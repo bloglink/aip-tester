@@ -114,33 +114,33 @@ void CWinSetImp::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-         CmdConfigure();
-         CmdStartSample();
-         break;
+        CmdConfigure();
+        CmdStartSample();
+        break;
     case Qt::Key_1:
-         ui->WindgetSetImp->setCurrentIndex(0);
-         break;
+        ui->WindgetSetImp->setCurrentIndex(0);
+        break;
     case Qt::Key_2:
-         emit TransformCmd(ADDR,WIN_CMD_SWITCH,NULL);
-         break;
+        emit TransformCmd(ADDR,WIN_CMD_SWITCH,NULL);
+        break;
     case Qt::Key_3:
-         if (Freq[ui->TabSetImp->currentRow()] != 0)
-              Freq[ui->TabSetImp->currentRow()]--;
-         CmdConfigure();
-         CmdSample(ui->TabSetImp->currentRow());
-         break;
+        if (Freq[ui->TabSetImp->currentRow()] != 0)
+            Freq[ui->TabSetImp->currentRow()]--;
+        CmdConfigure();
+        CmdSample(ui->TabSetImp->currentRow());
+        break;
     case Qt::Key_4:
-         CmdConfigure();
-         CmdSample(ui->TabSetImp->currentRow());
-         break;
+        CmdConfigure();
+        CmdSample(ui->TabSetImp->currentRow());
+        break;
     case Qt::Key_5:
-         if (Freq[ui->TabSetImp->currentRow()] != 14)
-              Freq[ui->TabSetImp->currentRow()]++;
-         CmdConfigure();
-         CmdSample(ui->TabSetImp->currentRow());
-         break;
+        if (Freq[ui->TabSetImp->currentRow()] != 14)
+            Freq[ui->TabSetImp->currentRow()]++;
+        CmdConfigure();
+        CmdSample(ui->TabSetImp->currentRow());
+        break;
     default:
-         break;
+        break;
     }
 }
 /*******************************************************************************
@@ -163,212 +163,212 @@ void CWinSetImp::DatInit()
     //可用
     QStringList temp = (QString(set->value("Enable","0 0 0 0 0 0 0 0").toByteArray())).split(" ");
     if (temp.size() > 8)
-         ui->TabSetImp->setRowCount(temp.size());
+        ui->TabSetImp->setRowCount(temp.size());
     else
-         ui->TabSetImp->setRowCount(8);
+        ui->TabSetImp->setRowCount(8);
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Enable.size() > row)
-              continue;
-         Enable.append(new QTableWidgetItem);
-         ui->TabSetImp->setItem(row,0,Enable.at(row));
-         Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-         Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+        if (Enable.size() > row)
+            continue;
+        Enable.append(new QTableWidgetItem);
+        ui->TabSetImp->setItem(row,0,Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Enable.size() <= row)
-              break;
-         Enable.at(row)->setText(temp.at(row));
+        if (Enable.size() <= row)
+            break;
+        Enable.at(row)->setText(temp.at(row));
     }
     //端一
     temp = (set->value("Terminal1","0 0 0 0 0 0 0 0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Terminal1.size() > row)
-              continue;
-         Terminal1.append(new QTableWidgetItem);
-         ui->TabSetImp->setItem(row,1,Terminal1.at(row));
-         Terminal1.at(row)->setText(temp.at(row));
-         Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-         Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
+        if (Terminal1.size() > row)
+            continue;
+        Terminal1.append(new QTableWidgetItem);
+        ui->TabSetImp->setItem(row,1,Terminal1.at(row));
+        Terminal1.at(row)->setText(temp.at(row));
+        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Terminal1.size() <= row)
-              break;
-         Terminal1.at(row)->setText(temp.at(row));
+        if (Terminal1.size() <= row)
+            break;
+        Terminal1.at(row)->setText(temp.at(row));
     }
     //端二
     temp = (set->value("Terminal2","1 1 1 1 1 1 1 1").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Terminal2.size() > row)
-              continue;
-         Terminal2.append(new QTableWidgetItem);
-         ui->TabSetImp->setItem(row,2,Terminal2.at(row));
-         Terminal2.at(row)->setText(temp.at(row));
-         Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-         Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
+        if (Terminal2.size() > row)
+            continue;
+        Terminal2.append(new QTableWidgetItem);
+        ui->TabSetImp->setItem(row,2,Terminal2.at(row));
+        Terminal2.at(row)->setText(temp.at(row));
+        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Terminal2.size() <= row)
-              break;
-         Terminal2.at(row)->setText(temp.at(row));
+        if (Terminal2.size() <= row)
+            break;
+        Terminal2.at(row)->setText(temp.at(row));
     }
     //电压
     temp = (set->value("Volt","500 500 500 500 500 500 500 500").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Volt.size() > row)
-              continue;
-         Volt.append(new QDoubleSpinBox(this));
-         ui->TabSetImp->setCellWidget(row,3,Volt.at(row));
-         Volt.at(row)->setDecimals(0);
-         Volt.at(row)->setMaximum(3000);
-         Volt.at(row)->setAlignment(Qt::AlignHCenter);
+        if (Volt.size() > row)
+            continue;
+        Volt.append(new QDoubleSpinBox(this));
+        ui->TabSetImp->setCellWidget(row,3,Volt.at(row));
+        Volt.at(row)->setDecimals(0);
+        Volt.at(row)->setMaximum(3000);
+        Volt.at(row)->setAlignment(Qt::AlignHCenter);
 
-         Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Volt.size() <= row)
-              break;
-         Volt.at(row)->setValue(temp.at(row).toDouble());
+        if (Volt.size() <= row)
+            break;
+        Volt.at(row)->setValue(temp.at(row).toDouble());
     }
     connect(Volt.at(0),SIGNAL(editingFinished()),this,SLOT(VoltEdit()));
     //次数
     temp = (set->value("Time","1 1 1 1 1 1 1 1").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Time.size() > row)
-              continue;
-         Time.append(new QDoubleSpinBox(this));
-         ui->TabSetImp->setCellWidget(row,4,Time.at(row));
-         Time.at(row)->setDecimals(0);
-         Time.at(row)->setMaximum(99);
-         Time.at(row)->setAlignment(Qt::AlignHCenter);
-         Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        if (Time.size() > row)
+            continue;
+        Time.append(new QDoubleSpinBox(this));
+        ui->TabSetImp->setCellWidget(row,4,Time.at(row));
+        Time.at(row)->setDecimals(0);
+        Time.at(row)->setMaximum(99);
+        Time.at(row)->setAlignment(Qt::AlignHCenter);
+        Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Time.size() <= row)
-              break;
-         Time.at(row)->setValue(temp.at(row).toDouble());
+        if (Time.size() <= row)
+            break;
+        Time.at(row)->setValue(temp.at(row).toDouble());
     }
     //电晕
     temp = (set->value("Flut","10 10 10 10 10 10 10 10").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Flut.size() > row)
-              continue;
-         Flut.append(new QDoubleSpinBox(this));
-         ui->TabSetImp->setCellWidget(row,5,Flut.at(row));
-         Flut.at(row)->setDecimals(0);
-         Flut.at(row)->setMaximum(9999);
-         Flut.at(row)->setAlignment(Qt::AlignHCenter);
-         Flut.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        if (Flut.size() > row)
+            continue;
+        Flut.append(new QDoubleSpinBox(this));
+        ui->TabSetImp->setCellWidget(row,5,Flut.at(row));
+        Flut.at(row)->setDecimals(0);
+        Flut.at(row)->setMaximum(9999);
+        Flut.at(row)->setAlignment(Qt::AlignHCenter);
+        Flut.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Flut.size() <= row)
-              break;
-         Flut.at(row)->setValue(temp.at(row).toDouble());
+        if (Flut.size() <= row)
+            break;
+        Flut.at(row)->setValue(temp.at(row).toDouble());
     }
     //相位
     temp = (set->value("Phase","10 10 10 10 10 10 10 10").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Phase.size() > row)
-              continue;
-         Phase.append(new QDoubleSpinBox(this));
-         ui->TabSetImp->setCellWidget(row,6,Phase.at(row));
-         Phase.at(row)->setDecimals(0);
-         Phase.at(row)->setMaximum(9999);
-         Phase.at(row)->setAlignment(Qt::AlignHCenter);
-         Phase.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        if (Phase.size() > row)
+            continue;
+        Phase.append(new QDoubleSpinBox(this));
+        ui->TabSetImp->setCellWidget(row,6,Phase.at(row));
+        Phase.at(row)->setDecimals(0);
+        Phase.at(row)->setMaximum(9999);
+        Phase.at(row)->setAlignment(Qt::AlignHCenter);
+        Phase.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Phase.size() <= row)
-              break;
-         Phase.at(row)->setValue(temp.at(row).toDouble());
+        if (Phase.size() <= row)
+            break;
+        Phase.at(row)->setValue(temp.at(row).toDouble());
     }
     //面积
     temp = (set->value("Area","10 10 10 10 10 10 10 10").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Area.size() > row)
-              continue;
-         Area.append(new QDoubleSpinBox(this));
-         ui->TabSetImp->setCellWidget(row,7,Area.at(row));
-         Area.at(row)->setDecimals(0);
-         Area.at(row)->setMaximum(9999);
-         Area.at(row)->setAlignment(Qt::AlignHCenter);
-         Area.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        if (Area.size() > row)
+            continue;
+        Area.append(new QDoubleSpinBox(this));
+        ui->TabSetImp->setCellWidget(row,7,Area.at(row));
+        Area.at(row)->setDecimals(0);
+        Area.at(row)->setMaximum(9999);
+        Area.at(row)->setAlignment(Qt::AlignHCenter);
+        Area.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Area.size() <= row)
-              break;
-         Area.at(row)->setValue(temp.at(row).toDouble());
+        if (Area.size() <= row)
+            break;
+        Area.at(row)->setValue(temp.at(row).toDouble());
     }
     //差积
     temp = (set->value("Diff","10 10 10 10 10 10 10 10").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Diff.size() > row)
-              continue;
-         Diff.append(new QDoubleSpinBox(this));
-         ui->TabSetImp->setCellWidget(row,8,Diff.at(row));
-         Diff.at(row)->setDecimals(0);
-         Diff.at(row)->setMaximum(9999);
-         Diff.at(row)->setAlignment(Qt::AlignHCenter);
-         Diff.at(row)->setValue(temp.at(row).toDouble());
-         Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        if (Diff.size() > row)
+            continue;
+        Diff.append(new QDoubleSpinBox(this));
+        ui->TabSetImp->setCellWidget(row,8,Diff.at(row));
+        Diff.at(row)->setDecimals(0);
+        Diff.at(row)->setMaximum(9999);
+        Diff.at(row)->setAlignment(Qt::AlignHCenter);
+        Diff.at(row)->setValue(temp.at(row).toDouble());
+        Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Diff.size() <= row)
-              break;
-         Diff.at(row)->setValue(temp.at(row).toDouble());
+        if (Diff.size() <= row)
+            break;
+        Diff.at(row)->setValue(temp.at(row).toDouble());
     }
     //频率
     temp = (set->value("Freq","7 7 7 7 7 7 7 7").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Freq.size() > row)
-              continue;
-         Freq.append(temp.at(row).toInt());
+        if (Freq.size() > row)
+            continue;
+        Freq.append(temp.at(row).toInt());
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Freq.size() <= row)
-              break;
-         Freq[row] = temp.at(row).toInt();
+        if (Freq.size() <= row)
+            break;
+        Freq[row] = temp.at(row).toInt();
     }
     //计算起点
     temp = (set->value("Block0","5 5 5 5 5 5 5 5").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Block0.size() > row)
-              continue;
-         Block0.append(temp.at(row).toInt());
+        if (Block0.size() > row)
+            continue;
+        Block0.append(temp.at(row).toInt());
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Block0.size() <= row)
-              break;
-         Block0[row] = temp.at(row).toInt();
+        if (Block0.size() <= row)
+            break;
+        Block0[row] = temp.at(row).toInt();
     }
     //计算终点
     temp = (set->value("Block1","395 395 395 395 395 395 395 395").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Block1.size() > row)
-              continue;
-         Block1.append(temp.at(row).toInt());
+        if (Block1.size() > row)
+            continue;
+        Block1.append(temp.at(row).toInt());
     }
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-         if (Block1.size() <= row)
-              break;
-         Block1[row] = temp.at(row).toInt();
+        if (Block1.size() <= row)
+            break;
+        Block1[row] = temp.at(row).toInt();
     }
     //波形
     for (int row=0; row<ui->TabSetImp->rowCount(); row++) {
-         if (WaveImp.size() > row)
-              continue;
-         WaveImp.append(new Waveform(this));
-         ui->TabSetImp->setCellWidget(row,9,WaveImp.at(row));
+        if (WaveImp.size() > row)
+            continue;
+        WaveImp.append(new Waveform(this));
+        ui->TabSetImp->setCellWidget(row,9,WaveImp.at(row));
     }
     if (WaveImp.size() != 8)
-         return;
+        return;
     QByteArray w;
     for (int row=0; row<qMin(WaveImp.size(),ui->TabSetImp->rowCount()); row++) {
-         QString byte = "WaveImp"+QString::number(row);
-         w = set->value(byte,"1000000000000000").toByteArray();
-         WaveImp.at(row)->WaveByteShow(w);
-         QString T1 = Terminal1.at(row)->text();
-         QString T2 = Terminal2.at(row)->text();
-         WaveImp.at(row)->WaveItem = QString(tr("匝间%1-%2")).arg(T1).arg(T2).toUtf8();
+        QString byte = "WaveImp"+QString::number(row);
+        w = set->value(byte,"1000000000000000").toByteArray();
+        WaveImp.at(row)->WaveByteShow(w);
+        QString T1 = Terminal1.at(row)->text();
+        QString T2 = Terminal2.at(row)->text();
+        WaveImp.at(row)->WaveItem = QString(tr("匝间%1-%2")).arg(T1).arg(T2).toUtf8();
     }
 }
 /*******************************************************************************
@@ -382,56 +382,56 @@ void CWinSetImp::DatSave()
     QStringList temp;
     temp.clear();
     for (int i=0; i<Enable.size(); i++)
-         temp.append(Enable.at(i)->text());
+        temp.append(Enable.at(i)->text());
     set->setValue("Enable",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Terminal1.size(); i++)
-         temp.append(Terminal1.at(i)->text());
+        temp.append(Terminal1.at(i)->text());
     set->setValue("Terminal1",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Terminal2.size(); i++)
-         temp.append(Terminal2.at(i)->text());
+        temp.append(Terminal2.at(i)->text());
     set->setValue("Terminal2",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Volt.size(); i++)
-         temp.append(Volt.at(i)->text());
+        temp.append(Volt.at(i)->text());
     set->setValue("Volt",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Time.size(); i++)
-         temp.append(Time.at(i)->text());
+        temp.append(Time.at(i)->text());
     set->setValue("Time",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Flut.size(); i++)
-         temp.append(Flut.at(i)->text());
+        temp.append(Flut.at(i)->text());
     set->setValue("Flut",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Phase.size(); i++)
-         temp.append(Phase.at(i)->text());
+        temp.append(Phase.at(i)->text());
     set->setValue("Phase",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Area.size(); i++)
-         temp.append(Area.at(i)->text());
+        temp.append(Area.at(i)->text());
     set->setValue("Area",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Diff.size(); i++)
-         temp.append(Diff.at(i)->text());
+        temp.append(Diff.at(i)->text());
     set->setValue("Diff",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Freq.size(); i++)
-         temp.append(QString::number(Freq.at(i)));
+        temp.append(QString::number(Freq.at(i)));
     set->setValue("Freq",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Block0.size(); i++)
-         temp.append(QString::number(Block0.at(i)));
+        temp.append(QString::number(Block0.at(i)));
     set->setValue("Block0",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Block1.size(); i++)
-         temp.append(QString::number(Block1.at(i)));
+        temp.append(QString::number(Block1.at(i)));
     set->setValue("Block1",(temp.join(" ").toUtf8()));
 
     for (int row=0; row<qMin(WaveImp.size(),ui->TabSetImp->rowCount()); row++) {
-         QString byte = "WaveImp"+QString::number(row);
-         set->setValue(byte,WaveImp.at(row)->WaveByte);
+        QString byte = "WaveImp"+QString::number(row);
+        set->setValue(byte,WaveImp.at(row)->WaveByte);
     }
 }
 
@@ -454,37 +454,37 @@ void CWinSetImp::DisplayInit()
     ListResult.clear();
     ListJudge.clear();
     for (int row = 0; row<Enable.size(); row++) {
-         if (Enable.at(row)->text() == "Y") {
-              if (row >= Terminal1.size())
-                   break;
-              if (row >= Terminal2.size())
-                   break;
-              QString T1 = Terminal1.at(row)->text();
-              QString T2 = Terminal2.at(row)->text();
-              ListItem.append(QString(tr("匝间%1-%2")).arg(T1).arg(T2));
-              if (row >= Volt.size())
-                   break;
-              if (row >= Time.size())
-                   break;
-              if (row >= Flut.size())
-                   break;
-              if (row >= Phase.size())
-                   break;
-              if (row >= Area.size())
-                   break;
-              if (row >= Diff.size())
-                   break;
-              QString V = Volt.at(row)->text();
-              QString C = Flut.at(row)->text();
-              QString P = Phase.at(row)->text();
-              QString A = Area.at(row)->text();
-              QString D = Diff.at(row)->text();
-              ListPara.append(QString("%1V,%2,%3,%4,%5").arg(V).arg(C).arg(P).arg(A).arg(D));
-              WaveNumber.append(row);
-              ListResult.append(" ");
-              ListJudge.append(" ");
-              WaveImp.at(row)->WaveTest.clear();
-         }
+        if (Enable.at(row)->text() == "Y") {
+            if (row >= Terminal1.size())
+                break;
+            if (row >= Terminal2.size())
+                break;
+            QString T1 = Terminal1.at(row)->text();
+            QString T2 = Terminal2.at(row)->text();
+            ListItem.append(QString(tr("匝间%1-%2")).arg(T1).arg(T2));
+            if (row >= Volt.size())
+                break;
+            if (row >= Time.size())
+                break;
+            if (row >= Flut.size())
+                break;
+            if (row >= Phase.size())
+                break;
+            if (row >= Area.size())
+                break;
+            if (row >= Diff.size())
+                break;
+            QString V = Volt.at(row)->text();
+            QString C = Flut.at(row)->text();
+            QString P = Phase.at(row)->text();
+            QString A = Area.at(row)->text();
+            QString D = Diff.at(row)->text();
+            ListPara.append(QString("%1V,%2,%3,%4,%5").arg(V).arg(C).arg(P).arg(A).arg(D));
+            WaveNumber.append(row);
+            ListResult.append(" ");
+            ListJudge.append(" ");
+            WaveImp.at(row)->WaveTest.clear();
+        }
     }
 }
 /*******************************************************************************
@@ -497,26 +497,26 @@ void CWinSetImp::ItemClick(int r, int c)
 {
     switch (c) {
     case 0:
-         if (Enable.at(r)->text() != "Y")
-              Enable.at(r)->setText("Y");
-         else
-              Enable.at(r)->setText("N");
-         break;
+        if (Enable.at(r)->text() != "Y")
+            Enable.at(r)->setText("Y");
+        else
+            Enable.at(r)->setText("N");
+        break;
     case 1:
     case 2:
-         input->showNormal();
-         break;
+        input->showNormal();
+        break;
     case 9:
-         ui->WindgetSetImp->setCurrentIndex(1);
-         ui->LabelWave->WaveByteShow(WaveImp.at(r)->WaveByte);
-         ui->LabelWave->WaveItemShow(WaveImp.at(r)->WaveItem);
-         ui->LabelWave->WaveBlock(Block0.at(r),Block1.at(r));
-         ui->BoxStart->setValue(Block0.at(r));
-         ui->BoxEnd->setValue(Block1.at(r));
-         CurrentWave = r;
-         break;
+        ui->WindgetSetImp->setCurrentIndex(1);
+        ui->LabelWave->WaveByteShow(WaveImp.at(r)->WaveByte);
+        ui->LabelWave->WaveItemShow(WaveImp.at(r)->WaveItem);
+        ui->LabelWave->WaveBlock(Block0.at(r),Block1.at(r));
+        ui->BoxStart->setValue(Block0.at(r));
+        ui->BoxEnd->setValue(Block1.at(r));
+        CurrentWave = r;
+        break;
     default:
-         break;
+        break;
     }
 }
 /*******************************************************************************
@@ -538,13 +538,13 @@ void CWinSetImp::ItemChange(QString msg)
 void CWinSetImp::BlockClick(int x)
 {
     if (x >=200) {
-         ui->LabelWave->WaveBlock(ui->LabelWave->Block0,x);
-         ui->BoxEnd->setValue(x);
-         Block1[CurrentWave] = x;
+        ui->LabelWave->WaveBlock(ui->LabelWave->Block0,x);
+        ui->BoxEnd->setValue(x);
+        Block1[CurrentWave] = x;
     } else {
-         ui->LabelWave->WaveBlock(x,ui->LabelWave->Block1);
-         ui->BoxStart->setValue(x);
-         Block0[CurrentWave] = x;
+        ui->LabelWave->WaveBlock(x,ui->LabelWave->Block1);
+        ui->BoxStart->setValue(x);
+        Block0[CurrentWave] = x;
     }
 }
 /*******************************************************************************
@@ -557,23 +557,23 @@ bool CWinSetImp::WaitTestOver()
 {
     TimeOut = 0;
     while (Testing) {
-         Delay(10);
-         TimeOut++;
-         if (TimeOut > 50) {
-              for (int i=0; i<ListResult.size(); i++) {
-                   if (ListResult.at(i) == " ") {
-                        ListResult[i] = "---";
-                   }
-              }
-              for (int i=0; i<ListJudge.size(); i++) {
-                   if (ListJudge.at(i) == " ") {
-                        ListJudge[i] = "NG";
-                   }
-              }
-              Testing = false;
-              emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-              return false;
-         }
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > 50) {
+            for (int i=0; i<ListResult.size(); i++) {
+                if (ListResult.at(i) == " ") {
+                    ListResult[i] = "---";
+                }
+            }
+            for (int i=0; i<ListJudge.size(); i++) {
+                if (ListJudge.at(i) == " ") {
+                    ListJudge[i] = "NG";
+                }
+            }
+            Testing = false;
+            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
+            return false;
+        }
     }
     return true;
 }
@@ -588,7 +588,7 @@ void CWinSetImp::Delay(int ms)
     QElapsedTimer t;
     t.start();
     while(t.elapsed()<ms)
-         QCoreApplication::processEvents();
+        QCoreApplication::processEvents();
 }
 /*******************************************************************************
  * version:     1.0
@@ -599,43 +599,43 @@ void CWinSetImp::Delay(int ms)
 void CWinSetImp::ExcuteCmd(int id,QByteArray msg)
 {
     if (!Testing && !Sampling)
-         return;
+        return;
     TimeOut = 0;
     if (id == CAN_ID_IMP_WAVE) {
-         UpdateWave(msg);
-         return;
+        UpdateWave(msg);
+        return;
     }
     if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-         UpdateState(msg);
+        UpdateState(msg);
     }
     if (msg.size()==7 && (quint8)msg.at(0)==0x02) {
-         UpdateWaveFreq(msg);
+        UpdateWaveFreq(msg);
     }
     if (msg.size()==5 && (quint8)msg.at(0)==0x03) {
-         CurrentWave = (quint8)msg.at(1);
-         if (Sampling) {
-              WaveImp.at(CurrentWave)->WaveByte.clear();
-         }
-         if (Testing) {
-              WaveImp.at(CurrentWave)->WaveTest.clear();
-              QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
-              QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
-              emit TransformCmd(ADDR,WIN_WAVE_ITEM,i);
-              emit TransformCmd(ADDR,WIN_WAVE_BYTE,w);
-         }
+        CurrentWave = (quint8)msg.at(1);
+        if (Sampling) {
+            WaveImp.at(CurrentWave)->WaveByte.clear();
+        }
+        if (Testing) {
+            WaveImp.at(CurrentWave)->WaveTest.clear();
+            QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
+            QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
+            emit TransformCmd(ADDR,WIN_WAVE_ITEM,i);
+            emit TransformCmd(ADDR,WIN_WAVE_BYTE,w);
+        }
     }
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff) {
-         QByteArray w;
-         if (Sampling) {
-              w = WaveImp.at(CurrentWave)->WaveByte;
-              WaveImp.at(CurrentWave)->WaveByteShow(w);
-              ui->LabelWave->WaveByteShow(w);
-         }
-         if (Testing) {
-              w = WaveImp.at(CurrentWave)->WaveTest;
-              emit TransformCmd(ADDR,WIN_WAVE_TEST,w);
-              UpdateTestData(msg);
-         }
+        QByteArray w;
+        if (Sampling) {
+            w = WaveImp.at(CurrentWave)->WaveByte;
+            WaveImp.at(CurrentWave)->WaveByteShow(w);
+            ui->LabelWave->WaveByteShow(w);
+        }
+        if (Testing) {
+            w = WaveImp.at(CurrentWave)->WaveTest;
+            emit TransformCmd(ADDR,WIN_WAVE_TEST,w);
+            UpdateTestData(msg);
+        }
     }
 }
 /*******************************************************************************
@@ -647,9 +647,9 @@ void CWinSetImp::ExcuteCmd(int id,QByteArray msg)
 void CWinSetImp::UpdateWave(QByteArray msg)
 {
     if (Sampling)
-         WaveImp.at(CurrentWave)->WaveByte.append(msg);
+        WaveImp.at(CurrentWave)->WaveByte.append(msg);
     else
-         WaveImp.at(CurrentWave)->WaveTest.append(msg);
+        WaveImp.at(CurrentWave)->WaveTest.append(msg);
 }
 /*******************************************************************************
  * version:     1.0
@@ -671,15 +671,15 @@ void CWinSetImp::UpdateWaveFreq(QByteArray msg)
 void CWinSetImp::UpdateState(QByteArray)
 {
     if (Testing) {
-         Testing = false;
+        Testing = false;
     }
     if (Sampling) {
-         Sampling = false;
-         emit TransformCmd(ADDR,WIN_CMD_DEBUG,"IMP Sample ok\n");
+        Sampling = false;
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"IMP Sample ok\n");
     }
     if (!isCheckOk) {
-         isCheckOk = true;
-         emit TransformCmd(ADDR,WIN_CMD_DEBUG,"IMP check ok\n");
+        isCheckOk = true;
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"IMP check ok\n");
     }
 }
 /*******************************************************************************
@@ -691,7 +691,7 @@ void CWinSetImp::UpdateState(QByteArray)
 void CWinSetImp::UpdateTestData(QByteArray )
 {
     if (Sampling)
-         return;
+        return;
     WaveImp.at(CurrentWave)->InitWaveByte();
     WaveImp.at(CurrentWave)->InitWaveTest();
     qint32 Area1=0;
@@ -706,25 +706,25 @@ void CWinSetImp::UpdateTestData(QByteArray )
     quint16 s = Block0.at(CurrentWave);
     quint16 e = Block1.at(CurrentWave);
     if (s < 1)
-         s = 1;
+        s = 1;
     if (e > 398)
-         e = 398;
+        e = 398;
     for (int i=s; i<e; i++) {
-         int a1 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
-         int a2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
-         Area1 += abs(a1-0x200);
-         Area2 += abs(a2-0x200);
-         int b1 = WaveImp.at(CurrentWave)->WaveByteH.at(i-1);
-         int b2 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
-         int b3 = WaveImp.at(CurrentWave)->WaveByteH.at(i+1);
-         int c1 = WaveImp.at(CurrentWave)->WaveTestH.at(i-1);
-         int c2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
-         int c3 = WaveImp.at(CurrentWave)->WaveTestH.at(i+1);
-         Area3 += abs((b1+b2*2+b3)-(c1+c2*2+c3));
+        int a1 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
+        int a2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
+        Area1 += abs(a1-0x200);
+        Area2 += abs(a2-0x200);
+        int b1 = WaveImp.at(CurrentWave)->WaveByteH.at(i-1);
+        int b2 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
+        int b3 = WaveImp.at(CurrentWave)->WaveByteH.at(i+1);
+        int c1 = WaveImp.at(CurrentWave)->WaveTestH.at(i-1);
+        int c2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
+        int c3 = WaveImp.at(CurrentWave)->WaveTestH.at(i+1);
+        Area3 += abs((b1+b2*2+b3)-(c1+c2*2+c3));
 
-         F +=abs(c2-c3);
-         Phase1 += (a1-0x200)*(a1-0x200);
-         Phase2 += (a1-0x200)*(a2-0x200);
+        F +=abs(c2-c3);
+        Phase1 += (a1-0x200)*(a1-0x200);
+        Phase2 += (a1-0x200)*(a2-0x200);
     }
     A = (Area2-Area1)*100/Area1;
     D = qMin(Area2,Area3/4)*100/Area1;
@@ -732,15 +732,15 @@ void CWinSetImp::UpdateTestData(QByteArray )
     UpdateResult(QString("A:%1%,D:%2%,F:%3,P:%4%").arg(A).arg(D).arg(F).arg(P).toUtf8());
     quint8 number = quint8(CurrentWave);
     if (number >= Area.size() || abs(A) >= Area.at(number)->value())
-         UpdateJudge("NG");
+        UpdateJudge("NG");
     else if (number >= Diff.size() || abs(D) >= Diff.at(number)->value())
-         UpdateJudge("NG");
+        UpdateJudge("NG");
     else if (number >= Flut.size() || abs(F) >= Flut.at(number)->value())
-         UpdateJudge("NG");
+        UpdateJudge("NG");
     else if (number >= Phase.size() || abs(P) >= Phase.at(number)->value())
-         UpdateJudge("NG");
+        UpdateJudge("NG");
     else
-         UpdateJudge("OK");
+        UpdateJudge("OK");
     emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
 }
 /*******************************************************************************
@@ -752,10 +752,10 @@ void CWinSetImp::UpdateTestData(QByteArray )
 void CWinSetImp::UpdateResult(QByteArray msg)
 {
     for (int i=0; i<ListResult.size(); i++) {
-         if (ListResult.at(i) == " ") {
-              ListResult[i] = msg;
-              break;
-         }
+        if (ListResult.at(i) == " ") {
+            ListResult[i] = msg;
+            break;
+        }
     }
 }
 /*******************************************************************************
@@ -767,10 +767,10 @@ void CWinSetImp::UpdateResult(QByteArray msg)
 void CWinSetImp::UpdateJudge(QByteArray msg)
 {
     for (int i=0; i<ListJudge.size(); i++) {
-         if (ListJudge.at(i) == " ") {
-              ListJudge[i] = msg;
-              break;
-         }
+        if (ListJudge.at(i) == " ") {
+            ListJudge[i] = msg;
+            break;
+        }
     }
 }
 /*******************************************************************************
@@ -785,13 +785,13 @@ int CWinSetImp::Gear(int row)
 {
     int gear = 0;
     if (Volt.at(row)->value() <= 1000)
-         gear = 1;
+        gear = 1;
     else if (Volt.at(row)->value()<=2000)
-         gear = 2;
+        gear = 2;
     else if (Volt.at(row)->value()<=4000)
-         gear = 3;
+        gear = 3;
     else if (Volt.at(row)->value()<=5000)
-         gear = 4;
+        gear = 4;
     gear <<= 4;
     gear += Time.at(row)->value()+1;
     return gear;
@@ -824,11 +824,11 @@ void CWinSetImp::CmdStartTest(quint8 pos)
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
     for (int row=0; row<Enable.size(); row++) {
-         if (Enable.at(row)->text() == "Y")
-              tt += 0x0001<<row;
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
     }
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(pos)
-       <<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(tt/256)<<quint8(tt%256);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
 }
@@ -845,7 +845,7 @@ void CWinSetImp::CmdSample(quint16 t)
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0x0001<<t;
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x02)<<quint8(0x13)
-       <<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(tt/256)<<quint8(tt%256);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Sampling = true;
 }
@@ -862,11 +862,11 @@ void CWinSetImp::CmdStartSample()
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
     for (int row=0; row<Enable.size(); row++) {
-         if (Enable.at(row)->text() == "Y")
-              tt += 0x0001<<row;
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
     }
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x01)<<quint8(0x13)
-       <<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(tt/256)<<quint8(tt%256);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Sampling = true;
 }
@@ -880,17 +880,17 @@ void CWinSetImp::DisplayWave(QByteArray msg)
 {
     int t = 0;
     for (int i=0; i<WaveNumber.size(); i++) {
-         if (WaveImp.at(WaveNumber.at(i))->WaveItem == msg)
-              t = i;
+        if (WaveImp.at(WaveNumber.at(i))->WaveItem == msg)
+            t = i;
     }
     for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
-         QByteArray w;
-         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
-         emit TransformCmd(ADDR,WIN_WAVE_ITEM,w);
-         w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-         emit TransformCmd(ADDR,WIN_WAVE_BYTE,w);
-         w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
-         emit TransformCmd(ADDR,WIN_WAVE_TEST,w);
+        QByteArray w;
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
+        emit TransformCmd(ADDR,WIN_WAVE_ITEM,w);
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
+        emit TransformCmd(ADDR,WIN_WAVE_BYTE,w);
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
+        emit TransformCmd(ADDR,WIN_WAVE_TEST,w);
     }
 }
 /*******************************************************************************
@@ -922,11 +922,11 @@ void CWinSetImp::CmdConfigure()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     for (int row=0; row<Enable.size(); row++) {
-         out<<quint16(0x24)<<quint8(0x08)<<quint8(0x03)<<quint8(row)
-            <<quint8(Terminal1.at(row)->text().toInt())
-          <<quint8(Terminal2.at(row)->text().toInt())
-         <<quint8(int(Volt.at(row)->value())/256)<<quint8(int(Volt.at(row)->value())%256)
-         <<quint8(Gear(row))<<quint8(Freq.at(row));
+        out<<quint16(0x24)<<quint8(0x08)<<quint8(0x03)<<quint8(row)
+          <<quint8(Terminal1.at(row)->text().toInt())
+         <<quint8(Terminal2.at(row)->text().toInt())
+        <<quint8(int(Volt.at(row)->value())/256)<<quint8(int(Volt.at(row)->value())%256)
+        <<quint8(Gear(row))<<quint8(Freq.at(row));
     }
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
 }
@@ -949,6 +949,68 @@ void CWinSetImp::showEvent(QShowEvent *)
 void CWinSetImp::hideEvent(QHideEvent *)
 {
     DatSave();
+}
+
+void CWinSetImp::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR && addr != WIN_ID_IMP && addr != CAN_ID_IMP && addr != CAN_ID_IMP_WAVE)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCmd(addr,msg);
+        break;
+    case CAN_CMD_CHECK:
+        CmdCheckState();
+        break;
+    case CAN_CMD_START:
+        CmdStartTest(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        CmdStopTest();
+        break;
+    case CAN_CMD_INIT:
+        ShowInit();
+        CmdConfigure();
+        break;
+    default:
+        break;
+
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.28
+ * brief:       更新显示
+ * date:        2017.02.14
+ * brief:       修改显示方式
+*******************************************************************************/
+void CWinSetImp::ShowInit()
+{
+    Items.clear();
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s;
+            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+            QString V = Volt.at(qMin(row,Volt.size()))->text();
+            QString C = Flut.at(qMin(row,Flut.size()))->text();
+            QString P = Phase.at(qMin(row,Phase.size()))->text();
+            QString A = Area.at(qMin(row,Area.size()))->text();
+            QString D = Diff.at(qMin(row,Diff.size()))->text();
+
+            s.append(QString(tr("匝间%1-%2")).arg(T1).arg(T2));
+            if (C.toInt() == 0)
+                s.append(QString("%1V,%2,%3,%4").arg(V).arg(P).arg(A).arg(D));
+            else
+                s.append(QString("%1V,%2,%3,%4,%5").arg(V).arg(C).arg(P).arg(A).arg(D));
+            s.append(" ");
+            s.append(" ");
+            Items.append(s.join("@"));
+            WaveImp.at(row)->WaveTest.clear();
+        }
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                        END

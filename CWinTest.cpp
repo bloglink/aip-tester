@@ -106,17 +106,17 @@ void CWinTest::KeyJudge(int win)
         } else {
             TestOn = true;
             ui->BtnStart->setText("中断测试");
-            emit TransformCmd(ADDR,CTRL_CMD_START,"NULL");
+            emit TransformCmd(ADDR,CAN_CMD_START,"NULL");
         }
         break;
     case Qt::Key_3:
         TestOn = false;
         if (ui->BtnCmdStart->text() == "单次测试") {
             ui->BtnCmdStart->setText("中断测试");
-            emit TransformCmd(ADDR,CTRL_CMD_START,"NULL");
+            emit TransformCmd(ADDR,CAN_CMD_START,"NULL");
         } else {
             ui->BtnCmdStart->setText("单次测试");
-            emit TransformCmd(ADDR,CTRL_CMD_STOP,"NULL");
+            emit TransformCmd(ADDR,CAN_CMD_STOP,"NULL");
         }
         break;
     default:
@@ -154,13 +154,56 @@ void CWinTest::DatInit()
     WaveClear();
     int width = set->value("/GLOBAL/Width","200").toInt();
     ui->TabTest->setColumnWidth(1,width);
-    emit TransformCmd(ADDR,WIN_CMD_SHOW,NULL);
+    emit TransformCmd(ADDR,WIN_CMD_INIT,NULL);
 }
 
 void CWinTest::DatSave()
 {
     int width = ui->TabTest->columnWidth(1);
     set->setValue("/GLOBAL/Width",width);
+}
+void CWinTest::ShowItems(QStringList item)
+{
+    ui->TabTest->setRowCount(item.size());
+    for (int i=0; i<item.size(); i++) {
+        QStringList s = QString(item.at(i)).split("@");
+        ui->TabTest->setItem(i,0,new QTableWidgetItem);
+        ui->TabTest->item(i,0)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i,0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i,0)->setText(s.at(0));
+
+        ui->TabTest->setItem(i,1,new QTableWidgetItem);
+        ui->TabTest->item(i,1)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i,1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i,1)->setText(s.at(1));
+
+        ui->TabTest->setItem(i,2,new QTableWidgetItem);
+        ui->TabTest->item(i,2)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i,2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i,2)->setText(s.at(2));
+
+        ui->TabTest->setItem(i,3,new QTableWidgetItem);
+        ui->TabTest->item(i,3)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i,3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i,3)->setText(s.at(3));
+    }
+    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
+    ui->LabelState->setText("--");
+}
+
+void CWinTest::ShowItem(QString item)
+{
+    QStringList s = item.split("@");
+    for (int i=0; i<ui->TabTest->rowCount(); i++) {
+        QString n = ui->TabTest->item(i,0)->text();
+        QString t = ui->TabTest->item(i,2)->text();
+        if (t != " ")
+            continue;
+        if (s.at(0) == n) {
+            ui->TabTest->item(i,2)->setText(s.at(2));
+            ui->TabTest->item(i,3)->setText(s.at(3));
+        }
+    }
 }
 /*******************************************************************************
  * version:     1.0
@@ -342,7 +385,7 @@ void CWinTest::DisplayAmount(QStringList amount)
         ui->LabelUnqualified->setText(QString::number(unq));
     }
     if (TestOn) {
-        emit TransformCmd(ADDR,CTRL_CMD_START,"NULL");
+        emit TransformCmd(ADDR,CAN_CMD_START,"NULL");
     }
     ui->BtnCmdStart->setText("单次测试");
 }
@@ -379,11 +422,11 @@ void CWinTest::DisplayTime()
  * date:        2016.11.23
  * brief:       更新显示波形
 *******************************************************************************/
-void CWinTest::ItemClick(int r, int )
+void CWinTest::ItemClick(int , int )
 {
-    QString t = ListItem.at(r);
-    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")))
-        emit TransformCmd(ADDR,WIN_CMD_WAVE,t.toUtf8());
+//    QString t = ListItem.at(r);
+//    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")))
+//        emit TransformCmd(ADDR,WIN_CMD_WAVE,t.toUtf8());
 }
 /*******************************************************************************
  * version:     1.0

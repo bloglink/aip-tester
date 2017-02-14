@@ -25,6 +25,8 @@ public slots:
 public:
     int Block0;
     int Block1;
+    int WaveLine;
+    int WaveGroup;
     QByteArray WaveByte;
     QByteArray WaveTest;
     QByteArray WaveItem;

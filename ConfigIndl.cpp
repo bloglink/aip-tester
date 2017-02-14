@@ -9,7 +9,8 @@ ConfigIndl::ConfigIndl(QWidget *parent) :
     WinInit();
     BtnInit();
     DatInit();
-
+    Testing = false;
+    isCheckOk = false;
 }
 
 ConfigIndl::~ConfigIndl()
@@ -463,21 +464,52 @@ void ConfigIndl::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
     case CAN_DAT_GET:
         ExcuteCmd(msg);
         break;
-    case CTRL_CMD_STATE:
+    case CAN_CMD_CHECK:
         CmdCheckState();
         break;
-    case CTRL_CMD_START:
+    case CAN_CMD_START:
         CmdStartTest(msg.toInt());
         break;
-    case CTRL_CMD_STOP:
+    case CAN_CMD_STOP:
         CmdStopTest();
         break;
-    case CTRL_CMD_CONFIG:
+    case CAN_CMD_INIT:
+        ShowInit();
         CmdConfigure();
         break;
     default:
         break;
     }
+}
+
+void ConfigIndl::ShowInit()
+{
+    Items.clear();
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s;
+            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+            QString M1 = Min.at(qMin(row,Min.size()))->text();
+            QString M2 = Max.at(qMin(row,Max.size()))->text();
+            QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
+            QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
+            s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
+            s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
+            s.append(" ");
+            s.append(" ");
+            Items.append(s.join("@"));
+        }
+    }
+    if (ui->BoxUnbalance->value() != 0 && ListItem.size()>=3) {
+        QStringList s;
+        s.append("电感平衡");
+        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 void ConfigIndl::ExcuteCmd(QByteArray msg)
 {
@@ -599,7 +631,6 @@ void ConfigIndl::CmdConfigure()
         }
     }
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
 }
 
 bool ConfigIndl::WaitTestOver()

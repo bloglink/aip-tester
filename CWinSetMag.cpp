@@ -405,7 +405,7 @@ void CWinSetMag::ExcuteCmd(int id, QByteArray msg)
     if (!Testing && !Sampling)
         return;
     TimeOut = 0;
-    if (id == CAN_ID_DLR_WAVE) {
+    if (id == CAN_ID_DCR_WAVE) {
         UpdateWave(msg);
         return;
     }
@@ -711,6 +711,68 @@ void CWinSetMag::showEvent(QShowEvent *)
 void CWinSetMag::hideEvent(QHideEvent *)
 {
     DatSave();
+}
+
+void CWinSetMag::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR && addr != WIN_ID_MAG && addr != CAN_ID_DCR && addr != CAN_ID_DCR_WAVE)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCmd(addr,msg);
+        break;
+    case CAN_CMD_CHECK:
+        CmdCheckState();
+        break;
+    case CAN_CMD_START:
+        CmdStartTest(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        CmdStopTest();
+        break;
+    case CAN_CMD_INIT:
+        ShowInit();
+        CmdConfigure();
+        break;
+    default:
+        break;
+
+    }
+}
+/*******************************************************************************
+  * version:    1.0
+  * author:     link
+  * date:       2016.12.19
+  * brief:      更新显示
+  * date:       2017.02.14
+  * brief:      修改显示方式
+*******************************************************************************/
+void CWinSetMag::ShowInit()
+{
+    Items.clear();
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s;
+            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+            QString M1 = Max.at(qMin(row,Max.size()))->text();
+            s.append(QString(tr("反嵌%1-%2")).arg(T1).arg(T2));
+            s.append(QString("%1%").arg(M1));
+            s.append(" ");
+            s.append(" ");
+            Items.append(s.join("@"));
+            WaveMag.at(row)->WaveTest.clear();
+        }
+    }
+    if (ui->BoxDir->currentIndex() == 2) {
+        QStringList s;
+        s.append(QString(tr("磁旋")));
+        s.append(QString(tr("反转")));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                  END

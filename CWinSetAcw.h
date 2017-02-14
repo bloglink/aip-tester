@@ -53,6 +53,8 @@ private slots:
     void Delay(int ms);
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ShowInit(void);
 private:
     QSettings *set;
     bool isCheckOk;
@@ -60,6 +62,7 @@ private:
     quint16 TimeOut;
     QList<double> Volt;
     QList<double> Res;
+    QStringList Items;
 
 };
 

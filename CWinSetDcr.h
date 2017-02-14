@@ -35,14 +35,13 @@ private:
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
 public slots:
-    void DisplayInit(void);
     void ExcuteCmd(QByteArray msg);
     void CmdCheckState(void);
     void CmdStartTest(quint8 pos);
     void CmdStopTest(void);
     void CmdConfigure(void);
     void CmdCheckVersion(void);
-    bool WaitTestOver(void);
+    bool WaitTestOver(quint16 t);
 public:
     QStringList ListItem;
     QStringList ListPara;
@@ -68,12 +67,15 @@ private slots:
     void Delay(int ms);
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ShowInit(void);
 private:
     QSettings *set;
     bool isCheckOk;
     bool Testing;
     quint16 TimeOut;
     InputNum *input;
+    QStringList Items;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;

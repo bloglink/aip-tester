@@ -55,7 +55,9 @@ const quint16 GuestHeart        = 6000;
 
 #define ADDR 6000
 #define WIN_CMD_SWITCH  7000
-#define WIN_CMD_SHOW    7001
+#define WIN_CMD_INIT    7001
+#define WIN_CMD_SHOW    7010
+#define WIN_CMD_ITEM    7011
 #define WIN_CMD_RESULT  7002
 #define WIN_CMD_JUDGE   7003
 #define WIN_CMD_TEMP    7004
@@ -68,10 +70,10 @@ const quint16 GuestHeart        = 6000;
 #define CAN_DAT_GET 8000
 #define CAN_DAT_PUT 8001
 
-#define CTRL_CMD_STATE 9000
-#define CTRL_CMD_START 9001
-#define CTRL_CMD_STOP  9002
-#define CTRL_CMD_CONFIG 9003
+#define CAN_CMD_CHECK 9000
+#define CAN_CMD_START 9001
+#define CAN_CMD_STOP  9002
+#define CAN_CMD_INIT  9003
 
 #define  ResCu    0.0039  //  铜材料
 #define  ResCu_Al 0.0041  //  铜铝材料
@@ -90,8 +92,8 @@ const quint16 GuestHeart        = 6000;
 
 #define LOCAL
 
-#define CAN_ID_DLR       0x41         // 电阻板
-#define CAN_ID_DLR_WAVE  0x441        // 电阻板反嵌波形
+#define CAN_ID_DCR       0x41         // 电阻板
+#define CAN_ID_DCR_WAVE  0x441        // 电阻板反嵌波形
 #define CAN_ID_IR        0x61         // 耐压板
 #define CAN_ID_IMP       0x81         // 匝间板
 #define CAN_ID_IMP_WAVE  0x481        // 匝间板波形
@@ -109,7 +111,7 @@ const quint16 GuestHeart        = 6000;
 #define CAN_CMD_DEBUG        0x06     //上传调试参数
 #define CAN_CMD_VERSION      0x08     //上传版本
 
-#define WIN_ID_DLR      0x01
+#define WIN_ID_DCR      0x01
 #define WIN_ID_MAG      0x02
 #define WIN_ID_IR       0x03
 #define WIN_ID_ACW      0x04

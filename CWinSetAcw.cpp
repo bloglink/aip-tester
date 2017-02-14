@@ -369,6 +369,47 @@ void CWinSetAcw::hideEvent(QHideEvent *)
 {
     DatSave();
 }
+
+void CWinSetAcw::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR && addr != WIN_ID_ACW && addr != CAN_ID_IR)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        CmdCheckState();
+        break;
+    case CAN_CMD_START:
+        CmdStartTest(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        CmdStopTest();
+        break;
+    case CAN_CMD_INIT:
+        ShowInit();
+        CmdConfigure();
+        break;
+    default:
+        break;
+    }
+}
+
+void CWinSetAcw::ShowInit()
+{
+    Items.clear();
+    QStringList s;
+    QString U1 = QString::number(ui->BoxVoltage->value());
+    QString M1 = ui->BoxMin->text();
+    QString M2 = ui->BoxMax->text();
+    s.append(QString(tr("交耐")));
+    s.append(QString("%1V,%2~%3mA").arg(U1).arg(M1).arg(M2));
+    s.append(" ");
+    s.append(" ");
+    Items.append(s.join("@"));
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
+}
 /*******************************************************************************
  *                                  END
 *******************************************************************************/

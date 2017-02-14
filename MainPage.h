@@ -30,8 +30,6 @@
 #include "ConfigLvs.h"
 #include "ConfigBlock.h"
 
-#include "ipmethod.h"
-
 namespace Ui {
 class MainPage;
 }
@@ -57,9 +55,12 @@ private slots:
     void CanThreadInit(void);
     void CanThread(QByteArray msg);
     void CheckThread(void);
-    void TestThread(void);
+
     void TestSave(void);
-    void DisplayInit(void);
+    void TestInit(void);
+    void TestThread(void);
+
+//    void DisplayInit(void);
     void DisplayResult(void);
     void DisplayWave(QByteArray msg);
     void DisplayWarnning();
@@ -68,13 +69,14 @@ private slots:
     bool OutWaitOver(void);
 private:
     QList<int> WinPrevious;
-    QSettings *set;
     QSettings *global;
+    QSettings *set;
     QThread *can;
     CanSocket thread;
     QTimer *timer;
 
     QStringList ItemToTest;
+    QStringList Items;
     bool Testing;
     quint8 Pos;
     bool isStop;

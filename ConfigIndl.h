@@ -73,6 +73,7 @@ private slots:
     void UpdateUnbalance(void);
     void Delay(int ms);
     void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ShowInit(void);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
 private:
@@ -81,6 +82,7 @@ private:
     bool Testing;
     quint16 TimeOut;
     InputNum *input;
+    QStringList Items;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;

@@ -25,7 +25,6 @@ CWinSetDcr::CWinSetDcr(QWidget *parent) :
     WinInit();
     BtnInit();
     DatInit();
-    DisplayInit();
     Testing = false;
     isCheckOk = false;
 }
@@ -363,40 +362,6 @@ bool CWinSetDcr::DatStdd()
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
- * brief:      更新显示
- * date:       2017.01.04
- * brief:      增加不平衡度显示
-*******************************************************************************/
-void CWinSetDcr::DisplayInit()
-{
-    ListItem.clear();
-    ListPara.clear();
-    ListResult.clear();
-    ListJudge.clear();
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-            QString U1 = Unit.at(qMin(row,Unit.size()))->currentText();
-            QString M1 = Min.at(qMin(row,Min.size()))->text();
-            QString M2 = Max.at(qMin(row,Max.size()))->text();
-            ListItem.append(QString(tr("电阻%1-%2")).arg(T1).arg(T2));
-            ListPara.append(QString("%1~%2%3").arg(M1).arg(M2).arg(U1));
-            ListResult.append(" ");
-            ListJudge.append(" ");
-        }
-    }
-    if (ui->BoxUnbalance->value() != 0 && ListItem.size()>=3) {
-        ListItem.append("电阻平衡");
-        ListPara.append(QString("%1%").arg(ui->BoxUnbalance->value()));
-        ListResult.append(" ");
-        ListJudge.append(" ");
-    }
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
  * date:       2016.12.23
  * brief:      点击
 *******************************************************************************/
@@ -448,27 +413,14 @@ void CWinSetDcr::Delay(int ms)
  * date:       2016.12.19
  * brief:      等待测试结束
 *******************************************************************************/
-bool CWinSetDcr::WaitTestOver()
+bool CWinSetDcr::WaitTestOver(quint16 t)
 {
     TimeOut = 0;
     while (Testing) {
         Delay(10);
         TimeOut++;
-        if (TimeOut > 100) {
-            for (int i=0; i<ListResult.size(); i++) {
-                if (ListResult.at(i) == " ") {
-                    ListResult[i] = "---";
-                }
-            }
-            for (int i=0; i<ListJudge.size(); i++) {
-                if (ListJudge.at(i) == " ") {
-                    ListJudge[i] = "NG";
-                }
-            }
-            Testing = false;
-            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
+        if (TimeOut > t)
             return false;
-        }
     }
     return true;
 }
@@ -562,8 +514,8 @@ void CWinSetDcr::UpdateTestData(QByteArray msg)
         break;
     }
     UpdateResult(t.toUtf8());
-//    number = qMin(number,Min.size());
-//    number = qMin(number,Max.size());
+    //    number = qMin(number,Min.size());
+    //    number = qMin(number,Max.size());
     if (temp>Min.at(number)->value() && temp<Max.at(number)->value())
         UpdateJudge("OK");
     else
@@ -662,7 +614,7 @@ void CWinSetDcr::CmdCheckState()
 *******************************************************************************/
 void CWinSetDcr::CmdStartTest(quint8 pos)
 {
-    WaitTestOver();
+    WaitTestOver(100);
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -802,6 +754,83 @@ void CWinSetDcr::hideEvent(QHideEvent *)
 {
     if(DatStdd())
         DatSave();
+}
+
+void CWinSetDcr::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        CmdCheckState();
+        break;
+    case CAN_CMD_START:
+        qDebug()<<"test dcr";
+        CmdStartTest(msg.toInt());
+        if(!WaitTestOver(100)) {
+            Testing = false;
+            for (int i=0; i<Items.size(); i++) {
+                QStringList s = QString(Items.at(i)).split("@");
+                if (s.at(2) == " ")
+                    s[2] = "---";
+                if (s.at(3) == " ")
+                    s[3] = "NG";
+                emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+            }
+        }
+        break;
+    case CAN_CMD_STOP:
+        CmdStopTest();
+        break;
+    case CAN_CMD_INIT:
+        ShowInit();
+        CmdConfigure();
+        break;
+    default:
+        break;
+
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       更新显示
+ * date:        2017.01.04
+ * brief:       增加不平衡度显示
+ * date:        2017.02.14
+ * brief:       修改显示方式
+*******************************************************************************/
+void CWinSetDcr::ShowInit()
+{
+    Items.clear();
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s;
+            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+            QString U1 = Unit.at(qMin(row,Unit.size()))->currentText();
+            QString M1 = Min.at(qMin(row,Min.size()))->text();
+            QString M2 = Max.at(qMin(row,Max.size()))->text();
+            s.append(QString(tr("电阻%1-%2")).arg(T1).arg(T2));
+            s.append(QString("%1~%2%3").arg(M1).arg(M2).arg(U1));
+            s.append(" ");
+            s.append(" ");
+            Items.append(s.join("@"));
+        }
+    }
+    if (ui->BoxUnbalance->value() != 0 && ListItem.size()>=3) {
+        QStringList s;
+        s.append("电阻平衡");
+        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                  END

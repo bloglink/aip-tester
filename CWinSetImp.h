@@ -67,6 +67,8 @@ private slots:
     int Gear(int row);
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ShowInit(void);
 private:
     QSettings *set;
     bool isCheckOk;
@@ -75,6 +77,7 @@ private:
     quint16 TimeOut;
     InputNum *input;
     quint8 CurrentWave;
+    QStringList Items;
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
     QList<QTableWidgetItem*> Terminal2;

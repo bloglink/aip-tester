@@ -34,6 +34,8 @@ private:
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
 public slots:
+    void ShowItems(QStringList item);
+    void ShowItem(QString item);
     void DisplayItem(QStringList item);
     void DisplayPara(QStringList para);
     void DisplayResult(QStringList result);
