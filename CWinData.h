@@ -32,14 +32,6 @@ private:
 
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-
-    void DatInit(void);
-    void InsertItem(QString para,QString r,QString j);
-    void InsertRow(QString item,QString para,QString r,QString j);
-    void SubmitStart(void);
-    void SubmitAll(void);
-    void DeleteAll(void);
 public:
     QList<QTableWidgetItem*> Amount;
     QList<QTableWidgetItem*> Dcr;
@@ -53,6 +45,9 @@ private slots:
     void BtnInit(void);
     void BtnJudge(int id);
     void SqlInit(void);
+    void DatInit(void);
+    void ItemInit(QString item);
+    void DeleteAll(void);
     virtual void showEvent(QShowEvent *);
 private:
     QSqlDatabase db;

@@ -194,20 +194,22 @@ void MainPage::DatInit()
     global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
+    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse.remove(".ini");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
+    QString t = QString("./config/%1.ini").arg(FileInUse);
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
 
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
     PauseMode = set->value("/GLOBAL/TestNG","0").toBool();
 
-    QStringList tt;
-    for (int i=0; i<WinData->Amount.size(); i++)
-        tt.append(WinData->Amount.at(i)->text());
-    tt.removeFirst();
-    WinTest->ShowAmount(tt);
+//    QStringList tt;
+//    for (int i=0; i<WinData->Amount.size(); i++)
+//        tt.append(WinData->Amount.at(i)->text());
+//    tt.removeFirst();
+//    WinTest->ShowAmount(tt);
 }
 /******************************************************************************
  * version:     1.0
@@ -445,52 +447,11 @@ void MainPage::TestStart(QByteArray data)
 ******************************************************************************/
 void MainPage::TestSave()
 {
-    //    QStringList item;
-    //    QStringList judge;
-    //    if (!WinTest->ListItem.filter("电阻").isEmpty()) {
-    //        item.append("DCR");
-    //        if (WinSetDcr->ListJudge.contains("NG"))
-    //            judge.append("DCR");
-    //    }
-    //    if (!WinTest->ListItem.filter("反嵌").isEmpty()) {
-    //        item.append("MAG");
-    //        if (WinSetMag->ListJudge.contains("NG"))
-    //            judge.append("MAG");
-    //    }
-    //    if (!WinTest->ListItem.filter("磁旋").isEmpty()) {
-    //        item.append("DIR");
-    //        if (WinSetMag->ListJudge.last() == "NG")
-    //            judge.append("DIR");
-    //    }
-    //    if (!WinTest->ListItem.filter("绝缘").isEmpty()) {
-    //        item.append("INR");
-    //        if (WinSetIr->ListJudge.contains("NG"))
-    //            judge.append("INR");
-    //    }
-    //    if (!WinTest->ListItem.filter("交耐").isEmpty()) {
-    //        item.append("ACW");
-    //        if (WinSetAcw->ListJudge.contains("NG"))
-    //            judge.append("ACW");
-    //    }
-    //    if (!WinTest->ListItem.filter("匝间").isEmpty()) {
-    //        item.append("IMP");
-    //        if (WinSetImp->ListJudge.contains("NG"))
-    //            judge.append("IMP");
-    //    }
-    //    QString type = global->value("FileInUse","default.ini").toString();
-    //    if (judge.isEmpty())
-    //        judge.append("OK");
-
-    //    WinData->SubmitStart();
-    //    WinData->InsertItem(item.join(" "),type.remove(".ini"),judge.join(" "));
-    //    for (int i=0; i<WinTest->ListItem.size(); i++) {
-    //        QString t1 = WinTest->ListItem.at(i);
-    //        QString t2 = WinTest->ListPara.at(i);
-    //        QString t3 = WinTest->ListResult.at(i);
-    //        QString t4 = WinTest->ListJudge.at(i);
-    //        WinData->InsertRow(t1,t2,t3,t4);
-    //    }
-    //    WinData->SubmitAll();
+    QStringList s;
+    s.append("总数");
+    s.append(FileInUse);
+    s.append(ItemJudge);
+    emit PutSqlData(s.join("@").toUtf8());
 }
 /******************************************************************************
  * version:     1.0
@@ -513,11 +474,11 @@ void MainPage::TestJudge(QByteArray msg)
 {
     emit PutSqlData(msg);
     QStringList s = QString(msg).split("@");
-    if (s.size() < 4)
+    if (s.size() < 3)
         return;
-    if (s.at(3) == "NG")
+    if (s.at(2) == "NG")
         ItemJudge = "NG";
-    if (s.at(3) == "NG" && PauseMode != 1)
+    if (s.at(2) == "NG" && PauseMode != 1)
         TestPause();
 }
 /*******************************************************************************

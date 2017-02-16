@@ -2,6 +2,7 @@
 #define SQLCONTRL_H
 
 #include <QUrl>
+#include <QDate>
 #include <QTime>
 #include <QObject>
 #include <QVariant>

@@ -302,7 +302,6 @@ void CWinSetIr::TestStart(quint8 pos)
     }
     QStringList s;
     s.append("绝缘");
-    s.append(QDate::currentDate().toString("yyyy-MM-dd"));
     s.append(FileInUse);
     s.append(Judge);
     emit TransformCmd(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());

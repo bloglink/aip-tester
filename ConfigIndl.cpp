@@ -93,9 +93,11 @@ void ConfigIndl::DatInit()
     QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
+    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse.remove(".ini");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
+    QString t = QString("./config/%1.ini").arg(FileInUse);
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetDcr");
@@ -512,11 +514,22 @@ void ConfigIndl::TestStart(quint8 pos)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
+    Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
-        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
-        for (int i=0; i<Items.size(); i++) {
-            QStringList s = QString(Items.at(i)).split("@");
+        Judge = "NG";
+        for (int row = 0; row<Enable.size(); row++) {
+            if (Enable.at(row)->text() == "Y") {
+                QStringList s = QString(Items.at(row)).split("@");
+                if (s.at(2) == " ")
+                    s[2] = "---";
+                if (s.at(3) == " ")
+                    s[3] = "NG";
+                emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+            }
+        }
+        if (ui->BoxUnbalance->value() != 0) {
+            QStringList s = QString(Items.last()).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
@@ -524,6 +537,11 @@ void ConfigIndl::TestStart(quint8 pos)
             emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
         }
     }
+    QStringList s;
+    s.append("电感");
+    s.append(FileInUse);
+    s.append(Judge);
+    emit TransformCmd(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -568,11 +586,11 @@ void ConfigIndl::TestResult(QByteArray msg)
             max *= 1000;
             min *= 1000;
         }
-        QString judge;
-        if (Result1.Result>=min && Result1.Result<= max && Result2.Result>=qmin && Result2.Result<=qmax)
-            judge = "OK";
-        else
+        QString judge = "OK";
+        if (Result1.Result<min || Result1.Result>max || Result2.Result<qmin || Result2.Result>qmax){
+            Judge = "NG";
             judge = "NG";
+        }
         QStringList s = QString(Items.at(number)).split("@");
         if (s.at(2) == " ")
             s[2] = t;
@@ -581,7 +599,6 @@ void ConfigIndl::TestResult(QByteArray msg)
         emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
 
         if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
-            bool isOk = true;
             double sum = 0;
             double avr = 0;
             QString u;
@@ -589,18 +606,16 @@ void ConfigIndl::TestResult(QByteArray msg)
                 sum += Results.at(i);
             }
             avr = sum/Results.size();
+            judge = "OK";
             for (int i=0; i<Results.size(); i++) {
                 double un = fabs(Results.at(i)-avr)*100/avr;
                 u.append(QString::number(un,'f',1));
                 u.append("% ");
-                if (un >= ui->BoxUnbalance->value())
-                    isOk = false;
+                if (un >= ui->BoxUnbalance->value()) {
+                    Judge = "NG";
+                    judge = "NG";
+                }
             }
-
-            if (isOk)
-                judge = "OK";
-            else
-                judge = "NG";
             QStringList s = QString(Items.last()).split("@");
             if (s.at(2) == " ")
                 s[2] = u;

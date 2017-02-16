@@ -78,6 +78,7 @@ private:
     QStringList ItemToTest;
     QStringList Items;
     QString ItemJudge;
+    QString FileInUse;
     int PauseMode;
     bool Testing;
     quint8 Pos;

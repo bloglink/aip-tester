@@ -2,6 +2,7 @@
 #define CONFIGINDL_H
 
 #include <cmath>
+#include <QDate>
 #include <QDebug>
 #include <QWidget>
 #include <QLineEdit>
@@ -76,6 +77,8 @@ private:
     InputNum *input;
     QStringList Items;
     QList<double> Results;
+    QString Judge;
+    QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
