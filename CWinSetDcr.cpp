@@ -394,9 +394,6 @@ void CWinSetDcr::ItemChange(QString msg)
     if (t==1 || t==2)
         ui->TabSetDcr->currentItem()->setText(msg);
 }
-
-
-
 /*******************************************************************************
  * version:     1.0
  * author:      link
@@ -569,7 +566,6 @@ void CWinSetDcr::TestStart(quint8 pos)
             if (s.at(3) == " ")
                 s[3] = "NG";
             emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
-
         }
     }
 }
@@ -595,7 +591,7 @@ void CWinSetDcr::TestResult(QByteArray msg)
         temp *= offset;
     }
     QString t;
-    QString judge;
+    QString judge = "OK";
     switch (grade) {
     case 1:
         temp /= 100;
@@ -630,10 +626,10 @@ void CWinSetDcr::TestResult(QByteArray msg)
         break;
     }
     Results.append(temp);
-    if (temp>Min.at(number)->value() && temp<Max.at(number)->value())
-        judge = "OK";
-    else
+    if (temp<Min.at(number)->value() || temp>Max.at(number)->value()) {
+        Judge = "NG";
         judge = "NG";
+    }
 
     QStringList s = QString(Items.at(number)).split("@");
     if (s.at(2) == " ")
@@ -641,11 +637,9 @@ void CWinSetDcr::TestResult(QByteArray msg)
     if (s.at(3) == " ")
         s[3] = judge;
     emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
-    if (judge == "NG")
-        Judge = "NG";
 
+    //计算不平衡度
     if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
-        bool isOk = true;
         double sum = 0;
         double avr = 0;
         QString u;
@@ -657,22 +651,17 @@ void CWinSetDcr::TestResult(QByteArray msg)
             double un = fabs(Results.at(i)-avr)*100/avr;
             u.append(QString::number(un,'f',1));
             u.append("% ");
-            if (un >= ui->BoxUnbalance->value())
-                isOk = false;
+            if (un >= ui->BoxUnbalance->value()) {
+                judge = "NG";
+                Judge = "NG";
+            }
         }
-
-        if (isOk)
-            judge = "OK";
-        else
-            judge = "NG";
         QStringList s = QString(Items.last()).split("@");
         if (s.at(2) == " ")
             s[2] = u;
         if (s.at(3) == " ")
             s[3] = judge;
         emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
-        if (judge == "NG")
-            Judge = "NG";
     }
 }
 /*******************************************************************************

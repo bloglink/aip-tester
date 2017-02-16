@@ -109,7 +109,7 @@ void ConfigLvs::DatSave()
 *******************************************************************************/
 void ConfigLvs::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_LVS && addr != CAN_ID_IR)
+    if (addr != ADDR && addr != WIN_ID_LVS && addr != CAN_ID_PWR)
         return;
     switch (cmd) {
     case CAN_DAT_GET:
@@ -326,7 +326,7 @@ void ConfigLvs::Delay(int ms)
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       更新显示
 *******************************************************************************/
 void ConfigLvs::showEvent(QShowEvent *)
@@ -336,7 +336,7 @@ void ConfigLvs::showEvent(QShowEvent *)
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       退出保存
 *******************************************************************************/
 void ConfigLvs::hideEvent(QHideEvent *)

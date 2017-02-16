@@ -427,5 +427,5 @@ void CWinData::DeleteAll()
 ******************************************************************************/
 void CWinData::showEvent(QShowEvent *)
 {
-    DatInit();
+//    DatInit();
 }

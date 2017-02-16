@@ -383,6 +383,8 @@ void CWinType::ProjToTestSelect(int row, int column)
             emit TransformCmd(ADDR,WIN_CMD_SWITCH,"匝间");
         if (ui->TabProj->item(row,0)->text() == tr("电感"))
             emit TransformCmd(ADDR,WIN_CMD_SWITCH,"电感");
+        if (ui->TabProj->item(row,0)->text() == tr("功率"))
+            emit TransformCmd(ADDR,WIN_CMD_SWITCH,"功率");
         if (ui->TabProj->item(row,0)->text() == tr("低启"))
             emit TransformCmd(ADDR,WIN_CMD_SWITCH,"低启");
         if (ui->TabProj->item(row,0)->text() == tr("堵转"))

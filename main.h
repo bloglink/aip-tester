@@ -97,6 +97,7 @@ const quint16 GuestHeart        = 6000;
 #define CAN_ID_IMP       0x81         // 匝间板
 #define CAN_ID_IMP_WAVE  0x481        // 匝间板波形
 #define CAN_ID_INDL      0xC1
+#define CAN_ID_PWR       0xE1
 #define CAN_ID_13OUT     0x261        // 输出板13
 #define CAN_ID_14OUT     0x281        // 输出板14
 #define CAN_ID_15OUT     0x2A1        // 输出板15

@@ -121,6 +121,12 @@ void MainPage::WinInit()
     WinSetIndl->setObjectName("电感");
     connect(WinSetIndl,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),this,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),WinSetIndl,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
+    //功率设置
+    WinSetPower = new ConfigPower(this);
+    ui->Desktop->addWidget(WinSetPower);
+    WinSetPower->setObjectName("功率");
+    connect(WinSetPower,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),this,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),WinSetPower,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
     //低启设置
     WinSetLvs = new ConfigLvs(this);
     ui->Desktop->addWidget(WinSetLvs);

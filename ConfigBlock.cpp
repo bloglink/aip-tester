@@ -110,7 +110,7 @@ void ConfigBlock::DatSave()
 *******************************************************************************/
 void ConfigBlock::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_BLOCK && addr != CAN_ID_IR)
+    if (addr != ADDR && addr != WIN_ID_BLOCK && addr != CAN_ID_PWR)
         return;
     switch (cmd) {
     case CAN_DAT_GET:

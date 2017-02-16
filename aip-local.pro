@@ -34,7 +34,8 @@ SOURCES += main.cpp \
     ConfigIndl.cpp \
     ConfigLvs.cpp \
     DigitalBox.cpp \
-    ConfigPower.cpp
+    ConfigPower.cpp \
+    SqlContrl.cpp
 
 HEADERS  += \
     CWinBack.h \
@@ -59,7 +60,8 @@ HEADERS  += \
     ConfigIndl.h \
     ConfigLvs.h \
     DigitalBox.h \
-    ConfigPower.h
+    ConfigPower.h \
+    SqlContrl.h
 
 FORMS    += \
     CWinBack.ui \

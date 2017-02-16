@@ -27,6 +27,7 @@
 #include "CWinSetIr.h"
 #include "CWinSetImp.h"
 #include "ConfigIndl.h"
+#include "ConfigPower.h"
 #include "ConfigLvs.h"
 #include "ConfigBlock.h"
 
@@ -94,6 +95,7 @@ private:
     ConfigIndl *WinSetIndl;
     ConfigLvs  *WinSetLvs;
     ConfigBlock *WinSetBlock;
+    ConfigPower *WinSetPower;
 };
 
 #endif // MAINPAGE_H
