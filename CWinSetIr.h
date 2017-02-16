@@ -1,6 +1,7 @@
 #ifndef CWINSETIR_H
 #define CWINSETIR_H
 
+#include <QDate>
 #include <QDebug>
 #include <QWidget>
 #include <QListView>
@@ -60,6 +61,8 @@ private:
     QList<double> Volt;
     QList<double> Res;
     QStringList Items;
+    QString Judge;
+    QString FileInUse;
 
 };
 

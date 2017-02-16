@@ -91,9 +91,11 @@ void CWinSetIr::DatInit()
     QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
+    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse.remove(".ini");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
+    QString t = QString("./config/%1.ini").arg(FileInUse);
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetIr");
@@ -248,12 +250,13 @@ void CWinSetIr::TestCheckOk(QByteArray )
     if (abs(vv-ui->BoxVoltage->currentText().toInt()) <5)
         vv = ui->BoxVoltage->currentText().toInt();
     QString t = QString("%1V,%2MΩ").arg(vv).arg(rr/10);
-    QString judge;
+    QString judge = "OK";
 
-    if (rr/10>ui->BoxMax->value() || rr/10<ui->BoxMin->value())
+    if (rr/10>ui->BoxMax->value() || rr/10<ui->BoxMin->value()) {
+        Judge = "NG";
         judge = "NG";
-    else
-        judge = "OK";
+    }
+
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
@@ -283,8 +286,10 @@ void CWinSetIr::TestStart(quint8 pos)
       <<quint8(pos)<<quint8(0x01);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
+    Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
+        Judge = "NG";
         emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
@@ -295,6 +300,12 @@ void CWinSetIr::TestStart(quint8 pos)
             emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
         }
     }
+    QStringList s;
+    s.append("绝缘");
+    s.append(QDate::currentDate().toString("yyyy-MM-dd"));
+    s.append(FileInUse);
+    s.append(Judge);
+    emit TransformCmd(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
