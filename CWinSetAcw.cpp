@@ -92,9 +92,11 @@ void CWinSetAcw::DatInit()
     QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
+    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse.remove(".ini");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
+    QString t = QString("./config/%1.ini").arg(FileInUse);
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetAcw");
@@ -222,25 +224,26 @@ void CWinSetAcw::TestCheck()
 void CWinSetAcw::TestCheckOk(QByteArray )
 {
     Testing = false;
-    if (Volt.isEmpty() || Res.isEmpty())
+    if (Volt.isEmpty() || Curr.isEmpty())
         return;
     double vv = 0;
     double rr = 0;
     for (int i=0; i<Volt.size(); i++) {
         vv += Volt.at(i);
-        rr += Res.at(i);
+        rr += Curr.at(i);
     }
     vv /= Volt.size();
-    rr /= Res.size();
+    rr /= Curr.size();
     if (abs(vv-ui->BoxVoltage->value()) <5)
         vv = ui->BoxVoltage->value();
     QString t = QString("%1V,%2mA").arg(vv).arg(rr/100);
-    QString judge;
+    QString judge = "OK";
 
-    if (rr/100>ui->BoxMax->value() || rr/100<ui->BoxMin->value())
+    if (rr/100>ui->BoxMax->value() || rr/100<ui->BoxMin->value()) {
+        Judge = "NG";
         judge = "NG";
-    else
-        judge = "OK";
+    }
+
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
@@ -249,7 +252,7 @@ void CWinSetAcw::TestCheckOk(QByteArray )
     emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
 
     Volt.clear();
-    Res.clear();
+    Curr.clear();
 }
 /*******************************************************************************
  * version:     1.0
@@ -270,8 +273,10 @@ void CWinSetAcw::TestStart(quint8 pos)
       <<quint8(pos)<<quint8(0x00);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
+    Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
+        Judge = "NG";
         emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
@@ -280,9 +285,14 @@ void CWinSetAcw::TestStart(quint8 pos)
             if (s.at(3) == " ")
                 s[3] = "NG";
             emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
-
         }
     }
+    QStringList s;
+    s.append("交耐");
+    s.append(QDate::currentDate().toString("yyyy-MM-dd"));
+    s.append(FileInUse);
+    s.append(Judge);
+    emit TransformCmd(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -297,7 +307,7 @@ void CWinSetAcw::TestResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     Volt.append(v);
-    Res.append(tt);
+    Curr.append(tt);
 }
 /*******************************************************************************
  * version:     1.0

@@ -1,6 +1,7 @@
 #ifndef CWINSETACW_H
 #define CWINSETACW_H
 
+#include <QDate>
 #include <QDebug>
 #include <QWidget>
 #include <QListView>
@@ -55,8 +56,10 @@ private:
     bool Testing;
     quint16 TimeOut;
     QList<double> Volt;
-    QList<double> Res;
+    QList<double> Curr;
     QStringList Items;
+    QString Judge;
+    QString FileInUse;
 
 };
 
