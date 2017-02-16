@@ -1,6 +1,7 @@
 #ifndef CWINSETMAG_H
 #define CWINSETMAG_H
 
+#include <QDate>
 #include <QMessageBox>
 #include <QWidget>
 #include <QListView>
@@ -69,6 +70,8 @@ private:
     InputNum *input;
     quint8 CurrentWave;
     QStringList Items;
+    QString Judge;
+    QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
