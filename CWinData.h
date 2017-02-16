@@ -59,6 +59,7 @@ private:
     QSqlTableModel *model;
     QSettings *global;
     int MaxId;
+    QString SqlName;
 };
 
 #endif // CWINDATA_H

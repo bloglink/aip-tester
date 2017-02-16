@@ -2,6 +2,7 @@
 #define CWINSETDCR_H
 
 #include <cmath>
+#include <QDate>
 #include <QDebug>
 #include <QWidget>
 #include <QComboBox>
@@ -71,6 +72,7 @@ private:
     QStringList Items;
     QList<double> Results;
     QString Judge;
+    QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;

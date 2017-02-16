@@ -108,12 +108,13 @@ void CWinData::BtnJudge(int id)
 ******************************************************************************/
 void CWinData::SqlInit()
 {
+    SqlName = "SqlData";
     QFile file("./data/aip.db");
     if (!file.exists()) {
         file.open(QIODevice::ReadWrite);
         file.close();
     }
-    db = QSqlDatabase::addDatabase("QSQLITE");
+    db = QSqlDatabase::addDatabase("QSQLITE",SqlName);
     db.setDatabaseName("./data/aip.db");
     db.open();
 

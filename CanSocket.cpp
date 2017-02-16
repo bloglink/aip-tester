@@ -43,7 +43,6 @@ void CanSocket::DeviceOpen()
     int ret = CAN_ChannelStart(s,0,&InitMsg);
     if (ret <= 0)
         return;
-    qDebug()<<"can open sucecss";
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(readAll()));
     timer->start(50);

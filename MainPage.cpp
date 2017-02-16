@@ -39,6 +39,8 @@ MainPage::~MainPage()
 {
     can->quit();
     can->wait();
+    sql->quit();
+    sql->wait();
     delete ui;
 }
 /******************************************************************************
@@ -144,11 +146,12 @@ void MainPage::WinInit()
 
     //打开CAN口
     CanThreadInit();
+    //打开SQL
+    SqlThreadInit();
     //设置风格样式
     emit TransformCmd(ADDR,WIN_CMD_STYLE,NULL);
 
     Testing = false;
-    isChecked = false;
     Pos = 0x13;
 
     QTimer::singleShot(300,this,SLOT(TestCheck()));
@@ -215,12 +218,28 @@ void MainPage::DatInit()
 void MainPage::CanThreadInit()
 {
     can = new QThread(this);
-    thread.moveToThread(can);
-    connect(can,SIGNAL(started()),&thread,SLOT(DeviceOpen()));
-    connect(can,SIGNAL(finished()),&thread,SLOT(DeviceQuit()));
-    connect(this,SIGNAL(PutCanData(QByteArray)),&thread,SLOT(WriteAll(QByteArray)));
-    connect(&thread,SIGNAL(GetCanData(QByteArray)),this,SLOT(CanThread(QByteArray)));
+
+    CanCtrl.moveToThread(can);
+    connect(can,SIGNAL(started()),&CanCtrl,SLOT(DeviceOpen()));
+    connect(can,SIGNAL(finished()),&CanCtrl,SLOT(DeviceQuit()));
+    connect(this,SIGNAL(PutCanData(QByteArray)),&CanCtrl,SLOT(WriteAll(QByteArray)));
+    connect(&CanCtrl,SIGNAL(GetCanData(QByteArray)),this,SLOT(CanThread(QByteArray)));
     can->start();
+}
+/******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       启动SQL线程
+******************************************************************************/
+void MainPage::SqlThreadInit()
+{
+    sql = new QThread(this);
+    SqlCtrl.moveToThread(sql);
+    connect(sql,SIGNAL(started()),&SqlCtrl,SLOT(DeviceOpen()));
+    connect(sql,SIGNAL(finished()),&SqlCtrl,SLOT(DeviceQuit()));
+    connect(this,SIGNAL(PutSqlData(QByteArray)),&SqlCtrl,SLOT(PutItem(QByteArray)));
+    sql->start();
 }
 /******************************************************************************
  * version:     1.0
@@ -277,11 +296,11 @@ void MainPage::ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg)
         Items.append(QString(msg).split("\n"));
         break;
     case WIN_CMD_JUDGE:
-        TestJudge = "NG";
-        ItemJudge = "NG";
+        TestJudge(msg);
         break;
     case WIN_CMD_ITEM:
         WinTest->ShowItem(msg);
+        emit PutSqlData(msg);
         break;
     case WIN_CMD_TEMP:
         WinTest->ShowTemp(msg);
@@ -376,7 +395,7 @@ void MainPage::TestStart(QByteArray data)
     if (ui->Desktop->currentWidget()->objectName() != "WinTest")
         return;
     Testing = true;
-    TestJudge = "OK";
+    ItemJudge = "OK";
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
     PauseMode = set->value("/GLOBAL/TestNG","0").toBool();
 
@@ -392,15 +411,11 @@ void MainPage::TestStart(QByteArray data)
 
     for (int i=0; i<ItemToTest.size(); i++) {
         emit TransformCmd(ItemToTest.at(i).toInt(),CAN_CMD_START,data);
-        if (ItemJudge == "NG" && PauseMode != 1)
-            TestPause();
-        ItemJudge = "OK";
         if (!Testing)
             break;
-
     }
     TestSave();
-    if (TestJudge == "NG") {
+    if (ItemJudge == "NG") {
         msg.clear();
         msg.append(0x08 | 0x01);
         emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
@@ -417,7 +432,7 @@ void MainPage::TestStart(QByteArray data)
         msg.append(0x04 | 0x00);
         emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
     }
-    WinTest->ShowJudge(TestJudge);
+    WinTest->ShowJudge(ItemJudge);
     Testing = false;
 }
 /******************************************************************************
@@ -488,7 +503,29 @@ void MainPage::TestPause()
     if(QMessageBox::warning(this,"此项目不合格", "是否继续",QMessageBox::Yes,QMessageBox::No)==QMessageBox::No)
         Testing = false;
 }
-
+/******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       测试结果判定保存
+******************************************************************************/
+void MainPage::TestJudge(QByteArray msg)
+{
+    emit PutSqlData(msg);
+    QStringList s = QString(msg).split("@");
+    if (s.size() < 4)
+        return;
+    if (s.at(3) == "NG")
+        ItemJudge = "NG";
+    if (s.at(3) == "NG" && PauseMode != 1)
+        TestPause();
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.30
+ * brief:      延时
+*******************************************************************************/
 void MainPage::Delay(int ms)
 {
     QElapsedTimer t;

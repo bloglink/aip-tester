@@ -12,6 +12,7 @@
 
 
 #include "CanSocket.h"
+#include "SqlContrl.h"
 #include "main.h"
 
 #include "HomePage.h"
@@ -47,6 +48,7 @@ private:
     Ui::MainPage *ui;
 signals:
     void PutCanData(QByteArray msg);
+    void PutSqlData(QByteArray msg);
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray msg);
 private slots:
     void WinInit(void);
@@ -54,31 +56,32 @@ private slots:
     void DatInit(void);
     void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
     void CanThreadInit(void);
+    void SqlThreadInit(void);
     void CanThread(QByteArray msg);
     void TestCheck(void);
     void TestInit(void);
     void TestStart(QByteArray msg);
     void TestSave(void);
     void TestPause(void);
+    void TestJudge(QByteArray msg);
     void Delay(int ms);
 private:
     QList<int> WinPrevious;
     QSettings *global;
     QSettings *set;
     QThread *can;
-    CanSocket thread;
+    QThread *sql;
+    CanSocket CanCtrl;
+    SqlContrl SqlCtrl;
     QTimer *timer;
 
     QStringList ItemToTest;
     QStringList Items;
-    QString TestJudge;
     QString ItemJudge;
     int PauseMode;
     bool Testing;
     quint8 Pos;
-    bool isStop;
-    bool isChecked;
-    bool OutTesting;
+
 
     HomePage *WinHome;
     Settings *WinSets;
