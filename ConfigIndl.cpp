@@ -386,6 +386,7 @@ void ConfigIndl::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
         TestStop();
         break;
     case CAN_CMD_INIT:
+        DatInit();
         TestInit();
         TestConfig();
         break;

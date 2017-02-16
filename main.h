@@ -86,6 +86,9 @@ const quint16 GuestHeart        = 6000;
 #define WIN_ID_DCW      0x05
 #define WIN_ID_IMP      0x06
 #define WIN_ID_INDL     0x07
+#define WIN_ID_PWR      0x08
+#define WIN_ID_LVS      0x09
+#define WIN_ID_BLOCK    0x0A
 #define WIN_ID_OUT      0x13
 
 #define CAN_ID_DCR       0x41         // 电阻板

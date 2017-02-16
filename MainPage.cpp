@@ -126,12 +126,14 @@ void MainPage::WinInit()
     ui->Desktop->addWidget(WinSetLvs);
     WinSetLvs->setObjectName("低启");
     connect(WinSetLvs,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),this,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),WinSetLvs,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
     //
     //堵转设置
     WinSetBlock = new ConfigBlock(this);
     ui->Desktop->addWidget(WinSetBlock);
     WinSetBlock->setObjectName("堵转");
     connect(WinSetBlock,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),this,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),WinSetBlock,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
     WinSwitch("WinHome");
 
     //打开CAN口
@@ -190,7 +192,7 @@ void MainPage::DatInit()
     set->setIniCodec("GB18030");
 
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
-    isPause = set->value("/GLOBAL/TestNG","false").toBool();
+    PauseMode = set->value("/GLOBAL/TestNG","0").toBool();
 
     QStringList tt;
     for (int i=0; i<WinData->Amount.size(); i++)
@@ -370,7 +372,7 @@ void MainPage::TestStart(QByteArray data)
     Testing = true;
     TestJudge = "OK";
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
-    isPause = set->value("/GLOBAL/TestNG","false").toBool();
+    PauseMode = set->value("/GLOBAL/TestNG","0").toBool();
 
     TestInit();
     if (data.toInt() == 0x13)
@@ -383,10 +385,10 @@ void MainPage::TestStart(QByteArray data)
     emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
 
     for (int i=0; i<ItemToTest.size(); i++) {
-        if (ItemJudge == "NG" && isPause)
-            qDebug()<<"pause";
-        ItemJudge = "OK";
         emit TransformCmd(ItemToTest.at(i).toInt(),CAN_CMD_START,data);
+        if (ItemJudge == "NG" && PauseMode != 1)
+            TestPause();
+        ItemJudge = "OK";
         if (!Testing)
             break;
 
@@ -475,47 +477,10 @@ void MainPage::TestSave()
  * date:        2016.12.30
  * brief:       不合格警告
 ******************************************************************************/
-void MainPage::DisplayWarnning()
+void MainPage::TestPause()
 {
     if(QMessageBox::warning(this,"此项目不合格", "是否继续",QMessageBox::Yes,QMessageBox::No)==QMessageBox::No)
         Testing = false;
-}
-/******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.30
- * brief:       输出板信号处理
-******************************************************************************/
-void MainPage::OutExcuteCmd(quint16 id,QByteArray msg)
-{
-    if (quint8(msg.at(0)) == 0x00) {
-        OutTesting = false;
-    }
-    if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x01)) {
-        if (!isStop || Testing || ui->Desktop->currentWidget()->objectName() != "WinTest")
-            return;
-        if (id == CAN_ID_13OUT) {
-            Pos = 0x13;
-            WinTest->ShowPos("左");
-            isStop = false;
-        }
-        if (id == CAN_ID_14OUT) {
-            Pos = 0x14;
-            WinTest->ShowPos("右");
-            isStop = false;
-        }
-        QTimer::singleShot(10,this,SLOT(TestStart()));
-    }
-    if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x00)) {
-        if (id == CAN_ID_13OUT && Pos == 0x13) {
-            isStop = true;
-            Testing = false;
-        }
-        if (id == CAN_ID_14OUT && Pos == 0x14) {
-            isStop = true;
-            Testing = false;
-        }
-    }
 }
 
 void MainPage::Delay(int ms)
@@ -524,18 +489,4 @@ void MainPage::Delay(int ms)
     t.start();
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
-}
-
-bool MainPage::OutWaitOver()
-{
-    quint8 TimeOut = 0;
-    while (OutTesting) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > 50) {
-            OutTesting = false;
-            return false;
-        }
-    }
-    return true;
 }

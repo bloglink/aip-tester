@@ -28,34 +28,38 @@ private:
 
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-    void DisplayInit(void);
-    void ExcuteCmd(QByteArray msg);
-    void CmdCheckState(void);
-    void CmdStartTest(quint8 pos);
-    void CmdSample(void);
-    void CmdStopTest(void);
-    void CmdConfigure(void);
-    bool WaitTestOver(void);
-public:
-    QStringList ListItem;
-    QStringList ListPara;
-    QStringList ListResult;
-    QStringList ListJudge;
 private slots:
+    void WinInit(void);
     void BtnInit(void);
+    void BtnJudge(int id);
     void DatInit(void);
     void DatSave(void);
-    void SampleOver(void);
 
-    void showEvent(QShowEvent *);
-    void hideEvent(QHideEvent *);
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ExcuteCanCmd(QByteArray msg);
+    void TestInit(void);
+    void TestCheck(void);
+    void TestCheckOk(QByteArray msg);
+    void TestSample(void);
+    void TestSampleOver(void);
+    void TestStart(quint8 pos);
+    void TestResult(QByteArray msg);
+    void TestStop(void);
+    void TestConfig(void);
 
+    bool WaitTestOver(quint16 t);
+    void Delay(int ms);
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
 private:
     QSettings *set;
     bool isCheckOk;
     bool Testing;
     quint16 TimeOut;
+    QStringList Items;
+    QList<double> Volt;
+    QList<double> Curr;
+    QList<double> Power;
 };
 
 #endif // CONFIGBLOCK_H

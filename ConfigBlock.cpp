@@ -12,12 +12,50 @@ ConfigBlock::~ConfigBlock()
 {
     delete ui;
 }
-
-void ConfigBlock::BtnInit()
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       初始化界面
+*******************************************************************************/
+void ConfigBlock::WinInit()
 {
 
 }
-
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       初始化按键
+*******************************************************************************/
+void ConfigBlock::BtnInit()
+{
+    QButtonGroup *btnGroup = new QButtonGroup;
+    btnGroup->addButton(ui->BtnExit,Qt::Key_2);
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       按键功能
+*******************************************************************************/
+void ConfigBlock::BtnJudge(int id)
+{
+    switch (id) {
+    case Qt::Key_0:
+        emit TransformCmd(ADDR,WIN_CMD_SWITCH,NULL);
+        break;
+    default:
+        break;
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       数据初始化
+*******************************************************************************/
 void ConfigBlock::DatInit()
 {
     QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
@@ -30,69 +68,163 @@ void ConfigBlock::DatInit()
     set->setIniCodec("GB18030");
     set->beginGroup("ConfigBlock");
 
-    ui->BoxVoltage->setValue(set->value("Voltage","1").toDouble());
-    ui->BoxTimeUse->setValue(set->value("TimeUse","10").toDouble());
+    ui->BoxVolt->setValue(set->value("Voltage","1").toDouble());
+    ui->BoxTime->setValue(set->value("TimeUse","10").toDouble());
     ui->BoxGrade->setValue(set->value("Grade","1").toDouble());
     ui->BoxVoltMax->setValue(set->value("VoltMax","255").toDouble());
     ui->BoxVoltMin->setValue(set->value("VoltMin","1").toDouble());
-    ui->BoxCurrentMax->setValue(set->value("CurrentMax","5.000").toDouble());
-    ui->BoxCurrentMin->setValue(set->value("CurrentMin","0.001").toDouble());
+    ui->BoxCurrMax->setValue(set->value("CurrentMax","5.000").toDouble());
+    ui->BoxCurrMin->setValue(set->value("CurrentMin","0.001").toDouble());
     ui->BoxPowerMax->setValue(set->value("PowerMax","1275").toDouble());
     ui->BoxPowerMin->setValue(set->value("PowerMin","0.1").toDouble());
     ui->BoxFreq->setValue(set->value("Freq","1").toDouble());
-    ui->BoxCurrent->setValue(set->value("Current","0.001").toDouble());
+    ui->BoxCurr->setValue(set->value("Current","0.001").toDouble());
     ui->BoxPower->setValue(set->value("Power","1").toDouble());
 }
-
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       数据保存
+*******************************************************************************/
 void ConfigBlock::DatSave()
 {
-    set->setValue("Voltage",QString::number(ui->BoxVoltage->value()));
-    set->setValue("TimeUse",QString::number(ui->BoxTimeUse->value()));
+    set->setValue("Voltage",QString::number(ui->BoxVolt->value()));
+    set->setValue("TimeUse",QString::number(ui->BoxTime->value()));
     set->setValue("Grade",QString::number(ui->BoxGrade->value()));
     set->setValue("VoltMax",QString::number(ui->BoxVoltMax->value()));
     set->setValue("VoltMin",QString::number(ui->BoxVoltMin->value()));
-    set->setValue("CurrentMax",QString::number(ui->BoxCurrentMax->value()));
-    set->setValue("CurrentMin",QString::number(ui->BoxCurrentMin->value()));
+    set->setValue("CurrentMax",QString::number(ui->BoxCurrMax->value()));
+    set->setValue("CurrentMin",QString::number(ui->BoxCurrMin->value()));
     set->setValue("PowerMax",QString::number(ui->BoxPowerMax->value()));
     set->setValue("PowerMin",QString::number(ui->BoxPowerMin->value()));
     set->setValue("Freq",QString::number(ui->BoxFreq->value()));
-    set->setValue("Current",QString::number(ui->BoxCurrent->value()));
+    set->setValue("Current",QString::number(ui->BoxCurr->value()));
     set->setValue("Power",QString::number(ui->BoxPower->value()));
 }
-
-
-
-void ConfigBlock::DisplayInit()
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       命令处理
+*******************************************************************************/
+void ConfigBlock::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    ListItem.clear();
-    ListPara.clear();
-    ListResult.clear();
-    ListJudge.clear();
+    if (addr != ADDR && addr != WIN_ID_BLOCK && addr != CAN_ID_IR)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCanCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        TestCheck();
+        break;
+    case CAN_CMD_START:
+        TestStart(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        TestStop();
+        break;
+    case CAN_CMD_INIT:
+        DatInit();
+        TestInit();
+        TestConfig();
+        break;
+    default:
+        break;
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       CAN命令处理
+*******************************************************************************/
+void ConfigBlock::ExcuteCanCmd(QByteArray msg)
+{
+    if (!Testing)
+        return;
+    TimeOut = 0;
+    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+        TestCheckOk(msg);
+    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
+        TestResult(msg);
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.16
+ * brief:      更新显示
+*******************************************************************************/
+void ConfigBlock::TestInit()
+{
+    Items.clear();
+    QStringList s;
     QString U1 = QString::number(ui->BoxVoltMin->value());
     QString U2 = QString::number(ui->BoxVoltMax->value());
-    QString C1 = QString::number(ui->BoxCurrentMin->value());
-    QString C2 = QString::number(ui->BoxCurrentMax->value());
+    QString C1 = QString::number(ui->BoxCurrMin->value());
+    QString C2 = QString::number(ui->BoxCurrMax->value());
     QString P1 = QString::number(ui->BoxPowerMin->value());
     QString P2 = QString::number(ui->BoxPowerMax->value());
-    ListItem.append(QString(tr("堵转")));
-    ListPara.append(QString("%1~%2V,%3~%4mA,%5~%6W").arg(U1).arg(U2).arg(C1).arg(C2).arg(P1).arg(P2));
-    ListResult.append(" ");
-    ListJudge.append(" ");
+    s.append(QString(tr("堵转")));
+    s.append(QString("%1~%2V,%3~%4mA,%5~%6W").arg(U1).arg(U2).arg(C1).arg(C2).arg(P1).arg(P2));
+    s.append(" ");
+    s.append(" ");
+    Items.append(s.join("@"));
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
-
-void ConfigBlock::ExcuteCmd(QByteArray msg)
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       检测状态
+*******************************************************************************/
+void ConfigBlock::TestCheck()
 {
 
 }
-
-void ConfigBlock::CmdCheckState()
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       更新状态,求平均并清理测试结果
+*******************************************************************************/
+void ConfigBlock::TestCheckOk(QByteArray)
 {
+    Testing = false;
 
-}
+    if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty())
+        return;
+    double vv = 0;
+    double rr = 0;
+    double pp = 0;
+    for (int i=0; i<Volt.size(); i++) {
+        vv += Volt.at(i);
+        rr += Curr.at(i);
+        pp += Power.at(i);
+    }
+    vv /= Volt.size();
+    rr /= Curr.size();
+    pp /= Power.size();
+    if (abs(vv-ui->BoxVolt->value()) <5)
+        vv = ui->BoxVolt->value();
+    QString t = QString("%1V,%2mA,%3W").arg(vv).arg(rr/10).arg(pp);
+    QString judge = "OK";
 
-void ConfigBlock::CmdStartTest(quint8 pos)
-{
+    if (rr/100>ui->BoxCurrMax->value() || rr/10<ui->BoxCurrMin->value() )
+        judge = "NG";
+    if (pp>ui->BoxPowerMax->value() || pp<ui->BoxPowerMin->value() )
+        judge = "NG";
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = judge;
+    emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
 
+    Volt.clear();
+    Curr.clear();
+    Power.clear();
 }
 /*******************************************************************************
  * version:     1.0
@@ -100,17 +232,23 @@ void ConfigBlock::CmdStartTest(quint8 pos)
  * date:        2016.12.28
  * brief:       定频采集一个波形
 *******************************************************************************/
-void ConfigBlock::CmdSample(void)
+void ConfigBlock::TestSample(void)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x05)<<quint8(0x03)
-      <<quint8(ui->BoxGrade->value())<<quint8(ui->BoxTimeUse->value()/10)
-       <<quint8(int(ui->BoxVoltage)/256)<<quint8(int(ui->BoxVoltage)%256);
+      <<quint8(ui->BoxGrade->value())<<quint8(ui->BoxTime->value()/10)
+       <<quint8(int(ui->BoxVolt)/256)<<quint8(int(ui->BoxVolt)%256);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
 }
-void ConfigBlock::SampleOver()
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       采样波形计算
+*******************************************************************************/
+void ConfigBlock::TestSampleOver()
 {
 //    int i,k;
 //    int Trough,Trough_Point;  // 波谷
@@ -184,46 +322,122 @@ void ConfigBlock::SampleOver()
 //        ui->label_pwr->setText(QString(tr("功率:"))+QString::number(pwr_average/10,'f',1));
 //    }
 }
-void ConfigBlock::CmdStopTest()
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       开始测试
+*******************************************************************************/
+void ConfigBlock::TestStart(quint8 pos)
+{
+    if (Testing)
+        return;
+    qDebug()<<pos;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 t = ui->BoxTime->value()*10;
+    quint16 v = ui->BoxVolt->value()*10;
+    quint8 g = ui->BoxGrade->value();
+    out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(g)
+      <<quint8(t/256)<<quint8(t%256)<<quint8(v/256)<<quint8(v%256)
+     <<quint8(0x00)<<quint8(0x00);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if(!WaitTestOver(100)) {
+        Testing = false;
+        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
+        for (int i=0; i<Items.size(); i++) {
+            QStringList s = QString(Items.at(i)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       更新测试数据
+*******************************************************************************/
+void ConfigBlock::TestResult(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    double p = quint16(msg.at(5)*256)+quint8(msg.at(6));
+    Volt.append(v);
+    Curr.append(c);
+    Power.append(p);
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       停止测试
+*******************************************************************************/
+void ConfigBlock::TestStop()
 {
 
 }
-
-void ConfigBlock::CmdConfigure()
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       配置
+*******************************************************************************/
+void ConfigBlock::TestConfig()
 {
 
 }
-
-bool ConfigBlock::WaitTestOver()
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.16
+ * brief:      等待测试结束
+*******************************************************************************/
+bool ConfigBlock::WaitTestOver(quint16 t)
 {
-//    TimeOut = 0;
-//    while (Testing) {
-//        Delay(10);
-//        TimeOut++;
-//        if (TimeOut > 50) {
-//            for (int i=0; i<ListResult.size(); i++) {
-//                if (ListResult.at(i) == " ") {
-//                    ListResult[i] = "---";
-//                }
-//            }
-//            for (int i=0; i<ListJudge.size(); i++) {
-//                if (ListJudge.at(i) == " ") {
-//                    ListJudge[i] = "NG";
-//                }
-//            }
-//            Testing = false;
-//            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-//            return false;
-//        }
-//    }
+    TimeOut = 0;
+    while (Testing) {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
+    }
     return true;
 }
-
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       延时
+*******************************************************************************/
+void ConfigBlock::Delay(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while(t.elapsed()<ms)
+        QCoreApplication::processEvents();
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       更新显示
+*******************************************************************************/
 void ConfigBlock::showEvent(QShowEvent *)
 {
     DatInit();
 }
-
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       退出保存
+*******************************************************************************/
 void ConfigBlock::hideEvent(QHideEvent *)
 {
     DatSave();

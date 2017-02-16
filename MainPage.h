@@ -55,15 +55,11 @@ private slots:
     void CanThreadInit(void);
     void CanThread(QByteArray msg);
     void TestCheck(void);
-
-
     void TestInit(void);
     void TestStart(QByteArray msg);
     void TestSave(void);
-    void DisplayWarnning();
-    void OutExcuteCmd(quint16 id, QByteArray msg);
+    void TestPause(void);
     void Delay(int ms);
-    bool OutWaitOver(void);
 private:
     QList<int> WinPrevious;
     QSettings *global;
@@ -76,7 +72,7 @@ private:
     QStringList Items;
     QString TestJudge;
     QString ItemJudge;
-    bool isPause;
+    int PauseMode;
     bool Testing;
     quint8 Pos;
     bool isStop;

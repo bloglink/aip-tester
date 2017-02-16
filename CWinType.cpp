@@ -42,7 +42,7 @@ CWinType::~CWinType()
 ******************************************************************************/
 void CWinType::WinInit()
 {
-    ItemName<<"空"<<"电阻"<<"反嵌"<<"绝缘"<<"交耐"<<"直耐"<<"匝间"<<"电感"<<"低启"<<"堵转"
+    ItemName<<"空"<<"电阻"<<"反嵌"<<"绝缘"<<"交耐"<<"直耐"<<"匝间"<<"电感"<<"功率"<<"低启"<<"堵转"
            <<"转速"<<"泄漏"<<"PG"<<"EMF"<<"DCBL";
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabColor->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
