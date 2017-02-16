@@ -155,9 +155,11 @@ void CWinSetImp::DatInit()
     QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
+    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse.remove(".ini");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
+    QString t = QString("./config/%1.ini").arg(FileInUse);
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetImp");
@@ -728,18 +730,27 @@ void CWinSetImp::TestStart(quint8 pos)
       <<quint8(tt/256)<<quint8(tt%256);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
+    Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
-        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
-        for (int i=0; i<Items.size(); i++) {
-            QStringList s = QString(Items.at(i)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        Judge = "NG";
+        for (int row = 0; row<Enable.size(); row++) {
+            if (Enable.at(row)->text() == "Y") {
+                QStringList s = QString(Items.at(row)).split("@");
+                if (s.at(2) == " ")
+                    s[2] = "---";
+                if (s.at(3) == " ")
+                    s[3] = "NG";
+                emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+            }
         }
     }
+    QStringList s;
+    s.append("匝间");
+    s.append(QDate::currentDate().toString("yyyy-MM-dd"));
+    s.append(FileInUse);
+    s.append(Judge);
+    emit TransformCmd(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -788,19 +799,25 @@ void CWinSetImp::TestResult(QByteArray )
     A = (Area2-Area1)*100/Area1;
     D = qMin(Area2,Area3/4)*100/Area1;
     P = (Phase1-Phase2)*100/Phase1;
-    QString n = QString("A:%1%,D:%2%,F:%3,P:%4%").arg(A).arg(D).arg(F).arg(P);
-    QString judge;
-    quint8 number = quint8(CurrentWave);
-    if (number >= Area.size() || abs(A) >= Area.at(number)->value())
-        judge = "NG";
-    else if (number >= Diff.size() || abs(D) >= Diff.at(number)->value())
-        judge = "NG";
-    else if (number >= Flut.size() || abs(F) >= Flut.at(number)->value())
-        judge = "NG";
-    else if (number >= Phase.size() || abs(P) >= Phase.at(number)->value())
-        judge = "NG";
+
+    QString n;
+    QString judge = "OK";
+    int number = CurrentWave;
+    if (Flut.at(qMin(number,Flut.size()-1))!=0)
+        n = QString("A:%1%,D:%2%,F:%3,P:%4%").arg(A).arg(D).arg(F).arg(P);
     else
-        judge = "OK";
+        n = QString("A:%1%,D:%2%,P:%3").arg(A).arg(D).arg(P);
+
+    if (abs(A) >= Area.at(qMin(number,Area.size()-1))->value())
+        judge = "NG";
+    else if (abs(D) >= Diff.at(qMin(number,Diff.size()-1))->value())
+        judge = "NG";
+    else if (abs(F) >= Flut.at(qMin(number,Flut.size()-1))->value() && Flut.at(qMin(number,Flut.size()-1))->value()!=0)
+        judge = "NG";
+    else if (abs(P) >= Phase.at(qMin(number,Phase.size()-1))->value())
+        judge = "NG";
+    if (judge == "NG")
+        Judge = "NG";
     QStringList t = QString(Items.at(CurrentWave)).split("@");
     if (t.at(2) == " ")
         t[2] = n;

@@ -1,6 +1,7 @@
 #ifndef CWINSETIMP_H
 #define CWINSETIMP_H
 
+#include <QDate>
 #include <QWidget>
 #include <QListView>
 #include <QSettings>
@@ -77,6 +78,9 @@ private:
     InputNum *input;
     quint8 CurrentWave;
     QStringList Items;
+    QString Judge;
+    QString FileInUse;
+
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
     QList<QTableWidgetItem*> Terminal2;
