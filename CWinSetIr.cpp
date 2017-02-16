@@ -25,7 +25,6 @@ CWinSetIr::CWinSetIr(QWidget *parent) :
     WinInit();
     BtnInit();
     DatInit();
-    DisplayInit();
     Testing = false;
     isCheckOk = false;
 }
@@ -129,81 +128,94 @@ void CWinSetIr::DatSave()
  * version:     1.0
  * author:      link
  * date:        2016.12.19
- * brief:       更新显示
-*******************************************************************************/
-void CWinSetIr::DisplayInit()
-{
-    ListItem.clear();
-    ListPara.clear();
-    ListResult.clear();
-    ListJudge.clear();
-    QString U1 = ui->BoxVoltage->currentText();
-    QString M1 = ui->BoxMin->text();
-    QString M2 = ui->BoxMax->text();
-    ListItem.append(QString(tr("绝缘")));
-    ListPara.append(QString("%1V,%2~%3MΩ").arg(U1).arg(M1).arg(M2));
-    ListResult.append(" ");
-    ListJudge.append(" ");
-
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       等待测试结束
-*******************************************************************************/
-bool CWinSetIr::WaitTestOver()
-{
-    TimeOut = 0;
-    while (Testing) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > 50) {
-            for (int i=0; i<ListResult.size(); i++) {
-                if (ListResult.at(i) == " ") {
-                    ListResult[i] = "---";
-                }
-            }
-            for (int i=0; i<ListJudge.size(); i++) {
-                if (ListJudge.at(i) == " ") {
-                    ListJudge[i] = "NG";
-                }
-            }
-            Testing = false;
-            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-            return false;
-        }
-    }
-    return true;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       延时
-*******************************************************************************/
-void CWinSetIr::Delay(int ms)
-{
-    QElapsedTimer t;
-    t.start();
-    while(t.elapsed()<ms)
-        QCoreApplication::processEvents();
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
  * brief:       命令处理
 *******************************************************************************/
-void CWinSetIr::ExcuteCmd(QByteArray msg)
+
+void CWinSetIr::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR && addr != WIN_ID_IR && addr != CAN_ID_IR)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCanCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        TestCheck();
+        break;
+    case CAN_CMD_START:
+        TestStart(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        TestStop();
+        break;
+    case CAN_CMD_INIT:
+        TestInit();
+        TestConfig();
+        break;
+    case CAN_CMD_ALARM:
+        TestAlarm(msg.toInt());
+        break;
+    default:
+        break;
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       CAN命令处理
+*******************************************************************************/
+void CWinSetIr::ExcuteCanCmd(QByteArray msg)
 {
     if (!Testing)
         return;
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        UpdateState(msg);
+        TestCheckOk(msg);
     if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        UpdateTestData(msg);
+        TestResult(msg);
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      更新显示
+ * date:       2017.02.15
+ * brief:      修改显示方式
+*******************************************************************************/
+void CWinSetIr::TestInit()
+{
+    Items.clear();
+    QStringList s;
+    QString U1 = ui->BoxVoltage->currentText();
+    QString M1 = ui->BoxMin->text();
+    QString M2 = ui->BoxMax->text();
+    s.append(QString(tr("绝缘")));
+    s.append(QString("%1V,%2~%3MΩ").arg(U1).arg(M1).arg(M2));
+    s.append(" ");
+    s.append(" ");
+    Items.append(s.join("@"));
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       检测状态
+*******************************************************************************/
+void CWinSetIr::TestCheck()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if (!WaitTestOver(100)) {
+        Testing = false;
+        QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"IR Error\n");
+    }
 }
 /*******************************************************************************
  * version:     1.0
@@ -212,31 +224,18 @@ void CWinSetIr::ExcuteCmd(QByteArray msg)
  * brief:       更新状态
  * date:        2017.01.13
  * brief:       清理测试结果
+ * date:        2017.02.15
+ * brief:       增加求平均
 *******************************************************************************/
-void CWinSetIr::UpdateState(QByteArray )
+void CWinSetIr::TestCheckOk(QByteArray )
 {
     Testing = false;
     if (!isCheckOk) {
         emit TransformCmd(ADDR,WIN_CMD_DEBUG,"Ir check ok\n");
         isCheckOk = true;
     }
-    Volt.clear();
-    Res.clear();
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新测试数据
- * date:        2017.01.13
- * brief:       求平均
-*******************************************************************************/
-void CWinSetIr::UpdateTestData(QByteArray msg)
-{
-    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
-    Volt.append(v);
-    Res.append(tt);
+    if (Volt.isEmpty() || Res.isEmpty())
+        return;
     double vv = 0;
     double rr = 0;
     for (int i=0; i<Volt.size(); i++) {
@@ -248,57 +247,34 @@ void CWinSetIr::UpdateTestData(QByteArray msg)
     if (abs(vv-ui->BoxVoltage->currentText().toInt()) <5)
         vv = ui->BoxVoltage->currentText().toInt();
     QString t = QString("%1V,%2MΩ").arg(vv).arg(rr/10);
-    UpdateResult(t.toUtf8());
+    QString judge;
+
     if (rr/10>ui->BoxMax->value() || rr/10<ui->BoxMin->value())
-        UpdateJudge("NG");
+        judge = "NG";
     else
-        UpdateJudge("OK");
-    emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新测试结果
-*******************************************************************************/
-void CWinSetIr::UpdateResult(QByteArray msg)
-{
-    ListResult[0] = msg;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新测试判定
-*******************************************************************************/
-void CWinSetIr::UpdateJudge(QByteArray msg)
-{
-    ListJudge[0] = msg;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       检测状态
-*******************************************************************************/
-void CWinSetIr::CmdCheckState()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
+        judge = "OK";
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = judge;
+    emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+    Volt.clear();
+    Res.clear();
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
  * date:        2016.12.19
  * brief:       开始测试
+ * date:        2017.02.15
+ * brief:       增加超时判断
 *******************************************************************************/
-void CWinSetIr::CmdStartTest(quint8 pos)
+void CWinSetIr::TestStart(quint8 pos)
 {
-    WaitTestOver();
+    if (Testing)
+        return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -306,6 +282,35 @@ void CWinSetIr::CmdStartTest(quint8 pos)
       <<quint8(pos)<<quint8(0x01);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
+    if(!WaitTestOver(100)) {
+        Testing = false;
+        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
+        for (int i=0; i<Items.size(); i++) {
+            QStringList s = QString(Items.at(i)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       更新测试数据
+ * date:        2017.01.13
+ * brief:       求平均
+ * date:        2017.02.15
+ * brief:       移除求平均计算,移到TestCheckOk
+*******************************************************************************/
+void CWinSetIr::TestResult(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    Volt.append(v);
+    Res.append(tt);
 }
 /*******************************************************************************
  * version:     1.0
@@ -313,7 +318,7 @@ void CWinSetIr::CmdStartTest(quint8 pos)
  * date:        2016.12.19
  * brief:       停止测试
 *******************************************************************************/
-void CWinSetIr::CmdStopTest()
+void CWinSetIr::TestStop()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -328,7 +333,7 @@ void CWinSetIr::CmdStopTest()
  * date:        2016.12.19
  * brief:       配置
 *******************************************************************************/
-void CWinSetIr::CmdConfigure()
+void CWinSetIr::TestConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -351,13 +356,45 @@ void CWinSetIr::CmdConfigure()
  * date:        2017.01.17
  * brief:       报警输出
 *******************************************************************************/
-void CWinSetIr::CmdOnOff(quint8 port)
+void CWinSetIr::TestAlarm(quint8 port)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x02)<<quint8(0x09)<<quint8(port);
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       等待测试结束
+ * date:        2017.02.15
+ * brief:       去除超时处理
+*******************************************************************************/
+bool CWinSetIr::WaitTestOver(quint16 t)
+{
+    TimeOut = 0;
+    while (Testing) {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
+    }
+    return true;
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       延时
+*******************************************************************************/
+void CWinSetIr::Delay(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while(t.elapsed()<ms)
+        QCoreApplication::processEvents();
 }
 /*******************************************************************************
  * version:     1.0
@@ -378,47 +415,6 @@ void CWinSetIr::showEvent(QShowEvent *)
 void CWinSetIr::hideEvent(QHideEvent *)
 {
     DatSave();
-}
-
-void CWinSetIr::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_IR && addr != CAN_ID_IR)
-        return;
-    switch (cmd) {
-    case CAN_DAT_GET:
-        ExcuteCmd(msg);
-        break;
-    case CAN_CMD_CHECK:
-        CmdCheckState();
-        break;
-    case CAN_CMD_START:
-        CmdStartTest(msg.toInt());
-        break;
-    case CAN_CMD_STOP:
-        CmdStopTest();
-        break;
-    case CAN_CMD_INIT:
-        ShowInit();
-        CmdConfigure();
-        break;
-    default:
-        break;
-    }
-}
-
-void CWinSetIr::ShowInit()
-{
-    Items.clear();
-    QStringList s;
-    QString U1 = ui->BoxVoltage->currentText();
-    QString M1 = ui->BoxMin->text();
-    QString M2 = ui->BoxMax->text();
-    s.append(QString(tr("绝缘")));
-    s.append(QString("%1V,%2~%3MΩ").arg(U1).arg(M1).arg(M2));
-    s.append(" ");
-    s.append(" ");
-    Items.append(s.join("@"));
-    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                  END

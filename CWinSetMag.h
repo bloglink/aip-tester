@@ -1,6 +1,7 @@
 #ifndef CWINSETMAG_H
 #define CWINSETMAG_H
 
+#include <QMessageBox>
 #include <QWidget>
 #include <QListView>
 #include <QSettings>
@@ -29,21 +30,7 @@ private:
 
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-    void DisplayInit(void);
-    void ExcuteCmd(int id, QByteArray msg);
-    void CmdCheckState(void);
-    void CmdStartTest(quint8 pos);
-    void CmdStartSample(void);
-    void CmdStopTest(void);
-    void CmdConfigure(void);
-    bool WaitTestOver(void);
-    void DisplayWave(QByteArray msg);
 public:
-    QStringList ListItem;
-    QStringList ListPara;
-    QStringList ListResult;
-    QStringList ListJudge;
     QList<Waveform *> WaveMag;
 private slots:
     void WinInit(void);
@@ -53,17 +40,26 @@ private slots:
     void DatSave(void);
     void ItemClick(int r, int c);
     void ItemChange(QString msg);
-    void UpdateWave(QByteArray msg);
-    void UpdateState(QByteArray msg);
-    void UpdateTestData(QByteArray msg);
-    void UpdateResult(QByteArray msg);
-    void UpdateJudge(QByteArray msg);
+
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ExcuteCanCmd(int id, QByteArray msg);
+    void TestInit(void);
+    void TestCheck(void);
+    void TestCheckOk(QByteArray msg);
+    void TestSample(void);
+    void TestStart(quint8 pos);
+    void TestResult(QByteArray msg);
+    void TestWave(QByteArray msg);
+    void TestWaveShow(QByteArray msg);
+    void TestDir();
+    void TestStop(void);
+    void TestConfig(void);
+
+    bool WaitTestOver(quint16 t);
     void Delay(int ms);
-    void UpdateDir();
+
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
-    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
-    void ShowInit(void);
 private:
     QSettings *set;
     bool isCheckOk;

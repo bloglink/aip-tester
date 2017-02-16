@@ -42,19 +42,6 @@ private:
     Ui::ConfigIndl *ui;
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-    void DisplayInit(void);
-    void ExcuteCmd(QByteArray msg);
-    void CmdCheckState(void);
-    void CmdStartTest(quint8 pos);
-    void CmdStopTest(void);
-    void CmdConfigure(void);
-    bool WaitTestOver(void);
-public:
-    QStringList ListItem;
-    QStringList ListPara;
-    QStringList ListResult;
-    QStringList ListJudge;
 private slots:
     void WinInit(void);
     void BtnInit(void);
@@ -64,16 +51,21 @@ private slots:
     void DatAuto(void);
     void ItemClick(int r,int c);
     void ItemChange(QString msg);
-    int Gear(int row);
-    int Mode(int row);
-    void UpdateState(QByteArray msg);
-    void UpdateTestData(QByteArray msg);
-    void UpdateResult(QByteArray msg);
-    void UpdateJudge(QByteArray msg);
-    void UpdateUnbalance(void);
-    void Delay(int ms);
+    int TestGear(int row);
+    int TestMode(int row);
+
     void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
-    void ShowInit(void);
+    void ExcuteCanCmd(QByteArray msg);
+    void TestInit(void);
+    void TestCheck(void);
+    void TestCheckOk(QByteArray msg);
+    void TestStart(quint8 pos);
+    void TestResult(QByteArray msg);
+    void TestStop(void);
+    void TestConfig(void);
+
+    bool WaitTestOver(quint16 t);
+    void Delay(int ms);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
 private:
@@ -83,6 +75,7 @@ private:
     quint16 TimeOut;
     InputNum *input;
     QStringList Items;
+    QList<double> Results;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;

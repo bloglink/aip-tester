@@ -6,6 +6,7 @@
 #include <QListView>
 #include <QSettings>
 #include <QComboBox>
+#include <QMessageBox>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
@@ -27,35 +28,29 @@ private:
     Ui::CWinSetIr *ui;
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-    void DisplayInit(void);
-    void ExcuteCmd(QByteArray msg);
-    void CmdCheckState(void);
-    void CmdStartTest(quint8 pos);
-    void CmdStopTest(void);
-    void CmdConfigure(void);
-    void CmdOnOff(quint8 port);
-    bool WaitTestOver(void);
-public:
-    QStringList ListItem;
-    QStringList ListPara;
-    QStringList ListResult;
-    QStringList ListJudge;
 private slots:
     void WinInit(void);
     void BtnInit(void);
     void BtnJudge(int id);
     void DatInit(void);
     void DatSave(void);
-    void UpdateResult(QByteArray msg);
-    void UpdateJudge(QByteArray msg);
-    void UpdateState(QByteArray msg);
-    void UpdateTestData(QByteArray msg);
+
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ExcuteCanCmd(QByteArray msg);
+    void TestInit(void);
+    void TestCheck(void);
+    void TestCheckOk(QByteArray msg);
+    void TestStart(quint8 pos);
+    void TestResult(QByteArray msg);
+    void TestStop(void);
+    void TestConfig(void);
+    void TestAlarm(quint8 port);
+
+    bool WaitTestOver(quint16 t);
     void Delay(int ms);
+
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
-    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
-    void ShowInit(void);
 
 private:
     QSettings *set;

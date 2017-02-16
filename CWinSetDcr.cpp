@@ -394,52 +394,124 @@ void CWinSetDcr::ItemChange(QString msg)
     if (t==1 || t==2)
         ui->TabSetDcr->currentItem()->setText(msg);
 }
+
+
+
 /*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      延时
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.15
+ * brief:       命令处理
 *******************************************************************************/
-void CWinSetDcr::Delay(int ms)
+void CWinSetDcr::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    QElapsedTimer t;
-    t.start();
-    while(t.elapsed()<ms)
-        QCoreApplication::processEvents();
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      等待测试结束
-*******************************************************************************/
-bool CWinSetDcr::WaitTestOver(quint16 t)
-{
-    TimeOut = 0;
-    while (Testing) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > t)
-            return false;
+    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCanCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        TestCheck();
+        break;
+    case CAN_CMD_START:
+        TestStart(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        TestStop();
+        break;
+    case CAN_CMD_INIT:
+        TestInit();
+        TestConfig();
+        break;
+    default:
+        break;
     }
-    return true;
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
  * date:       2016.12.19
- * brief:      命令处理
+ * brief:      CAN命令处理
 *******************************************************************************/
-void CWinSetDcr::ExcuteCmd(QByteArray msg)
+void CWinSetDcr::ExcuteCanCmd(QByteArray msg)
 {
     if (!Testing)
         return;
     TimeOut = 0;
     if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-        UpdateState(msg);
+        TestCheckOk(msg);
     }
     if (msg.size()==7 && (quint8)msg.at(0)==0x01) {
-        UpdateTestData(msg);
+        TestResult(msg);
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.19
+ * brief:       更新显示
+ * date:        2017.01.04
+ * brief:       增加不平衡度显示
+ * date:        2017.02.14
+ * brief:       修改显示方式
+*******************************************************************************/
+void CWinSetDcr::TestInit()
+{
+    Items.clear();
+    Results.clear();
+    QStringList n;
+    for (int row = 0; row<Enable.size(); row++) {
+        QStringList s;
+        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+        QString U1 = Unit.at(qMin(row,Unit.size()))->currentText();
+        QString M1 = Min.at(qMin(row,Min.size()))->text();
+        QString M2 = Max.at(qMin(row,Max.size()))->text();
+        s.append(QString(tr("电阻%1-%2")).arg(T1).arg(T2));
+        s.append(QString("%1~%2%3").arg(M1).arg(M2).arg(U1));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+    }
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            n.append(Items.at(row));
+        }
+    }
+    if (ui->BoxUnbalance->value() != 0 && Items.size()>=3) {
+        QStringList s;
+        s.append("电阻平衡");
+        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+        n.append(Items.last());
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      检测状态
+ * date:       2017.02.15
+ * brief:      增加超时判断
+*******************************************************************************/
+void CWinSetDcr::TestCheck()
+{
+    if (Testing)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x00);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if (!WaitTestOver(100)) {
+        Testing = false;
+        QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"DCR Error\n");
     }
 }
 /*******************************************************************************
@@ -448,7 +520,7 @@ void CWinSetDcr::ExcuteCmd(QByteArray msg)
  * date:       2016.12.19
  * brief:      更新状态
 *******************************************************************************/
-void CWinSetDcr::UpdateState(QByteArray msg)
+void CWinSetDcr::TestCheckOk(QByteArray msg)
 {
     if (!isCheckOk) {
         isCheckOk = true;
@@ -458,28 +530,71 @@ void CWinSetDcr::UpdateState(QByteArray msg)
         Testing = false;
     double offset = ui->BoxOffset->value();
     double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
-    QString t = QString("温度:%1°C").arg(temp);
+    QString t = QString(tr("温度:%1°C")).arg(temp);
     emit TransformCmd(ADDR,WIN_CMD_TEMP,t.toUtf8());
+    emit TransformCmd(ADDR,WIN_CMD_JUDGE,Judge.toUtf8());
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.27
- * brief:      更新测试数据
- * date:       2017.01.04
- * brief:      增加温度补偿与不平衡度判定
+ * date:       2016.12.19
+ * brief:      开始测试
+ * date:       2017.02.15
+ * brief:      增加超时判断
 *******************************************************************************/
-void CWinSetDcr::UpdateTestData(QByteArray msg)
+void CWinSetDcr::TestStart(quint8 pos)
+{
+    if (Testing)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x01)<<quint8(0x00)
+      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if(!WaitTestOver(100)) {
+        Testing = false;
+        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
+        for (int i=0; i<Items.size(); i++) {
+            QStringList s = QString(Items.at(i)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+        }
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.27
+ * brief:       更新测试数据
+ * date:        2017.01.04
+ * brief:       增加温度补偿与不平衡度判定
+ * date:        2017.02.14
+ * brief:       修改显示方式
+*******************************************************************************/
+void CWinSetDcr::TestResult(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
     quint8 grade = quint8(msg.at(2));
     double temp = (quint16)(msg.at(3)*256)+(quint8)msg.at(4);
     double tt = (quint16)(msg.at(5)*256)+quint8(msg.at(6));
+
     if (ui->BoxOffsetEnable->isChecked()) {
-        double offset = OffsetValue(tt,number);
+        double offset = TestOffset(tt,number);
         temp *= offset;
     }
     QString t;
+    QString judge;
     switch (grade) {
     case 1:
         temp /= 100;
@@ -513,120 +628,77 @@ void CWinSetDcr::UpdateTestData(QByteArray msg)
         qDebug()<<tt;
         break;
     }
-    UpdateResult(t.toUtf8());
-    //    number = qMin(number,Min.size());
-    //    number = qMin(number,Max.size());
+    Results.append(temp);
     if (temp>Min.at(number)->value() && temp<Max.at(number)->value())
-        UpdateJudge("OK");
+        judge = "OK";
     else
-        UpdateJudge("NG");
-    if (ListItem.contains("电阻平衡") && ListJudge.count(" ")==1) {
-        UpdateUnbalance();
-    }
-    emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.27
- * brief:      添加测试数据
-*******************************************************************************/
-void CWinSetDcr::UpdateResult(QByteArray msg)
-{
-    for (int i=0; i<ListResult.size(); i++) {
-        if (ListResult.at(i) == " ") {
-            ListResult[i] = msg;
-            break;
+        judge = "NG";
+
+    QStringList s = QString(Items.at(number)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = judge;
+    emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+    if (judge == "NG")
+        Judge = "NG";
+
+    if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
+        bool isOk = true;
+        double sum = 0;
+        double avr = 0;
+        QString u;
+        for (int i=0; i<Results.size(); i++) {
+            sum += Results.at(i);
         }
-    }
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.27
- * brief:      添加测试结果
-*******************************************************************************/
-void CWinSetDcr::UpdateJudge(QByteArray msg)
-{
-    for (int i=0; i<ListJudge.size(); i++) {
-        if (ListJudge.at(i) == " ") {
-            ListJudge[i] = msg;
-            break;
+        avr = sum/Results.size();
+        for (int i=0; i<Results.size(); i++) {
+            double un = fabs(Results.at(i)-avr)*100/avr;
+            u.append(QString::number(un,'f',1));
+            u.append("% ");
+            if (un >= ui->BoxUnbalance->value())
+                isOk = false;
         }
+
+        if (isOk)
+            judge = "OK";
+        else
+            judge = "NG";
+        QStringList s = QString(Items.last()).split("@");
+        if (s.at(2) == " ")
+            s[2] = u;
+        if (s.at(3) == " ")
+            s[3] = judge;
+        emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        if (judge == "NG")
+            Judge = "NG";
     }
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.01.04
- * brief:      不平衡度判断
-*******************************************************************************/
-void CWinSetDcr::UpdateUnbalance()
-{
-    bool isOk = true;
-    double sum = 0;
-    double avr = 0;
-    QStringList t;
-    QString result;
-    for (int i=0; i<ListResult.size()-1; i++) {
-        t.append(ListResult.at(i));
-        t.last().remove("kΩ");
-        t.last().remove("mΩ");
-        t.last().remove("Ω");
-    }
-    for (int i=0; i<t.size(); i++) {
-        sum += t.at(i).toDouble();
-    }
-    avr = sum/t.size();
-    for (int i=0; i<t.size(); i++) {
-        double un = fabs(t.at(i).toDouble()-avr)*100/avr;
-        result.append(QString::number(un,'f',1));
-        result.append("% ");
-        if (un >= ui->BoxUnbalance->value())
-            isOk = false;
-    }
-    UpdateResult(result.toUtf8());
-    if (isOk)
-        UpdateJudge("OK");
-    else
-        UpdateJudge("NG");
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
  * date:       2016.12.19
- * brief:      检测状态
+ * brief:      计算温度补偿
 *******************************************************************************/
-void CWinSetDcr::CmdCheckState()
+double CWinSetDcr::TestOffset(double t, quint8 num)
 {
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x00);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      开始测试
-*******************************************************************************/
-void CWinSetDcr::CmdStartTest(quint8 pos)
-{
-    WaitTestOver(100);
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
+    double temp;
+    double res = 0;
+    switch (Metal.at(num)->currentIndex()) {
+    case 0:
+        res = ResCu;
+        break;
+    case 1:
+        res = ResCu_Al;
+        break;
+    case 2:
+        res = ResAl;
+        break;
+    default:
+        break;
     }
-    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x01)<<quint8(0x00)
-      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
+    temp = 1+res*(ui->BoxStd->value()-(t/10-50)-ui->BoxOffset->value());
+    return temp;
 }
 /*******************************************************************************
  * version:    1.0
@@ -634,7 +706,7 @@ void CWinSetDcr::CmdStartTest(quint8 pos)
  * date:       2016.12.19
  * brief:      停止测试
 *******************************************************************************/
-void CWinSetDcr::CmdStopTest()
+void CWinSetDcr::TestStop()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -649,7 +721,7 @@ void CWinSetDcr::CmdStopTest()
  * date:       2016.12.19
  * brief:      配置
 *******************************************************************************/
-void CWinSetDcr::CmdConfigure()
+void CWinSetDcr::TestConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -659,7 +731,7 @@ void CWinSetDcr::CmdConfigure()
             out<<quint16(0x22)<<quint8(0x06)<<quint8(0x03)<<quint8(row)
               <<quint8(Terminal1.at(row)->text().toInt())
              <<quint8(Terminal2.at(row)->text().toInt())
-            <<quint8(Gear(row))
+            <<quint8(TestGear(row))
             <<quint8(ui->BoxTime->value()*10);
         }
     }
@@ -669,19 +741,9 @@ void CWinSetDcr::CmdConfigure()
  * version:    1.0
  * author:     link
  * date:       2016.12.19
- * brief:      检测版本
-*******************************************************************************/
-void CWinSetDcr::CmdCheckVersion()
-{
-
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
  * brief:      计算测试档位
 *******************************************************************************/
-int CWinSetDcr::Gear(int row)
+int CWinSetDcr::TestGear(int row)
 {
     if (row >= Max.size())
         return 7;
@@ -711,27 +773,43 @@ int CWinSetDcr::Gear(int row)
  * version:    1.0
  * author:     link
  * date:       2016.12.19
- * brief:      计算温度补偿
+ * brief:      检测版本
 *******************************************************************************/
-double CWinSetDcr::OffsetValue(double t, quint8 num)
+void CWinSetDcr::TestVersion()
 {
-    double temp;
-    double res = 0;
-    switch (Metal.at(num)->currentIndex()) {
-    case 0:
-        res = ResCu;
-        break;
-    case 1:
-        res = ResCu_Al;
-        break;
-    case 2:
-        res = ResAl;
-        break;
-    default:
-        break;
+
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      等待测试结束
+ * date:       2017.02.15
+ * brief:      去除超时处理
+*******************************************************************************/
+bool CWinSetDcr::WaitTestOver(quint16 t)
+{
+    TimeOut = 0;
+    while (Testing) {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
     }
-    temp = 1+res*(ui->BoxStd->value()-(t/10-50)-ui->BoxOffset->value());
-    return temp;
+    return true;
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      延时
+*******************************************************************************/
+void CWinSetDcr::Delay(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while(t.elapsed()<ms)
+        QCoreApplication::processEvents();
 }
 /*******************************************************************************
  * version:    1.0
@@ -754,83 +832,6 @@ void CWinSetDcr::hideEvent(QHideEvent *)
 {
     if(DatStdd())
         DatSave();
-}
-
-void CWinSetDcr::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR)
-        return;
-    switch (cmd) {
-    case CAN_DAT_GET:
-        ExcuteCmd(msg);
-        break;
-    case CAN_CMD_CHECK:
-        CmdCheckState();
-        break;
-    case CAN_CMD_START:
-        qDebug()<<"test dcr";
-        CmdStartTest(msg.toInt());
-        if(!WaitTestOver(100)) {
-            Testing = false;
-            for (int i=0; i<Items.size(); i++) {
-                QStringList s = QString(Items.at(i)).split("@");
-                if (s.at(2) == " ")
-                    s[2] = "---";
-                if (s.at(3) == " ")
-                    s[3] = "NG";
-                emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
-            }
-        }
-        break;
-    case CAN_CMD_STOP:
-        CmdStopTest();
-        break;
-    case CAN_CMD_INIT:
-        ShowInit();
-        CmdConfigure();
-        break;
-    default:
-        break;
-
-    }
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新显示
- * date:        2017.01.04
- * brief:       增加不平衡度显示
- * date:        2017.02.14
- * brief:       修改显示方式
-*******************************************************************************/
-void CWinSetDcr::ShowInit()
-{
-    Items.clear();
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s;
-            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-            QString U1 = Unit.at(qMin(row,Unit.size()))->currentText();
-            QString M1 = Min.at(qMin(row,Min.size()))->text();
-            QString M2 = Max.at(qMin(row,Max.size()))->text();
-            s.append(QString(tr("电阻%1-%2")).arg(T1).arg(T2));
-            s.append(QString("%1~%2%3").arg(M1).arg(M2).arg(U1));
-            s.append(" ");
-            s.append(" ");
-            Items.append(s.join("@"));
-        }
-    }
-    if (ui->BoxUnbalance->value() != 0 && ListItem.size()>=3) {
-        QStringList s;
-        s.append("电阻平衡");
-        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-    }
-    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                  END

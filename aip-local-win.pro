@@ -22,7 +22,6 @@ SOURCES += main.cpp \
     CWinSetIr.cpp \
     CWinSetMag.cpp \
     CWinTest.cpp \
-    ipmethod.cpp \
     Waveform.cpp \
     CWinType.cpp \
     HomePage.cpp \
@@ -47,7 +46,6 @@ HEADERS  += \
     CWinSetIr.h \
     CWinSetMag.h \
     CWinTest.h \
-    ipmethod.h \
     Waveform.h \
     CWinType.h \
     HomePage.h \

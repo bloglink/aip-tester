@@ -54,15 +54,12 @@ private slots:
     void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
     void CanThreadInit(void);
     void CanThread(QByteArray msg);
-    void CheckThread(void);
+    void TestCheck(void);
 
-    void TestSave(void);
+
     void TestInit(void);
-    void TestThread(void);
-
-//    void DisplayInit(void);
-    void DisplayResult(void);
-    void DisplayWave(QByteArray msg);
+    void TestStart(QByteArray msg);
+    void TestSave(void);
     void DisplayWarnning();
     void OutExcuteCmd(quint16 id, QByteArray msg);
     void Delay(int ms);
@@ -77,6 +74,9 @@ private:
 
     QStringList ItemToTest;
     QStringList Items;
+    QString TestJudge;
+    QString ItemJudge;
+    bool isPause;
     bool Testing;
     quint8 Pos;
     bool isStop;

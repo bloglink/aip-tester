@@ -5,6 +5,7 @@
 #include <QListView>
 #include <QSettings>
 #include <QComboBox>
+#include <QMessageBox>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
@@ -30,22 +31,7 @@ private:
 
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-    void DisplayInit(void);
-    void ExcuteCmd(int id, QByteArray msg);
-    void CmdCheckState(void);
-    void CmdStartTest(quint8 pos);
-    void CmdSample(quint16 row);
-    void CmdStopTest(void);
-    void CmdConfigure(void);
-    bool WaitTestOver(void);
-    void CmdStartSample();
-    void DisplayWave(QByteArray msg);
 public:
-    QStringList ListItem;
-    QStringList ListPara;
-    QStringList ListResult;
-    QStringList ListJudge;
     QList<Waveform *> WaveImp;
 private slots:
     void WinInit(void);
@@ -54,21 +40,34 @@ private slots:
     void DatInit(void);
     void DatSave(void);
     void VoltEdit(void);
-    void Delay(int ms);
+
     void ItemClick(int r, int c);
     void ItemChange(QString msg);
     void BlockClick(int x);
-    void UpdateWave(QByteArray msg);
-    void UpdateWaveFreq(QByteArray msg);
-    void UpdateState(QByteArray msg);
-    void UpdateTestData(QByteArray msg);
-    void UpdateResult(QByteArray msg);
-    void UpdateJudge(QByteArray msg);
-    int Gear(int row);
+
+
+
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
+    void ExcuteCanCmd(int id, QByteArray msg);
+    void TestInit(void);
+    void TestCheck(void);
+    void TestCheckOk(QByteArray msg);
+    void TestSampleAuto();
+    void TestSample(quint16 row);
+    void TestStart(quint8 pos);
+    void TestResult(QByteArray msg);
+    void TestWave(QByteArray msg);
+    void TestWaveShow(QByteArray msg);
+
+    void TestStop(void);
+    void TestConfig(void);
+    int TestGear(int row);
+
+    bool WaitTestOver(quint16 t);
+    void Delay(int ms);
+
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
-    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
-    void ShowInit(void);
 private:
     QSettings *set;
     bool isCheckOk;

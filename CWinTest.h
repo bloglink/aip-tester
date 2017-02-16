@@ -36,30 +36,22 @@ signals:
 public slots:
     void ShowItems(QStringList item);
     void ShowItem(QString item);
-    void DisplayItem(QStringList item);
-    void DisplayPara(QStringList para);
-    void DisplayResult(QStringList result);
-    void DisplayJudge(QStringList judge);
-    void DisplayWaveItem(QByteArray msg);
-    void DisplayWaveByte(QByteArray msg);
-    void DisplayWaveTest(QByteArray msg);
-    void DisplayTemp(QByteArray msg);
-    void DisplayPos(QByteArray msg);
-    void DisplayState(QByteArray msg);
-    void DisplayAmount(QStringList amount);
+    void ShowJudge(QString judge);
+    void ShowWaveItem(QByteArray msg);
+    void ShowWaveByte(QByteArray msg);
+    void ShowWaveTest(QByteArray msg);
+    void ShowTemp(QByteArray msg);
+    void ShowPos(QByteArray msg);
+    void ShowAmount(QStringList amount);
+    void ShowTime(void);
     void WaveClear(void);
-public:
-    QStringList ListItem;
-    QStringList ListPara;
-    QStringList ListResult;
-    QStringList ListJudge;
 private slots:
     void WinInit(void);
     void KeyInit(void);
     void KeyJudge(int win);
     void DatInit(void);
     void DatSave(void);
-    void DisplayTime(void);
+
     void ItemClick(int r, int c);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
@@ -78,7 +70,6 @@ private:
     bool TestRunning;
     quint16 TestStep;
     quint16 TestTime;
-    bool TestOn;
 
 };
 

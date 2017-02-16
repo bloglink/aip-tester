@@ -54,19 +54,6 @@ MainPage::~MainPage()
 void MainPage::WinInit()
 {
     //    this->setWindowFlags(Qt::FramelessWindowHint);
-#ifdef __arm__
-    //启用输入法
-    QWSInputMethod *p_ipmethod =new IPMethod;
-    QWSServer::setCurrentInputMethod(p_ipmethod);
-    connect(this,SIGNAL(Serial_SendString(QString)),p_ipmethod,SLOT(Preedit(QString)));
-    connect(this,SIGNAL(Serial_SendEnter()),p_ipmethod,SLOT(Confirm()));
-    connect(this,SIGNAL(Serial_SendBackspace()),p_ipmethod,SLOT(Backspace()));
-    connect(this,SIGNAL(Serial_SendEscape()),p_ipmethod,SLOT(Escape()));
-    connect(this,SIGNAL(Serial_Upspace()),p_ipmethod,SLOT(Upspace()));
-    connect(this,SIGNAL(Serial_Downspace()),p_ipmethod,SLOT(Downspace()));
-    connect(this,SIGNAL(Serial_Tabspace()),p_ipmethod,SLOT(Tabspace()));
-    connect(this,SIGNAL(Serial_BackTabspace()),p_ipmethod,SLOT(BackTabspace()));
-#endif
     //主界面
     WinHome = new HomePage(this);
     ui->Desktop->addWidget(WinHome);
@@ -77,6 +64,7 @@ void MainPage::WinInit()
     ui->Desktop->addWidget(WinSets);
     WinSets->setObjectName("WinSyst");
     connect(WinSets,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),this,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),WinSets,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
     //型号管理
     WinType = new CWinType(this);
     ui->Desktop->addWidget(WinType);
@@ -144,18 +132,18 @@ void MainPage::WinInit()
     ui->Desktop->addWidget(WinSetBlock);
     WinSetBlock->setObjectName("堵转");
     connect(WinSetBlock,SIGNAL(TransformCmd(quint16,quint16,QByteArray)),this,SLOT(ExcuteCmd(quint16,quint16,QByteArray)));
-    WinSwitch("堵转");
+    WinSwitch("WinHome");
 
     //打开CAN口
     CanThreadInit();
     //设置风格样式
-    WinSets->SysStyle();
+    emit TransformCmd(ADDR,WIN_CMD_STYLE,NULL);
 
     Testing = false;
     isChecked = false;
     Pos = 0x13;
 
-    QTimer::singleShot(300,this,SLOT(CheckThread()));
+    QTimer::singleShot(300,this,SLOT(TestCheck()));
 }
 /******************************************************************************
  * version:     1.0
@@ -165,6 +153,8 @@ void MainPage::WinInit()
 ******************************************************************************/
 void MainPage::WinSwitch(QByteArray msg)
 {
+    if (Testing)
+        return;
     int WinCurrent = ui->Desktop->currentIndex();
     if (msg.isNull()) {
         ui->Desktop->setCurrentIndex(WinPrevious.last());
@@ -200,12 +190,13 @@ void MainPage::DatInit()
     set->setIniCodec("GB18030");
 
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
+    isPause = set->value("/GLOBAL/TestNG","false").toBool();
 
     QStringList tt;
     for (int i=0; i<WinData->Amount.size(); i++)
         tt.append(WinData->Amount.at(i)->text());
     tt.removeFirst();
-    WinTest->DisplayAmount(tt);
+    WinTest->ShowAmount(tt);
 }
 /******************************************************************************
  * version:     1.0
@@ -222,68 +213,6 @@ void MainPage::CanThreadInit()
     connect(this,SIGNAL(PutCanData(QByteArray)),&thread,SLOT(WriteAll(QByteArray)));
     connect(&thread,SIGNAL(GetCanData(QByteArray)),this,SLOT(CanThread(QByteArray)));
     can->start();
-}
-/******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.30
- * brief:       命令处理
-******************************************************************************/
-void MainPage::ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg)
-{
-    switch (cmd) {
-    case 1000:
-        break;
-    case WIN_CMD_SWITCH:
-        WinSwitch(msg);
-        break;
-    case WIN_CMD_INIT:
-        TestInit();
-        break;
-    case WIN_CMD_SHOW:
-        Items.append(QString(msg).split("\n"));
-        break;
-    case WIN_CMD_RESULT:
-        DisplayResult();
-        break;
-    case WIN_CMD_ITEM:
-        WinTest->ShowItem(msg);
-        break;
-    case WIN_CMD_TEMP:
-        WinTest->DisplayTemp(msg);
-        break;
-    case WIN_WAVE_BYTE:
-        WinTest->DisplayWaveByte(msg);
-        break;
-    case WIN_WAVE_TEST:
-        WinTest->DisplayWaveTest(msg);
-        break;
-    case WIN_WAVE_ITEM:
-        WinTest->DisplayWaveItem(msg);
-        break;
-    case WIN_CMD_DEBUG:
-        if (ui->Desktop->currentWidget()->objectName() == "WinHome")
-            WinHome->ExcuteCmd(msg);
-        WinSets->ExcuteCmd(msg);
-        break;
-    case WIN_CMD_WAVE:
-        DisplayWave(msg);
-        break;
-    case CAN_DAT_GET:
-        break;
-    case CAN_DAT_PUT:
-        emit PutCanData(msg);
-        break;
-    case CAN_CMD_START:
-        TestThread();
-        break;
-    case CAN_CMD_STOP:
-        Testing = false;
-        break;
-    default:
-        qDebug()<<addr<<cmd<<msg;
-        break;
-    }
 }
 /******************************************************************************
  * version:     1.0
@@ -315,33 +244,72 @@ void MainPage::CanThread(QByteArray msg)
                 in >> dat;
                 cmd.append(dat);
             }
-            switch (id) {
-            case CAN_ID_DCR:
-                WinSetDcr->ExcuteCmd(cmd);
-                WinSetMag->ExcuteCmd(id,cmd);
-                break;
-            case CAN_ID_DCR_WAVE:
-                WinSetMag->ExcuteCmd(id,cmd);
-                break;
-            case CAN_ID_IR:
-                WinSetIr->ExcuteCmd(cmd);
-                WinSetAcw->ExcuteCmd(cmd);
-                break;
-            case CAN_ID_IMP:
-            case CAN_ID_IMP_WAVE:
-                WinSetImp->ExcuteCmd(id,cmd);
-                break;
-            case CAN_ID_INDL:
-                WinSetIndl->ExcuteCmd(cmd);
-                break;
-            case CAN_ID_13OUT:
-            case CAN_ID_14OUT:
-                OutExcuteCmd(id,cmd);
-                break;
-            default:
-                break;
-            }
+            emit TransformCmd(id,CAN_DAT_GET,cmd);
         }
+    }
+}
+/******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.30
+ * brief:       命令处理
+******************************************************************************/
+void MainPage::ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg)
+{
+    switch (cmd) {
+    case 1000:
+        break;
+    case WIN_CMD_SWITCH:
+        WinSwitch(msg);
+        break;
+    case WIN_CMD_INIT:
+        TestInit();
+        break;
+    case WIN_CMD_SHOW:
+        Items.append(QString(msg).split("\n"));
+        break;
+    case WIN_CMD_JUDGE:
+        TestJudge = "NG";
+        ItemJudge = "NG";
+        break;
+    case WIN_CMD_ITEM:
+        WinTest->ShowItem(msg);
+        break;
+    case WIN_CMD_TEMP:
+        WinTest->ShowTemp(msg);
+        break;
+    case WIN_WAVE_BYTE:
+        WinTest->ShowWaveByte(msg);
+        break;
+    case WIN_WAVE_TEST:
+        WinTest->ShowWaveTest(msg);
+        break;
+    case WIN_WAVE_ITEM:
+        WinTest->ShowWaveItem(msg);
+        break;
+    case WIN_CMD_DEBUG:
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,msg);
+        break;
+    case WIN_CMD_WAVE:
+        emit TransformCmd(ADDR,WIN_CMD_WAVE,msg);
+        break;
+    case CAN_DAT_GET:
+        break;
+    case CAN_DAT_PUT:
+        emit PutCanData(msg);
+        break;
+    case CAN_CMD_READY:
+        QTimer::singleShot(10,this,SLOT(TestStart(msg)));
+        break;
+    case CAN_CMD_START:
+        TestStart(msg);
+        break;
+    case CAN_CMD_STOP:
+        Testing = false;
+        break;
+    default:
+        qDebug()<<addr<<cmd<<msg;
+        break;
     }
 }
 /******************************************************************************
@@ -350,121 +318,22 @@ void MainPage::CanThread(QByteArray msg)
  * date:        2017.01.03
  * brief:       自检流程
 ******************************************************************************/
-void MainPage::CheckThread()
+void MainPage::TestCheck()
 {
     if (Testing)
         return;
     Testing = true;
     QStringList t = (global->value("ItemEnable","0 1 2 3 4 6").toString()).split(" ");
-    if (t.contains("1") || t.contains("2")) {
-        WinSetDcr->CmdCheckState();
-        if (!WinSetDcr->WaitTestOver(100)) {
-            ExcuteCmd(ADDR,WIN_CMD_DEBUG,"DCR time out\n");
-            QMessageBox::warning(this,"警告","电阻板异常",QMessageBox::Ok);
-        }
+    for (int i=0; i<t.size(); i++) {
+        emit TransformCmd(t.at(i).toInt(),CAN_CMD_CHECK,NULL);
     }
-    if (t.contains("3") || t.contains("4")) {
-        WinSetIr->CmdCheckState();
-        if (!WinSetIr->WaitTestOver()) {
-            ExcuteCmd(ADDR,WIN_CMD_DEBUG,"IR time out\n");
-            QMessageBox::warning(this,"警告","绝缘板异常",QMessageBox::Ok);
-        }
-    }
-    if (t.contains("6")) {
-        WinSetImp->CmdCheckState();
-        if (!WinSetImp->WaitTestOver()) {
-            ExcuteCmd(ADDR,WIN_CMD_DEBUG,"IMP time out\n");
-            QMessageBox::warning(this,"警告","匝间板异常",QMessageBox::Ok);
-        }
-    }
-    t = (global->value("ItemEnable","0").toString()).split(" ");
-    if (t.contains("0")) {
-        OutTesting = true;
-        QByteArray msg;
-        QDataStream out(&msg, QIODevice::ReadWrite);
-        out.setVersion(QDataStream::Qt_4_8);
-        out<<quint16(0x13)<<quint8(0x01)<<quint8(0x00);
-        ExcuteCmd(ADDR,CAN_DAT_PUT,msg);
-        if (!OutWaitOver()) {
-            ExcuteCmd(ADDR,WIN_CMD_DEBUG,"OUT13 time out\n");
-            QMessageBox::warning(this,"警告","输出板13异常",QMessageBox::Ok);
-        }
-    }
-    if (t.contains("1")) {
-        OutTesting = true;
-        QByteArray msg;
-        QDataStream out(&msg, QIODevice::ReadWrite);
-        out.setVersion(QDataStream::Qt_4_8);
-        out<<quint16(0x14)<<quint8(0x01)<<quint8(0x00);
-        ExcuteCmd(ADDR,CAN_DAT_PUT,msg);
-        if (!OutWaitOver()) {
-            ExcuteCmd(ADDR,WIN_CMD_DEBUG,"OUT14 time out\n");
-            QMessageBox::warning(this,"警告","输出板14异常",QMessageBox::Ok);
-        }
+    QStringList s = (global->value("OutEnable","0").toString()).split(" ");
+    for (int i=0; i<s.size(); i++) {
+        emit TransformCmd(WIN_ID_OUT,CAN_CMD_CHECK,s.at(i).toUtf8());
     }
     Testing = false;
     WinSwitch("WinTest");
 }
-
-/******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.30
- * brief:       测试数据保存
- * date:        2017.01.05
- * brief:       显示测试数量
-******************************************************************************/
-void MainPage::TestSave()
-{
-    QStringList item;
-    QStringList judge;
-    if (!WinTest->ListItem.filter("电阻").isEmpty()) {
-        item.append("DCR");
-        if (WinSetDcr->ListJudge.contains("NG"))
-            judge.append("DCR");
-    }
-    if (!WinTest->ListItem.filter("反嵌").isEmpty()) {
-        item.append("MAG");
-        if (WinSetMag->ListJudge.contains("NG"))
-            judge.append("MAG");
-    }
-    if (!WinTest->ListItem.filter("磁旋").isEmpty()) {
-        item.append("DIR");
-        if (WinSetMag->ListJudge.last() == "NG")
-            judge.append("DIR");
-    }
-    if (!WinTest->ListItem.filter("绝缘").isEmpty()) {
-        item.append("INR");
-        if (WinSetIr->ListJudge.contains("NG"))
-            judge.append("INR");
-    }
-    if (!WinTest->ListItem.filter("交耐").isEmpty()) {
-        item.append("ACW");
-        if (WinSetAcw->ListJudge.contains("NG"))
-            judge.append("ACW");
-    }
-    if (!WinTest->ListItem.filter("匝间").isEmpty()) {
-        item.append("IMP");
-        if (WinSetImp->ListJudge.contains("NG"))
-            judge.append("IMP");
-    }
-    QString type = global->value("FileInUse","default.ini").toString();
-    if (judge.isEmpty())
-        judge.append("OK");
-
-    WinData->SubmitStart();
-    WinData->InsertItem(item.join(" "),type.remove(".ini"),judge.join(" "));
-    for (int i=0; i<WinTest->ListItem.size(); i++) {
-        QString t1 = WinTest->ListItem.at(i);
-        QString t2 = WinTest->ListPara.at(i);
-        QString t3 = WinTest->ListResult.at(i);
-        QString t4 = WinTest->ListJudge.at(i);
-        WinData->InsertRow(t1,t2,t3,t4);
-    }
-    WinData->SubmitAll();
-}
-
-
 /******************************************************************************
  * version:     1.0
  * author:      link
@@ -477,7 +346,7 @@ void MainPage::TestInit()
 {
     Items.clear();//清空项目
     WinTest->WaveClear();//清空波形
-    WinSets->CmdConfigure();//设定启动方式
+    emit TransformCmd(WIN_ID_OUT,CAN_CMD_INIT,NULL);//设定启动方式
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
     for (int i=0; i<ItemToTest.size(); i++) {
         emit TransformCmd(ItemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
@@ -492,162 +361,113 @@ void MainPage::TestInit()
  * date:        2017.01.17
  * brief:       增加报警输出
 ******************************************************************************/
-void MainPage::TestThread()
+void MainPage::TestStart(QByteArray data)
 {
-    qDebug()<<"test";
     if (Testing)
         return;
-//    WinSetIr->CmdOnOff(0x02);
+    if (ui->Desktop->currentWidget()->objectName() != "WinTest")
+        return;
     Testing = true;
+    TestJudge = "OK";
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
-//    int pause = set->value("/GLOBAL/TestNG","0").toInt();
+    isPause = set->value("/GLOBAL/TestNG","false").toBool();
+
+    TestInit();
+    if (data.toInt() == 0x13)
+        WinTest->ShowPos(tr("左").toUtf8());
+    if (data.toInt() == 0x14)
+        WinTest->ShowPos(tr("右").toUtf8());
+
+    QByteArray msg;
+    msg.append(0x02 | 0x00);
+    emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
+
     for (int i=0; i<ItemToTest.size(); i++) {
-        emit TransformCmd(ItemToTest.at(i).toInt(),CAN_CMD_START,QString::number(Pos).toUtf8());
+        if (ItemJudge == "NG" && isPause)
+            qDebug()<<"pause";
+        ItemJudge = "OK";
+        emit TransformCmd(ItemToTest.at(i).toInt(),CAN_CMD_START,data);
         if (!Testing)
             break;
+
     }
+    TestSave();
+    if (TestJudge == "NG") {
+        msg.clear();
+        msg.append(0x08 | 0x01);
+        emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
+        Delay(500);
+        msg.clear();
+        msg.append(0x08 | 0x00);
+        emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
+    } else {
+        msg.clear();
+        msg.append(0x04 | 0x01);
+        emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
+        Delay(200);
+        msg.clear();
+        msg.append(0x04 | 0x00);
+        emit TransformCmd(ADDR,CAN_CMD_ALARM,msg);
+    }
+    WinTest->ShowJudge(TestJudge);
     Testing = false;
-//    for (int i=0; i<ItemToTest.size(); i++) {
-//        switch (ItemToTest.at(i).toInt()) {
-//        case 0:
-//            break;
-//        case 1:
-////            WinSetDcr->DisplayInit();
-////            WinSetDcr->CmdStartTest(Pos);
-////            if (!WinSetDcr->WaitTestOver())
-////                ExcuteCmd(ADDR,WIN_CMD_DEBUG,"DCR time out\n");
-
-////            if (WinSetDcr->ListJudge.contains("NG") && pause == 0)
-////                DisplayWarnning();
-//            break;
-//        case 2:
-//            WinTest->WaveClear();
-//            WinSetMag->DisplayInit();
-//            WinSetMag->CmdStartTest(Pos);
-//            WinSetMag->WaitTestOver();
-//            if (WinSetMag->ListJudge.contains("NG") && pause == 0)
-//                DisplayWarnning();
-//            break;
-//        case 3:
-//            WinSetIr->DisplayInit();
-//            WinSetIr->CmdStartTest(Pos);
-//            WinSetIr->WaitTestOver();
-//            if (WinSetIr->ListJudge.contains("NG") && pause == 0)
-//                DisplayWarnning();
-//            break;
-//        case 4:
-//            WinSetAcw->DisplayInit();
-//            WinSetAcw->CmdStartTest(Pos);
-//            WinSetAcw->WaitTestOver();
-//            if (WinSetAcw->ListJudge.contains("NG") && pause == 0)
-//                DisplayWarnning();
-//            break;
-//        case 5:
-//            break;
-//        case 6:
-//            WinTest->WaveClear();
-//            WinSetImp->DisplayInit();
-//            WinSetImp->CmdStartTest(Pos);
-//            WinSetImp->WaitTestOver();
-//            if (WinSetImp->ListJudge.contains("NG") && pause == 0)
-//                DisplayWarnning();
-//            break;
-//        case 7:
-//            WinSetIndl->DisplayInit();
-//            WinSetIndl->CmdStartTest(Pos);
-//            WinSetIndl->WaitTestOver();
-//            if (WinSetIndl->ListJudge.contains("NG") && pause == 0)
-//                DisplayWarnning();
-//            break;
-//        default:
-//            break;
-//        }
-//        if (!Testing)
-//            break;
-//    }
-//    TestSave();
-//    Testing = false;
-//    QStringList t;
-//    t.append("1");
-//    if (WinTest->ListJudge.contains("NG")) {
-//        WinTest->DisplayState("NG");
-//        WinSetIr->CmdOnOff(0x09);
-//        Delay(500);
-//        WinSetIr->CmdOnOff(0x08);
-//        t.append("0");
-//        t.append("1");
-//    } else {
-//        WinTest->DisplayState("OK");
-//        WinSetIr->CmdOnOff(0x05);
-//        Delay(200);
-//        WinSetIr->CmdOnOff(0x04);
-//        t.append("1");
-//        t.append("0");
-
-//    }
-//    WinTest->DisplayAmount(t);
 }
 /******************************************************************************
  * version:     1.0
  * author:      link
  * date:        2016.12.30
- * brief:       显示测试结果
+ * brief:       测试数据保存
+ * date:        2017.01.05
+ * brief:       显示测试数量
 ******************************************************************************/
-void MainPage::DisplayResult()
+void MainPage::TestSave()
 {
-    QStringList item;
-    QStringList para;
-    ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
-    for (int i=0; i<ItemToTest.size(); i++) {
-        switch (ItemToTest.at(i).toInt()) {
-        case 0:
-            break;
-        case 1:
-            item.append(WinSetDcr->ListResult);
-            para.append(WinSetDcr->ListJudge);
-            break;
-        case 2:
-            item.append(WinSetMag->ListResult);
-            para.append(WinSetMag->ListJudge);
-            break;
-        case 3:
-            item.append(WinSetIr->ListResult);
-            para.append(WinSetIr->ListJudge);
-            break;
-        case 4:
-            item.append(WinSetAcw->ListResult);
-            para.append(WinSetAcw->ListJudge);
-            break;
-        case 5:
-            break;
-        case 6:
-            item.append(WinSetImp->ListResult);
-            para.append(WinSetImp->ListJudge);
-            break;
-        case 7:
-            item.append(WinSetIndl->ListResult);
-            para.append(WinSetIndl->ListJudge);
-            break;
-        default:
-            break;
-        }
-    }
-    WinTest->DisplayResult(item);
-    WinTest->DisplayJudge(para);
-}
-/******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.30
- * brief:       显示波形
-******************************************************************************/
-void MainPage::DisplayWave(QByteArray msg)
-{
-    WinTest->WaveClear();
-    if (msg.contains("反嵌"))
-        WinSetMag->DisplayWave(msg);
-    if (msg.contains("匝间"))
-        WinSetImp->DisplayWave(msg);
+    //    QStringList item;
+    //    QStringList judge;
+    //    if (!WinTest->ListItem.filter("电阻").isEmpty()) {
+    //        item.append("DCR");
+    //        if (WinSetDcr->ListJudge.contains("NG"))
+    //            judge.append("DCR");
+    //    }
+    //    if (!WinTest->ListItem.filter("反嵌").isEmpty()) {
+    //        item.append("MAG");
+    //        if (WinSetMag->ListJudge.contains("NG"))
+    //            judge.append("MAG");
+    //    }
+    //    if (!WinTest->ListItem.filter("磁旋").isEmpty()) {
+    //        item.append("DIR");
+    //        if (WinSetMag->ListJudge.last() == "NG")
+    //            judge.append("DIR");
+    //    }
+    //    if (!WinTest->ListItem.filter("绝缘").isEmpty()) {
+    //        item.append("INR");
+    //        if (WinSetIr->ListJudge.contains("NG"))
+    //            judge.append("INR");
+    //    }
+    //    if (!WinTest->ListItem.filter("交耐").isEmpty()) {
+    //        item.append("ACW");
+    //        if (WinSetAcw->ListJudge.contains("NG"))
+    //            judge.append("ACW");
+    //    }
+    //    if (!WinTest->ListItem.filter("匝间").isEmpty()) {
+    //        item.append("IMP");
+    //        if (WinSetImp->ListJudge.contains("NG"))
+    //            judge.append("IMP");
+    //    }
+    //    QString type = global->value("FileInUse","default.ini").toString();
+    //    if (judge.isEmpty())
+    //        judge.append("OK");
+
+    //    WinData->SubmitStart();
+    //    WinData->InsertItem(item.join(" "),type.remove(".ini"),judge.join(" "));
+    //    for (int i=0; i<WinTest->ListItem.size(); i++) {
+    //        QString t1 = WinTest->ListItem.at(i);
+    //        QString t2 = WinTest->ListPara.at(i);
+    //        QString t3 = WinTest->ListResult.at(i);
+    //        QString t4 = WinTest->ListJudge.at(i);
+    //        WinData->InsertRow(t1,t2,t3,t4);
+    //    }
+    //    WinData->SubmitAll();
 }
 /******************************************************************************
  * version:     1.0
@@ -676,15 +496,15 @@ void MainPage::OutExcuteCmd(quint16 id,QByteArray msg)
             return;
         if (id == CAN_ID_13OUT) {
             Pos = 0x13;
-            WinTest->DisplayPos("左");
+            WinTest->ShowPos("左");
             isStop = false;
         }
         if (id == CAN_ID_14OUT) {
             Pos = 0x14;
-            WinTest->DisplayPos("右");
+            WinTest->ShowPos("右");
             isStop = false;
         }
-        QTimer::singleShot(10,this,SLOT(TestThread()));
+        QTimer::singleShot(10,this,SLOT(TestStart()));
     }
     if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x00)) {
         if (id == CAN_ID_13OUT && Pos == 0x13) {

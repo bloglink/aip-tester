@@ -23,7 +23,6 @@ CWinSetMag::CWinSetMag(QWidget *parent) :
     WinInit();
     BtnInit();
     DatInit();
-    DisplayInit();
     Testing = false;
     Sampling = false;
 }
@@ -38,10 +37,10 @@ CWinSetMag::~CWinSetMag()
     delete ui;
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      初始化界面
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      初始化界面
 *******************************************************************************/
 void CWinSetMag::WinInit()
 {
@@ -70,10 +69,10 @@ void CWinSetMag::WinInit()
     input->hide();
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      初始化按键
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      初始化按键
 *******************************************************************************/
 void CWinSetMag::BtnInit()
 {
@@ -83,17 +82,17 @@ void CWinSetMag::BtnInit()
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      按键功能
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      按键功能
 *******************************************************************************/
 void CWinSetMag::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        CmdConfigure();
-        CmdStartSample();
+        TestConfig();
+        TestSample();
         break;
     case Qt::Key_1:
         break;
@@ -105,10 +104,10 @@ void CWinSetMag::BtnJudge(int id)
     }
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      数据初始化
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      数据初始化
 *******************************************************************************/
 void CWinSetMag::DatInit()
 {
@@ -233,10 +232,10 @@ void CWinSetMag::DatInit()
     }
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      数据保存
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      数据保存
 *******************************************************************************/
 void CWinSetMag::DatSave()
 {
@@ -275,56 +274,56 @@ void CWinSetMag::DatSave()
         set->setValue(byte,WaveMag.at(row)->WaveByte);
     }
 }
+///*******************************************************************************
+// * version:    1.0
+// * author:     link
+// * date:       2016.12.19
+// * brief:      更新显示
+//*******************************************************************************/
+//void CWinSetMag::DisplayInit()
+//{
+//    ListItem.clear();
+//    ListPara.clear();
+//    WaveNumber.clear();
+//    ListResult.clear();
+//    ListJudge.clear();
+//    for (int row = 0; row<Enable.size(); row++) {
+//        if (Enable.at(row)->text() == "Y") {
+//            if (row >= Terminal1.size())
+//                break;
+//            if (row >= Terminal2.size())
+//                break;
+//            QString T1 = Terminal1.at(row)->text();
+//            QString T2 = Terminal2.at(row)->text();
+//            ListItem.append(QString(tr("反嵌%1-%2")).arg(T1).arg(T2));
+//            if (row >= Max.size())
+//                break;
+//            QString M2 = Max.at(row)->text();
+//            ListPara.append(QString("%1%").arg(M2));
+//            WaveNumber.append(row);
+//            ListResult.append(" ");
+//            ListJudge.append(" ");
+//            WaveMag.at(row)->WaveTest.clear();
+//        }
+//    }
+//    if (ui->BoxDir->currentIndex() == 1) {
+//        ListItem.append(QString(tr("磁旋")));
+//        ListPara.append(QString(tr("正转")));
+//        ListResult.append(" ");
+//        ListJudge.append(" ");
+//    }
+//    if (ui->BoxDir->currentIndex() == 2) {
+//        ListItem.append(QString(tr("磁旋")));
+//        ListPara.append(QString(tr("反转")));
+//        ListResult.append(" ");
+//        ListJudge.append(" ");
+//    }
+//}
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      更新显示
-*******************************************************************************/
-void CWinSetMag::DisplayInit()
-{
-    ListItem.clear();
-    ListPara.clear();
-    WaveNumber.clear();
-    ListResult.clear();
-    ListJudge.clear();
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            if (row >= Terminal1.size())
-                break;
-            if (row >= Terminal2.size())
-                break;
-            QString T1 = Terminal1.at(row)->text();
-            QString T2 = Terminal2.at(row)->text();
-            ListItem.append(QString(tr("反嵌%1-%2")).arg(T1).arg(T2));
-            if (row >= Max.size())
-                break;
-            QString M2 = Max.at(row)->text();
-            ListPara.append(QString("%1%").arg(M2));
-            WaveNumber.append(row);
-            ListResult.append(" ");
-            ListJudge.append(" ");
-            WaveMag.at(row)->WaveTest.clear();
-        }
-    }
-    if (ui->BoxDir->currentIndex() == 1) {
-        ListItem.append(QString(tr("磁旋")));
-        ListPara.append(QString(tr("正转")));
-        ListResult.append(" ");
-        ListJudge.append(" ");
-    }
-    if (ui->BoxDir->currentIndex() == 2) {
-        ListItem.append(QString(tr("磁旋")));
-        ListPara.append(QString(tr("反转")));
-        ListResult.append(" ");
-        ListJudge.append(" ");
-    }
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.23
-  * brief:      点击
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.23
+ * brief:      点击
 *******************************************************************************/
 void CWinSetMag::ItemClick(int r, int c)
 {
@@ -342,78 +341,70 @@ void CWinSetMag::ItemClick(int r, int c)
     }
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.23
-  * brief:      切换文字
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.23
+ * brief:      切换文字
 *******************************************************************************/
 void CWinSetMag::ItemChange(QString msg)
 {
     ui->TabSetMag->currentItem()->setText(msg);
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      等待测试结束
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      命令处理
 *******************************************************************************/
-bool CWinSetMag::WaitTestOver()
+void CWinSetMag::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    TimeOut = 0;
-    while (Testing) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > 350) {
-            for (int i=0; i<ListResult.size(); i++) {
-                if (ListResult.at(i) == " ") {
-                    ListResult[i] = "---";
-                }
-            }
-            for (int i=0; i<ListJudge.size(); i++) {
-                if (ListJudge.at(i) == " ") {
-                    ListJudge[i] = "NG";
-                }
-            }
-            Testing = false;
-            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-            return false;
-        }
+    if (addr != ADDR && addr != WIN_ID_MAG && addr != CAN_ID_DCR && addr != CAN_ID_DCR_WAVE)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCanCmd(addr,msg);
+        break;
+    case CAN_CMD_CHECK:
+        TestCheck();
+        break;
+    case CAN_CMD_START:
+        TestStart(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        TestStop();
+        break;
+    case CAN_CMD_INIT:
+        TestInit();
+        TestConfig();
+        break;
+    case WIN_CMD_WAVE:
+        TestWaveShow(msg);
+        break;
+    default:
+        break;
+
     }
-    return true;
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      延时
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      CAN命令处理
 *******************************************************************************/
-void CWinSetMag::Delay(int ms)
-{
-    QElapsedTimer t;
-    t.start();
-    while(t.elapsed()<ms)
-        QCoreApplication::processEvents();
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      命令处理
-*******************************************************************************/
-void CWinSetMag::ExcuteCmd(int id, QByteArray msg)
+void CWinSetMag::ExcuteCanCmd(int id, QByteArray msg)
 {
     if (!Testing && !Sampling)
         return;
     TimeOut = 0;
     if (id == CAN_ID_DCR_WAVE) {
-        UpdateWave(msg);
+        TestWave(msg);
         return;
     }
     if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-        UpdateState(msg);
+        TestCheckOk(msg);
     }
     if (msg.size()==5 && (quint8)msg.at(0)==0x02) {
-        UpdateTestData(msg);
+        TestResult(msg);
     }
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)!=0xff) {
         if (Sampling)
@@ -437,31 +428,73 @@ void CWinSetMag::ExcuteCmd(int id, QByteArray msg)
     }
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.27
-  * brief:      接收波形
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      更新显示
+ * date:       2017.02.14
+ * brief:      修改显示方式
 *******************************************************************************/
-void CWinSetMag::UpdateWave(QByteArray msg)
+void CWinSetMag::TestInit()
 {
-    if (Sampling)
-        WaveMag.at(CurrentWave)->WaveByte.append(msg);
-    else
-        WaveMag.at(CurrentWave)->WaveTest.append(msg);
+    Items.clear();
+    WaveNumber.clear();
+    QStringList n;
+    for (int row = 0; row<Enable.size(); row++) {
+        QStringList s;
+        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+        QString M1 = Max.at(qMin(row,Max.size()))->text();
+        s.append(QString(tr("反嵌%1-%2")).arg(T1).arg(T2));
+        s.append(QString("%1%").arg(M1));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+        WaveMag.at(row)->WaveTest.clear();
+    }
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            n.append(Items.at(row));
+            WaveNumber.append(row);
+        }
+    }
+    if (ui->BoxDir->currentIndex() != 0) {
+        QStringList s;
+        s.append(QString(tr("磁旋")));
+        s.append(ui->BoxDir->currentText());
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+        n.append(Items.last());
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.27
-  * brief:      更新状态
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      检测状态
+ * date:       2017.02.15
+ * brief:      取消功能,移到电阻模块
 *******************************************************************************/
-void CWinSetMag::UpdateState(QByteArray )
+void CWinSetMag::TestCheck()
+{
+
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.27
+ * brief:      更新状态
+ * date:       2017.02.15
+ * brief:      修改磁旋判断方式
+*******************************************************************************/
+void CWinSetMag::TestCheckOk(QByteArray )
 {
     if (Testing) {
         Testing = false;
-        if (ListItem.contains("磁旋")  && ListJudge.count(" ")==1) {
-            UpdateDir();
-            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
+        if (ui->BoxDir->currentIndex() != 0) {
+            TestDir();
         }
     }
     if (Sampling) {
@@ -474,12 +507,77 @@ void CWinSetMag::UpdateState(QByteArray )
     }
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.27
-  * brief:      更新测试数据
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      开始采样
+ * date:       2017.02.15
+ * brief:      增加测试或采样中返回
 *******************************************************************************/
-void CWinSetMag::UpdateTestData(QByteArray msg)
+void CWinSetMag::TestSample()
+{
+    if (Testing || Sampling)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
+      <<quint8(0x13)<<quint8(tt/256)<<quint8(tt%256);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Sampling = true;
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      开始测试
+ * date:       2017.02.15
+ * brief:      增加测试或采样中返回,增加超时判断
+*******************************************************************************/
+void CWinSetMag::TestStart(quint8 pos)
+{
+    if (Testing || Sampling)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
+      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if(!WaitTestOver(100)) {
+        Testing = false;
+        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
+        for (int i=0; i<Items.size(); i++) {
+            QStringList s = QString(Items.at(i)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+        }
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.27
+ * brief:       更新测试数据
+ * date:        2017.02.15
+ * brief:       修改显示方式
+*******************************************************************************/
+void CWinSetMag::TestResult(QByteArray msg)
 {
     CurrentWave = (quint8)msg.at(1);
     quint16 Area1 = Area[CurrentWave];
@@ -490,41 +588,54 @@ void CWinSetMag::UpdateTestData(QByteArray msg)
         return;
     }
     quint16 area = abs((Area2-Area1)*100/Area1);
-    UpdateResult(QString("%1%").arg(area).toUtf8());
+    QString n = QString("%1%").arg(area);
+    QString judge;
     if (CurrentWave < Max.size() && area < Max.at(CurrentWave)->value())
-        UpdateJudge("OK");
+        judge = "OK";
     else
-        UpdateJudge("NG");
-    emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
+        judge = "NG";
+
+    QStringList s = QString(Items.at(CurrentWave)).split("@");
+    if (s.at(2) == " ")
+        s[2] = n;
+    if (s.at(3) == " ")
+        s[3] = judge;
+    emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      添加测试数据
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.27
+ * brief:      接收波形
 *******************************************************************************/
-void CWinSetMag::UpdateResult(QByteArray msg)
+void CWinSetMag::TestWave(QByteArray msg)
 {
-    for (int i=0; i<ListResult.size(); i++) {
-        if (ListResult.at(i) == " ") {
-            ListResult[i] = msg;
-            break;
-        }
+    if (Sampling)
+        WaveMag.at(CurrentWave)->WaveByte.append(msg);
+    else
+        WaveMag.at(CurrentWave)->WaveTest.append(msg);
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      显示波形
+*******************************************************************************/
+void CWinSetMag::TestWaveShow(QByteArray msg)
+{
+    int t = WaveNumber.size();
+    for (int i=0; i<WaveNumber.size(); i++) {
+        if (WaveMag.at(WaveNumber.at(i))->WaveItem == msg)
+            t = i;
     }
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      添加测试结果
-*******************************************************************************/
-void CWinSetMag::UpdateJudge(QByteArray msg)
-{
-    for (int i=0; i<ListJudge.size(); i++) {
-        if (ListJudge.at(i) == " ") {
-            ListJudge[i] = msg;
-            break;
-        }
+    if (t == WaveNumber.size())
+        return;
+    for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
+        QByteArray w;
+        w = WaveMag.at(WaveNumber.at(t+i))->WaveItem;
+        emit TransformCmd(ADDR,WIN_WAVE_ITEM,w);
+        w = WaveMag.at(WaveNumber.at(t+i))->WaveTest;
+        emit TransformCmd(ADDR,WIN_WAVE_BYTE,w);
     }
 }
 /*******************************************************************************
@@ -533,7 +644,7 @@ void CWinSetMag::UpdateJudge(QByteArray msg)
  * date:        2016.11.28
  * brief:       显示旋向
 *******************************************************************************/
-void CWinSetMag::UpdateDir()
+void CWinSetMag::TestDir()
 {
     //计算主副相的面积，差积，和左右移动的差积
     qint32 	area1,area2,diff,diff1,diff2;
@@ -561,108 +672,35 @@ void CWinSetMag::UpdateDir()
     }
     diff1 /= 10;
     diff2 /= 10;
+    QString n;
+    QString judge;
 
     if(((diff*3<area1)&&(diff*3<area2))||(area1<(area2>>4))||(area2<(area1>>4)))
-        UpdateResult(tr("不转").toUtf8());
+        n = tr("不转");
     else if(diff1<diff2) //副相在前
-        UpdateResult(tr("正转").toUtf8());
+        n = tr("正转");
     else if(diff1>diff2)//主相在前
-        UpdateResult(tr("反转").toUtf8());
+        n = tr("反转");
     else
-        UpdateResult(tr("不转").toUtf8());
-    if (ListResult.last() == ui->BoxDir->currentText())
-        UpdateJudge("OK");
+        n = tr("不转");
+    if (n == ui->BoxDir->currentText())
+        judge = "OK";
     else
-        UpdateJudge("NG");
-//    ui->TextDebug->setText(QString("%1 %2 %3 %4 %5").arg(b1).arg(b2).arg(s1).arg(s2).arg(CurrentWave));
+        judge = "NG";
+    QStringList s = QString(Items.last()).split("@");
+    if (s.at(2) == " ")
+        s[2] = n;
+    if (s.at(3) == " ")
+        s[3] = judge;
+    emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      显示波形
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      停止测试
 *******************************************************************************/
-void CWinSetMag::DisplayWave(QByteArray msg)
-{
-    int t = 0;
-    for (int i=0; i<WaveNumber.size(); i++) {
-        if (WaveMag.at(WaveNumber.at(i))->WaveItem == msg)
-            t = i;
-    }
-    for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
-        QByteArray w;
-        w = WaveMag.at(WaveNumber.at(t+i))->WaveItem;
-        emit TransformCmd(ADDR,WIN_WAVE_ITEM,w);
-        w = WaveMag.at(WaveNumber.at(t+i))->WaveTest;
-        emit TransformCmd(ADDR,WIN_WAVE_BYTE,w);
-    }
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      检测状态
-*******************************************************************************/
-void CWinSetMag::CmdCheckState()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x00);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      开始测试
-*******************************************************************************/
-void CWinSetMag::CmdStartTest(quint8 pos)
-{
-    WaitTestOver();
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
-    }
-    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
-      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      开始采样
-*******************************************************************************/
-void CWinSetMag::CmdStartSample()
-{
-    WaitTestOver();
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
-    }
-    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
-      <<quint8(0x13)<<quint8(tt/256)<<quint8(tt%256);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Sampling = true;
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      停止测试
-*******************************************************************************/
-void CWinSetMag::CmdStopTest()
+void CWinSetMag::TestStop()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -672,12 +710,12 @@ void CWinSetMag::CmdStopTest()
     Testing = false;
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      配置
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      配置
 *******************************************************************************/
-void CWinSetMag::CmdConfigure()
+void CWinSetMag::TestConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -693,86 +731,54 @@ void CWinSetMag::CmdConfigure()
     emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      更新显示
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      等待测试结束
+*******************************************************************************/
+bool CWinSetMag::WaitTestOver(quint16 t)
+{
+    TimeOut = 0;
+    while (Testing) {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
+    }
+    return true;
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      延时
+*******************************************************************************/
+void CWinSetMag::Delay(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while(t.elapsed()<ms)
+        QCoreApplication::processEvents();
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      更新显示
 *******************************************************************************/
 void CWinSetMag::showEvent(QShowEvent *)
 {
     DatInit();
 }
 /*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      退出保存
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      退出保存
 *******************************************************************************/
 void CWinSetMag::hideEvent(QHideEvent *)
 {
     DatSave();
-}
-
-void CWinSetMag::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_MAG && addr != CAN_ID_DCR && addr != CAN_ID_DCR_WAVE)
-        return;
-    switch (cmd) {
-    case CAN_DAT_GET:
-        ExcuteCmd(addr,msg);
-        break;
-    case CAN_CMD_CHECK:
-        CmdCheckState();
-        break;
-    case CAN_CMD_START:
-        CmdStartTest(msg.toInt());
-        break;
-    case CAN_CMD_STOP:
-        CmdStopTest();
-        break;
-    case CAN_CMD_INIT:
-        ShowInit();
-        CmdConfigure();
-        break;
-    default:
-        break;
-
-    }
-}
-/*******************************************************************************
-  * version:    1.0
-  * author:     link
-  * date:       2016.12.19
-  * brief:      更新显示
-  * date:       2017.02.14
-  * brief:      修改显示方式
-*******************************************************************************/
-void CWinSetMag::ShowInit()
-{
-    Items.clear();
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s;
-            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-            QString M1 = Max.at(qMin(row,Max.size()))->text();
-            s.append(QString(tr("反嵌%1-%2")).arg(T1).arg(T2));
-            s.append(QString("%1%").arg(M1));
-            s.append(" ");
-            s.append(" ");
-            Items.append(s.join("@"));
-            WaveMag.at(row)->WaveTest.clear();
-        }
-    }
-    if (ui->BoxDir->currentIndex() == 2) {
-        QStringList s;
-        s.append(QString(tr("磁旋")));
-        s.append(QString(tr("反转")));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-    }
-    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                  END

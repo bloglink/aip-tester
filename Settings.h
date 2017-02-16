@@ -4,10 +4,12 @@
 #include <QFile>
 #include <QDebug>
 #include <QWidget>
+#include <QMessageBox>
 #include <QSettings>
 #include <QListView>
 #include <QSettings>
 #include <QButtonGroup>
+#include <QElapsedTimer>
 #include <QNetworkInterface>
 #include <QProcess>
 #include "main.h"
@@ -29,9 +31,8 @@ private:
 signals:
     void TransformCmd(quint16 addr,quint16 cmd,QByteArray data);
 public slots:
-    void ExcuteCmd(QByteArray msg);
-    void CmdConfigure(void);
-    void SysStyle(void);
+
+
 public:
     quint8 StartMode;
 private slots:
@@ -43,12 +44,27 @@ private slots:
     void ReadData();
     void Password(void);
     QString IpAddress(void);
+
+    void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray data);
+    void ExcuteCanCmd(quint16 id,QByteArray msg);
+    void TestStyle(void);
+    void TestCheck(quint16 pos);
+
+    void TestConfig(void);
+
+    bool WaitTestOver(quint16 t);
+    void Delay(int ms);
+
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 private:
     QProcess *process;
     QSettings *global;
     QString pwd;
+    bool Testing;
+    bool isStop;
+    quint16 TimeOut;
+    quint16 Pos;
 };
 
 #endif // SETTINGS_H

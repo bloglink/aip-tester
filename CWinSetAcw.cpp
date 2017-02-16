@@ -25,7 +25,6 @@ CWinSetAcw::CWinSetAcw(QWidget *parent) :
     WinInit();
     BtnInit();
     DatInit();
-    DisplayInit();
     Testing = false;
     isCheckOk = false;
 }
@@ -132,50 +131,228 @@ void CWinSetAcw::DatSave()
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
- * brief:       更新测试显示数据
+ * date:        2017.02.15
+ * brief:       命令处理
 *******************************************************************************/
-void CWinSetAcw::DisplayInit()
+void CWinSetAcw::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    ListItem.clear();
-    ListPara.clear();
-    ListResult.clear();
-    ListJudge.clear();
-    QString U1 = QString::number(ui->BoxVoltage->value());
-    QString M1 = ui->BoxMin->text();
-    QString M2 = ui->BoxMax->text();
-    ListItem.append(QString(tr("交耐")));
-    ListPara.append(QString("%1V,%2~%3mA").arg(U1).arg(M1).arg(M2));
-    ListResult.append(" ");
-    ListJudge.append(" ");
+    if (addr != ADDR && addr != WIN_ID_ACW && addr != CAN_ID_IR)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCanCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        TestCheck();
+        break;
+    case CAN_CMD_START:
+        TestStart(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        TestStop();
+        break;
+    case CAN_CMD_INIT:
+        TestInit();
+        TestConfig();
+        break;
+    default:
+        break;
+    }
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
  * date:        2016.12.20
- * brief:       等待测试结束
+ * brief:       CAN命令处理
 *******************************************************************************/
-bool CWinSetAcw::WaitTestOver()
+void CWinSetAcw::ExcuteCanCmd(QByteArray msg)
+{
+    if (!Testing)
+        return;
+    TimeOut = 0;
+    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+        TestCheckOk(msg);
+    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
+        TestResult(msg);
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.20
+ * brief:      更新显示
+ * date:       2017.02.15
+ * brief:      修改显示方式
+*******************************************************************************/
+void CWinSetAcw::TestInit()
+{
+    Items.clear();
+    QStringList s;
+    QString U1 = QString::number(ui->BoxVoltage->value());
+    QString M1 = ui->BoxMin->text();
+    QString M2 = ui->BoxMax->text();
+    s.append(QString(tr("交耐")));
+    s.append(QString("%1V,%2~%3mA").arg(U1).arg(M1).arg(M2));
+    s.append(" ");
+    s.append(" ");
+    Items.append(s.join("@"));
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       检测状态
+ * date:        2017.02.15
+ * brief:       取消功能,移到绝缘模块
+*******************************************************************************/
+void CWinSetAcw::TestCheck()
+{
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       更新状态
+ * date:        2017.01.13
+ * brief:       清理测试结果
+ * date:        2017.02.15
+ * brief:       增加求平均
+*******************************************************************************/
+void CWinSetAcw::TestCheckOk(QByteArray )
+{
+    Testing = false;
+    if (Volt.isEmpty() || Res.isEmpty())
+        return;
+    double vv = 0;
+    double rr = 0;
+    for (int i=0; i<Volt.size(); i++) {
+        vv += Volt.at(i);
+        rr += Res.at(i);
+    }
+    vv /= Volt.size();
+    rr /= Res.size();
+    if (abs(vv-ui->BoxVoltage->value()) <5)
+        vv = ui->BoxVoltage->value();
+    QString t = QString("%1V,%2mA").arg(vv).arg(rr/100);
+    QString judge;
+
+    if (rr/100>ui->BoxMax->value() || rr/100<ui->BoxMin->value())
+        judge = "NG";
+    else
+        judge = "OK";
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = judge;
+    emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+    Volt.clear();
+    Res.clear();
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       开始测试
+ * date:        2017.02.15
+ * brief:       增加超时判断
+*******************************************************************************/
+void CWinSetAcw::TestStart(quint8 pos)
+{
+    if (Testing)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x05)<<quint8(0x00)
+      <<quint8(pos)<<quint8(0x00);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if(!WaitTestOver(100)) {
+        Testing = false;
+        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
+        for (int i=0; i<Items.size(); i++) {
+            QStringList s = QString(Items.at(i)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+        }
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       更新测试数据
+ * date:        2017.01.13
+ * brief:       求平均
+*******************************************************************************/
+void CWinSetAcw::TestResult(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    Volt.append(v);
+    Res.append(tt);
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       停止测试
+*******************************************************************************/
+void CWinSetAcw::TestStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = false;
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.12.20
+ * brief:       配置
+*******************************************************************************/
+void CWinSetAcw::TestConfig()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    int freq = ui->BoxFrequcy->currentText().toInt();
+    int volt = ui->BoxVoltage->value();
+    int time = ui->BoxTime->value()*10;
+    int min = ui->BoxMin->value()*100;
+    int max = ui->BoxMax->value()*100;
+    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x00)<<quint8(0x05)
+      <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(freq);
+    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x00)<<quint8(volt/256)
+      <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
+    out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x00)
+      <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.20
+ * brief:      等待测试结束
+ * date:       2017.02.15
+ * brief:      去除超时处理
+*******************************************************************************/
+bool CWinSetAcw::WaitTestOver(quint16 t)
 {
     TimeOut = 0;
     while (Testing) {
         Delay(10);
         TimeOut++;
-        if (TimeOut > 50) {
-            for (int i=0; i<ListResult.size(); i++) {
-                if (ListResult.at(i) == " ") {
-                    ListResult[i] = "---";
-                }
-            }
-            for (int i=0; i<ListJudge.size(); i++) {
-                if (ListJudge.at(i) == " ") {
-                    ListJudge[i] = "NG";
-                }
-            }
-            Testing = false;
-            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
+        if (TimeOut > t)
             return false;
-        }
     }
     return true;
 }
@@ -196,163 +373,6 @@ void CWinSetAcw::Delay(int ms)
  * version:     1.0
  * author:      link
  * date:        2016.12.20
- * brief:       命令处理
-*******************************************************************************/
-void CWinSetAcw::ExcuteCmd(QByteArray msg)
-{
-    if (!Testing)
-        return;
-    TimeOut = 0;
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        UpdateState(msg);
-    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        UpdateTestData(msg);
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       更新状态
- * date:        2017.01.13
- * brief:       清理测试结果
-*******************************************************************************/
-void CWinSetAcw::UpdateState(QByteArray )
-{
-    Testing = false;
-    if (!isCheckOk) {
-        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"ACW check ok\n");
-        isCheckOk = true;
-    }
-    Volt.clear();
-    Res.clear();
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       更新测试数据
- * date:        2017.01.13
- * brief:       求平均
-*******************************************************************************/
-void CWinSetAcw::UpdateTestData(QByteArray msg)
-{
-    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
-    Volt.append(v);
-    Res.append(tt);
-    double vv = 0;
-    double rr = 0;
-    for (int i=0; i<Volt.size(); i++) {
-        vv += Volt.at(i);
-        rr += Res.at(i);
-    }
-    vv /= Volt.size();
-    rr /= Res.size();
-    if (abs(vv-ui->BoxVoltage->value()) <5)
-        vv = ui->BoxVoltage->value();
-    QString t = QString("%1V,%2mA").arg(vv).arg(rr/100);
-    UpdateResult(t.toUtf8());
-    if (rr/100>ui->BoxMax->value() || rr/100<ui->BoxMin->value())
-        UpdateJudge("NG");
-    else
-        UpdateJudge("OK");
-    emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       更新测试结果
-*******************************************************************************/
-void CWinSetAcw::UpdateResult(QByteArray msg)
-{
-    ListResult[0] = msg;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       更新测试判定
-*******************************************************************************/
-void CWinSetAcw::UpdateJudge(QByteArray msg)
-{
-    ListJudge[0] = msg;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       检测状态
-*******************************************************************************/
-void CWinSetAcw::CmdCheckState()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       开始测试
-*******************************************************************************/
-void CWinSetAcw::CmdStartTest(quint8 pos)
-{
-    WaitTestOver();
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x05)<<quint8(0x00)
-      <<quint8(pos)<<quint8(0x00);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       停止测试
-*******************************************************************************/
-void CWinSetAcw::CmdStopTest()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = false;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       配置
-*******************************************************************************/
-void CWinSetAcw::CmdConfigure()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    int freq = ui->BoxFrequcy->currentText().toInt();
-    int volt = ui->BoxVoltage->value();
-    int time = ui->BoxTime->value()*10;
-    int min = ui->BoxMin->value()*100;
-    int max = ui->BoxMax->value()*100;
-    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x00)<<quint8(0x05)
-      <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(freq);
-    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x00)<<quint8(volt/256)
-      <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
-    out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x00)
-      <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
  * brief:       更新显示
 *******************************************************************************/
 void CWinSetAcw::showEvent(QShowEvent *)
@@ -368,47 +388,6 @@ void CWinSetAcw::showEvent(QShowEvent *)
 void CWinSetAcw::hideEvent(QHideEvent *)
 {
     DatSave();
-}
-
-void CWinSetAcw::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_ACW && addr != CAN_ID_IR)
-        return;
-    switch (cmd) {
-    case CAN_DAT_GET:
-        ExcuteCmd(msg);
-        break;
-    case CAN_CMD_CHECK:
-        CmdCheckState();
-        break;
-    case CAN_CMD_START:
-        CmdStartTest(msg.toInt());
-        break;
-    case CAN_CMD_STOP:
-        CmdStopTest();
-        break;
-    case CAN_CMD_INIT:
-        ShowInit();
-        CmdConfigure();
-        break;
-    default:
-        break;
-    }
-}
-
-void CWinSetAcw::ShowInit()
-{
-    Items.clear();
-    QStringList s;
-    QString U1 = QString::number(ui->BoxVoltage->value());
-    QString M1 = ui->BoxMin->text();
-    QString M2 = ui->BoxMax->text();
-    s.append(QString(tr("交耐")));
-    s.append(QString("%1V,%2~%3mA").arg(U1).arg(M1).arg(M2));
-    s.append(" ");
-    s.append(" ");
-    Items.append(s.join("@"));
-    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  *                                  END

@@ -56,8 +56,6 @@ const quint16 GuestHeart        = 6000;
 #define ADDR 6000
 #define WIN_CMD_SWITCH  7000
 #define WIN_CMD_INIT    7001
-#define WIN_CMD_SHOW    7010
-#define WIN_CMD_ITEM    7011
 #define WIN_CMD_RESULT  7002
 #define WIN_CMD_JUDGE   7003
 #define WIN_CMD_TEMP    7004
@@ -66,6 +64,10 @@ const quint16 GuestHeart        = 6000;
 #define WIN_WAVE_ITEM   7007
 #define WIN_CMD_DEBUG   7008
 #define WIN_CMD_WAVE    7009
+#define WIN_CMD_SHOW    7010
+#define WIN_CMD_ITEM    7011
+#define WIN_CMD_STYLE   7012
+
 
 #define CAN_DAT_GET 8000
 #define CAN_DAT_PUT 8001
@@ -74,23 +76,17 @@ const quint16 GuestHeart        = 6000;
 #define CAN_CMD_START 9001
 #define CAN_CMD_STOP  9002
 #define CAN_CMD_INIT  9003
+#define CAN_CMD_ALARM 9004
+#define CAN_CMD_READY 9005
 
-#define  ResCu    0.0039  //  铜材料
-#define  ResCu_Al 0.0041  //  铜铝材料
-#define  ResAl    0.0043  //  铝材料
-
-
-#define NET "./network/"
-#define TMP "./temp/"
-#define CON "./config/"
-
-#ifdef __arm__
-#define GLOBAL_SET "/mnt/nandflash/AIP/Sys.ini"
-#else
-#define GLOBAL_SET "settings/global.ini"
-#endif
-
-#define LOCAL
+#define WIN_ID_DCR      0x01
+#define WIN_ID_MAG      0x02
+#define WIN_ID_IR       0x03
+#define WIN_ID_ACW      0x04
+#define WIN_ID_DCW      0x05
+#define WIN_ID_IMP      0x06
+#define WIN_ID_INDL     0x07
+#define WIN_ID_OUT      0x13
 
 #define CAN_ID_DCR       0x41         // 电阻板
 #define CAN_ID_DCR_WAVE  0x441        // 电阻板反嵌波形
@@ -111,13 +107,26 @@ const quint16 GuestHeart        = 6000;
 #define CAN_CMD_DEBUG        0x06     //上传调试参数
 #define CAN_CMD_VERSION      0x08     //上传版本
 
-#define WIN_ID_DCR      0x01
-#define WIN_ID_MAG      0x02
-#define WIN_ID_IR       0x03
-#define WIN_ID_ACW      0x04
-#define WIN_ID_DCW      0x05
-#define WIN_ID_IMP      0x06
-#define WIN_ID_INDL     0x07
+#define  ResCu    0.0039  //  铜材料
+#define  ResCu_Al 0.0041  //  铜铝材料
+#define  ResAl    0.0043  //  铝材料
+
+
+#define NET "./network/"
+#define TMP "./temp/"
+#define CON "./config/"
+
+#ifdef __arm__
+#define GLOBAL_SET "/mnt/nandflash/AIP/Sys.ini"
+#else
+#define GLOBAL_SET "settings/global.ini"
+#endif
+
+#define LOCAL
+
+
+
+
 
 //extern
 

@@ -26,9 +26,8 @@ CWinTest::CWinTest(QWidget *parent) :
     KeyInit();
 
     QTimer *timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(DisplayTime()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(ShowTime()));
     timer->start(1000);
-    TestOn = false;
 }
 /*******************************************************************************
  * version:     1.0
@@ -79,7 +78,6 @@ void CWinTest::KeyInit()
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnWinHome,Qt::Key_0);
     btnGroup->addButton(ui->BtnWinType,Qt::Key_1);
-    btnGroup->addButton(ui->BtnStart,Qt::Key_2);
     btnGroup->addButton(ui->BtnCmdStart,Qt::Key_3);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(KeyJudge(int)));
 }
@@ -98,25 +96,13 @@ void CWinTest::KeyJudge(int win)
     case Qt::Key_1:
         emit TransformCmd(ADDR,WIN_CMD_SWITCH,"WinType");
         break;
-
-    case Qt::Key_2:
-        if (TestOn) {
-            ui->BtnStart->setText("连续测试");
-            TestOn = false;
-        } else {
-            TestOn = true;
-            ui->BtnStart->setText("中断测试");
-            emit TransformCmd(ADDR,CAN_CMD_START,"NULL");
-        }
-        break;
     case Qt::Key_3:
-        TestOn = false;
         if (ui->BtnCmdStart->text() == "单次测试") {
             ui->BtnCmdStart->setText("中断测试");
-            emit TransformCmd(ADDR,CAN_CMD_START,"NULL");
+            emit TransformCmd(ADDR,CAN_CMD_START,QString::number(0x13).toUtf8());
         } else {
             ui->BtnCmdStart->setText("单次测试");
-            emit TransformCmd(ADDR,CAN_CMD_STOP,"NULL");
+            emit TransformCmd(ADDR,CAN_CMD_STOP,NULL);
         }
         break;
     default:
@@ -202,89 +188,34 @@ void CWinTest::ShowItem(QString item)
         if (s.at(0) == n) {
             ui->TabTest->item(i,2)->setText(s.at(2));
             ui->TabTest->item(i,3)->setText(s.at(3));
+            if (s.at(3) == "NG")
+                ui->TabTest->item(i,3)->setTextColor(QColor(Qt::red));
+            else
+                ui->TabTest->item(i,3)->setTextColor(QColor(Qt::green));
+            break;
         }
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.21
- * brief:       显示测试项目
-*******************************************************************************/
-void CWinTest::DisplayItem(QStringList item)
+
+void CWinTest::ShowJudge(QString judge)
 {
-    ListItem = item;
-    ListPara.clear();
-    ListResult.clear();
-    ListJudge.clear();
-    ui->TabTest->setRowCount(ListItem.size());
-    for (int i=0; i<ListItem.size(); i++) {
-        ui->TabTest->setItem(i,0,new QTableWidgetItem);
-        ui->TabTest->item(i,0)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i,0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i,0)->setText(ListItem.at(i));
-
-        ui->TabTest->setItem(i,1,new QTableWidgetItem);
-        ui->TabTest->item(i,1)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i,1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i,1)->setText("");
-
-        ui->TabTest->setItem(i,2,new QTableWidgetItem);
-        ui->TabTest->item(i,2)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i,2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i,2)->setText("");
-
-        ui->TabTest->setItem(i,3,new QTableWidgetItem);
-        ui->TabTest->item(i,3)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i,3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i,3)->setText("");
+    int sum = ui->LabelSum->text().toInt();
+    int qua = ui->LabelQualified->text().toInt();
+    int unq = ui->LabelUnqualified->text().toInt();
+    sum++;
+    if (judge == "NG") {
+        ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold  42pt Ubuntu;border: none;");
+        ui->LabelState->setText("NG");
+        unq++;
+    } else {
+        ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
+        ui->LabelState->setText("OK");
+        qua++;
     }
-    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
-    ui->LabelState->setText("--");
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.21
- * brief:       显示测试参数
-*******************************************************************************/
-void CWinTest::DisplayPara(QStringList para)
-{
-    ListPara = para;
-    for (int i=0; i<qMin(ListPara.size(),ListItem.size()); i++)
-        ui->TabTest->item(i,1)->setText(ListPara.at(i));
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.21
- * brief:       显示测试结果
-*******************************************************************************/
-void CWinTest::DisplayResult(QStringList result)
-{
-    ListResult = result;
-    for (int i=0; i<qMin(ListResult.size(),ListItem.size()); i++)
-        ui->TabTest->item(i,2)->setText(ListResult.at(i));
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.21
- * brief:       显示测试判定
-*******************************************************************************/
-void CWinTest::DisplayJudge(QStringList judge)
-{
-    ListJudge = judge;
-    for (int i=0; i<qMin(ListJudge.size(),ListItem.size()); i++) {
-        ui->TabTest->item(i,3)->setText(ListJudge.at(i));
-        if (ListJudge.at(i) == "NG") {
-            ui->TabTest->item(i,3)->setTextColor(QColor(Qt::red));
-            ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold  42pt Ubuntu;border: none;");
-            ui->LabelState->setText("NG");
-        }
-        if (ListJudge.at(i) == "OK")
-            ui->TabTest->item(i,3)->setTextColor(QColor(Qt::green));
-    }
+    ui->LabelSum->setText(QString::number(sum));
+    ui->LabelQualified->setText(QString::number(qua));
+    ui->LabelUnqualified->setText(QString::number(unq));
+    ui->BtnCmdStart->setText("单次测试");
 }
 /*******************************************************************************
  * version:     1.0
@@ -292,7 +223,7 @@ void CWinTest::DisplayJudge(QStringList judge)
  * date:        2016.12.21
  * brief:       显示波形项目
 *******************************************************************************/
-void CWinTest::DisplayWaveItem(QByteArray msg)
+void CWinTest::ShowWaveItem(QByteArray msg)
 {
     if (!wave.last()->WaveItem.isEmpty()) {
         WaveClear();
@@ -310,7 +241,7 @@ void CWinTest::DisplayWaveItem(QByteArray msg)
  * date:        2016.12.21
  * brief:       显示标准波形
 *******************************************************************************/
-void CWinTest::DisplayWaveByte(QByteArray msg)
+void CWinTest::ShowWaveByte(QByteArray msg)
 {
     for (int i=0; i<wave.size(); i++) {
         if (wave.at(i)->WaveByte.isEmpty()) {
@@ -325,7 +256,7 @@ void CWinTest::DisplayWaveByte(QByteArray msg)
  * date:        2016.12.21
  * brief:       显示测试波形
 *******************************************************************************/
-void CWinTest::DisplayWaveTest(QByteArray msg)
+void CWinTest::ShowWaveTest(QByteArray msg)
 {
     for (int i=0; i<wave.size(); i++) {
         if (wave.at(i)->WaveTest.isEmpty()) {
@@ -340,7 +271,7 @@ void CWinTest::DisplayWaveTest(QByteArray msg)
  * date:        2016.12.21
  * brief:       显示温度
 *******************************************************************************/
-void CWinTest::DisplayTemp(QByteArray msg)
+void CWinTest::ShowTemp(QByteArray msg)
 {
     ui->TextTestTemp->setText(msg);
 }
@@ -350,23 +281,9 @@ void CWinTest::DisplayTemp(QByteArray msg)
  * date:        2016.12.21
  * brief:       显示工位
 *******************************************************************************/
-void CWinTest::DisplayPos(QByteArray msg)
+void CWinTest::ShowPos(QByteArray msg)
 {
     ui->TextPos->setText(msg);
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.21
- * brief:       显示总测试结果
-*******************************************************************************/
-void CWinTest::DisplayState(QByteArray msg)
-{
-    ui->LabelState->setText(msg);
-    if (msg == "NG")
-        ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold  42pt Ubuntu;border: none;");
-    else
-        ui->LabelState->setStyleSheet("color:rgb(0,255,0);font: Bold  42pt Ubuntu;border: none;");
 }
 /*******************************************************************************
  * version:     1.0
@@ -374,7 +291,7 @@ void CWinTest::DisplayState(QByteArray msg)
  * date:        2017.01.05
  * brief:       显示测试数量
 *******************************************************************************/
-void CWinTest::DisplayAmount(QStringList amount)
+void CWinTest::ShowAmount(QStringList amount)
 {
     if (amount.size() >= 3) {
         int sum = ui->LabelSum->text().toInt()+amount.at(0).toInt();
@@ -384,10 +301,18 @@ void CWinTest::DisplayAmount(QStringList amount)
         ui->LabelQualified->setText(QString::number(qua));
         ui->LabelUnqualified->setText(QString::number(unq));
     }
-    if (TestOn) {
-        emit TransformCmd(ADDR,CAN_CMD_START,"NULL");
-    }
     ui->BtnCmdStart->setText("单次测试");
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2016.11.23
+ * brief:       显示时间
+*******************************************************************************/
+void CWinTest::ShowTime()
+{
+    QString t = QTime::currentTime().toString();
+    ui->TextTestTime->setText(t);
 }
 /*******************************************************************************
  * version:     1.0
@@ -409,24 +334,15 @@ void CWinTest::WaveClear()
  * version:     1.0
  * author:      link
  * date:        2016.11.23
- * brief:       显示时间
-*******************************************************************************/
-void CWinTest::DisplayTime()
-{
-    QString t = QTime::currentTime().toString();
-    ui->TextTestTime->setText(t);
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.11.23
  * brief:       更新显示波形
 *******************************************************************************/
-void CWinTest::ItemClick(int , int )
+void CWinTest::ItemClick(int r, int )
 {
-//    QString t = ListItem.at(r);
-//    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")))
-//        emit TransformCmd(ADDR,WIN_CMD_WAVE,t.toUtf8());
+    QString t = ui->TabTest->item(r,0)->text();
+    if (t.contains(tr("反嵌")) || t.contains(tr("匝间"))) {
+        WaveClear();
+        emit TransformCmd(ADDR,WIN_CMD_WAVE,t.toUtf8());
+    }
 }
 /*******************************************************************************
  * version:     1.0
@@ -441,7 +357,6 @@ void CWinTest::showEvent(QShowEvent *)
 
 void CWinTest::hideEvent(QHideEvent *)
 {
-    TestOn = false;
     DatSave();
 }
 

@@ -17,6 +17,12 @@ ConfigIndl::~ConfigIndl()
 {
     delete ui;
 }
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      初始化界面
+*******************************************************************************/
 void ConfigIndl::WinInit()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
@@ -42,7 +48,12 @@ void ConfigIndl::WinInit()
     connect(input,SIGNAL(ItemChange(QString)),this,SLOT(ItemChange(QString)));
     input->hide();
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      初始化按键
+*******************************************************************************/
 void ConfigIndl::BtnInit()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
@@ -50,7 +61,12 @@ void ConfigIndl::BtnInit()
     btnGroup->addButton(ui->BtnSDLRExit,Qt::Key_2);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      按键功能
+*******************************************************************************/
 void ConfigIndl::BtnJudge(int id)
 {
     switch (id) {
@@ -66,7 +82,12 @@ void ConfigIndl::BtnJudge(int id)
         break;
     }
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      数据初始化
+*******************************************************************************/
 void ConfigIndl::DatInit()
 {
     QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
@@ -236,7 +257,12 @@ void ConfigIndl::DatInit()
         Std.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      数据保存
+*******************************************************************************/
 void ConfigIndl::DatSave()
 {
     QStringList temp;
@@ -285,7 +311,12 @@ void ConfigIndl::DatSave()
         temp.append(QString::number(Std.at(i)->value()));
     set->setValue("Std",(temp.join(" ").toUtf8()));
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.19
+ * brief:      自动计算
+*******************************************************************************/
 void ConfigIndl::DatAuto()
 {
     for (int i=0; i<ui->TabInductance->rowCount(); i++) {
@@ -296,31 +327,12 @@ void ConfigIndl::DatAuto()
         Max.at(i)->setValue(max);
     }
 }
-void ConfigIndl::DisplayInit()
-{
-    ListItem.clear();
-    ListPara.clear();
-    ListResult.clear();
-    ListJudge.clear();
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            if (row >= Terminal1.size())
-                break;
-            if (row >= Terminal2.size())
-                break;
-            QString T1 = Terminal1.at(row)->text();
-            QString T2 = Terminal2.at(row)->text();
-            ListItem.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
-            QString M1 = Min.at(row)->text();
-            QString M2 = Max.at(row)->text();
-            QString Q1 = QMin.at(row)->text();
-            QString Q2 = QMax.at(row)->text();
-            ListPara.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
-            ListResult.append(" ");
-            ListJudge.append(" ");
-        }
-    }
-}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.23
+ * brief:      点击
+*******************************************************************************/
 void ConfigIndl::ItemClick(int r, int c)
 {
     switch (c) {
@@ -338,15 +350,309 @@ void ConfigIndl::ItemClick(int r, int c)
         break;
     }
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2016.12.23
+ * brief:      切换文字
+*******************************************************************************/
 void ConfigIndl::ItemChange(QString msg)
 {
     int t = ui->TabInductance->currentColumn();
     if (t==1 || t==2)
         ui->TabInductance->currentItem()->setText(msg);
 }
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.15
+ * brief:       命令处理
+*******************************************************************************/
+void ConfigIndl::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR && addr != WIN_ID_INDL && addr != CAN_ID_INDL)
+        return;
+    switch (cmd) {
+    case CAN_DAT_GET:
+        ExcuteCanCmd(msg);
+        break;
+    case CAN_CMD_CHECK:
+        TestCheck();
+        break;
+    case CAN_CMD_START:
+        TestStart(msg.toInt());
+        break;
+    case CAN_CMD_STOP:
+        TestStop();
+        break;
+    case CAN_CMD_INIT:
+        TestInit();
+        TestConfig();
+        break;
+    default:
+        break;
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.15
+ * brief:       CAN命令处理
+*******************************************************************************/
+void ConfigIndl::ExcuteCanCmd(QByteArray msg)
+{
+    if (!Testing)
+        return;
+    TimeOut = 0;
+    if (msg.size()==8 && (quint8)msg.at(0)==0x00) {
+        TestCheckOk(msg);
+    }
+    if (msg.size()==8 && (quint8)msg.at(0)==0x01) {
+        TestResult(msg);
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.15
+ * brief:       更新显示
+*******************************************************************************/
+void ConfigIndl::TestInit()
+{
+    Items.clear();
+    Results.clear();
+    QStringList n;
+    for (int row = 0; row<Enable.size(); row++) {
+        QStringList s;
+        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+        QString M1 = Min.at(qMin(row,Min.size()))->text();
+        QString M2 = Max.at(qMin(row,Max.size()))->text();
+        QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
+        QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
+        s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
+        s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+    }
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            n.append(Items.at(row));
+        }
+    }
+    if (ui->BoxUnbalance->value() != 0 && n.size()>=3) {
+        QStringList s;
+        s.append("电感平衡");
+        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+        n.append(Items.last());
+    }
+    emit TransformCmd(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      检测状态
+*******************************************************************************/
+void ConfigIndl::TestCheck()
+{
+    if (Testing)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if (!WaitTestOver(100)) {
+        Testing = false;
+        QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"INDL Error\n");
+    }
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      更新状态
+*******************************************************************************/
+void ConfigIndl::TestCheckOk(QByteArray )
+{
+    if (!isCheckOk) {
+        isCheckOk = true;
+        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"INDL check ok\n");
+    }
+    if (Testing)
+        Testing = false;
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      开始测试
+*******************************************************************************/
+void ConfigIndl::TestStart(quint8 pos)
+{
+    if (Testing)
+        return;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
+      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = true;
+    if(!WaitTestOver(100)) {
+        Testing = false;
+        emit TransformCmd(ADDR,WIN_CMD_JUDGE,"NG");
+        for (int i=0; i<Items.size(); i++) {
+            QStringList s = QString(Items.at(i)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+}
+/*******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.15
+ * brief:       更新测试数据
+*******************************************************************************/
+void ConfigIndl::TestResult(QByteArray msg)
+{
+    quint8 number = quint8(msg.at(1));
+    if (quint8(msg.at(3) == 0x00)) {
+        Result1.dat[0] = msg.at(4);
+        Result1.dat[1] = msg.at(5);
+        Result1.dat[2] = msg.at(6);
+        Result1.dat[3] = msg.at(7);
+    }
+    if (quint8(msg.at(3) == 0x01)) {
+        Result2.dat[0] = msg.at(4);
+        Result2.dat[1] = msg.at(5);
+        Result2.dat[2] = msg.at(6);
+        Result2.dat[3] = msg.at(7);
+        QString t = "---";
+        if (Result1.Result <= 1000)
+            t = QString::number(Result1.Result,'f',1) + "uH";
+        else if (Result1.Result <= 10000)
+            t = QString::number(Result1.Result/1000,'f',3) + "mH";
+        else if (Result1.Result <= 100000)
+            t = QString::number(Result1.Result/1000,'f',2) + "mH";
+        else if (Result1.Result <= 1000000)
+            t = QString::number(Result1.Result/1000,'f',1) + "mH";
+        else if (Result1.Result <= 10000000)
+            t = QString::number(Result1.Result/1000,'f',0) + "mH";
 
-int ConfigIndl::Gear(int row)
+        Results.append(t.toDouble());
+
+        t +="," + QString::number(Result2.Result,'f',2);
+        double max = Max.at(number)->value();
+        double min = Min.at(number)->value();
+        double qmax = QMax.at(number)->value();
+        double qmin = QMin.at(number)->value();
+        if (Unit.at(number)->currentText() == "mH") {
+            max *= 1000;
+            min *= 1000;
+        }
+        QString judge;
+        if (Result1.Result>=min && Result1.Result<= max && Result2.Result>=qmin && Result2.Result<=qmax)
+            judge = "OK";
+        else
+            judge = "NG";
+        QStringList s = QString(Items.at(number)).split("@");
+        if (s.at(2) == " ")
+            s[2] = t;
+        if (s.at(3) == " ")
+            s[3] = judge;
+        emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+        if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
+            bool isOk = true;
+            double sum = 0;
+            double avr = 0;
+            QString u;
+            for (int i=0; i<Results.size(); i++) {
+                sum += Results.at(i);
+            }
+            avr = sum/Results.size();
+            for (int i=0; i<Results.size(); i++) {
+                double un = fabs(Results.at(i)-avr)*100/avr;
+                u.append(QString::number(un,'f',1));
+                u.append("% ");
+                if (un >= ui->BoxUnbalance->value())
+                    isOk = false;
+            }
+
+            if (isOk)
+                judge = "OK";
+            else
+                judge = "NG";
+            QStringList s = QString(Items.last()).split("@");
+            if (s.at(2) == " ")
+                s[2] = u;
+            if (s.at(3) == " ")
+                s[3] = judge;
+            emit TransformCmd(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      停止测试
+*******************************************************************************/
+void ConfigIndl::TestStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x02);
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+    Testing = false;
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      配置
+*******************************************************************************/
+void ConfigIndl::TestConfig()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    for (int i=0; i<Enable.size(); i++) {
+        if (Enable.at(i)->text() == "Y") {
+            out<<quint16(0x26)<<quint8(0x07)<<quint8(0x03)<<quint8(i)
+              <<quint8(Terminal1.at(i)->text().toInt())
+             <<quint8(Terminal2.at(i)->text().toInt())
+            <<quint8(ui->BoxTime->value())
+            <<quint8(TestGear(i))<<quint8(TestMode(i));
+        }
+    }
+    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      计算测试档位
+*******************************************************************************/
+int ConfigIndl::TestGear(int row)
 {
     int t = 0;
     double s = Std.at(row)->text().toDouble();
@@ -407,8 +713,13 @@ int ConfigIndl::Gear(int row)
     }
     return t;
 }
-
-int ConfigIndl::Mode(int row)
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      计算测试方式
+*******************************************************************************/
+int ConfigIndl::TestMode(int row)
 {
     int t = 0;
     int s = 0;
@@ -423,31 +734,29 @@ int ConfigIndl::Mode(int row)
         t = s | 0x09;
     return t;
 }
-void ConfigIndl::UpdateResult(QByteArray msg)
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      等待测试结束
+*******************************************************************************/
+bool ConfigIndl::WaitTestOver(quint16 t)
 {
-    for (int i=0; i<ListResult.size(); i++) {
-        if (ListResult.at(i) == " ") {
-            ListResult[i] = msg;
-            break;
-        }
+    TimeOut = 0;
+    while (Testing) {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
     }
+    return true;
 }
-
-void ConfigIndl::UpdateJudge(QByteArray msg)
-{
-    for (int i=0; i<ListJudge.size(); i++) {
-        if (ListJudge.at(i) == " ") {
-            ListJudge[i] = msg;
-            break;
-        }
-    }
-}
-
-void ConfigIndl::UpdateUnbalance()
-{
-
-}
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      延时
+*******************************************************************************/
 void ConfigIndl::Delay(int ms)
 {
     QElapsedTimer t;
@@ -455,220 +764,23 @@ void ConfigIndl::Delay(int ms)
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
 }
-
-void ConfigIndl::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_INDL && addr != CAN_ID_INDL)
-        return;
-    switch (cmd) {
-    case CAN_DAT_GET:
-        ExcuteCmd(msg);
-        break;
-    case CAN_CMD_CHECK:
-        CmdCheckState();
-        break;
-    case CAN_CMD_START:
-        CmdStartTest(msg.toInt());
-        break;
-    case CAN_CMD_STOP:
-        CmdStopTest();
-        break;
-    case CAN_CMD_INIT:
-        ShowInit();
-        CmdConfigure();
-        break;
-    default:
-        break;
-    }
-}
-
-void ConfigIndl::ShowInit()
-{
-    Items.clear();
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s;
-            QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-            QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-            QString M1 = Min.at(qMin(row,Min.size()))->text();
-            QString M2 = Max.at(qMin(row,Max.size()))->text();
-            QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
-            QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
-            s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
-            s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
-            s.append(" ");
-            s.append(" ");
-            Items.append(s.join("@"));
-        }
-    }
-    if (ui->BoxUnbalance->value() != 0 && ListItem.size()>=3) {
-        QStringList s;
-        s.append("电感平衡");
-        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-    }
-    emit TransformCmd(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
-}
-void ConfigIndl::ExcuteCmd(QByteArray msg)
-{
-    if (!Testing)
-        return;
-    TimeOut = 0;
-    if (msg.size()==8 && (quint8)msg.at(0)==0x00) {
-        UpdateState(msg);
-    }
-    if (msg.size()==8 && (quint8)msg.at(0)==0x01) {
-        UpdateTestData(msg);
-    }
-}
-void ConfigIndl::UpdateState(QByteArray )
-{
-    if (!isCheckOk) {
-        isCheckOk = true;
-        emit TransformCmd(ADDR,WIN_CMD_DEBUG,"INDL check ok\n");
-    }
-    if (Testing)
-        Testing = false;
-}
-
-void ConfigIndl::UpdateTestData(QByteArray msg)
-{
-    quint8 number = quint8(msg.at(1));
-    if (quint8(msg.at(3) == 0x00)) {
-        Result1.dat[0] = msg.at(4);
-        Result1.dat[1] = msg.at(5);
-        Result1.dat[2] = msg.at(6);
-        Result1.dat[3] = msg.at(7);
-    }
-    if (quint8(msg.at(3) == 0x01)) {
-        Result2.dat[0] = msg.at(4);
-        Result2.dat[1] = msg.at(5);
-        Result2.dat[2] = msg.at(6);
-        Result2.dat[3] = msg.at(7);
-        QString t = "---";
-        if (Result1.Result <= 1000)
-            t = QString::number(Result1.Result,'f',1) + "uH";
-        else if (Result1.Result <= 10000)
-            t = QString::number(Result1.Result/1000,'f',3) + "mH";
-        else if (Result1.Result <= 100000)
-            t = QString::number(Result1.Result/1000,'f',2) + "mH";
-        else if (Result1.Result <= 1000000)
-            t = QString::number(Result1.Result/1000,'f',1) + "mH";
-        else if (Result1.Result <= 10000000)
-            t = QString::number(Result1.Result/1000,'f',0) + "mH";
-
-        t +="," + QString::number(Result2.Result,'f',2);
-        UpdateResult(t.toUtf8());
-        double max = Max.at(number)->value();
-        double min = Min.at(number)->value();
-        double qmax = QMax.at(number)->value();
-        double qmin = QMin.at(number)->value();
-        if (Unit.at(number)->currentText() == "mH") {
-            max *= 1000;
-            min *= 1000;
-        }
-        if (Result1.Result>=min && Result1.Result<= max && Result2.Result>=qmin && Result2.Result<=qmax)
-            UpdateJudge("OK");
-        else
-            UpdateJudge("NG");
-        emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-    }
-
-}
-
-void ConfigIndl::CmdCheckState()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-
-void ConfigIndl::CmdStartTest(quint8 pos)
-{
-    WaitTestOver();
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
-    }
-    out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
-      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = true;
-}
-
-void ConfigIndl::CmdStopTest()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x02);
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-    Testing = false;
-}
-
-void ConfigIndl::CmdConfigure()
-{
-    WaitTestOver();
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    for (int i=0; i<Enable.size(); i++) {
-        if (Enable.at(i)->text() == "Y") {
-            out<<quint16(0x26)<<quint8(0x07)<<quint8(0x03)<<quint8(i)
-              <<quint8(Terminal1.at(i)->text().toInt())
-             <<quint8(Terminal2.at(i)->text().toInt())
-            <<quint8(ui->BoxTime->value())
-            <<quint8(Gear(i))<<quint8(Mode(i));
-        }
-    }
-    emit TransformCmd(ADDR,CAN_DAT_PUT,msg);
-}
-
-bool ConfigIndl::WaitTestOver()
-{
-    TimeOut = 0;
-    while (Testing) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > 100) {
-            for (int i=0; i<ListResult.size(); i++) {
-                if (ListResult.at(i) == " ") {
-                    ListResult[i] = "---";
-                }
-            }
-            for (int i=0; i<ListJudge.size(); i++) {
-                if (ListJudge.at(i) == " ") {
-                    ListJudge[i] = "NG";
-                }
-            }
-            Testing = false;
-            qDebug()<<"error";
-            emit TransformCmd(ADDR,WIN_CMD_RESULT,NULL);
-            return false;
-        }
-    }
-    return true;
-}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      更新显示
+*******************************************************************************/
 void ConfigIndl::showEvent(QShowEvent *)
 {
     DatInit();
 }
-
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      判断保存
+*******************************************************************************/
 void ConfigIndl::hideEvent(QHideEvent *)
 {
     DatSave();
 }
-
-
-
-
-
