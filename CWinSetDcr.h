@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <QDate>
+#include <QTimer>
 #include <QDebug>
 #include <QWidget>
 #include <QComboBox>
@@ -73,6 +74,8 @@ private:
     QList<double> Results;
     QString Judge;
     QString FileInUse;
+
+    QTimer *Timer;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;

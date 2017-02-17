@@ -27,6 +27,9 @@ CWinSetDcr::CWinSetDcr(QWidget *parent) :
     DatInit();
     Testing = false;
     isCheckOk = false;
+    Timer = new QTimer(this);
+    connect(Timer,SIGNAL(timeout()),this,SLOT(TestCheck()));
+    Timer->start(5000);
 }
 /********************************************************************************
  * version:     1.0
@@ -513,6 +516,7 @@ void CWinSetDcr::TestCheck()
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
         emit TransformCmd(ADDR,WIN_CMD_DEBUG,"DCR Error\n");
+        Timer->stop();
     }
 }
 /*******************************************************************************

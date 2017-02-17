@@ -204,12 +204,6 @@ void MainPage::DatInit()
 
     ItemToTest = set->value("/GLOBAL/ProjToTest","").toString().split(" ");
     PauseMode = set->value("/GLOBAL/TestNG","0").toBool();
-
-//    QStringList tt;
-//    for (int i=0; i<WinData->Amount.size(); i++)
-//        tt.append(WinData->Amount.at(i)->text());
-//    tt.removeFirst();
-//    WinTest->ShowAmount(tt);
 }
 /******************************************************************************
  * version:     1.0
@@ -315,6 +309,9 @@ void MainPage::ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg)
         break;
     case WIN_WAVE_ITEM:
         WinTest->ShowWaveItem(msg);
+        break;
+    case WIN_WAVE_HIDE:
+        WinTest->WaveClear();
         break;
     case WIN_CMD_DEBUG:
         emit TransformCmd(ADDR,WIN_CMD_DEBUG,msg);

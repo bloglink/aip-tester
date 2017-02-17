@@ -67,6 +67,7 @@ const quint16 GuestHeart        = 6000;
 #define WIN_CMD_SHOW    7010
 #define WIN_CMD_ITEM    7011
 #define WIN_CMD_STYLE   7012
+#define WIN_WAVE_HIDE   7013
 
 
 #define CAN_DAT_GET 8000

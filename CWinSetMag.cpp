@@ -546,6 +546,9 @@ void CWinSetMag::TestStart(quint8 pos)
 {
     if (Testing || Sampling)
         return;
+
+    emit TransformCmd(ADDR,WIN_WAVE_HIDE,NULL);
+
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);

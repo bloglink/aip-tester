@@ -39,6 +39,7 @@ private slots:
     void BtnJudge(int id);
     void DatInit(void);
     void DatSave(void);
+    void ItemClick(int r,int c);
 
     void ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
@@ -64,6 +65,21 @@ private:
     QList<double> Volt;
     QList<double> Curr;
     QList<double> Power;
+
+    QString Judge;
+    QString FileInUse;
+
+    QList<QTableWidgetItem*> Enable;
+
+    QList<QDoubleSpinBox*> CurrMax;
+    QList<QDoubleSpinBox*> CurrMin;
+    QList<QDoubleSpinBox*> PowerMax;
+    QList<QDoubleSpinBox*> PowerMin;
+    QList<QDoubleSpinBox*> CapMax;
+    QList<QDoubleSpinBox*> CapMin;
+    QList<QComboBox*> TestDir;
+    QList<QDoubleSpinBox*> TestTime;
+    QList<QTableWidgetItem*> Grade;
 };
 
 #endif // CONFIGPOWER_H
