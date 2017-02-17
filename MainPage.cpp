@@ -386,7 +386,6 @@ void MainPage::TestInit()
 ******************************************************************************/
 void MainPage::TestStart(QByteArray data)
 {
-    emit TransformCmd(ADDR,WIN_CMD_DEBUG,data);
     if (Testing)
         return;
     if (ui->Desktop->currentWidget()->objectName() != "WinTest")

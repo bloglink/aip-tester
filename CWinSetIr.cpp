@@ -156,7 +156,7 @@ void CWinSetIr::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray msg)
         TestConfig();
         break;
     case CAN_CMD_ALARM:
-        TestAlarm(msg.toInt());
+        TestAlarm(quint8(msg.at(0)));
         break;
     default:
         break;
@@ -369,6 +369,7 @@ void CWinSetIr::TestConfig()
 *******************************************************************************/
 void CWinSetIr::TestAlarm(quint8 port)
 {
+
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
