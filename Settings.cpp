@@ -27,6 +27,10 @@ Settings::Settings(QWidget *parent) :
     process = new QProcess(this);
     connect(process, SIGNAL(readyRead()), this, SLOT(ReadData()));
     Testing = false;
+    isStop = true;
+
+    Timer = new QTimer(this);
+    connect(Timer,SIGNAL(timeout()),this,SLOT(TestStart()));
 }
 /******************************************************************************
  * version:     1.0
@@ -260,7 +264,7 @@ void Settings::ExcuteCanCmd(quint16 id,QByteArray msg)
             Pos = 0x14;
         }
         isStop = false;
-        emit TransformCmd(ADDR,CAN_CMD_READY,QString::number(Pos).toUtf8());
+        Timer->start(10);
     }
     if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x00)) {
         if (id == CAN_ID_13OUT && Pos == 0x13) {
@@ -294,6 +298,12 @@ void Settings::TestStyle()
     qss = QLatin1String(file.readAll());
     qApp->setStyleSheet(qss);
 }
+/******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.16
+ * brief:       查询输出板状态
+******************************************************************************/
 void Settings::TestCheck(quint16 pos)
 {
     if (Testing)
@@ -325,6 +335,17 @@ void Settings::TestCheck(quint16 pos)
         Testing = false;
         QMessageBox::warning(this,tr("警告"),w,QMessageBox::Ok);
     }
+}
+/******************************************************************************
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.17
+ * brief:       启动测试
+******************************************************************************/
+void Settings::TestStart()
+{
+    Timer->stop();
+    emit TransformCmd(ADDR,CAN_CMD_START,QString::number(Pos).toUtf8());
 }
 /******************************************************************************
  * version:     1.0

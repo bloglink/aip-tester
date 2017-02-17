@@ -2,6 +2,7 @@
 #define SETTINGS_H
 
 #include <QFile>
+#include <QTimer>
 #include <QDebug>
 #include <QWidget>
 #include <QMessageBox>
@@ -49,6 +50,7 @@ private slots:
     void ExcuteCanCmd(quint16 id,QByteArray msg);
     void TestStyle(void);
     void TestCheck(quint16 pos);
+    void TestStart(void);
 
     void TestConfig(void);
 
@@ -65,6 +67,7 @@ private:
     bool isStop;
     quint16 TimeOut;
     quint16 Pos;
+    QTimer *Timer;
 };
 
 #endif // SETTINGS_H

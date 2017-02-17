@@ -552,17 +552,19 @@ void ConfigIndl::TestStart(quint8 pos)
 void ConfigIndl::TestResult(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
+    if (number >0 )
+        number--;
     if (quint8(msg.at(3) == 0x00)) {
-        Result1.dat[0] = msg.at(4);
-        Result1.dat[1] = msg.at(5);
-        Result1.dat[2] = msg.at(6);
-        Result1.dat[3] = msg.at(7);
+        Result1.dat[0] = quint8(msg.at(4));
+        Result1.dat[1] = quint8(msg.at(5));
+        Result1.dat[2] = quint8(msg.at(6));
+        Result1.dat[3] = quint8(msg.at(7));
     }
     if (quint8(msg.at(3) == 0x01)) {
-        Result2.dat[0] = msg.at(4);
-        Result2.dat[1] = msg.at(5);
-        Result2.dat[2] = msg.at(6);
-        Result2.dat[3] = msg.at(7);
+        Result2.dat[0] = quint8(msg.at(4));
+        Result2.dat[1] = quint8(msg.at(5));
+        Result2.dat[2] = quint8(msg.at(6));
+        Result2.dat[3] = quint8(msg.at(7));
         QString t = "---";
         if (Result1.Result <= 1000)
             t = QString::number(Result1.Result,'f',1) + "uH";
@@ -653,6 +655,11 @@ void ConfigIndl::TestConfig()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i<Enable.size(); i++) {
         if (Enable.at(i)->text() == "Y") {
+//            out<<quint16(0x26)<<quint8(0x07)<<quint8(0x03)<<quint8(i)
+//              <<quint8(Terminal1.at(i)->text().toInt())
+//             <<quint8(Terminal2.at(i)->text().toInt())
+//            <<quint8(ui->BoxTime->value())
+//            <<quint8(TestGear(i))<<quint8(TestMode(i));
             out<<quint16(0x26)<<quint8(0x07)<<quint8(0x03)<<quint8(i)
               <<quint8(Terminal1.at(i)->text().toInt())
              <<quint8(Terminal2.at(i)->text().toInt())

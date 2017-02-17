@@ -257,8 +257,8 @@ void MainPage::CanThread(QByteArray msg)
         QDataStream in(&msg, QIODevice::ReadWrite);
         in.setVersion(QDataStream::Qt_4_8);
 
-        ExcuteCmd(ADDR,WIN_CMD_DEBUG,msg.toHex());
-        ExcuteCmd(ADDR,WIN_CMD_DEBUG,"\n");
+//        ExcuteCmd(ADDR,WIN_CMD_DEBUG,msg.toHex());
+//        ExcuteCmd(ADDR,WIN_CMD_DEBUG,"\n");
 
         while(!in.atEnd()) {
             in >> id >> dlc;
@@ -324,9 +324,6 @@ void MainPage::ExcuteCmd(quint16 addr,quint16 cmd,QByteArray msg)
     case CAN_DAT_PUT:
         emit PutCanData(msg);
         break;
-    case CAN_CMD_READY:
-        QTimer::singleShot(10,this,SLOT(TestStart(msg)));
-        break;
     case CAN_CMD_START:
         TestStart(msg);
         break;
@@ -389,6 +386,7 @@ void MainPage::TestInit()
 ******************************************************************************/
 void MainPage::TestStart(QByteArray data)
 {
+    emit TransformCmd(ADDR,WIN_CMD_DEBUG,data);
     if (Testing)
         return;
     if (ui->Desktop->currentWidget()->objectName() != "WinTest")
