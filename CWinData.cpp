@@ -25,7 +25,7 @@ CWinData::CWinData(QWidget *parent) :
     WinInit();
     BtnInit();
     SqlInit();
-    //    DatInit();
+    DatInit();
 }
 /******************************************************************************
  * version:     1.0
@@ -152,11 +152,19 @@ void CWinData::DatInit()
     ItemInit("交耐");
     ItemInit("匝间");
     ItemInit("电感");
+    QStringList n;
+    for (int i=0; i<ui->TabDetail->rowCount(); i++)
+        n.append(ui->TabDetail->item(i,0)->text());
+    QStringList v;
+    for (int i=0; i<ui->TabDetail->rowCount(); i++)
+        v.append(ui->TabDetail->item(i,4)->text());
+    ui->TextHistogram->SetNames(n);
+    ui->TextHistogram->SetValues(v);
+    ui->TextHistogram->update();
 }
 
 void CWinData::ItemInit(QString item)
 {
-
     QSqlQuery query(db);
     if (ui->EditType->text().isEmpty()) {
         query.prepare("select judge from TestData where para>=:date1 and para<=:date2 and item=:item");

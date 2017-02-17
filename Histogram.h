@@ -2,8 +2,11 @@
 #define HISTOGRAM_H
 
 #include <QDebug>
-#include <QWidget>
+#include <QDebug>
 #include <QLabel>
+#include <QPoint>
+#include <QWidget>
+#include <QPainter>
 #include <QMouseEvent>
 
 class Histogram : public QLabel
@@ -19,12 +22,11 @@ public slots:
     void SetValues(QStringList msg);
 private slots:
     virtual void paintEvent(QPaintEvent *);
-    virtual void resizeEvent(QResizeEvent *);
-    virtual void mousePressEvent(QMouseEvent *ev);
 private:
     QList<QColor> Colors;
     QStringList Names;
-    QStringList Values;
+    QList<quint16> Values;
+    quint16 Max;
 };
 
 #endif // HISTOGRAM_H

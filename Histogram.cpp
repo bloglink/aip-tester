@@ -23,21 +23,42 @@ void Histogram::SetNames(QStringList msg)
 
 void Histogram::SetValues(QStringList msg)
 {
-    Values = msg;
+    Max = 1;
+    Values.clear();
+    for (int i=0; i<msg.size(); i++) {
+        Values.append(QString(msg.at(i)).remove("%").toInt());
+        if (Values.at(i) > Max)
+            Max = Values.at(i);
+    }
 }
 
 void Histogram::paintEvent(QPaintEvent *)
 {
+    QPainter *painter = new QPainter(this);
 
-}
+    int w = this->width()/Names.size();
+    int h = this->height();
+    w = qMin(w,100);
 
-void Histogram::resizeEvent(QResizeEvent *)
-{
+    for (int i=0; i<Names.size(); i++) {
 
-}
+        int xx = w-20;
+        int yy = (h-50)*(Values.at(i))/Max;
+        int x = i*w+20;
+        int y = h-yy-25;
+        painter->setPen(QPen(Colors.at(i)));
+        painter->setBrush(QBrush(Colors.at(i)));
+        painter->drawRect(x,y,xx,yy);
 
-void Histogram::mousePressEvent(QMouseEvent *ev)
-{
-    qDebug()<<ev->x();
+        painter->setPen(QPen(QColor(Qt::white)));
+        painter->drawText(QRect(x+xx/2-15,h-25,xx,25),Names.at(i));
+        painter->drawText(QRect(x+xx/2-15,h-yy-40,xx,25),QString("%1%").arg(Values.at(i)));
+
+
+    }
+    painter->drawLine(5,h-24,this->width(),h-24);
+    painter->drawLine(5,5,5,h-24);
+
+    painter->end();
 }
 
