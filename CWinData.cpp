@@ -211,15 +211,9 @@ void CWinData::ItemInit(QString item)
 ******************************************************************************/
 void CWinData::DeleteAll()
 {
-    int nRowCnt = model->rowCount();
-    while (nRowCnt > 0)
-    {
-        nRowCnt--;
-        model->removeRow(nRowCnt);
-    }
-    model->database().transaction();
-    model->submitAll();
-    model->database().commit();
+    QSqlQuery query(db);
+    query.prepare("delete from TestData");
+    query.exec();
     DatInit();
 }
 /******************************************************************************

@@ -35,6 +35,8 @@ void Histogram::SetValues(QStringList msg)
 void Histogram::paintEvent(QPaintEvent *)
 {
     QPainter *painter = new QPainter(this);
+    if (Names.size() == 0)
+        return;
 
     int w = this->width()/Names.size();
     int h = this->height();
