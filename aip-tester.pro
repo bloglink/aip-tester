@@ -14,13 +14,16 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         HomePage.cpp \
-    System.cpp
+    System.cpp \
+    Input.cpp
 
 HEADERS  += HomePage.h \
-    System.h
+    System.h \
+    Input.h
 
 FORMS    += HomePage.ui \
-    System.ui
+    System.ui \
+    Input.ui
 
 RESOURCES += \
     image.qrc

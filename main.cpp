@@ -8,6 +8,7 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
+#include "Input.h"
 #include "HomePage.h"
 #include <QApplication>
 #include <QTextCodec>
@@ -27,9 +28,9 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-//#ifdef __arm__
-//    Input::Instance()->hide();
-//#endif
+#ifdef __arm__
+    Input::Instance()->hide();
+#endif
 
     HomePage w;
 #ifdef __arm__
