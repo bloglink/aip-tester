@@ -154,6 +154,12 @@ void HomePage::initAllWindows()
     connect(type,SIGNAL(sendMessage(quint16,quint16,QByteArray)),this,
             SLOT(readMessage(quint16,quint16,QByteArray)));
 
+    SqlPage *sql = new SqlPage(this);
+    ui->desktop->addWidget(sql);
+    sql->setObjectName("数据管理");
+    connect(sql,SIGNAL(sendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(readMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
 }

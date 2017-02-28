@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui sql
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -16,17 +16,22 @@ SOURCES += main.cpp\
         HomePage.cpp \
     System.cpp \
     Input.cpp \
-    MotorType.cpp
+    MotorType.cpp \
+    SqlPage.cpp \
+    Histogram.cpp
 
 HEADERS  += HomePage.h \
     System.h \
     Input.h \
-    MotorType.h
+    MotorType.h \
+    SqlPage.h \
+    Histogram.h
 
 FORMS    += HomePage.ui \
     System.ui \
     Input.ui \
-    MotorType.ui
+    MotorType.ui \
+    SqlPage.ui
 
 RESOURCES += \
     image.qrc \

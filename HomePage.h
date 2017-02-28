@@ -13,6 +13,7 @@
 
 #include "System.h"
 #include "MotorType.h"
+#include "SqlPage.h"
 
 namespace Ui {
 class HomePage;
