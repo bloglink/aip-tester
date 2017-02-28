@@ -12,6 +12,7 @@
 #include "define.h"
 
 #include "System.h"
+#include "MotorType.h"
 
 namespace Ui {
 class HomePage;

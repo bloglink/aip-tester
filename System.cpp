@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    system.cpp
+  * @file    System.cpp
   * @author  link
   * @version 2.0.1.0
   * @date    2017-02-28
@@ -22,6 +22,7 @@ System::System(QWidget *parent) :
     ui->setupUi(this);
     initShow();
     initButton();
+    initSettings();
 }
 /**
   * @brief  Destruct the window

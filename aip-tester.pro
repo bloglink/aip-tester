@@ -15,15 +15,19 @@ TEMPLATE = app
 SOURCES += main.cpp\
         HomePage.cpp \
     System.cpp \
-    Input.cpp
+    Input.cpp \
+    MotorType.cpp
 
 HEADERS  += HomePage.h \
     System.h \
-    Input.h
+    Input.h \
+    MotorType.h
 
 FORMS    += HomePage.ui \
     System.ui \
-    Input.ui
+    Input.ui \
+    MotorType.ui
 
 RESOURCES += \
-    image.qrc
+    image.qrc \
+    ../aip-local/aip-image.qrc

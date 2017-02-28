@@ -148,6 +148,12 @@ void HomePage::initAllWindows()
     connect(this,SIGNAL(sendMessage(quint16,quint16,QByteArray)),system,
             SLOT(readMessage(quint16,quint16,QByteArray)));
 
+    MotorType *type = new MotorType(this);
+    ui->desktop->addWidget(type);
+    type->setObjectName("型号管理");
+    connect(type,SIGNAL(sendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(readMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
 }
