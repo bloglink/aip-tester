@@ -10,6 +10,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "HomePage.h"
 #include <QApplication>
+#include <QTextCodec>
 /**
   * @brief  Initializes the software
   * @param  argc,*argv[]
@@ -26,9 +27,9 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-#ifdef __arm__
-    Input::Instance()->hide();
-#endif
+//#ifdef __arm__
+//    Input::Instance()->hide();
+//#endif
 
     HomePage w;
 #ifdef __arm__
@@ -37,5 +38,7 @@ int main(int argc, char *argv[])
     w.show();
     w.resize(1024,768);
 #endif
+    w.initAllWindows();
     return a.exec();
 }
+/*********************************END OF FILE**********************************/

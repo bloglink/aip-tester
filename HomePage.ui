@@ -27,7 +27,7 @@
     <number>0</number>
    </property>
    <item>
-    <widget class="QStackedWidget" name="Desktop">
+    <widget class="QStackedWidget" name="desktop">
      <property name="currentIndex">
       <number>0</number>
      </property>

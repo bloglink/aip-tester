@@ -2,7 +2,7 @@
   ******************************************************************************
   * @file    HomePage.cpp
   * @author  link
-  * @version 2.0.0.0
+  * @version 2.0.1.0
   * @date    2017-02-28
   * @brief   Home page of the motor comprehensive tester
   ******************************************************************************
@@ -40,8 +40,8 @@ HomePage::~HomePage()
   */
 void HomePage::initShow()
 {
-    this->setWindowTitle(tr("电机综合测试仪V-2.0.0.0"));
-    ui->titleVn->setText("V-2.0.0.0");
+    this->setWindowTitle(tr("电机综合测试仪V-2.0.1.0"));
+    ui->titleVn->setText("V-2.0.1.0");
     ui->titleVn->hide();
 
     //设置界面风格
@@ -98,15 +98,15 @@ void HomePage::judgeButton(int id)
   */
 void HomePage::jumpToWindow(QByteArray win)
 {
-    int WinCurrent = ui->Desktop->currentIndex();
+    int WinCurrent = ui->desktop->currentIndex();
     if (win.isNull()) { //空代表返回
-        ui->Desktop->setCurrentIndex(previous_window.last());
+        ui->desktop->setCurrentIndex(previous_window.last());
         previous_window.removeLast();
         return;
     }
-    for (int i=0; i<ui->Desktop->count(); i++) {
-        if (ui->Desktop->widget(i)->objectName() == win) {
-            ui->Desktop->setCurrentIndex(i);
+    for (int i=0; i<ui->desktop->count(); i++) {
+        if (ui->desktop->widget(i)->objectName() == win) {
+            ui->desktop->setCurrentIndex(i);
             break;
         }
     }
@@ -114,5 +114,41 @@ void HomePage::jumpToWindow(QByteArray win)
     if (previous_window.size()>10) { //最大嵌套10层
         previous_window.removeFirst();
     }
+}
+/**
+  * @brief  Excute command
+  * @param  addr:target address;cmd:command to excute;msg:command param
+  * @retval None
+  */
+void HomePage::readMessage(quint16 addr, quint16 cmd, QByteArray data)
+{
+    switch (cmd) {
+    case WIN_CMD_SWITCH:
+        jumpToWindow(data);
+        break;
+    default:
+        qDebug()<<addr<<cmd<<data;
+        break;
+    }
+}
+/**
+  * @brief  Initializes all window used
+  * @param  None
+  * @retval None
+  */
+void HomePage::initAllWindows()
+{
+    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口";
+
+    System *system = new System(this);
+    ui->desktop->addWidget(system);
+    system->setObjectName("系统设置");
+    connect(system,SIGNAL(sendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(readMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(sendMessage(quint16,quint16,QByteArray)),system,
+            SLOT(readMessage(quint16,quint16,QByteArray)));
+
+    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
+
 }
 /*********************************END OF FILE**********************************/
