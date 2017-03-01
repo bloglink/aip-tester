@@ -61,7 +61,7 @@ void PagePwr::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -75,7 +75,7 @@ void PagePwr::BtnJudge(int id)
 *******************************************************************************/
 void PagePwr::DatInit()
 {
-    QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
+    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
     FileInUse = global->value("FileInUse","default.ini").toString();
@@ -351,19 +351,19 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     if (addr != ADDR && addr != WIN_ID_PWR && addr != CAN_ID_PWR)
         return;
     switch (cmd) {
-    case CAN_DAT_GET:
+    case CMD_CAN:
         ExcuteCanCmd(msg);
         break;
-    case CAN_CMD_CHECK:
+    case CMD_CHECK:
         TestCheck();
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         TestStart(msg.toInt());
         break;
-    case CAN_CMD_STOP:
+    case CMD_STOP:
         TestStop();
         break;
-    case CAN_CMD_INIT:
+    case CMD_INIT:
         DatInit();
         TestInit();
         TestConfig();
@@ -419,7 +419,7 @@ void PagePwr::TestInit()
         }
     }
 
-    emit SendMessage(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
+    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -433,12 +433,12 @@ void PagePwr::TestCheck()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("功率板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"PWR Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"PWR Error\n");
     }
 }
 /*******************************************************************************
@@ -451,7 +451,7 @@ void PagePwr::TestCheckOk(QByteArray)
 {
     Testing = false;
     if (!isCheckOk) {
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"Power check ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Power check ok\n");
         isCheckOk = true;
     }
 }
@@ -473,7 +473,7 @@ void PagePwr::TestStart(quint8 pos)
     out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
       <<quint8(Time/256)<<quint8(Time%256)<<quint8(v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
@@ -486,7 +486,7 @@ void PagePwr::TestStart(quint8 pos)
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
     }
@@ -494,7 +494,7 @@ void PagePwr::TestStart(quint8 pos)
     s.append("电感");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -523,7 +523,7 @@ void PagePwr::TestStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 /*******************************************************************************

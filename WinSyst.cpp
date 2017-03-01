@@ -71,14 +71,14 @@ void WinSyst::BtnJudge(int id)
     switch (id) {
     case Qt::Key_0:
         if (ui->EditPassword->text() == "aip9981")
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"WinBack");
+            emit SendMessage(ADDR,CMD_JUMP,"WinBack");
         else if (ui->EditPassword->text() == password)
             ui->StackWinSyst->setCurrentIndex(0);
         else
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+            emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_2:
         ui->StackWinSyst->setCurrentIndex(2);
@@ -88,7 +88,7 @@ void WinSyst::BtnJudge(int id)
         break;
     case Qt::Key_4:
         QApplication::closeAllWindows();
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -103,7 +103,7 @@ void WinSyst::SetInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置";
 
-    QSettings *settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *settings = new QSettings(INI_PATH,QSettings::IniFormat);
     settings->setIniCodec("GB18030");
     settings->beginGroup("GLOBAL");
 
@@ -122,7 +122,7 @@ void WinSyst::SetInit()
 void WinSyst::SetSave()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置";
-    QSettings *settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *settings = new QSettings(INI_PATH,QSettings::IniFormat);
     settings->setIniCodec("GB18030");
     settings->beginGroup("GLOBAL");
     settings->setValue("User",QString::number(ui->BoxUser->currentIndex()));
@@ -155,7 +155,7 @@ void WinSyst::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     if (addr!=ADDR)
         return;
     switch (cmd) {
-    case WIN_CMD_DEBUG:
+    case CMD_DEBUG:
         ui->TextDebug->insertPlainText(msg);
         ui->TextDebug->moveCursor(QTextCursor::End);
         break;

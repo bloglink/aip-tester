@@ -85,18 +85,18 @@ void WinTest::BtnJudge(int win)
 {
     switch (win) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,"WinType");
+        emit SendMessage(ADDR,CMD_JUMP,"WinType");
         break;
     case Qt::Key_3:
         if (ui->BtnCmdStart->text() == "单次测试") {
             ui->BtnCmdStart->setText("中断测试");
-            emit SendMessage(ADDR,CAN_CMD_START,QString::number(0x13).toUtf8());
+            emit SendMessage(ADDR,CMD_START,QString::number(0x13).toUtf8());
         } else {
             ui->BtnCmdStart->setText("单次测试");
-            emit SendMessage(ADDR,CAN_CMD_STOP,NULL);
+            emit SendMessage(ADDR,CMD_STOP,NULL);
         }
         break;
     default:
@@ -112,7 +112,7 @@ void WinTest::SetInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取测试配置";
 
-    QSettings *g_settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
 
@@ -146,7 +146,7 @@ void WinTest::SetInit()
     }
 
     qDebug()<<QTime::currentTime().toString()<<"读取测试配置OK";
-    emit SendMessage(ADDR,WIN_CMD_INIT,NULL);
+    emit SendMessage(ADDR,CMD_INIT,NULL);
 }
 /**
   * @brief  Save settings
@@ -157,7 +157,7 @@ void WinTest::SetSave()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存测试配置";
 
-    QSettings *settings_g = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
     settings_g->setIniCodec("GB18030");
     settings_g->beginGroup("GLOBAL");
 
@@ -316,7 +316,7 @@ void WinTest::ItemClick(int r, int )
     QString t = ui->TabTest->item(r,0)->text();
     if (t.contains(tr("反嵌")) || t.contains(tr("匝间"))) {
         WaveClear();
-        emit SendMessage(ADDR,WIN_CMD_WAVE,t.toUtf8());
+        emit SendMessage(ADDR,CMD_WAVE,t.toUtf8());
     }
 }
 /**
@@ -330,32 +330,32 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         return;
 
     switch (cmd) {
-    case WIN_CMD_INIT:
+    case CMD_INIT:
         WaveClear();
         ItemInit(msg);
         break;
-    case WIN_CMD_ITEM:
+    case CMD_ITEM:
         showItem(msg);
         break;
-    case WIN_CMD_TEMP:
+    case CMD_TEMP:
         showTemperature(msg);
         break;
-    case WIN_WAVE_BYTE:
+    case CMD_WAVE_BYTE:
         showWaveByte(msg);
         break;
-    case WIN_WAVE_TEST:
+    case CMD_WAVE_TEST:
         showWaveTest(msg);
         break;
-    case WIN_WAVE_ITEM:
+    case CMD_WAVE_ITEM:
         showWaveItem(msg);
         break;
-    case WIN_WAVE_HIDE:
+    case CMD_WAVE_HIDE:
         WaveClear();
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         showStation(msg);
         break;
-    case WIN_CMD_JUDGE:
+    case CMD_JUDGE:
         showJudge(msg);
         break;
     default:

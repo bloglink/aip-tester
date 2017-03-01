@@ -76,7 +76,7 @@ void PageDcr::BtnJudge(int id)
     case Qt::Key_1:
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -93,7 +93,7 @@ void PageDcr::BtnJudge(int id)
 void PageDcr::DatInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取电阻配置";
-    QSettings *global = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
     FileInUse = global->value("FileInUse","default.ini").toString();
@@ -389,22 +389,22 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR)
         return;
     switch (cmd) {
-    case CAN_DAT_GET:
+    case CMD_CAN:
         ExcuteCanCmd(msg);
         break;
-    case CAN_CMD_CHECK:
+    case CMD_CHECK:
         TestCheck();
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         TestTimeOut(100);
         TestStart(msg.toInt());
         TestWait();
         TestJudge();
         break;
-    case CAN_CMD_STOP:
+    case CMD_STOP:
         TestStop();
         break;
-    case CAN_CMD_INIT:
+    case CMD_INIT:
         DatInit();
         TestInit();
         TestConfig();
@@ -473,7 +473,7 @@ void PageDcr::TestInit()
         Items.append(s.join("@"));
         n.append(Items.last());
     }
-    emit SendMessage(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
+    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 /**
   * @brief  Check PageDcr status
@@ -489,12 +489,12 @@ void PageDcr::TestCheck()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x22)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     if (!TestTimeOut(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"DCR Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"DCR Error\n");
     }
     qDebug()<<QTime::currentTime().toString()<<"查询电阻状态OK";
 }
@@ -507,14 +507,14 @@ void PageDcr::TestStatus(QByteArray msg)
 {
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"DCR check ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"DCR check ok\n");
     }
     if (Testing)
         Testing = false;
     double offset = ui->BoxOffset->value();
     double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
     QString t = QString(tr("温度:%1°C")).arg(temp);
-    emit SendMessage(ADDR,WIN_CMD_TEMP,t.toUtf8());
+    emit SendMessage(ADDR,CMD_TEMP,t.toUtf8());
 }
 /**
   * @brief  Start PageDcr test
@@ -535,7 +535,7 @@ void PageDcr::TestStart(quint8 pos)
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x01)<<quint8(0x00)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
 /**
   * @brief  Wait for test finish or time out
@@ -556,7 +556,7 @@ void PageDcr::TestWait()
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
         if (ui->BoxUnbalance->value() != 0) {
@@ -565,7 +565,7 @@ void PageDcr::TestWait()
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
 }
@@ -580,7 +580,7 @@ void PageDcr::TestJudge()
     s.append("电阻");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 
 }
 /*******************************************************************************
@@ -650,7 +650,7 @@ void PageDcr::TestResult(QByteArray msg)
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
     //计算不平衡度
     if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
@@ -675,7 +675,7 @@ void PageDcr::TestResult(QByteArray msg)
             s[2] = u;
         if (s.at(3) == " ")
             s[3] = judge;
-        emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
     }
 }
 /*******************************************************************************
@@ -716,7 +716,7 @@ void PageDcr::TestStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 /*******************************************************************************
@@ -739,7 +739,7 @@ void PageDcr::TestConfig()
             <<quint8(ui->BoxTime->value()*10);
         }
     }
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:    1.0

@@ -15,7 +15,6 @@ TEMPLATE = app
 SOURCES += main.cpp\
     Histogram.cpp \
     Waveform.cpp \
-    InputNum.cpp \
     PageKey.cpp \
     WinHome.cpp \
     WinSyst.cpp \
@@ -29,12 +28,15 @@ SOURCES += main.cpp\
     PageImp.cpp \
     PageNum.cpp \
     PageInd.cpp \
-    PagePwr.cpp
+    PagePwr.cpp \
+    PageLvs.cpp \
+    PageLck.cpp \
+    CanSocket.cpp \
+    sql.cpp
 
 HEADERS  += \
     Histogram.h \
     Waveform.h \
-    InputNum.h \
     PageKey.h \
     WinHome.h \
     WinSyst.h \
@@ -48,10 +50,13 @@ HEADERS  += \
     PageImp.h \
     PageNum.h \
     PageInd.h \
-    PagePwr.h
+    PagePwr.h \
+    PageLvs.h \
+    PageLck.h \
+    CanSocket.h \
+    sql.h
 
 FORMS    += \
-    InputNum.ui \
     PageKey.ui \
     WinHome.ui \
     WinSyst.ui \
@@ -65,7 +70,9 @@ FORMS    += \
     PageImp.ui \
     PageNum.ui \
     PageInd.ui \
-    PagePwr.ui
+    PagePwr.ui \
+    PageLvs.ui \
+    PageLck.ui
 
 RESOURCES += \
     image.qrc \

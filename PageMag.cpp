@@ -78,7 +78,7 @@ void PageMag::BtnJudge(int id)
     case Qt::Key_1:
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -93,7 +93,7 @@ void PageMag::BtnJudge(int id)
 void PageMag::DatInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"反嵌数据";
-    QSettings *global = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
     FileInUse = global->value("FileInUse","default.ini").toString();
@@ -303,24 +303,24 @@ void PageMag::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     if (addr != ADDR && addr != WIN_ID_MAG && addr != CAN_ID_DCR && addr != CAN_ID_DCR_WAVE)
         return;
     switch (cmd) {
-    case CAN_DAT_GET:
+    case CMD_CAN:
         ExcuteCanCmd(addr,msg);
         break;
-    case CAN_CMD_CHECK:
+    case CMD_CHECK:
         TestCheck();
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         TestStart(msg.toInt());
         break;
-    case CAN_CMD_STOP:
+    case CMD_STOP:
         TestStop();
         break;
-    case CAN_CMD_INIT:
+    case CMD_INIT:
         DatInit();
         TestInit();
         TestConfig();
         break;
-    case WIN_CMD_WAVE:
+    case CMD_WAVE:
         TestWaveShow(msg);
         break;
     default:
@@ -365,8 +365,8 @@ void PageMag::ExcuteCanCmd(int id, QByteArray msg)
         if (Testing) {
             w = WaveMag.at(CurrentWave)->WaveTest;
             i = WaveMag.at(CurrentWave)->WaveItem;
-            emit SendMessage(ADDR,WIN_WAVE_ITEM,i);
-            emit SendMessage(ADDR,WIN_WAVE_BYTE,w);
+            emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
+            emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
         }
     }
 }
@@ -410,7 +410,7 @@ void PageMag::TestInit()
         Items.append(s.join("@"));
         n.append(Items.last());
     }
-    emit SendMessage(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
+    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 /*******************************************************************************
  * version:    1.0
@@ -442,11 +442,11 @@ void PageMag::TestCheckOk(QByteArray )
     }
     if (Sampling) {
         Sampling = false;
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"MAG Sample ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"MAG Sample ok\n");
     }
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"MAG check ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"MAG check ok\n");
     }
 }
 /*******************************************************************************
@@ -471,7 +471,7 @@ void PageMag::TestSample()
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
       <<quint8(0x13)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Sampling = true;
 }
 /*******************************************************************************
@@ -488,7 +488,7 @@ void PageMag::TestStart(quint8 pos)
     if (Testing || Sampling)
         return;
 
-    emit SendMessage(ADDR,WIN_WAVE_HIDE,NULL);
+    emit SendMessage(ADDR,CMD_WAVE_HIDE,NULL);
 
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -500,7 +500,7 @@ void PageMag::TestStart(quint8 pos)
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
@@ -513,7 +513,7 @@ void PageMag::TestStart(quint8 pos)
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
         if (ui->BoxDir->currentIndex() != 0) {
@@ -522,14 +522,14 @@ void PageMag::TestStart(quint8 pos)
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
     QStringList s;
     s.append("反嵌");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -561,7 +561,7 @@ void PageMag::TestResult(QByteArray msg)
         s[2] = n;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:    1.0
@@ -594,9 +594,9 @@ void PageMag::TestWaveShow(QByteArray msg)
     for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
         QByteArray w;
         w = WaveMag.at(WaveNumber.at(t+i))->WaveItem;
-        emit SendMessage(ADDR,WIN_WAVE_ITEM,w);
+        emit SendMessage(ADDR,CMD_WAVE_ITEM,w);
         w = WaveMag.at(WaveNumber.at(t+i))->WaveTest;
-        emit SendMessage(ADDR,WIN_WAVE_BYTE,w);
+        emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
     }
 }
 /*******************************************************************************
@@ -653,7 +653,7 @@ void PageMag::TestDir()
         s[2] = n;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:    1.0
@@ -667,7 +667,7 @@ void PageMag::TestStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 /*******************************************************************************
@@ -689,7 +689,7 @@ void PageMag::TestConfig()
             <<quint8(Freq.at(row));
         }
     }
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:    1.0

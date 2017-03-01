@@ -1,9 +1,9 @@
-#include "PageAcw.h"
-#include "ui_PageAcw.h"
+#include "PageLvs.h"
+#include "ui_PageLvs.h"
 
-PageAcw::PageAcw(QWidget *parent) :
+PageLvs::PageLvs(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PageAcw)
+    ui(new Ui::PageLvs)
 {
     ui->setupUi(this);
     WinInit();
@@ -13,47 +13,42 @@ PageAcw::PageAcw(QWidget *parent) :
     isCheckOk = false;
 }
 
-PageAcw::~PageAcw()
+PageLvs::~PageLvs()
 {
     delete ui;
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       初始化界面
 *******************************************************************************/
-void PageAcw::WinInit()
+void PageLvs::WinInit()
 {
-    ui->BoxArc->setView(new QListView(this));
-    ui->BoxFrequcy->setView(new QListView(this));
+
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       初始化按键
 *******************************************************************************/
-void PageAcw::BtnInit()
+void PageLvs::BtnInit()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->BtnExitAcw,Qt::Key_2);
+    btnGroup->addButton(ui->BtnExit,Qt::Key_0);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       按键功能
 *******************************************************************************/
-void PageAcw::BtnJudge(int id)
+void PageLvs::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        break;
-    case Qt::Key_1:
-        break;
-    case Qt::Key_2:
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -63,65 +58,58 @@ void PageAcw::BtnJudge(int id)
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       数据初始化
 *******************************************************************************/
-void PageAcw::DatInit()
+void PageLvs::DatInit()
 {
-    qDebug()<<QTime::currentTime().toString()<<"交耐数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse","default.ini").toString();
-    FileInUse.remove(".ini");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1.ini").arg(FileInUse);
+    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
-    set->beginGroup("SetAcw");
+    set->beginGroup("SetLvs");
 
-    QStringList temp = (set->value("Other","500 0 5.00 3 0 0 0").toString()).split(" ");
-    if (temp.size() >= 7) {
-        ui->BoxVoltage->setValue(temp.at(0).toDouble());
-        ui->BoxMin->setValue(temp.at(1).toDouble());
-        ui->BoxMax->setValue(temp.at(2).toDouble());
-        ui->BoxTime->setValue(temp.at(3).toDouble());
-        ui->BoxArc->setCurrentIndex(temp.at(4).toInt());
-        ui->BoxFrequcy->setCurrentIndex(temp.at(5).toInt());
-        ui->BoxOffset->setValue(temp.at(6).toInt());
+    QStringList temp = (set->value("Other","20 0 0.5 10 10 50").toString()).split(" ");
+    if (temp.size() >= 6) {
+        ui->BoxVolt->setValue(temp.at(0).toDouble());
+        ui->BoxTime->setValue(temp.at(1).toDouble());
+        ui->BoxCurrMin->setValue(temp.at(2).toDouble());
+        ui->BoxCurrMax->setValue(temp.at(3).toDouble());
+        ui->BoxPowerMin->setValue(temp.at(4).toDouble());
+        ui->BoxPowerMax->setValue(temp.at(5).toDouble());
     }
-    qDebug()<<QTime::currentTime().toString()<<"交耐数据OK";
+
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       数据保存
 *******************************************************************************/
-void PageAcw::DatSave()
+void PageLvs::DatSave()
 {
-    qDebug()<<QTime::currentTime().toString()<<"交耐保存";
     QStringList temp;
-    temp.append(QString::number(ui->BoxVoltage->value()));
-    temp.append(QString::number(ui->BoxMin->value()));
-    temp.append(QString::number(ui->BoxMax->value()));
+    temp.append(QString::number(ui->BoxVolt->value()));
     temp.append(QString::number(ui->BoxTime->value()));
-    temp.append(QString::number(ui->BoxArc->currentIndex()));
-    temp.append(QString::number(ui->BoxFrequcy->currentIndex()));
-    temp.append(QString::number(ui->BoxOffset->value()));
+    temp.append(QString::number(ui->BoxCurrMin->value()));
+    temp.append(QString::number(ui->BoxCurrMax->value()));
+    temp.append(QString::number(ui->BoxPowerMin->value()));
+    temp.append(QString::number(ui->BoxPowerMax->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
-    qDebug()<<QTime::currentTime().toString()<<"交耐保存OK";
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2017.02.15
+ * date:        2017.02.16
  * brief:       命令处理
 *******************************************************************************/
-void PageAcw::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+void PageLvs::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_ACW && addr != CAN_ID_INR)
+    if (addr != ADDR && addr != WIN_ID_LVS && addr != CAN_ID_PWR)
         return;
     switch (cmd) {
     case CMD_CAN:
@@ -148,10 +136,10 @@ void PageAcw::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       CAN命令处理
 *******************************************************************************/
-void PageAcw::ExcuteCanCmd(QByteArray msg)
+void PageLvs::ExcuteCanCmd(QByteArray msg)
 {
     if (!Testing)
         return;
@@ -164,20 +152,20 @@ void PageAcw::ExcuteCanCmd(QByteArray msg)
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.20
+ * date:       2017.02.16
  * brief:      更新显示
- * date:       2017.02.15
- * brief:      修改显示方式
 *******************************************************************************/
-void PageAcw::TestInit()
+void PageLvs::TestInit()
 {
     Items.clear();
     QStringList s;
-    QString U1 = QString::number(ui->BoxVoltage->value());
-    QString M1 = ui->BoxMin->text();
-    QString M2 = ui->BoxMax->text();
-    s.append(QString(tr("交耐")));
-    s.append(QString("%1V,%2~%3mA").arg(U1).arg(M1).arg(M2));
+    s.append(QString(tr("低启")));
+
+    double M1 = ui->BoxCurrMin->value();
+    double M2 = ui->BoxCurrMax->value();
+    double Q1 = ui->BoxPowerMin->value();
+    double Q2 = ui->BoxPowerMax->value();
+    s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
@@ -186,49 +174,45 @@ void PageAcw::TestInit()
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       检测状态
- * date:        2017.02.15
- * brief:       取消功能,移到绝缘模块
 *******************************************************************************/
-void PageAcw::TestCheck()
+void PageLvs::TestCheck()
 {
+
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
- * brief:       更新状态
- * date:        2017.01.13
- * brief:       清理测试结果
- * date:        2017.02.15
- * brief:       增加求平均
+ * date:        2017.02.16
+ * brief:       更新状态,求平均并清理测试结果
 *******************************************************************************/
-void PageAcw::TestCheckOk(QByteArray )
+void PageLvs::TestCheckOk(QByteArray )
 {
     Testing = false;
-    if (Volt.isEmpty() || Curr.isEmpty())
+
+    if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty())
         return;
     double vv = 0;
     double rr = 0;
+    double pp = 0;
     for (int i=0; i<Volt.size(); i++) {
         vv += Volt.at(i);
         rr += Curr.at(i);
+        pp += Power.at(i);
     }
     vv /= Volt.size();
     rr /= Curr.size();
-    if (abs(vv-ui->BoxVoltage->value()) <5)
-        vv = ui->BoxVoltage->value();
-    QString vvv = QString::number(vv,'f',0);
-    QString rrr = QString::number(rr/100,'f',1);
-    QString t = QString("%1V,%2mA").arg(vvv).arg(rrr);
+    pp /= Power.size();
+    if (abs(vv-ui->BoxVolt->value()) <5)
+        vv = ui->BoxVolt->value();
+    QString t = QString("%1V,%2mA,%3W").arg(vv).arg(rr/10).arg(pp);
     QString judge = "OK";
 
-    if (rr/100>ui->BoxMax->value() || rr/100<ui->BoxMin->value()) {
-        Judge = "NG";
+    if (rr/100>ui->BoxCurrMax->value() || rr/10<ui->BoxCurrMin->value() )
         judge = "NG";
-    }
-
+    if (pp>ui->BoxPowerMax->value() || pp<ui->BoxPowerMin->value() )
+        judge = "NG";
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
@@ -238,30 +222,31 @@ void PageAcw::TestCheckOk(QByteArray )
 
     Volt.clear();
     Curr.clear();
+    Power.clear();
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       开始测试
- * date:        2017.02.15
- * brief:       增加超时判断
 *******************************************************************************/
-void PageAcw::TestStart(quint8 pos)
+void PageLvs::TestStart(quint8 pos)
 {
     if (Testing)
         return;
+    qDebug()<<pos;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x05)<<quint8(0x00)
-      <<quint8(pos)<<quint8(0x00);
+    quint16 t = ui->BoxTime->value()*10;
+    quint16 v = ui->BoxVolt->value()*10;
+    out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
+      <<quint8(t/256)<<quint8(t%256)<<quint8(v/256)<<quint8(v%256)
+     <<quint8(0x00)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
-    Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
-        Judge = "NG";
         emit SendMessage(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
@@ -272,75 +257,49 @@ void PageAcw::TestStart(quint8 pos)
             emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
-    QStringList s;
-    s.append("交耐");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       更新测试数据
- * date:        2017.01.13
- * brief:       求平均
 *******************************************************************************/
-void PageAcw::TestResult(QByteArray msg)
+void PageLvs::TestResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    double p = quint16(msg.at(5)*256)+quint8(msg.at(6));
     Volt.append(v);
-    Curr.append(tt);
+    Curr.append(c);
+    Power.append(p);
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       停止测试
 *******************************************************************************/
-void PageAcw::TestStop()
+void PageLvs::TestStop()
 {
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = false;
+
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       配置
 *******************************************************************************/
-void PageAcw::TestConfig()
+void PageLvs::TestConfig()
 {
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    int freq = ui->BoxFrequcy->currentText().toInt();
-    int volt = ui->BoxVoltage->value();
-    int time = ui->BoxTime->value()*10;
-    int min = ui->BoxMin->value()*100;
-    int max = ui->BoxMax->value()*100;
-    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x00)<<quint8(0x05)
-      <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(freq);
-    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x00)<<quint8(volt/256)
-      <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
-    out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x00)
-      <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.20
+ * date:       2017.02.16
  * brief:      等待测试结束
- * date:       2017.02.15
- * brief:      去除超时处理
 *******************************************************************************/
-bool PageAcw::WaitTestOver(quint16 t)
+bool PageLvs::WaitTestOver(quint16 t)
 {
     TimeOut = 0;
     while (Testing) {
@@ -354,10 +313,10 @@ bool PageAcw::WaitTestOver(quint16 t)
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       延时
 *******************************************************************************/
-void PageAcw::Delay(int ms)
+void PageLvs::Delay(int ms)
 {
     QElapsedTimer t;
     t.start();
@@ -367,23 +326,20 @@ void PageAcw::Delay(int ms)
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       更新显示
 *******************************************************************************/
-void PageAcw::showEvent(QShowEvent *)
+void PageLvs::showEvent(QShowEvent *)
 {
     DatInit();
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.20
+ * date:        2017.02.16
  * brief:       退出保存
 *******************************************************************************/
-void PageAcw::hideEvent(QHideEvent *)
+void PageLvs::hideEvent(QHideEvent *)
 {
     DatSave();
 }
-/*******************************************************************************
- *                                  END
-*******************************************************************************/

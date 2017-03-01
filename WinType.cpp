@@ -208,7 +208,7 @@ void WinType::judgeButton(int id)
         TypeQuery();
         break;
     case Qt::Key_4:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -248,7 +248,7 @@ void WinType::TypesInit()
 void WinType::ItemsInit()
 {
     QStringList temp;
-    QSettings *g_settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //可使用的测试项目
@@ -279,7 +279,7 @@ void WinType::SetInit()
     qDebug()<<QTime::currentTime().toString()<<"读取电机型号";
 
     QStringList temp;
-    QSettings *g_settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
@@ -322,7 +322,7 @@ void WinType::SetSave()
     qDebug()<<QTime::currentTime().toString()<<"保存电机型号";
 
     QStringList temp;
-    QSettings *g_settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
@@ -402,25 +402,25 @@ void WinType::selectItemToTest(int row, int column)
         if (ui->TabProj->item(row,0)->text() == tr("空"))
             ui->Other->setCurrentIndex(0);
         if (ui->TabProj->item(row,0)->text() == tr("电阻"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageDcr");
+            emit SendMessage(ADDR,CMD_JUMP,"PageDcr");
         if (ui->TabProj->item(row,0)->text() == tr("反嵌"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageMag");
+            emit SendMessage(ADDR,CMD_JUMP,"PageMag");
         if (ui->TabProj->item(row,0)->text() == tr("绝缘"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageInr");
+            emit SendMessage(ADDR,CMD_JUMP,"PageInr");
         if (ui->TabProj->item(row,0)->text() == tr("交耐"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageAcw");
+            emit SendMessage(ADDR,CMD_JUMP,"PageAcw");
         if (ui->TabProj->item(row,0)->text() == tr("直耐"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageDcw");
+            emit SendMessage(ADDR,CMD_JUMP,"PageDcw");
         if (ui->TabProj->item(row,0)->text() == tr("匝间"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageImp");
+            emit SendMessage(ADDR,CMD_JUMP,"PageImp");
         if (ui->TabProj->item(row,0)->text() == tr("电感"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageInd");
+            emit SendMessage(ADDR,CMD_JUMP,"PageInd");
         if (ui->TabProj->item(row,0)->text() == tr("功率"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PagePwr");
+            emit SendMessage(ADDR,CMD_JUMP,"PagePwr");
         if (ui->TabProj->item(row,0)->text() == tr("低启"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageLvs");
+            emit SendMessage(ADDR,CMD_JUMP,"PageLvs");
         if (ui->TabProj->item(row,0)->text() == tr("堵转"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageLck");
+            emit SendMessage(ADDR,CMD_JUMP,"PageLck");
         return;
     }
     if (ui->TabTest->currentRow() == ui->TabTest->rowCount()-1) {
@@ -449,7 +449,7 @@ void WinType::TypeAdd()
         if (ui->TabFile->item(i,0)->text() == t)
             return;
     }
-    QSettings *g_settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
@@ -486,7 +486,7 @@ void WinType::TypeRead()
     }
     QString t = ui->TabFile->currentItem()->text();
     t.append(".ini");
-    QSettings *g_settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     g_settings->setValue("FileInUse",t);

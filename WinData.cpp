@@ -73,7 +73,7 @@ void WinData::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
         if (ui->WidgetShow->currentIndex() == 0)

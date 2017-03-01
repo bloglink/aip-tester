@@ -30,6 +30,10 @@ WinHome::WinHome(QWidget *parent) :
   */
 WinHome::~WinHome()
 {
+    thread_can->quit();
+    thread_can->wait();
+    thread_sql->quit();
+    thread_sql->wait();
     delete ui;
 }
 /**
@@ -147,6 +151,22 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pagePwr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
+    PageLvs *pageLvs = new PageLvs(this);
+    ui->desktop->addWidget(pageLvs);
+    pageLvs->setObjectName("PageLvs");
+    connect(pageLvs,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageLvs,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
+    PageLck *pageLck = new PageLck(this);
+    ui->desktop->addWidget(pageLck);
+    pageLck->setObjectName("PageLck");
+    connect(pageLck,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageLck,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
@@ -216,6 +236,61 @@ void WinHome::BtnJudge(int id)
     }
 }
 /**
+  * @brief  Initializes can thread
+  * @param  None
+  * @retval None
+  */
+void WinHome::CanInit()
+{
+    thread_can = new QThread(this);
+    can.moveToThread(thread_can);
+    connect(thread_can,SIGNAL(started()),&can,SLOT(DeviceOpen()));
+    connect(thread_can,SIGNAL(finished()),&can,SLOT(DeviceQuit()));
+    connect(this,SIGNAL(PutCanData(QByteArray)),&can,SLOT(WriteAll(QByteArray)));
+    connect(&can,SIGNAL(GetCanData(QByteArray)),this,SLOT(CanThread(QByteArray)));
+    thread_can->start();
+}
+/**
+  * @brief  Initializes sql thread
+  * @param  None
+  * @retval None
+  */
+void WinHome::SqlInit()
+{
+    thread_sql = new QThread(this);
+    sql.moveToThread(thread_sql);
+    connect(thread_sql,SIGNAL(started()),&sql,SLOT(DeviceOpen()));
+    connect(thread_sql,SIGNAL(finished()),&sql,SLOT(DeviceQuit()));
+    connect(this,SIGNAL(WriteSql(QByteArray)),&sql,SLOT(Write(QByteArray)));
+    thread_sql->start();
+}
+/**
+  * @brief  Can data read
+  * @param  msg:can data
+  * @retval None
+  */
+void WinHome::CanThread(QByteArray msg)
+{
+    if (!msg.isEmpty()) {
+        quint16 id;
+        quint8 dlc;
+        quint8 dat;
+        QByteArray cmd;
+        QDataStream in(&msg, QIODevice::ReadWrite);
+        in.setVersion(QDataStream::Qt_4_8);
+
+        while(!in.atEnd()) {
+            in >> id >> dlc;
+            cmd.clear();
+            for (int i=0; i<dlc; i++) {
+                in >> dat;
+                cmd.append(dat);
+            }
+            emit SendMessage(id,CMD_CAN,cmd);
+        }
+    }
+}
+/**
   * @brief  Excute command
   * @param  addr:target address;cmd:command to excute;msg:command param
   * @retval None
@@ -223,42 +298,40 @@ void WinHome::BtnJudge(int id)
 void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     switch (cmd) {
-    case WIN_CMD_SWITCH:
+    case CMD_JUMP:
         WinJump(msg);
         break;
-    case WIN_CMD_INIT:
+    case CMD_INIT:
         TestInit();
         break;
-    case WIN_CMD_SHOW:
+    case CMD_INIT_ITEM:
         Items.append(QString(msg).split("\n"));
         break;
-    case WIN_CMD_JUDGE:
+    case CMD_JUDGE:
         TestSaveJudge(msg);
         break;
-    case WIN_CMD_ITEM:
+    case CMD_ITEM:
         emit WriteSql(msg);
-    case WIN_CMD_TEMP:
-    case WIN_WAVE_BYTE:
-    case WIN_WAVE_TEST:
-    case WIN_WAVE_ITEM:
-    case WIN_WAVE_HIDE:
+    case CMD_TEMP:
+    case CMD_WAVE_BYTE:
+    case CMD_WAVE_TEST:
+    case CMD_WAVE_ITEM:
+    case CMD_WAVE_HIDE:
         emit SendMessage(WIN_ID_TEST,cmd,msg);
         break;
-    case WIN_CMD_DEBUG:
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,msg);
+    case CMD_DEBUG:
+        emit SendMessage(ADDR,CMD_DEBUG,msg);
         break;
-    case WIN_CMD_WAVE:
-        emit SendMessage(ADDR,WIN_CMD_WAVE,msg);
+    case CMD_WAVE:
+        emit SendMessage(ADDR,CMD_WAVE,msg);
         break;
-    case CAN_DAT_GET:
-        break;
-    case CAN_DAT_PUT:
+    case CMD_CAN:
         emit PutCanData(msg);
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         TestStart(msg);
         break;
-    case CAN_CMD_STOP:
+    case CMD_STOP:
         Testing = false;
         break;
     default:
@@ -277,7 +350,7 @@ void WinHome::TestInit()
 
     Items.clear();
     //全局配置
-    QSettings *settings_g = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
     settings_g->setIniCodec("GB18030");
     settings_g->beginGroup("GLOBAL");
     motor_type = settings_g->value("FileInUse","default.ini").toString();
@@ -290,12 +363,12 @@ void WinHome::TestInit()
     ItemToTest = settings_c->value("/GLOBAL/ProjToTest","").toString().split(" ");
     PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
-    emit SendMessage(WIN_ID_OUT,CAN_CMD_INIT,NULL);//设定启动方式
+    emit SendMessage(WIN_ID_OUT,CMD_INIT,NULL);//设定启动方式
 
     for (int i=0; i<ItemToTest.size(); i++) {
-        emit SendMessage(ItemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
+        emit SendMessage(ItemToTest.at(i).toInt(),CMD_INIT,NULL);
     }
-    emit SendMessage(WIN_ID_TEST,WIN_CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
+    emit SendMessage(WIN_ID_TEST,CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
@@ -312,17 +385,17 @@ void WinHome::TestCheck()
     Testing = true;
 
     //全局配置
-    QSettings *settings_g = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
     settings_g->setIniCodec("GB18030");
     settings_g->beginGroup("GLOBAL");
 
     QStringList t = (settings_g->value("ItemEnable","0 1 2 3 4 6").toString()).split(" ");
     for (int i=0; i<t.size(); i++) {
-        emit SendMessage(t.at(i).toInt(),CAN_CMD_CHECK,NULL);
+        emit SendMessage(t.at(i).toInt(),CMD_CHECK,NULL);
     }
     QStringList s = (settings_g->value("OutEnable","0").toString()).split(" ");
     for (int i=0; i<s.size(); i++) {
-        emit SendMessage(WIN_ID_OUT,CAN_CMD_CHECK,s.at(i).toUtf8());
+        emit SendMessage(WIN_ID_OUT,CMD_CHECK,s.at(i).toUtf8());
     }
     qDebug()<<QTime::currentTime().toString()<<"开机自检OK";
 
@@ -353,14 +426,14 @@ void WinHome::TestStart(QByteArray station)
 
     TestInit();
 
-    emit SendMessage(WIN_ID_TEST,CAN_CMD_START,station);
+    emit SendMessage(WIN_ID_TEST,CMD_START,station);
 
     QByteArray msg;
     msg.append(0x02 | 0x00);
-    emit SendMessage(ADDR,CAN_CMD_ALARM,msg);
+    emit SendMessage(ADDR,CMD_ALARM,msg);
 
     for (int i=0; i<ItemToTest.size(); i++) {
-        emit SendMessage(ItemToTest.at(i).toInt(),CAN_CMD_START,station);
+        emit SendMessage(ItemToTest.at(i).toInt(),CMD_START,station);
         if (!Testing)
             break;
     }
@@ -368,21 +441,21 @@ void WinHome::TestStart(QByteArray station)
     if (ItemJudge == "NG") {
         msg.clear();
         msg.append(0x08 | 0x01);
-        emit SendMessage(ADDR,CAN_CMD_ALARM,msg);
+        emit SendMessage(ADDR,CMD_ALARM,msg);
         Delay(500);
         msg.clear();
         msg.append(0x08 | 0x00);
-        emit SendMessage(ADDR,CAN_CMD_ALARM,msg);
+        emit SendMessage(ADDR,CMD_ALARM,msg);
     } else {
         msg.clear();
         msg.append(0x04 | 0x01);
-        emit SendMessage(ADDR,CAN_CMD_ALARM,msg);
+        emit SendMessage(ADDR,CMD_ALARM,msg);
         Delay(200);
         msg.clear();
         msg.append(0x04 | 0x00);
-        emit SendMessage(ADDR,CAN_CMD_ALARM,msg);
+        emit SendMessage(ADDR,CMD_ALARM,msg);
     }
-    emit SendMessage(WIN_ID_TEST,WIN_CMD_JUDGE,ItemJudge.toUtf8());
+    emit SendMessage(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
     Testing = false;
 }
 /**
@@ -461,7 +534,10 @@ void WinHome::Delay(int ms)
 void WinHome::showEvent(QShowEvent *)
 {
     QTimer *timer = new QTimer(this);
-    if (!isCheckOk)
+    if (!isCheckOk) {
+        CanInit();
+        SqlInit();
         timer->singleShot(50,this,SLOT(WinInitAll()));
+    }
 }
 /*********************************END OF FILE**********************************/

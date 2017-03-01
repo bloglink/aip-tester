@@ -99,7 +99,7 @@ void PageImp::BtnJudge(int id)
         ui->WindgetSetImp->setCurrentIndex(0);
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_3:
         if (Freq[ui->TabSetImp->currentRow()] != 0)
@@ -130,7 +130,7 @@ void PageImp::BtnJudge(int id)
 void PageImp::DatInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间数据";
-    QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
+    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
     FileInUse = global->value("FileInUse","default.ini").toString();
@@ -495,24 +495,24 @@ void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     if (addr != ADDR && addr != WIN_ID_IMP && addr != CAN_ID_IMP && addr != CAN_ID_IMP_WAVE)
         return;
     switch (cmd) {
-    case CAN_DAT_GET:
+    case CMD_CAN:
         ExcuteCanCmd(addr,msg);
         break;
-    case CAN_CMD_CHECK:
+    case CMD_CHECK:
         TestCheck();
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         TestStart(msg.toInt());
         break;
-    case CAN_CMD_STOP:
+    case CMD_STOP:
         TestStop();
         break;
-    case CAN_CMD_INIT:
+    case CMD_INIT:
         DatInit();
         TestInit();
         TestConfig();
         break;
-    case WIN_CMD_WAVE:
+    case CMD_WAVE:
         TestWaveShow(msg);
         break;
     default:
@@ -552,8 +552,8 @@ void PageImp::ExcuteCanCmd(int id,QByteArray msg)
             WaveImp.at(CurrentWave)->WaveTest.clear();
             QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
             QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
-            emit SendMessage(ADDR,WIN_WAVE_ITEM,i);
-            emit SendMessage(ADDR,WIN_WAVE_BYTE,w);
+            emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
+            emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
         }
     }
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff) {
@@ -565,7 +565,7 @@ void PageImp::ExcuteCanCmd(int id,QByteArray msg)
         }
         if (Testing) {
             w = WaveImp.at(CurrentWave)->WaveTest;
-            emit SendMessage(ADDR,WIN_WAVE_TEST,w);
+            emit SendMessage(ADDR,CMD_WAVE_TEST,w);
             TestResult(msg);
         }
     }
@@ -609,7 +609,7 @@ void PageImp::TestInit()
             WaveNumber.append(row);
         }
     }
-    emit SendMessage(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
+    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -623,12 +623,12 @@ void PageImp::TestCheck()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x24)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("匝间板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"IMP Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"IMP Error\n");
     }
 }
 /*******************************************************************************
@@ -644,11 +644,11 @@ void PageImp::TestCheckOk(QByteArray)
     }
     if (Sampling) {
         Sampling = false;
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"IMP Sample ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"IMP Sample ok\n");
     }
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"IMP check ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"IMP check ok\n");
     }
 }
 /*******************************************************************************
@@ -669,7 +669,7 @@ void PageImp::TestSampleAuto()
     }
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x01)<<quint8(0x13)
       <<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Sampling = true;
 }
 /*******************************************************************************
@@ -686,7 +686,7 @@ void PageImp::TestSample(quint16 t)
     quint16 tt = 0x0001<<t;
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x02)<<quint8(0x13)
       <<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Sampling = true;
 }
 /*******************************************************************************
@@ -702,7 +702,7 @@ void PageImp::TestStart(quint8 pos)
     if (Testing || Sampling)
         return;
 
-    emit SendMessage(ADDR,WIN_WAVE_HIDE,NULL);
+    emit SendMessage(ADDR,CMD_WAVE_HIDE,NULL);
 
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -714,7 +714,7 @@ void PageImp::TestStart(quint8 pos)
     }
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(pos)
       <<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
@@ -727,7 +727,7 @@ void PageImp::TestStart(quint8 pos)
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
     }
@@ -735,7 +735,7 @@ void PageImp::TestStart(quint8 pos)
     s.append("匝间");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -808,7 +808,7 @@ void PageImp::TestResult(QByteArray )
         t[2] = n;
     if (t.at(3) == " ")
         t[3] = judge;
-    emit SendMessage(ADDR,WIN_CMD_ITEM,t.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_ITEM,t.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -842,11 +842,11 @@ void PageImp::TestWaveShow(QByteArray msg)
     for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
         QByteArray w;
         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
-        emit SendMessage(ADDR,WIN_WAVE_ITEM,w);
+        emit SendMessage(ADDR,CMD_WAVE_ITEM,w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-        emit SendMessage(ADDR,WIN_WAVE_BYTE,w);
+        emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
-        emit SendMessage(ADDR,WIN_WAVE_TEST,w);
+        emit SendMessage(ADDR,CMD_WAVE_TEST,w);
     }
 }
 /*******************************************************************************
@@ -861,7 +861,7 @@ void PageImp::TestStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x24)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 /*******************************************************************************
@@ -884,7 +884,7 @@ void PageImp::TestConfig()
         <<quint8(int(Volt.at(row)->value())/256)<<quint8(int(Volt.at(row)->value())%256)
         <<quint8(TestGear(row))<<quint8(Freq.at(row));
     }
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:     1.0

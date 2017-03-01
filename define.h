@@ -3,8 +3,7 @@
 
 #include <QApplication>
 
-#define GLOBAL_PATH "./nandflash/global.ini"
-#define GLOBAL_SET GLOBAL_PATH
+#define INI_PATH "./nandflash/global.ini"
 #define SQL_PATH "./nandflash/aip.db"
 
 #define ADDR 6000
@@ -29,69 +28,49 @@
 #define ONLINE_DEVICES          2006 //在线设备列表
 #define HEART_BEAT              6000 //心跳
 
-#define WIN_CMD_SWITCH  7000
-#define WIN_CMD_INIT    7001
-#define WIN_CMD_RESULT  7002
-#define WIN_CMD_JUDGE   7003
-#define WIN_CMD_TEMP    7004
-#define WIN_WAVE_BYTE   7005
-#define WIN_WAVE_TEST   7006
-#define WIN_WAVE_ITEM   7007
-#define WIN_CMD_DEBUG   7008
-#define WIN_CMD_WAVE    7009
-#define WIN_CMD_SHOW    7010
-#define WIN_CMD_ITEM    7011
-#define WIN_CMD_STYLE   7012
-#define WIN_WAVE_HIDE   7013
+#define CMD_JUMP        0x00    //界面跳转
+#define CMD_INIT        0x01    //测试界面初始化
+#define CMD_TEMP        0x02    //显示温度
+#define CMD_WAVE        0x03    //更新波形
+#define CMD_ITEM        0x04    //更新测试项目
+#define CMD_JUDGE       0x05    //测试结果判定
+#define CMD_DEBUG       0x06    //调试信息显示
+#define CMD_WAVE_BYTE   0x07    //标准波形
+#define CMD_WAVE_TEST   0x08    //测试波形
+#define CMD_WAVE_ITEM   0x09    //波形标题
+#define CMD_INIT_ITEM   0x0A    //添加测试项目
+#define CMD_WAVE_HIDE   0x0B    //清空测试波形
+#define CMD_CAN         0x10    //CAN消息
+#define CMD_CHECK       0x11    //查询板子状态
+#define CMD_START       0x12    //启动测试
+#define CMD_STOP        0x13    //停止测试
+#define CMD_ALARM       0x14    //报警
+#define CAN_CMD_READY   0x15
 
-#define WIN_ID_TEST     0x00
-#define WIN_ID_DCR      0x01
-#define WIN_ID_MAG      0x02
-#define WIN_ID_IR       0x03
-#define WIN_ID_ACW      0x04
-#define WIN_ID_DCW      0x05
-#define WIN_ID_IMP      0x06
-#define WIN_ID_INDL     0x07
-#define WIN_ID_PWR      0x08
-#define WIN_ID_LVS      0x09
-#define WIN_ID_BLOCK    0x0A
-#define WIN_ID_OUT      0x13
+#define WIN_ID_TEST     0x00    //测试界面
+#define WIN_ID_DCR      0x01    //电阻界面
+#define WIN_ID_MAG      0x02    //反嵌界面
+#define WIN_ID_INR      0x03    //绝缘界面
+#define WIN_ID_ACW      0x04    //交耐界面
+#define WIN_ID_DCW      0x05    //直耐界面
+#define WIN_ID_IMP      0x06    //匝间界面
+#define WIN_ID_IND      0x07    //电感界面
+#define WIN_ID_PWR      0x08    //功率界面
+#define WIN_ID_LVS      0x09    //低启界面
+#define WIN_ID_LCK      0x0A    //堵转界面
+#define WIN_ID_OUT      0x13    //输出板
 
-#define CAN_DAT_GET 8000
-#define CAN_DAT_PUT 8001
-#define CAN_CMD_CHECK 9000
-#define CAN_CMD_START 9001
-#define CAN_CMD_STOP  9002
-#define CAN_CMD_INIT  9003
-#define CAN_CMD_ALARM 9004
-#define CAN_CMD_READY 9005
-
-#define CTRL_CMD_START 9000
-#define CTRL_CMD_STOP  9001
-
-
-#define CAN_ID_DCR       0x41         // 电阻板
-#define CAN_ID_DCR_WAVE  0x441        // 电阻板反嵌波形
-#define CAN_ID_IR        0x61         // 耐压板
-#define CAN_ID_IMP       0x81         // 匝间板
-#define CAN_ID_IMP_WAVE  0x481        // 匝间板波形
-#define CAN_ID_INDL      0xC1
-#define CAN_ID_PWR       0xE1
-#define CAN_ID_13OUT     0x261        // 输出板13
-#define CAN_ID_14OUT     0x281        // 输出板14
-#define CAN_ID_15OUT     0x2A1        // 输出板15
-#define CAN_ID_16OUT     0x2C1        // 输出板16
-#define CAN_ID_17OUT     0x2E1        // 输出板17
-
-#define CAN_CMD_STATE        0x00     //上传状态
-#define CAN_CMD_RESULT_ONE   0x01     //上传结果1
-#define CAN_CMD_RESULT_TWO   0x02     //上传结果2
-#define CAN_CMD_WAVE         0x03     //上传波形
-#define CAN_CMD_DEBUG        0x06     //上传调试参数
-#define CAN_CMD_VERSION      0x08     //上传版本
-
-
-//extern
-
+#define CAN_ID_DCR      0x41    // 电阻板
+#define CAN_ID_DCR_WAVE 0x441   // 电阻板反嵌波形
+#define CAN_ID_INR      0x61    // 耐压板
+#define CAN_ID_IMP      0x81    // 匝间板
+#define CAN_ID_IMP_WAVE 0x481   // 匝间板波形
+#define CAN_ID_IND      0xC1    // 电感板
+#define CAN_ID_PWR      0xE1    // 功率板
+#define CAN_ID_13OUT    0x261   // 输出板13
+#define CAN_ID_14OUT    0x281   // 输出板14
+#define CAN_ID_15OUT    0x2A1   // 输出板15
+#define CAN_ID_16OUT    0x2C1   // 输出板16
+#define CAN_ID_17OUT    0x2E1   // 输出板17
 
 #endif // DEFINE_H

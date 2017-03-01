@@ -6,6 +6,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QWidget>
+#include <QThread>
 #include <QSettings>
 #include <QMessageBox>
 #include <QButtonGroup>
@@ -24,6 +25,11 @@
 #include "PageImp.h"
 #include "PageInd.h"
 #include "PagePwr.h"
+#include "PageLvs.h"
+#include "PageLck.h"
+
+#include "sql.h"
+#include "CanSocket.h"
 
 namespace Ui {
 class WinHome;
@@ -50,6 +56,9 @@ private slots:
     void WinJump(QByteArray win);
     void BtnInit(void);
     void BtnJudge(int id);
+    void CanInit(void);
+    void SqlInit(void);
+    void CanThread(QByteArray msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
     void TestInit(void);
@@ -71,6 +80,11 @@ private:
     QStringList ItemToTest;
     int PauseMode;
     QStringList Items;
+
+    QThread *thread_can;
+    QThread *thread_sql;
+    CanSocket can;
+    Sql sql;
 };
 
 #endif // WINHOME_H

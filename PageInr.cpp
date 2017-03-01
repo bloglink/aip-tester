@@ -53,7 +53,7 @@ void PageInr::BtnJudge(int id)
     case Qt::Key_1:
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -68,7 +68,7 @@ void PageInr::BtnJudge(int id)
 void PageInr::DatInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"绝缘数据";
-    QSettings *global = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
     FileInUse = global->value("FileInUse","default.ini").toString();
@@ -118,27 +118,27 @@ void PageInr::DatSave()
 
 void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_IR && addr != CAN_ID_IR)
+    if (addr != ADDR && addr != WIN_ID_INR && addr != CAN_ID_INR)
         return;
     switch (cmd) {
-    case CAN_DAT_GET:
+    case CMD_CAN:
         ExcuteCanCmd(msg);
         break;
-    case CAN_CMD_CHECK:
+    case CMD_CHECK:
         TestCheck();
         break;
-    case CAN_CMD_START:
+    case CMD_START:
         TestStart(msg.toInt());
         break;
-    case CAN_CMD_STOP:
+    case CMD_STOP:
         TestStop();
         break;
-    case CAN_CMD_INIT:
+    case CMD_INIT:
         DatInit();
         TestInit();
         TestConfig();
         break;
-    case CAN_CMD_ALARM:
+    case CMD_ALARM:
         TestAlarm(quint8(msg.at(0)));
         break;
     default:
@@ -181,7 +181,7 @@ void PageInr::TestInit()
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
-    emit SendMessage(ADDR,WIN_CMD_SHOW,Items.join("\n").toUtf8());
+    emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -195,12 +195,12 @@ void PageInr::TestCheck()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"IR Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"IR Error\n");
     }
 }
 /*******************************************************************************
@@ -217,7 +217,7 @@ void PageInr::TestCheckOk(QByteArray )
 {
     Testing = false;
     if (!isCheckOk) {
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"Ir check ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Ir check ok\n");
         isCheckOk = true;
     }
     if (Volt.isEmpty() || Res.isEmpty())
@@ -247,7 +247,7 @@ void PageInr::TestCheckOk(QByteArray )
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
     Volt.clear();
     Res.clear();
@@ -269,27 +269,27 @@ void PageInr::TestStart(quint8 pos)
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x04)<<quint8(0x00)
       <<quint8(pos)<<quint8(0x01);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
         Judge = "NG";
-        emit SendMessage(ADDR,WIN_CMD_JUDGE,"NG");
+        emit SendMessage(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
     QStringList s;
     s.append("绝缘");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -320,7 +320,7 @@ void PageInr::TestStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 /*******************************************************************************
@@ -344,7 +344,7 @@ void PageInr::TestConfig()
       <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
     out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x01)
       <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);//上限
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:     1.0
@@ -359,7 +359,7 @@ void PageInr::TestAlarm(quint8 port)
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x02)<<quint8(0x09)<<quint8(port);
-    emit SendMessage(ADDR,CAN_DAT_PUT,msg);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:     1.0
