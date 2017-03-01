@@ -91,15 +91,15 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winTest,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
-//    Resistance *resistance = new Resistance(this);
-//    ui->desktop->addWidget(resistance);
-//    resistance->setObjectName("电阻");
-//    connect(resistance,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
-//            SLOT(ReadMessage(quint16,quint16,QByteArray)));
-//    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),resistance,
-//            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    PageDcr *pageDcr = new PageDcr(this);
+    ui->desktop->addWidget(pageDcr);
+    pageDcr->setObjectName("PageDcr");
+    connect(pageDcr,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageDcr,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
-//    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
+    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
 

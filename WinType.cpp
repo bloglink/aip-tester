@@ -402,25 +402,25 @@ void WinType::selectItemToTest(int row, int column)
         if (ui->TabProj->item(row,0)->text() == tr("空"))
             ui->Other->setCurrentIndex(0);
         if (ui->TabProj->item(row,0)->text() == tr("电阻"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"电阻");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageDcr");
         if (ui->TabProj->item(row,0)->text() == tr("反嵌"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"反嵌");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageMag");
         if (ui->TabProj->item(row,0)->text() == tr("绝缘"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"绝缘");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageInr");
         if (ui->TabProj->item(row,0)->text() == tr("交耐"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"交耐");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageAcw");
         if (ui->TabProj->item(row,0)->text() == tr("直耐"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"直耐");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageDcw");
         if (ui->TabProj->item(row,0)->text() == tr("匝间"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"匝间");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageImp");
         if (ui->TabProj->item(row,0)->text() == tr("电感"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"电感");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageInd");
         if (ui->TabProj->item(row,0)->text() == tr("功率"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"功率");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PagePwr");
         if (ui->TabProj->item(row,0)->text() == tr("低启"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"低启");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageLvs");
         if (ui->TabProj->item(row,0)->text() == tr("堵转"))
-            emit SendMessage(ADDR,WIN_CMD_SWITCH,"堵转");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"PageLck");
         return;
     }
     if (ui->TabTest->currentRow() == ui->TabTest->rowCount()-1) {

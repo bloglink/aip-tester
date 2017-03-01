@@ -17,7 +17,7 @@
 #include "WinType.h"
 #include "WinData.h"
 #include "WinTest.h"
-#include "Resistance.h"
+#include "PageDcr.h"
 
 namespace Ui {
 class WinHome;

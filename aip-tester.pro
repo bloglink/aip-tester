@@ -14,7 +14,6 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
     Histogram.cpp \
-    Test.cpp \
     Waveform.cpp \
     Resistance.cpp \
     InputNum.cpp \
@@ -23,11 +22,11 @@ SOURCES += main.cpp\
     WinSyst.cpp \
     WinType.cpp \
     WinData.cpp \
-    WinTest.cpp
+    WinTest.cpp \
+    PageDcr.cpp
 
 HEADERS  += \
     Histogram.h \
-    Test.h \
     Waveform.h \
     Resistance.h \
     InputNum.h \
@@ -36,10 +35,10 @@ HEADERS  += \
     WinSyst.h \
     WinType.h \
     WinData.h \
-    WinTest.h
+    WinTest.h \
+    PageDcr.h
 
 FORMS    += \
-    Test.ui \
     Resistance.ui \
     InputNum.ui \
     PageKey.ui \
@@ -47,7 +46,8 @@ FORMS    += \
     WinSyst.ui \
     WinType.ui \
     WinData.ui \
-    WinTest.ui
+    WinTest.ui \
+    PageDcr.ui
 
 RESOURCES += \
     image.qrc \
