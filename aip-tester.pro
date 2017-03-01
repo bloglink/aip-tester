@@ -23,7 +23,8 @@ SOURCES += main.cpp\
     PageKey.cpp \
     WinHome.cpp \
     WinSyst.cpp \
-    WinType.cpp
+    WinType.cpp \
+    WinData.cpp
 
 HEADERS  += \
     MotorType.h \
@@ -36,7 +37,8 @@ HEADERS  += \
     PageKey.h \
     WinHome.h \
     WinSyst.h \
-    WinType.h
+    WinType.h \
+    WinData.h
 
 FORMS    += \
     MotorType.ui \
@@ -47,7 +49,8 @@ FORMS    += \
     PageKey.ui \
     WinHome.ui \
     WinSyst.ui \
-    WinType.ui
+    WinType.ui \
+    WinData.ui
 
 RESOURCES += \
     image.qrc \

@@ -15,7 +15,7 @@
 
 #include "WinSyst.h"
 #include "WinType.h"
-#include "SqlPage.h"
+#include "WinData.h"
 #include "Test.h"
 #include "Resistance.h"
 

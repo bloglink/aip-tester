@@ -77,10 +77,10 @@ void WinHome::WinInitAll()
     connect(winType,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
-    SqlPage *sql = new SqlPage(this);
-    ui->desktop->addWidget(sql);
-    sql->setObjectName("数据管理");
-    connect(sql,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    WinData *winData = new WinData(this);
+    ui->desktop->addWidget(winData);
+    winData->setObjectName("WinData");
+    connect(winData,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
     Test *test = new Test(this);
@@ -157,7 +157,7 @@ void WinHome::BtnJudge(int id)
         WinJump("WinType");
         break;
     case Qt::Key_3:
-        WinJump("数据管理");
+        WinJump("WinData");
         break;
     case Qt::Key_4:
         WinJump("进入测试");
