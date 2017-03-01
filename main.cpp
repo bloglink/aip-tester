@@ -39,7 +39,6 @@ int main(int argc, char *argv[])
     w.show();
     w.resize(1024,768);
 #endif
-    w.WinInitAll();
     return a.exec();
 }
 /*********************************END OF FILE**********************************/

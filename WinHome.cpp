@@ -115,6 +115,14 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
+    PageAcw *pageAcw = new PageAcw(this);
+    ui->desktop->addWidget(pageAcw);
+    pageAcw->setObjectName("PageAcw");
+    connect(pageAcw,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageAcw,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
@@ -248,7 +256,7 @@ void WinHome::TestInit()
     QSettings *settings_g = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
     settings_g->setIniCodec("GB18030");
     settings_g->beginGroup("GLOBAL");
-    motor_type = settings_g->value("motor_type","default.ini").toString();
+    motor_type = settings_g->value("FileInUse","default.ini").toString();
     motor_type.remove(".ini");
     //当前配置
     QString n = QString("./config/%1.ini").arg(motor_type);
@@ -264,6 +272,7 @@ void WinHome::TestInit()
         emit SendMessage(ItemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
     }
     emit SendMessage(WIN_ID_TEST,WIN_CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
+    qDebug()<<ItemToTest;
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
@@ -425,5 +434,12 @@ void WinHome::Delay(int ms)
     t.start();
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
+}
+
+void WinHome::showEvent(QShowEvent *)
+{
+    QTimer *timer = new QTimer(this);
+    if (!isCheckOk)
+        timer->singleShot(50,this,SLOT(WinInitAll()));
 }
 /*********************************END OF FILE**********************************/

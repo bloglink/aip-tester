@@ -20,6 +20,7 @@
 #include "PageDcr.h"
 #include "PageMag.h"
 #include "PageInr.h"
+#include "PageAcw.h"
 
 namespace Ui {
 class WinHome;
@@ -40,10 +41,9 @@ signals:
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
-public slots:
-    void WinInitAll(void);
 private slots:
     void WinInit(void);
+    void WinInitAll(void);
     void WinJump(QByteArray win);
     void BtnInit(void);
     void BtnJudge(int id);
@@ -57,6 +57,8 @@ private slots:
     void TestPause(void);
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
+
+    virtual void showEvent(QShowEvent *);
 private:
     QList<int> previous_window;
     QString motor_type;

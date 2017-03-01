@@ -4,6 +4,7 @@
 #include <QApplication>
 
 #define GLOBAL_PATH "./nandflash/global.ini"
+#define GLOBAL_SET GLOBAL_PATH
 #define SQL_PATH "./nandflash/aip.db"
 
 #define ADDR 6000

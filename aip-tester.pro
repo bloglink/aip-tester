@@ -24,7 +24,8 @@ SOURCES += main.cpp\
     WinTest.cpp \
     PageDcr.cpp \
     PageMag.cpp \
-    PageInr.cpp
+    PageInr.cpp \
+    PageAcw.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -38,7 +39,8 @@ HEADERS  += \
     WinTest.h \
     PageDcr.h \
     PageMag.h \
-    PageInr.h
+    PageInr.h \
+    PageAcw.h
 
 FORMS    += \
     InputNum.ui \
@@ -50,7 +52,8 @@ FORMS    += \
     WinTest.ui \
     PageDcr.ui \
     PageMag.ui \
-    PageInr.ui
+    PageInr.ui \
+    PageAcw.ui
 
 RESOURCES += \
     image.qrc \
