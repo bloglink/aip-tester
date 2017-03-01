@@ -9,7 +9,7 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "PageKey.h"
-#include "HomePage.h"
+#include "WinHome.h"
 #include <QApplication>
 #include <QTextCodec>
 /**
@@ -32,14 +32,14 @@ int main(int argc, char *argv[])
     PageKey::Instance()->hide();
 #endif
 
-    HomePage w;
+    WinHome w;
 #ifdef __arm__
     w.showFullScreen();
 #else
     w.show();
     w.resize(1024,768);
 #endif
-    w.initAllWindows();
+    w.WinInitAll();
     return a.exec();
 }
 /*********************************END OF FILE**********************************/

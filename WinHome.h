@@ -1,5 +1,5 @@
-#ifndef HOMEPAGE_H
-#define HOMEPAGE_H
+#ifndef WINHOME_H
+#define WINHOME_H
 
 #include <QTime>
 #include <QFile>
@@ -20,40 +20,41 @@
 #include "Resistance.h"
 
 namespace Ui {
-class HomePage;
+class WinHome;
 }
 
-class HomePage : public QWidget
+class WinHome : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit HomePage(QWidget *parent = 0);
-    ~HomePage();
+    explicit WinHome(QWidget *parent = 0);
+    ~WinHome();
 
 private:
-    Ui::HomePage *ui;
+    Ui::WinHome *ui;
 
 signals:
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
-    void sendMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 public slots:
-    void initAllWindows(void);
+    void WinInitAll(void);
 private slots:
-    void initShow(void);
-    void initButton(void);
-    void judgeButton(int id);
-    void jumpToWindow(QByteArray win);
-    void readMessage(quint16 addr,quint16 cmd,QByteArray data);
-    void initTest(void);
-    void checkStatus(void);
-    void startTest(QByteArray msg);
-    void saveTest(void);
+    void WinInit(void);
+    void WinJump(QByteArray win);
+    void BtnInit(void);
+    void BtnJudge(int id);
+
+    void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void TestInit(void);
+    void TestCheck(void);
+    void TestStart(QByteArray msg);
+    void TestSaveItem(void);
+    void TestSaveJudge(QByteArray msg);
     void TestPause(void);
-    void saveJudge(QByteArray msg);
     bool WaitTestOver(quint16 t);
-    void delay(int ms);
+    void Delay(int ms);
 private:
     QList<int> previous_window;
     QString motor_type;
@@ -65,4 +66,4 @@ private:
     QStringList Items;
 };
 
-#endif // HOMEPAGE_H
+#endif // WINHOME_H
