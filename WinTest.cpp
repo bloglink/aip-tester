@@ -88,7 +88,7 @@ void WinTest::BtnJudge(int win)
         emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
         break;
     case Qt::Key_1:
-        emit SendMessage(ADDR,WIN_CMD_SWITCH,"型号管理");
+        emit SendMessage(ADDR,WIN_CMD_SWITCH,"WinType");
         break;
     case Qt::Key_3:
         if (ui->BtnCmdStart->text() == "单次测试") {
@@ -276,7 +276,10 @@ void WinTest::showTemperature(QByteArray msg)
   */
 void WinTest::showStation(QByteArray msg)
 {
-    ui->TextPos->setText(msg);
+    if (msg.toInt() == 0x13)
+        ui->TextPos->setText(tr("左"));
+    if (msg.toInt() == 0x14)
+        ui->TextPos->setText(tr("右"));
 }
 /**
   * @brief  Show current time
@@ -352,7 +355,7 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CAN_CMD_START:
         showStation(msg);
         break;
-    case WIN_CMD_DEBUG:
+    case WIN_CMD_JUDGE:
         showJudge(msg);
         break;
     default:
@@ -401,7 +404,7 @@ void WinTest::ItemInit(QByteArray msg)
   */
 void WinTest::showEvent(QShowEvent *)
 {
-//    SetInit();
+    SetInit();
 }
 /**
   * @brief  Save data when hide
@@ -410,6 +413,6 @@ void WinTest::showEvent(QShowEvent *)
   */
 void WinTest::hideEvent(QHideEvent *)
 {
-//    SetSave();
+    SetSave();
 }
 /*********************************END OF FILE**********************************/

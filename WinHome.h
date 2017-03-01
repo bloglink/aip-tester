@@ -18,6 +18,7 @@
 #include "WinData.h"
 #include "WinTest.h"
 #include "PageDcr.h"
+#include "PageMag.h"
 
 namespace Ui {
 class WinHome;

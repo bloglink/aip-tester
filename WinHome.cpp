@@ -99,6 +99,14 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageDcr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
+    PageMag *pageMag = new PageMag(this);
+    ui->desktop->addWidget(pageMag);
+    pageMag->setObjectName("PageMag");
+    connect(pageMag,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageMag,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
@@ -239,18 +247,18 @@ void WinHome::TestInit()
     QSettings *settings_c = new QSettings(n,QSettings::IniFormat);
     settings_c->setIniCodec("GB18030");
 
-    QStringList itemToTest = settings_c->value("/GLOBAL/ProjToTest","").toString().split(" ");
+    ItemToTest = settings_c->value("/GLOBAL/ProjToTest","").toString().split(" ");
+    PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
     emit SendMessage(WIN_ID_OUT,CAN_CMD_INIT,NULL);//设定启动方式
 
-    for (int i=0; i<itemToTest.size(); i++) {
-        emit SendMessage(itemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
+    for (int i=0; i<ItemToTest.size(); i++) {
+        emit SendMessage(ItemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
     }
     emit SendMessage(WIN_ID_TEST,WIN_CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
-
 /**
   * @brief  Check the board status
   * @param  None
@@ -285,9 +293,8 @@ void WinHome::TestCheck()
     if (!isCheckOk) {
         isCheckOk = true;
         Delay(1000);
-        WinJump("进入测试");
+        WinJump("WinTest");
     }
-
 }
 /**
   * @brief  Test thread
@@ -296,10 +303,11 @@ void WinHome::TestCheck()
   */
 void WinHome::TestStart(QByteArray station)
 {
+    qDebug()<<QTime::currentTime().toString()<<"启动测试"<<Testing;
     WaitTestOver(100);
     if (Testing)
         return;
-    if (ui->desktop->currentWidget()->objectName() != "进入测试")
+    if (ui->desktop->currentWidget()->objectName() != "WinTest")
         return;
     Testing = true;
     ItemJudge = "OK";
@@ -335,7 +343,7 @@ void WinHome::TestStart(QByteArray station)
         msg.append(0x04 | 0x00);
         emit SendMessage(ADDR,CAN_CMD_ALARM,msg);
     }
-    emit SendMessage(WIN_ID_TEST,WIN_CMD_JUDGE,station);
+    emit SendMessage(WIN_ID_TEST,WIN_CMD_JUDGE,ItemJudge.toUtf8());
     Testing = false;
 }
 /**

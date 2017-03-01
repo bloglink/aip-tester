@@ -308,7 +308,7 @@ void WinType::SetInit()
         ui->TabWire->item(i/2,i%2)->setBackgroundColor(QColor(temp.at(i)));
     }
 
-    ui->BoxTestNG->setCurrentIndex(c_settings->value("TestNG",0).toInt());
+    ui->BoxTestNG->setCurrentIndex(c_settings->value("TestNG","0").toInt());
     ui->BoxType->setCurrentIndex(c_settings->value("WinType","0").toInt());
     qDebug()<<QTime::currentTime().toString()<<"读取电机型号OK";
 }
