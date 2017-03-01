@@ -18,20 +18,25 @@ SOURCES += main.cpp\
     Input.cpp \
     MotorType.cpp \
     SqlPage.cpp \
-    Histogram.cpp
+    Histogram.cpp \
+    Test.cpp \
+    Waveform.cpp
 
 HEADERS  += HomePage.h \
     System.h \
     Input.h \
     MotorType.h \
     SqlPage.h \
-    Histogram.h
+    Histogram.h \
+    Test.h \
+    Waveform.h
 
 FORMS    += HomePage.ui \
     System.ui \
     Input.ui \
     MotorType.ui \
-    SqlPage.ui
+    SqlPage.ui \
+    Test.ui
 
 RESOURCES += \
     image.qrc \

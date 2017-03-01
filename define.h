@@ -42,6 +42,8 @@
 #define WIN_CMD_ITEM    7011
 #define WIN_CMD_STYLE   7012
 #define WIN_WAVE_HIDE   7013
+
+#define WIN_ID_TEST     0x00
 #define WIN_ID_DCR      0x01
 #define WIN_ID_MAG      0x02
 #define WIN_ID_IR       0x03

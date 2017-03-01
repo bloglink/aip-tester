@@ -87,6 +87,7 @@ void System::judgeButton(int id)
         modifyPassword();
         break;
     case Qt::Key_4:
+        QApplication::closeAllWindows();
         emit sendMessage(ADDR,WIN_CMD_SWITCH,NULL);
         break;
     default:
