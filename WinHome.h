@@ -21,6 +21,7 @@
 #include "PageMag.h"
 #include "PageInr.h"
 #include "PageAcw.h"
+#include "PageImp.h"
 
 namespace Ui {
 class WinHome;

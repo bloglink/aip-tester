@@ -123,6 +123,14 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageAcw,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
+    PageImp *pageImp = new PageImp(this);
+    ui->desktop->addWidget(pageImp);
+    pageImp->setObjectName("PageImp");
+    connect(pageImp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageImp,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
@@ -272,7 +280,6 @@ void WinHome::TestInit()
         emit SendMessage(ItemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
     }
     emit SendMessage(WIN_ID_TEST,WIN_CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
-    qDebug()<<ItemToTest;
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
@@ -320,7 +327,6 @@ void WinHome::TestCheck()
   */
 void WinHome::TestStart(QByteArray station)
 {
-    qDebug()<<QTime::currentTime().toString()<<"启动测试"<<Testing;
     WaitTestOver(100);
     if (Testing)
         return;
@@ -390,8 +396,8 @@ void WinHome::TestSaveJudge(QByteArray msg)
         return;
     if (s.at(2) == "NG")
         ItemJudge = "NG";
-//    if (s.at(2) == "NG" && PauseMode != 1)
-//        TestPause();
+    if (s.at(2) == "NG" && PauseMode != 1)
+        TestPause();
 }
 /******************************************************************************
  * version:     1.0

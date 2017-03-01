@@ -25,7 +25,8 @@ SOURCES += main.cpp\
     PageDcr.cpp \
     PageMag.cpp \
     PageInr.cpp \
-    PageAcw.cpp
+    PageAcw.cpp \
+    PageImp.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -40,7 +41,8 @@ HEADERS  += \
     PageDcr.h \
     PageMag.h \
     PageInr.h \
-    PageAcw.h
+    PageAcw.h \
+    PageImp.h
 
 FORMS    += \
     InputNum.ui \
@@ -53,7 +55,8 @@ FORMS    += \
     PageDcr.ui \
     PageMag.ui \
     PageInr.ui \
-    PageAcw.ui
+    PageAcw.ui \
+    PageImp.ui
 
 RESOURCES += \
     image.qrc \
