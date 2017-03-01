@@ -83,23 +83,23 @@ void WinHome::WinInitAll()
     connect(winData,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
-    Test *test = new Test(this);
-    ui->desktop->addWidget(test);
-    test->setObjectName("进入测试");
-    connect(test,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    WinTest *winTest = new WinTest(this);
+    ui->desktop->addWidget(winTest);
+    winTest->setObjectName("WinTest");
+    connect(winTest,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),test,
-            SLOT(ReadMessage(quint16,quint16,QByteArray)));
-
-    Resistance *resistance = new Resistance(this);
-    ui->desktop->addWidget(resistance);
-    test->setObjectName("电阻");
-    connect(resistance,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
-            SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),resistance,
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winTest,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
-    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
+//    Resistance *resistance = new Resistance(this);
+//    ui->desktop->addWidget(resistance);
+//    resistance->setObjectName("电阻");
+//    connect(resistance,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+//            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+//    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),resistance,
+//            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
+//    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
 
@@ -160,15 +160,13 @@ void WinHome::BtnJudge(int id)
         WinJump("WinData");
         break;
     case Qt::Key_4:
-        WinJump("进入测试");
+        WinJump("WinTest");
         break;
     case Qt::Key_5:
         QApplication::closeAllWindows();
         break;
     }
 }
-
-
 /**
   * @brief  Excute command
   * @param  addr:target address;cmd:command to excute;msg:command param
@@ -280,14 +278,16 @@ void WinHome::TestCheck()
     }
     qDebug()<<QTime::currentTime().toString()<<"开机自检OK";
 
+    ui->titleVn->show();
+    ui->Text->hide();
+
     Testing = false;
     if (!isCheckOk) {
         isCheckOk = true;
         Delay(1000);
         WinJump("进入测试");
     }
-    ui->titleVn->show();
-    ui->Text->hide();
+
 }
 /**
   * @brief  Test thread

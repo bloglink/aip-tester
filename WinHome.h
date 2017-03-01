@@ -16,7 +16,7 @@
 #include "WinSyst.h"
 #include "WinType.h"
 #include "WinData.h"
-#include "Test.h"
+#include "WinTest.h"
 #include "Resistance.h"
 
 namespace Ui {

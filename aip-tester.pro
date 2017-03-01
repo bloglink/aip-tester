@@ -13,8 +13,6 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    MotorType.cpp \
-    SqlPage.cpp \
     Histogram.cpp \
     Test.cpp \
     Waveform.cpp \
@@ -24,11 +22,10 @@ SOURCES += main.cpp\
     WinHome.cpp \
     WinSyst.cpp \
     WinType.cpp \
-    WinData.cpp
+    WinData.cpp \
+    WinTest.cpp
 
 HEADERS  += \
-    MotorType.h \
-    SqlPage.h \
     Histogram.h \
     Test.h \
     Waveform.h \
@@ -38,11 +35,10 @@ HEADERS  += \
     WinHome.h \
     WinSyst.h \
     WinType.h \
-    WinData.h
+    WinData.h \
+    WinTest.h
 
 FORMS    += \
-    MotorType.ui \
-    SqlPage.ui \
     Test.ui \
     Resistance.ui \
     InputNum.ui \
@@ -50,7 +46,8 @@ FORMS    += \
     WinHome.ui \
     WinSyst.ui \
     WinType.ui \
-    WinData.ui
+    WinData.ui \
+    WinTest.ui
 
 RESOURCES += \
     image.qrc \
