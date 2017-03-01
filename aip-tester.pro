@@ -13,7 +13,6 @@ TEMPLATE = app
 
 
 SOURCES += main.cpp\
-    System.cpp \
     MotorType.cpp \
     SqlPage.cpp \
     Histogram.cpp \
@@ -22,10 +21,10 @@ SOURCES += main.cpp\
     Resistance.cpp \
     InputNum.cpp \
     PageKey.cpp \
-    WinHome.cpp
+    WinHome.cpp \
+    WinSyst.cpp
 
 HEADERS  += \
-    System.h \
     MotorType.h \
     SqlPage.h \
     Histogram.h \
@@ -34,17 +33,18 @@ HEADERS  += \
     Resistance.h \
     InputNum.h \
     PageKey.h \
-    WinHome.h
+    WinHome.h \
+    WinSyst.h
 
 FORMS    += \
-    System.ui \
     MotorType.ui \
     SqlPage.ui \
     Test.ui \
     Resistance.ui \
     InputNum.ui \
     PageKey.ui \
-    WinHome.ui
+    WinHome.ui \
+    WinSyst.ui
 
 RESOURCES += \
     image.qrc \

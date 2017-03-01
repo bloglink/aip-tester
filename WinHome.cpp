@@ -63,12 +63,12 @@ void WinHome::WinInitAll()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口";
 
-    System *system = new System(this);
-    ui->desktop->addWidget(system);
-    system->setObjectName("系统设置");
-    connect(system,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    WinSyst *winSyst = new WinSyst(this);
+    ui->desktop->addWidget(winSyst);
+    winSyst->setObjectName("WinSyst");
+    connect(winSyst,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),system,
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winSyst,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
     MotorType *type = new MotorType(this);
@@ -136,7 +136,7 @@ void WinHome::WinJump(QByteArray win)
 void WinHome::BtnInit()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->btnSystem,Qt::Key_1);
+    btnGroup->addButton(ui->btnSyst,Qt::Key_1);
     btnGroup->addButton(ui->btnType,Qt::Key_2);
     btnGroup->addButton(ui->btnData,Qt::Key_3);
     btnGroup->addButton(ui->btnTest,Qt::Key_4);
@@ -151,7 +151,7 @@ void WinHome::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_1:
-        WinJump("系统设置");
+        WinJump("WinSyst");
         break;
     case Qt::Key_2:
         WinJump("型号管理");
@@ -286,6 +286,8 @@ void WinHome::TestCheck()
         Delay(1000);
         WinJump("进入测试");
     }
+    ui->titleVn->show();
+    ui->Text->hide();
 }
 /**
   * @brief  Test thread

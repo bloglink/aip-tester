@@ -13,7 +13,7 @@
 
 #include "define.h"
 
-#include "System.h"
+#include "WinSyst.h"
 #include "MotorType.h"
 #include "SqlPage.h"
 #include "Test.h"

@@ -1,35 +1,35 @@
 /**
   ******************************************************************************
-  * @file    System.cpp
+  * @file    WinSyst.cpp
   * @author  link
   * @version 2.0.1.0
   * @date    2017-02-28
-  * @brief   System settings
+  * @brief   WinSyst settings
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#include "System.h"
-#include "ui_System.h"
+#include "WinSyst.h"
+#include "ui_WinSyst.h"
 /**
   * @brief  Initializes
   * @param  *parent:parent widget
   * @retval None
   */
-System::System(QWidget *parent) :
+WinSyst::WinSyst(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::System)
+    ui(new Ui::WinSyst)
 {
     ui->setupUi(this);
-    initShow();
-    initButton();
-    initSettings();
+    WinInit();
+    BtnInit();
+    SetInit();
 }
 /**
   * @brief  Destruct the window
   * @param  None
   * @retval None
   */
-System::~System()
+WinSyst::~WinSyst()
 {
     delete ui;
 }
@@ -38,7 +38,7 @@ System::~System()
   * @param  None
   * @retval None
   */
-void System::initShow()
+void WinSyst::WinInit()
 {
     ui->BoxUser->setView(new QListView(this));
     ui->BoxMode->setView(new QListView(this));
@@ -50,7 +50,7 @@ void System::initShow()
   * @param  None
   * @retval None
   */
-void System::initButton()
+void WinSyst::BtnInit()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnOk,Qt::Key_0);
@@ -59,36 +59,36 @@ void System::initButton()
     btnGroup->addButton(ui->BtnSystPasswordOK,Qt::Key_3);
     btnGroup->addButton(ui->BtnSystPasswordExit,Qt::Key_4);
     btnGroup->addButton(ui->BtnExit,Qt::Key_4);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(judgeButton(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 /**
   * @brief  Button functions
   * @param  id:button id
   * @retval None
   */
-void System::judgeButton(int id)
+void WinSyst::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
         if (ui->EditPassword->text() == "aip9981")
-            emit sendMessage(ADDR,WIN_CMD_SWITCH,"WinBack");
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,"WinBack");
         else if (ui->EditPassword->text() == password)
             ui->StackWinSyst->setCurrentIndex(0);
         else
-            emit sendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+            emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
         break;
     case Qt::Key_1:
-        emit sendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
         break;
     case Qt::Key_2:
         ui->StackWinSyst->setCurrentIndex(2);
         break;
     case Qt::Key_3:
-        modifyPassword();
+        Password();
         break;
     case Qt::Key_4:
         QApplication::closeAllWindows();
-        emit sendMessage(ADDR,WIN_CMD_SWITCH,NULL);
+        emit SendMessage(ADDR,WIN_CMD_SWITCH,NULL);
         break;
     default:
         break;
@@ -99,7 +99,7 @@ void System::judgeButton(int id)
   * @param  None
   * @retval None
   */
-void System::initSettings()
+void WinSyst::SetInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置";
 
@@ -119,7 +119,7 @@ void System::initSettings()
   * @param  None
   * @retval None
   */
-void System::saveSettings()
+void WinSyst::SetSave()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置";
     QSettings *settings = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
@@ -136,21 +136,21 @@ void System::saveSettings()
   * @param  None
   * @retval None
   */
-void System::modifyPassword()
+void WinSyst::Password()
 {
     QString old = ui->EditPwdOld->text();
     QString new1 = ui->EditPwdNew->text();
     QString new2 = ui->EditPwdNewR->text();
     if ( old == password && new1 == new2)
         password = new1;
-    saveSettings();
+    SetSave();
 }
 /**
   * @brief  Excute command
   * @param  addr:target address;cmd:command to excute;msg:command param
   * @retval None
   */
-void System::readMessage(quint16 addr, quint16 cmd, QByteArray msg)
+void WinSyst::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr!=ADDR)
         return;
@@ -168,9 +168,9 @@ void System::readMessage(quint16 addr, quint16 cmd, QByteArray msg)
   * @param  None
   * @retval None
   */
-void System::showEvent(QShowEvent *)
+void WinSyst::showEvent(QShowEvent *)
 {
-    initSettings();
+    SetInit();
     ui->StackWinSyst->setCurrentIndex(1);
 }
 /**
@@ -178,8 +178,8 @@ void System::showEvent(QShowEvent *)
   * @param  None
   * @retval None
   */
-void System::hideEvent(QHideEvent *)
+void WinSyst::hideEvent(QHideEvent *)
 {
-    saveSettings();
+    SetSave();
 }
 /*********************************END OF FILE**********************************/
