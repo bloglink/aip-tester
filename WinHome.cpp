@@ -107,6 +107,14 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageMag,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
+    PageInr *pageInr = new PageInr(this);
+    ui->desktop->addWidget(pageInr);
+    pageInr->setObjectName("PageInr");
+    connect(pageInr,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInr,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();
@@ -373,8 +381,8 @@ void WinHome::TestSaveJudge(QByteArray msg)
         return;
     if (s.at(2) == "NG")
         ItemJudge = "NG";
-    if (s.at(2) == "NG" && PauseMode != 1)
-        TestPause();
+//    if (s.at(2) == "NG" && PauseMode != 1)
+//        TestPause();
 }
 /******************************************************************************
  * version:     1.0
