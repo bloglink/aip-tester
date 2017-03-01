@@ -1,86 +1,86 @@
-#ifndef PAGEMAG_H
-#define PAGEMAG_H
+#ifndef PAGEPWR_H
+#define PAGEPWR_H
 
-#include <QDate>
-#include <QMessageBox>
+
+#include <cmath>
+#include <QDebug>
 #include <QWidget>
-#include <QListView>
-#include <QSettings>
+#include <QLineEdit>
 #include <QComboBox>
+#include <QSettings>
+#include <QListView>
+#include <QMessageBox>
+#include <QHeaderView>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
 #include "define.h"
-#include "Waveform.h"
-#include "PageNum.h"
 
 namespace Ui {
-class PageMag;
+class PagePwr;
 }
 
-class PageMag : public QWidget
+class PagePwr : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PageMag(QWidget *parent = 0);
-    ~PageMag();
+    explicit PagePwr(QWidget *parent = 0);
+    ~PagePwr();
 
 private:
-    Ui::PageMag *ui;
+    Ui::PagePwr *ui;
 
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
-public:
-    QList<Waveform *> WaveMag;
 private slots:
     void WinInit(void);
     void BtnInit(void);
     void BtnJudge(int id);
     void DatInit(void);
     void DatSave(void);
-    void ItemClick(int r, int c);
-    void ItemChange(QString msg);
+    void ItemClick(int r,int c);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
-    void ExcuteCanCmd(int id, QByteArray msg);
+    void ExcuteCanCmd(QByteArray msg);
     void TestInit(void);
     void TestCheck(void);
     void TestCheckOk(QByteArray msg);
-    void TestSample(void);
     void TestStart(quint8 pos);
     void TestResult(QByteArray msg);
-    void TestWave(QByteArray msg);
-    void TestWaveShow(QByteArray msg);
-    void TestDir();
     void TestStop(void);
     void TestConfig(void);
 
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
-
-    virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
+    virtual void showEvent(QShowEvent *);
+    virtual void hideEvent(QHideEvent *);
 private:
     QSettings *set;
     bool isCheckOk;
     bool Testing;
-    bool Sampling;
     quint16 TimeOut;
-    PageNum *input;
-    quint8 CurrentWave;
+    quint16 Time;
     QStringList Items;
+    QList<double> Volt;
+    QList<double> Curr;
+    QList<double> Power;
+
     QString Judge;
     QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
-    QList<QTableWidgetItem*> Terminal1;
-    QList<QTableWidgetItem*> Terminal2;
-    QList<QDoubleSpinBox*> Max;
-    QList<int> WaveNumber;
-    QList<int> Area;
-    QList<int> Freq;
+
+    QList<QDoubleSpinBox*> CurrMax;
+    QList<QDoubleSpinBox*> CurrMin;
+    QList<QDoubleSpinBox*> PowerMax;
+    QList<QDoubleSpinBox*> PowerMin;
+    QList<QDoubleSpinBox*> CapMax;
+    QList<QDoubleSpinBox*> CapMin;
+    QList<QComboBox*> TestDir;
+    QList<QDoubleSpinBox*> TestTime;
+    QList<QTableWidgetItem*> Grade;
 };
 
-#endif // PAGEMAG_H
+#endif // PAGEPWR_H

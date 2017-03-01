@@ -1,86 +1,96 @@
-#ifndef PAGEMAG_H
-#define PAGEMAG_H
+#ifndef PAGEIND_H
+#define PAGEIND_H
 
+#include <cmath>
 #include <QDate>
-#include <QMessageBox>
+#include <QDebug>
 #include <QWidget>
-#include <QListView>
-#include <QSettings>
+#include <QLineEdit>
 #include <QComboBox>
+#include <QSettings>
+#include <QListView>
+#include <QMessageBox>
+#include <QHeaderView>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
+#include <stdint.h>
+
 #include "define.h"
-#include "Waveform.h"
 #include "PageNum.h"
+union  Resultunion // 接收电感数据
+{
+    float   Result;
+    uint8_t dat[4];
+};
 
 namespace Ui {
-class PageMag;
+class PageInd;
 }
 
-class PageMag : public QWidget
+class PageInd : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit PageMag(QWidget *parent = 0);
-    ~PageMag();
+    explicit PageInd(QWidget *parent = 0);
+    ~PageInd();
 
 private:
-    Ui::PageMag *ui;
+    Ui::PageInd *ui;
 
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
-public:
-    QList<Waveform *> WaveMag;
 private slots:
     void WinInit(void);
     void BtnInit(void);
     void BtnJudge(int id);
     void DatInit(void);
     void DatSave(void);
-    void ItemClick(int r, int c);
+    void DatAuto(void);
+    void ItemClick(int r,int c);
     void ItemChange(QString msg);
+    int TestGear(int row);
+    int TestMode(int row);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
-    void ExcuteCanCmd(int id, QByteArray msg);
+    void ExcuteCanCmd(QByteArray msg);
     void TestInit(void);
     void TestCheck(void);
     void TestCheckOk(QByteArray msg);
-    void TestSample(void);
     void TestStart(quint8 pos);
     void TestResult(QByteArray msg);
-    void TestWave(QByteArray msg);
-    void TestWaveShow(QByteArray msg);
-    void TestDir();
     void TestStop(void);
     void TestConfig(void);
 
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
-
-    virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
+    void showEvent(QShowEvent *);
+    void hideEvent(QHideEvent *);
 private:
     QSettings *set;
     bool isCheckOk;
     bool Testing;
-    bool Sampling;
     quint16 TimeOut;
     PageNum *input;
-    quint8 CurrentWave;
     QStringList Items;
+    QList<double> Results;
     QString Judge;
     QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
     QList<QTableWidgetItem*> Terminal2;
+    QList<QComboBox*> Unit;
+    QList<QDoubleSpinBox*> Min;
     QList<QDoubleSpinBox*> Max;
-    QList<int> WaveNumber;
-    QList<int> Area;
-    QList<int> Freq;
+    QList<QDoubleSpinBox*> QMin;
+    QList<QDoubleSpinBox*> QMax;
+    QList<QDoubleSpinBox*> Std;
+
+    Resultunion  Result1;
+    Resultunion  Result2;
 };
 
-#endif // PAGEMAG_H
+#endif // PAGEIND_H

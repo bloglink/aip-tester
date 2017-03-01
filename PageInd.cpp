@@ -1,9 +1,9 @@
-#include "PageDcr.h"
-#include "ui_PageDcr.h"
+#include "PageInd.h"
+#include "ui_PageInd.h"
 
-PageDcr::PageDcr(QWidget *parent) :
+PageInd::PageInd(QWidget *parent) :
     QWidget(parent),
-    ui(new Ui::PageDcr)
+    ui(new Ui::PageInd)
 {
     ui->setupUi(this);
     WinInit();
@@ -13,7 +13,7 @@ PageDcr::PageDcr(QWidget *parent) :
     isCheckOk = false;
 }
 
-PageDcr::~PageDcr()
+PageInd::~PageInd()
 {
     delete ui;
 }
@@ -23,24 +23,24 @@ PageDcr::~PageDcr()
  * date:       2016.12.19
  * brief:      初始化界面
 *******************************************************************************/
-void PageDcr::WinInit()
+void PageInd::WinInit()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
-    ui->TabSetDcr->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
-    ui->TabSetDcr->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
+    ui->TabInductance->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabSetDcr->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
-    ui->TabSetDcr->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
-    ui->TabSetDcr->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
+    ui->TabInductance->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
+    ui->TabInductance->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabSetDcr,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabInductance,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
     input = new PageNum(this);
     QStringList t;
     t <<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11"<<"12";
@@ -54,7 +54,7 @@ void PageDcr::WinInit()
  * date:       2016.12.19
  * brief:      初始化按键
 *******************************************************************************/
-void PageDcr::BtnInit()
+void PageInd::BtnInit()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSDLRAuto,Qt::Key_0);
@@ -67,7 +67,7 @@ void PageDcr::BtnInit()
  * date:       2016.12.19
  * brief:      按键功能
 *******************************************************************************/
-void PageDcr::BtnJudge(int id)
+void PageInd::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -87,13 +87,11 @@ void PageDcr::BtnJudge(int id)
  * author:     link
  * date:       2016.12.19
  * brief:      数据初始化
- * date:       2017.01.04
- * brief:      增加不平衡度
 *******************************************************************************/
-void PageDcr::DatInit()
+void PageInd::DatInit()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取电阻配置";
-    QSettings *global = new QSettings(GLOBAL_PATH,QSettings::IniFormat);
+    qDebug()<<QTime::currentTime().toString()<<"电感数据";
+    QSettings *global = new QSettings(GLOBAL_SET,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
     FileInUse = global->value("FileInUse","default.ini").toString();
@@ -105,167 +103,180 @@ void PageDcr::DatInit()
     set->setIniCodec("GB18030");
     set->beginGroup("SetDcr");
 
-
     QStringList temp = (set->value("Other","20 0 0.5 10 10 50").toString()).split(" ");
     if (temp.size() >= 6) {
-        ui->BoxStd->setValue(temp.at(0).toDouble());
-        ui->BoxOffset->setValue(temp.at(1).toDouble());
-        ui->BoxTime->setValue(temp.at(2).toDouble());
-        ui->BoxMin->setValue(temp.at(3).toDouble());
-        ui->BoxMax->setValue(temp.at(4).toDouble());
-        ui->BoxUnbalance->setValue(temp.at(5).toDouble());
+        ui->BoxTime->setValue(temp.at(0).toDouble());
+        ui->BoxUnbalance->setValue(temp.at(1).toDouble());
+        ui->BoxMin->setValue(temp.at(2).toDouble());
+        ui->BoxMax->setValue(temp.at(3).toDouble());
+        ui->BoxFreq->setCurrentIndex(temp.at(4).toInt());
+        ui->BoxMode->setCurrentIndex(temp.at(5).toInt());
     }
     //可用
     temp = (QString(set->value("Enable","Y Y Y Y Y Y Y Y").toByteArray())).split(" ");
     if (temp.size() > 8)
-        ui->TabSetDcr->setRowCount(temp.size());
+        ui->TabInductance->setRowCount(temp.size());
     else
-        ui->TabSetDcr->setRowCount(8);
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+        ui->TabInductance->setRowCount(8);
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Enable.size() > row)
             continue;
         Enable.append(new QTableWidgetItem);
-        ui->TabSetDcr->setItem(row,0,Enable.at(row));
+        ui->TabInductance->setItem(row,0,Enable.at(row));
         Enable.at(row)->setText(temp.at(row));
         Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Enable.at(row)->setTextAlignment(Qt::AlignCenter);
     }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Enable.size() <= row)
             break;
         Enable.at(row)->setText(temp.at(row));
     }
     //端一
     temp = (set->value("Terminal1","1 2 3 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Terminal1.size() > row)
             continue;
         Terminal1.append(new QTableWidgetItem);
-        ui->TabSetDcr->setItem(row,1,Terminal1.at(row));
+        ui->TabInductance->setItem(row,1,Terminal1.at(row));
         Terminal1.at(row)->setText(temp.at(row));
         Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
     }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Terminal1.size() <= row)
             break;
         Terminal1.at(row)->setText(temp.at(row));
     }
     //端二
     temp = (set->value("Terminal2","2 3 4 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Terminal2.size() > row)
             continue;
         Terminal2.append(new QTableWidgetItem);
-        ui->TabSetDcr->setItem(row,2,Terminal2.at(row));
+        ui->TabInductance->setItem(row,2,Terminal2.at(row));
         Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
     }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Terminal2.size() <= row)
             break;
         Terminal2.at(row)->setText(temp.at(row));
     }
-    //材料
-    temp = (QString(set->value("Metal","0 0 0 0 0 0 0 0").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Metal.size() > row)
-            continue;
-        Metal.append(new QComboBox(this));
-        ui->TabSetDcr->setCellWidget(row,3,Metal.at(row));
-        QStringList t;
-        t <<tr("铜")<<tr("铝")<<tr("铜铝");
-        Metal.at(row)->setView(new QListView(this));
-        Metal.at(row)->addItems(t);
-
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Metal.size() <= row)
-            break;
-        Metal.at(row)->setCurrentIndex(temp.at(row).toInt());
-    }
     //单位
     temp = (QString(set->value("Unit","1 1 1 1 1 1 1 1").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Unit.size() > row)
             continue;
         Unit.append(new QComboBox(this));
-        ui->TabSetDcr->setCellWidget(row,4,Unit.at(row));
+        ui->TabInductance->setCellWidget(row,3,Unit.at(row));
         QStringList t;
-        t <<"mΩ"<<"Ω"<<"kΩ";
+        t <<"uH"<<"mH";
         Unit.at(row)->setView(new QListView(this));
         Unit.at(row)->addItems(t);
         Unit.at(row)->setCurrentIndex(temp.at(row).toInt());
     }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Unit.size() <= row)
             break;
         Unit.at(row)->setCurrentIndex(temp.at(row).toInt());
     }
     //最小值
-    temp = (set->value("Min","0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    temp = (set->value("Min","100 100 100 100 100 100 100 100").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Min.size() > row)
             continue;
         Min.append(new QDoubleSpinBox(this));
-        ui->TabSetDcr->setCellWidget(row,5,Min.at(row));
-        Min.at(row)->setMaximum(9999);
+        ui->TabInductance->setCellWidget(row,4,Min.at(row));
+        Min.at(row)->setMaximum(2000);
         Min.at(row)->setAlignment(Qt::AlignHCenter);
         Min.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Min.size() <= row)
             break;
         Min.at(row)->setValue(temp.at(row).toDouble());
     }
     //最大值
-    temp = (set->value("Max","200.00 200.00 200.00 200.00 200.00 200.00 200.00 200.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    temp = (set->value("Max","300 300 300 300 300 300 300 300").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Max.size() > row)
             continue;
         Max.append(new QDoubleSpinBox(this));
-        ui->TabSetDcr->setCellWidget(row,6,Max.at(row));
-        Max.at(row)->setMaximum(9999);
+        ui->TabInductance->setCellWidget(row,5,Max.at(row));
+        Max.at(row)->setMaximum(2000);
         Max.at(row)->setAlignment(Qt::AlignHCenter);
         Max.at(row)->setValue(temp.at(row).toDouble());
         Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Max.size() <= row)
             break;
         Max.at(row)->setValue(temp.at(row).toDouble());
     }
+    //最小值
+    temp = (set->value("QMin","0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
+        if (QMin.size() > row)
+            continue;
+        QMin.append(new QDoubleSpinBox(this));
+        ui->TabInductance->setCellWidget(row,6,QMin.at(row));
+        QMin.at(row)->setMaximum(100);
+        QMin.at(row)->setAlignment(Qt::AlignHCenter);
+        QMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+    }
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
+        if (QMin.size() <= row)
+            break;
+        QMin.at(row)->setValue(temp.at(row).toDouble());
+    }
+    //最大值
+    temp = (set->value("QMax","200.00 200.00 200.00 200.00 200.00 200.00 200.00 200.00").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
+        if (QMax.size() > row)
+            continue;
+        QMax.append(new QDoubleSpinBox(this));
+        ui->TabInductance->setCellWidget(row,7,QMax.at(row));
+        QMax.at(row)->setMaximum(100);
+        QMax.at(row)->setAlignment(Qt::AlignHCenter);
+        QMax.at(row)->setValue(temp.at(row).toDouble());
+        QMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+    }
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
+        if (QMax.size() <= row)
+            break;
+        QMax.at(row)->setValue(temp.at(row).toDouble());
+    }
     //标准值
-    temp = (set->value("Std","100.00 100.00 100.00 100.00 100.00 100.00 100.00 100.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
+    temp = (set->value("Std","200 200 200 200 200 200 200 200").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),ui->TabInductance->rowCount()); row++) {
         if (Std.size() > row)
             continue;
         Std.append(new QDoubleSpinBox(this));
-        ui->TabSetDcr->setCellWidget(row,7,Std.at(row));
-        Std.at(row)->setMaximum(9999);
+        ui->TabInductance->setCellWidget(row,8,Std.at(row));
+        Std.at(row)->setMaximum(2000);
         Std.at(row)->setAlignment(Qt::AlignHCenter);
         Std.at(row)->setValue(temp.at(row).toDouble());
         Std.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
-    qDebug()<<QTime::currentTime().toString()<<"读取电阻配置OK";
+    qDebug()<<QTime::currentTime().toString()<<"电感数据OK";
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
  * date:       2016.12.19
  * brief:      数据保存
- * date:       2017.01.04
- * brief:      增加不平衡度
 *******************************************************************************/
-void PageDcr::DatSave()
+void PageInd::DatSave()
 {
+    qDebug()<<QTime::currentTime().toString()<<"电感保存";
     QStringList temp;
-    temp.append(QString::number(ui->BoxStd->value()));
-    temp.append(QString::number(ui->BoxOffset->value()));
     temp.append(QString::number(ui->BoxTime->value()));
+    temp.append(QString::number(ui->BoxUnbalance->value()));
     temp.append(QString::number(ui->BoxMin->value()));
     temp.append(QString::number(ui->BoxMax->value()));
-    temp.append(QString::number(ui->BoxUnbalance->value()));
+    temp.append(QString::number(ui->BoxFreq->currentIndex()));
+    temp.append(QString::number(ui->BoxMode->currentIndex()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
 
     temp.clear();
@@ -281,10 +292,6 @@ void PageDcr::DatSave()
         temp.append(Terminal2.at(i)->text());
     set->setValue("Terminal2",(temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Metal.size(); i++)
-        temp.append(QString::number(Metal.at(i)->currentIndex()));
-    set->setValue("Metal",(temp.join(" ").toUtf8()));
-    temp.clear();
     for (int i=0; i<Unit.size(); i++)
         temp.append(QString::number(Unit.at(i)->currentIndex()));
     set->setValue("Unit",(temp.join(" ").toUtf8()));
@@ -297,9 +304,18 @@ void PageDcr::DatSave()
         temp.append(QString::number(Max.at(i)->value()));
     set->setValue("Max",(temp.join(" ").toUtf8()));
     temp.clear();
+    for (int i=0; i<QMin.size(); i++)
+        temp.append(QString::number(QMin.at(i)->value()));
+    set->setValue("QMin",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<QMax.size(); i++)
+        temp.append(QString::number(QMax.at(i)->value()));
+    set->setValue("QMax",(temp.join(" ").toUtf8()));
+    temp.clear();
     for (int i=0; i<Std.size(); i++)
         temp.append(QString::number(Std.at(i)->value()));
     set->setValue("Std",(temp.join(" ").toUtf8()));
+    qDebug()<<QTime::currentTime().toString()<<"电感保存OK";
 }
 /*******************************************************************************
  * version:    1.0
@@ -307,9 +323,9 @@ void PageDcr::DatSave()
  * date:       2016.12.19
  * brief:      自动计算
 *******************************************************************************/
-void PageDcr::DatAuto()
+void PageInd::DatAuto()
 {
-    for (int i=0; i<ui->TabSetDcr->rowCount(); i++) {
+    for (int i=0; i<ui->TabInductance->rowCount(); i++) {
         double std = Std.at(i)->value();
         double min = std*(100-ui->BoxMin->value())/100;
         double max = std*(100+ui->BoxMax->value())/100;
@@ -320,36 +336,10 @@ void PageDcr::DatAuto()
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
- * brief:      数据格式化
-*******************************************************************************/
-bool PageDcr::DatStdd()
-{
-    for (int i=0; i<qMin(Terminal1.size(),Terminal2.size()); i++) {
-        int t1 = Terminal1.at(i)->text().toInt();
-        int t2 = Terminal2.at(i)->text().toInt();
-        if (abs(t1-t2)%3 == 0) {
-            QString warning = QString("行%1:\n端子差不能为3,保存失败").arg(i+1);
-            QMessageBox::warning(this,"警告", warning,QMessageBox::Ok);
-            return false;
-        }
-    }
-    for (int i=0; i<qMin(Max.size(),Min.size()); i++) {
-        if (Min.at(i)->value()>Max.at(i)->value()) {
-            QString warning = QString("行%1:\n上限大于下限,保存失败").arg(i+1);
-            QMessageBox::warning(this,"警告", warning,QMessageBox::Ok);
-            return false;
-        }
-    }
-    return true;
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
  * date:       2016.12.23
  * brief:      点击
 *******************************************************************************/
-void PageDcr::ItemClick(int r, int c)
+void PageInd::ItemClick(int r, int c)
 {
     switch (c) {
     case 0:
@@ -372,11 +362,11 @@ void PageDcr::ItemClick(int r, int c)
  * date:       2016.12.23
  * brief:      切换文字
 *******************************************************************************/
-void PageDcr::ItemChange(QString msg)
+void PageInd::ItemChange(QString msg)
 {
-    int t = ui->TabSetDcr->currentColumn();
+    int t = ui->TabInductance->currentColumn();
     if (t==1 || t==2)
-        ui->TabSetDcr->currentItem()->setText(msg);
+        ui->TabInductance->currentItem()->setText(msg);
 }
 /*******************************************************************************
  * version:     1.0
@@ -384,9 +374,9 @@ void PageDcr::ItemChange(QString msg)
  * date:        2017.02.15
  * brief:       命令处理
 *******************************************************************************/
-void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR)
+    if (addr != ADDR && addr != WIN_ID_INDL && addr != CAN_ID_INDL)
         return;
     switch (cmd) {
     case CAN_DAT_GET:
@@ -396,10 +386,7 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         TestCheck();
         break;
     case CAN_CMD_START:
-        TestTimeOut(100);
         TestStart(msg.toInt());
-        TestWait();
-        TestJudge();
         break;
     case CAN_CMD_STOP:
         TestStop();
@@ -414,34 +401,30 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     }
 }
 /*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      CAN命令处理
+ * version:     1.0
+ * author:      link
+ * date:        2017.02.15
+ * brief:       CAN命令处理
 *******************************************************************************/
-void PageDcr::ExcuteCanCmd(QByteArray msg)
+void PageInd::ExcuteCanCmd(QByteArray msg)
 {
     if (!Testing)
         return;
     TimeOut = 0;
-    if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-        TestStatus(msg);
+    if (msg.size()==8 && (quint8)msg.at(0)==0x00) {
+        TestCheckOk(msg);
     }
-    if (msg.size()==7 && (quint8)msg.at(0)==0x01) {
+    if (msg.size()==8 && (quint8)msg.at(0)==0x01) {
         TestResult(msg);
     }
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.19
+ * date:        2017.02.15
  * brief:       更新显示
- * date:        2017.01.04
- * brief:       增加不平衡度显示
- * date:        2017.02.14
- * brief:       修改显示方式
 *******************************************************************************/
-void PageDcr::TestInit()
+void PageInd::TestInit()
 {
     Items.clear();
     Results.clear();
@@ -450,11 +433,12 @@ void PageDcr::TestInit()
         QStringList s;
         QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
         QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-        QString U1 = Unit.at(qMin(row,Unit.size()))->currentText();
         QString M1 = Min.at(qMin(row,Min.size()))->text();
         QString M2 = Max.at(qMin(row,Max.size()))->text();
-        s.append(QString(tr("电阻%1-%2")).arg(T1).arg(T2));
-        s.append(QString("%1~%2%3").arg(M1).arg(M2).arg(U1));
+        QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
+        QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
+        s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
+        s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
         s.append(" ");
         s.append(" ");
         Items.append(s.join("@"));
@@ -464,9 +448,9 @@ void PageDcr::TestInit()
             n.append(Items.at(row));
         }
     }
-    if (ui->BoxUnbalance->value() != 0 && Items.size()>=3) {
+    if (ui->BoxUnbalance->value() != 0 && n.size()>=3) {
         QStringList s;
-        s.append("电阻平衡");
+        s.append("电感平衡");
         s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
         s.append(" ");
         s.append(" ");
@@ -475,53 +459,50 @@ void PageDcr::TestInit()
     }
     emit SendMessage(ADDR,WIN_CMD_SHOW,n.join("\n").toUtf8());
 }
-/**
-  * @brief  Check PageDcr status
-  * @param  None
-  * @retval None
-  */
-void PageDcr::TestCheck()
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      检测状态
+*******************************************************************************/
+void PageInd::TestCheck()
 {
-    qDebug()<<QTime::currentTime().toString()<<"查询电阻状态";
     if (Testing)
         return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x00);
+    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
     emit SendMessage(ADDR,CAN_DAT_PUT,msg);
     Testing = true;
-    if (!TestTimeOut(100)) {
+    if (!WaitTestOver(100)) {
         Testing = false;
-        QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"DCR Error\n");
+        QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
+        emit SendMessage(ADDR,WIN_CMD_DEBUG,"INDL Error\n");
     }
-    qDebug()<<QTime::currentTime().toString()<<"查询电阻状态OK";
 }
-/**
-  * @brief  Excute status message
-  * @param  msg:status message
-  * @retval None
-  */
-void PageDcr::TestStatus(QByteArray msg)
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      更新状态
+*******************************************************************************/
+void PageInd::TestCheckOk(QByteArray )
 {
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,WIN_CMD_DEBUG,"DCR check ok\n");
+        emit SendMessage(ADDR,WIN_CMD_DEBUG,"INDL check ok\n");
     }
     if (Testing)
         Testing = false;
-    double offset = ui->BoxOffset->value();
-    double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
-    QString t = QString(tr("温度:%1°C")).arg(temp);
-    emit SendMessage(ADDR,WIN_CMD_TEMP,t.toUtf8());
 }
-/**
-  * @brief  Start PageDcr test
-  * @param  pos:station
-  * @retval None
-  */
-void PageDcr::TestStart(quint8 pos)
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
+ * brief:      开始测试
+*******************************************************************************/
+void PageInd::TestStart(quint8 pos)
 {
     if (Testing)
         return;
@@ -533,20 +514,12 @@ void PageDcr::TestStart(quint8 pos)
         if (Enable.at(row)->text() == "Y")
             tt += 0x0001<<row;
     }
-    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x01)<<quint8(0x00)
+    out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CAN_DAT_PUT,msg);
-}
-/**
-  * @brief  Wait for test finish or time out
-  * @param  None
-  * @retval None
-  */
-void PageDcr::TestWait()
-{
     Testing = true;
     Judge = "OK";
-    if(!TestTimeOut(100)) {
+    if(!WaitTestOver(100)) {
         Testing = false;
         Judge = "NG";
         for (int row = 0; row<Enable.size(); row++) {
@@ -568,175 +541,129 @@ void PageDcr::TestWait()
             emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
         }
     }
-}
-/**
-  * @brief  Send judge message
-  * @param  None
-  * @retval None
-  */
-void PageDcr::TestJudge()
-{
     QStringList s;
-    s.append("电阻");
+    s.append("电感");
     s.append(FileInUse);
     s.append(Judge);
     emit SendMessage(ADDR,WIN_CMD_JUDGE,s.join("@").toUtf8());
-
 }
 /*******************************************************************************
  * version:     1.0
  * author:      link
- * date:        2016.12.27
+ * date:        2017.02.15
  * brief:       更新测试数据
- * date:        2017.01.04
- * brief:       增加温度补偿与不平衡度判定
- * date:        2017.02.14
- * brief:       修改显示方式
 *******************************************************************************/
-void PageDcr::TestResult(QByteArray msg)
+void PageInd::TestResult(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
-    quint8 grade = quint8(msg.at(2));
-    double temp = (quint16)(msg.at(3)*256)+(quint8)msg.at(4);
-    double tt = (quint16)(msg.at(5)*256)+quint8(msg.at(6));
-
-    if (ui->BoxOffsetEnable->isChecked()) {
-        double offset = TestOffset(tt,number);
-        temp *= offset;
+    if (number >0 )
+        number--;
+    if (quint8(msg.at(3) == 0x00)) {
+        Result1.dat[0] = quint8(msg.at(4));
+        Result1.dat[1] = quint8(msg.at(5));
+        Result1.dat[2] = quint8(msg.at(6));
+        Result1.dat[3] = quint8(msg.at(7));
     }
-    QString t;
-    QString judge = "OK";
-    switch (grade) {
-    case 1:
-        temp /= 100;
-        t = QString("%1mΩ").arg(temp,0,'r',3);
-        break;
-    case 2:
-        temp /= 10;
-        t = QString("%1mΩ").arg(temp,0,'r',2);
-        break;
-    case 3:
-        temp /= 1000;
-        t = QString("%1Ω").arg(temp,0,'r',3);
-        break;
-    case 4:
-        temp /= 100;
-        t = QString("%1Ω").arg(temp,0,'r',2);
-        break;
-    case 5:
-        temp /= 10;
-        t = QString("%1Ω").arg(temp,0,'r',1);
-        break;
-    case 6:
-        temp /= 1000;
-        t = QString("%1kΩ").arg(temp,0,'r',3);
-        break;
-    case 7:
-        temp /= 100;
-        t = QString("%1kΩ").arg(temp,0,'r',2);
-        break;
-    default:
-        qDebug()<<tt;
-        break;
-    }
-    Results.append(temp);
-    if (temp<Min.at(number)->value() || temp>Max.at(number)->value()) {
-        Judge = "NG";
-        judge = "NG";
-    }
+    if (quint8(msg.at(3) == 0x01)) {
+        Result2.dat[0] = quint8(msg.at(4));
+        Result2.dat[1] = quint8(msg.at(5));
+        Result2.dat[2] = quint8(msg.at(6));
+        Result2.dat[3] = quint8(msg.at(7));
+        QString t = "---";
+        if (Result1.Result <= 1000)
+            t = QString::number(Result1.Result,'f',1) + "uH";
+        else if (Result1.Result <= 10000)
+            t = QString::number(Result1.Result/1000,'f',3) + "mH";
+        else if (Result1.Result <= 100000)
+            t = QString::number(Result1.Result/1000,'f',2) + "mH";
+        else if (Result1.Result <= 1000000)
+            t = QString::number(Result1.Result/1000,'f',1) + "mH";
+        else if (Result1.Result <= 10000000)
+            t = QString::number(Result1.Result/1000,'f',0) + "mH";
 
-    QStringList s = QString(Items.at(number)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    if (s.at(3) == " ")
-        s[3] = judge;
-    emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        Results.append(t.toDouble());
 
-    //计算不平衡度
-    if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
-        double sum = 0;
-        double avr = 0;
-        QString u;
-        for (int i=0; i<Results.size(); i++) {
-            sum += Results.at(i);
+        t +="," + QString::number(Result2.Result,'f',2);
+        double max = Max.at(number)->value();
+        double min = Min.at(number)->value();
+        double qmax = QMax.at(number)->value();
+        double qmin = QMin.at(number)->value();
+        if (Unit.at(number)->currentText() == "mH") {
+            max *= 1000;
+            min *= 1000;
         }
-        avr = sum/Results.size();
-        for (int i=0; i<Results.size(); i++) {
-            double un = fabs(Results.at(i)-avr)*100/avr;
-            u.append(QString::number(un,'f',1));
-            u.append("% ");
-            if (un >= ui->BoxUnbalance->value()) {
-                judge = "NG";
-                Judge = "NG";
-            }
+        QString judge = "OK";
+        if (Result1.Result<min || Result1.Result>max || Result2.Result<qmin || Result2.Result>qmax){
+            Judge = "NG";
+            judge = "NG";
         }
-        QStringList s = QString(Items.last()).split("@");
+        QStringList s = QString(Items.at(number)).split("@");
         if (s.at(2) == " ")
-            s[2] = u;
+            s[2] = t;
         if (s.at(3) == " ")
             s[3] = judge;
         emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+
+        if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
+            double sum = 0;
+            double avr = 0;
+            QString u;
+            for (int i=0; i<Results.size(); i++) {
+                sum += Results.at(i);
+            }
+            avr = sum/Results.size();
+            judge = "OK";
+            for (int i=0; i<Results.size(); i++) {
+                double un = fabs(Results.at(i)-avr)*100/avr;
+                u.append(QString::number(un,'f',1));
+                u.append("% ");
+                if (un >= ui->BoxUnbalance->value()) {
+                    Judge = "NG";
+                    judge = "NG";
+                }
+            }
+            QStringList s = QString(Items.last()).split("@");
+            if (s.at(2) == " ")
+                s[2] = u;
+            if (s.at(3) == " ")
+                s[3] = judge;
+            emit SendMessage(ADDR,WIN_CMD_ITEM,s.join("@").toUtf8());
+        }
     }
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
- * brief:      计算温度补偿
-*******************************************************************************/
-double PageDcr::TestOffset(double t, quint8 num)
-{
-    double temp;
-    double res = 0;
-    switch (Metal.at(num)->currentIndex()) {
-    case 0:
-        res = ResCu;
-        break;
-    case 1:
-        res = ResCu_Al;
-        break;
-    case 2:
-        res = ResAl;
-        break;
-    default:
-        break;
-    }
-    temp = 1+res*(ui->BoxStd->value()-(t/10-50)-ui->BoxOffset->value());
-    return temp;
-}
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
+ * date:       2017.02.15
  * brief:      停止测试
 *******************************************************************************/
-void PageDcr::TestStop()
+void PageInd::TestStop()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
+    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x02);
     emit SendMessage(ADDR,CAN_DAT_PUT,msg);
     Testing = false;
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
+ * date:       2017.02.15
  * brief:      配置
 *******************************************************************************/
-void PageDcr::TestConfig()
+void PageInd::TestConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            out<<quint16(0x22)<<quint8(0x06)<<quint8(0x03)<<quint8(row)
-              <<quint8(Terminal1.at(row)->text().toInt())
-             <<quint8(Terminal2.at(row)->text().toInt())
-            <<quint8(TestGear(row))
-            <<quint8(ui->BoxTime->value()*10);
+    for (int i=0; i<Enable.size(); i++) {
+        if (Enable.at(i)->text() == "Y") {
+            out<<quint16(0x26)<<quint8(0x07)<<quint8(0x03)<<quint8(i)
+              <<quint8(Terminal1.at(i)->text().toInt())
+             <<quint8(Terminal2.at(i)->text().toInt())
+            <<quint8(ui->BoxTime->value())
+            <<quint8(TestGear(i))<<quint8(TestMode(i));
         }
     }
     emit SendMessage(ADDR,CAN_DAT_PUT,msg);
@@ -744,52 +671,115 @@ void PageDcr::TestConfig()
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
+ * date:       2017.02.15
  * brief:      计算测试档位
 *******************************************************************************/
-int PageDcr::TestGear(int row)
+int PageInd::TestGear(int row)
 {
-    if (row >= Max.size())
-        return 7;
-    if (row >= Unit.size())
-        return 7;
-    double r = Max.at(row)->value();
-    if (Unit.at(row)->currentText() == "mΩ")
-        r /= 1000;
-    if (Unit.at(row)->currentText() == "kΩ")
-        r *= 1000;
-    if (r <= 0.2)
-        return 1;
-    if (r <= 2)
-        return 2;
-    if (r <= 20)
-        return 3;
-    if (r <= 200)
-        return 4;
-    if (r <= 2000)
-        return 5;
-    if (r <= 20000)
-        return 6;
-    else
-        return 7;
+    int t = 0;
+    double s = Std.at(row)->text().toDouble();
+    if (Unit.at(row)->currentText() == "mH") {
+        switch (ui->BoxFreq->currentIndex()) {
+        case 0:
+            if (2*3.14*s*0.1/1000 < 1)
+                t = 0x09;
+            else if (2*3.14*s*0.1/1000 < 10)
+                t = 0x29;
+            else
+                t = 0x39;
+            break;
+        case 1:
+            if (2*3.14*s*0.12/1000 < 1)
+                t = 0x0A;
+            else if (2*3.14*s*0.12/1000 < 10)
+                t = 0x2A;
+            else
+                t = 0x3A;
+            break;
+        case 2:
+            if (2*3.14*s*1/1000 < 1)
+                t = 0x0A;
+            else if (2*3.14*s*1/1000 < 10)
+                t = 0x2A;
+            else
+                t = 0x3A;
+            break;
+        case 3:
+            if (2*3.14*s*01/1000 < 1)
+                t = 0x0C;
+            else if (2*3.14*s*10/1000 < 10)
+                t = 0x2C;
+            else
+                t = 0x3C;
+            break;
+        default:
+            break;
+        }
+    } else {
+        switch (ui->BoxFreq->currentIndex()) {
+        case 0:
+            t = 0x09;
+            break;
+        case 1:
+            t = 0x0A;
+            break;
+        case 2:
+            t = 0x0B;
+            break;
+        case 3:
+            t = 0x0C;
+            break;
+        default:
+            break;
+        }
+    }
+    return t;
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
- * brief:      检测版本
+ * date:       2017.02.15
+ * brief:      计算测试方式
 *******************************************************************************/
-void PageDcr::TestVersion()
+int PageInd::TestMode(int row)
 {
+    int t = 0;
+    int s = 0;
+    if (ui->BoxMode->currentIndex() == 0)
+        s = 0x00;
+    else
+        s = 0x40;
 
+    if (Unit.at(row)->currentText()=="uH" && Max.at(row)->text().toInt()<500)
+        t = s | 0x0F;
+    else
+        t = s | 0x09;
+    return t;
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
+ * date:       2017.02.15
+ * brief:      等待测试结束
+*******************************************************************************/
+bool PageInd::WaitTestOver(quint16 t)
+{
+    TimeOut = 0;
+    while (Testing) {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
+    }
+    return true;
+}
+/*******************************************************************************
+ * version:    1.0
+ * author:     link
+ * date:       2017.02.15
  * brief:      延时
 *******************************************************************************/
-void PageDcr::TestDelay(int ms)
+void PageInd::Delay(int ms)
 {
     QElapsedTimer t;
     t.start();
@@ -799,45 +789,20 @@ void PageDcr::TestDelay(int ms)
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
- * brief:      等待测试结束
  * date:       2017.02.15
- * brief:      去除超时处理
-*******************************************************************************/
-bool PageDcr::TestTimeOut(quint16 t)
-{
-    TimeOut = 0;
-    while (Testing) {
-        TestDelay(10);
-        TimeOut++;
-        if (TimeOut > t)
-            return false;
-    }
-    return true;
-}
-
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
  * brief:      更新显示
 *******************************************************************************/
-void PageDcr::showEvent(QShowEvent*)
+void PageInd::showEvent(QShowEvent *)
 {
     DatInit();
-    DatStdd();
 }
 /*******************************************************************************
  * version:    1.0
  * author:     link
- * date:       2016.12.19
+ * date:       2017.02.15
  * brief:      判断保存
 *******************************************************************************/
-void PageDcr::hideEvent(QHideEvent *)
+void PageInd::hideEvent(QHideEvent *)
 {
-    if(DatStdd())
-        DatSave();
+    DatSave();
 }
-/*******************************************************************************
- *                                  END
-*******************************************************************************/

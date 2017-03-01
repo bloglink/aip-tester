@@ -17,7 +17,7 @@
 #include <QTableWidgetItem>
 
 #include "define.h"
-#include "InputNum.h"
+#include "PageNum.h"
 
 #define  ResCu    0.0039  //  铜材料
 #define  ResCu_Al 0.0041  //  铜铝材料
@@ -76,7 +76,7 @@ private:
     bool isCheckOk;
     bool Testing;
     quint16 TimeOut;
-    InputNum *input;
+    PageNum *input;
     QStringList Items;
     QList<double> Results;
     QString Judge;

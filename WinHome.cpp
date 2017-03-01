@@ -131,6 +131,22 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageImp,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
+    PageInd *pageInd = new PageInd(this);
+    ui->desktop->addWidget(pageInd);
+    pageInd->setObjectName("PageInd");
+    connect(pageInd,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInd,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
+    PagePwr *pagePwr = new PagePwr(this);
+    ui->desktop->addWidget(pagePwr);
+    pagePwr->setObjectName("PagePwr");
+    connect(pagePwr,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pagePwr,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     TestCheck();

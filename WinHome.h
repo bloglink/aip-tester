@@ -22,6 +22,8 @@
 #include "PageInr.h"
 #include "PageAcw.h"
 #include "PageImp.h"
+#include "PageInd.h"
+#include "PagePwr.h"
 
 namespace Ui {
 class WinHome;

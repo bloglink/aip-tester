@@ -141,14 +141,14 @@ void WinData::SqlRead()
         model->fetchMore();
     }
     ui->TabDetail->setRowCount(0);
-    SqlQuery("总数");
-    SqlQuery("电阻");
-    SqlQuery("反嵌");
-    SqlQuery("磁旋");
-    SqlQuery("绝缘");
-    SqlQuery("交耐");
-    SqlQuery("匝间");
-    SqlQuery("电感");
+    SqlQuery(tr("总数"));
+    SqlQuery(tr("电阻"));
+    SqlQuery(tr("反嵌"));
+    SqlQuery(tr("磁旋"));
+    SqlQuery(tr("绝缘"));
+    SqlQuery(tr("交耐"));
+    SqlQuery(tr("匝间"));
+    SqlQuery(tr("电感"));
     QStringList n;
     for (int i=0; i<ui->TabDetail->rowCount(); i++)
         n.append(ui->TabDetail->item(i,0)->text());

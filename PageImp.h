@@ -13,7 +13,7 @@
 #include <QTableWidgetItem>
 #include "define.h"
 #include "Waveform.h"
-#include "InputNum.h"
+#include "PageNum.h"
 
 namespace Ui {
 class PageImp;
@@ -75,7 +75,7 @@ private:
     bool Testing;
     bool Sampling;
     quint16 TimeOut;
-    InputNum *input;
+    PageNum *input;
     quint8 CurrentWave;
     QStringList Items;
     QString Judge;
