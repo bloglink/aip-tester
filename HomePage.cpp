@@ -155,6 +155,14 @@ void HomePage::initAllWindows()
     connect(this,SIGNAL(sendMessage(quint16,quint16,QByteArray)),test,
             SLOT(readMessage(quint16,quint16,QByteArray)));
 
+    Resistance *resistance = new Resistance(this);
+    ui->desktop->addWidget(resistance);
+    test->setObjectName("电阻");
+    connect(resistance,SIGNAL(sendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(readMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(sendMessage(quint16,quint16,QByteArray)),resistance,
+            SLOT(readMessage(quint16,quint16,QByteArray)));
+
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
     checkStatus();
@@ -232,14 +240,14 @@ void HomePage::initTest()
     QSettings *settings_c = new QSettings(n,QSettings::IniFormat);
     settings_c->setIniCodec("GB18030");
 
-//    QStringList itemToTest = settings_c->value("/GLOBAL/ProjToTest","").toString().split(" ");
+    QStringList itemToTest = settings_c->value("/GLOBAL/ProjToTest","").toString().split(" ");
 
-//    emit sendMessage(WIN_ID_OUT,CAN_CMD_INIT,NULL);//设定启动方式
+    emit sendMessage(WIN_ID_OUT,CAN_CMD_INIT,NULL);//设定启动方式
 
-//    for (int i=0; i<itemToTest.size(); i++) {
-//        emit sendMessage(itemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
-//    }
-//    emit sendMessage(WIN_ID_TEST,WIN_CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
+    for (int i=0; i<itemToTest.size(); i++) {
+        emit sendMessage(itemToTest.at(i).toInt(),CAN_CMD_INIT,NULL);
+    }
+    emit sendMessage(WIN_ID_TEST,WIN_CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }

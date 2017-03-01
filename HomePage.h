@@ -17,6 +17,7 @@
 #include "MotorType.h"
 #include "SqlPage.h"
 #include "Test.h"
+#include "Resistance.h"
 
 namespace Ui {
 class HomePage;

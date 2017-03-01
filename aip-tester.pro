@@ -20,7 +20,10 @@ SOURCES += main.cpp\
     SqlPage.cpp \
     Histogram.cpp \
     Test.cpp \
-    Waveform.cpp
+    Waveform.cpp \
+    Resistance.cpp \
+    InputNum.cpp \
+    PageKey.cpp
 
 HEADERS  += HomePage.h \
     System.h \
@@ -29,14 +32,20 @@ HEADERS  += HomePage.h \
     SqlPage.h \
     Histogram.h \
     Test.h \
-    Waveform.h
+    Waveform.h \
+    Resistance.h \
+    InputNum.h \
+    PageKey.h
 
 FORMS    += HomePage.ui \
     System.ui \
     Input.ui \
     MotorType.ui \
     SqlPage.ui \
-    Test.ui
+    Test.ui \
+    Resistance.ui \
+    InputNum.ui \
+    PageKey.ui
 
 RESOURCES += \
     image.qrc \
