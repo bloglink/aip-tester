@@ -14,7 +14,7 @@
 #include "define.h"
 
 #include "WinSyst.h"
-#include "MotorType.h"
+#include "WinType.h"
 #include "SqlPage.h"
 #include "Test.h"
 #include "Resistance.h"

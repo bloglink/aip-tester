@@ -71,10 +71,10 @@ void WinHome::WinInitAll()
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winSyst,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
-    MotorType *type = new MotorType(this);
-    ui->desktop->addWidget(type);
-    type->setObjectName("型号管理");
-    connect(type,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    WinType *winType = new WinType(this);
+    ui->desktop->addWidget(winType);
+    winType->setObjectName("WinType");
+    connect(winType,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
 
     SqlPage *sql = new SqlPage(this);
@@ -154,7 +154,7 @@ void WinHome::BtnJudge(int id)
         WinJump("WinSyst");
         break;
     case Qt::Key_2:
-        WinJump("型号管理");
+        WinJump("WinType");
         break;
     case Qt::Key_3:
         WinJump("数据管理");
