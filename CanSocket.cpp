@@ -49,7 +49,7 @@ void CanSocket::DeviceOpen()
     connect(timer,SIGNAL(timeout()),this,SLOT(readAll()));
     timer->start(50);
 
-    qDebug()<<QTime::currentTime().toString()<<"打开CAN口";
+    qDebug()<<QTime::currentTime().toString()<<"打开CAN口OK";
 }
 /*******************************************************************************
  * version:     1.0
@@ -67,7 +67,6 @@ void CanSocket::DeviceQuit()
 #else
     CAN_ChannelStop(s,0);
     CAN_DeviceClose(s);
-    qDebug()<<"can close sucecss";
 #endif
 }
 /*******************************************************************************

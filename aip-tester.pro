@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql
+QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -34,7 +34,8 @@ SOURCES += main.cpp\
     CanSocket.cpp \
     SqlData.cpp \
     PageOut.cpp \
-    WinBack.cpp
+    WinBack.cpp \
+    TcpClient.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -58,7 +59,8 @@ HEADERS  += \
     CanSocket.h \
     SqlData.h \
     PageOut.h \
-    WinBack.h
+    WinBack.h \
+    TcpClient.h
 
 FORMS    += \
     PageKey.ui \
@@ -81,5 +83,4 @@ FORMS    += \
     WinBack.ui
 
 RESOURCES += \
-    image.qrc \
-    ../aip-local/aip-image.qrc
+    image.qrc

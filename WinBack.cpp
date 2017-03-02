@@ -98,9 +98,8 @@ void WinBack::DatInit()
     if (temp.contains("4"))
         ui->BoxEnableOut17->setChecked(true);
 
-    QString t = g_settings->value("Number","V20170106").toString();
+    QString t = g_settings->value("Number","168912000X").toString();
     ui->EditNumber->setText(t);
-
 }
 /******************************************************************************
  * version:     1.0

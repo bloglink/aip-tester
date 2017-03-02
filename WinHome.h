@@ -33,6 +33,7 @@
 
 #include "SqlData.h"
 #include "CanSocket.h"
+#include "TcpClient.h"
 
 namespace Ui {
 class WinHome;
@@ -59,8 +60,10 @@ private slots:
     void WinJump(QByteArray win);
     void BtnInit(void);
     void BtnJudge(int id);
+    void DatInit(void);
     void CanInit(void);
     void SqlInit(void);
+    void TcpInit(void);
     void CanThread(QByteArray msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
@@ -87,8 +90,10 @@ private:
 
     QThread *thread_can;
     QThread *thread_sql;
+    QThread *thread_tcp;
     CanSocket can;
     SqlData sql;
+    TcpClient tcp;
 };
 
 #endif // WINHOME_H

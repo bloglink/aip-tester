@@ -22,6 +22,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     WinInit();
     BtnInit();
+    DatInit();
 }
 /**
   * @brief  Destruct the window
@@ -34,6 +35,8 @@ WinHome::~WinHome()
     thread_can->wait();
     thread_sql->quit();
     thread_sql->wait();
+    thread_tcp->quit();
+    thread_tcp->wait();
     delete ui;
 }
 /**
@@ -43,8 +46,6 @@ WinHome::~WinHome()
   */
 void WinHome::WinInit()
 {
-    this->setWindowTitle(tr("电机综合测试仪V-2.0.1.0"));
-    ui->titleVn->setText("V-2.0.1.0");
     ui->titleVn->hide();
 
     //设置界面风格
@@ -280,6 +281,21 @@ void WinHome::BtnJudge(int id)
     }
 }
 /**
+  * @brief  Initializes data
+  * @param  None
+  * @retval None
+  */
+void WinHome::DatInit()
+{
+    QString v = "V-2.0.1.0";
+    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
+    global->setIniCodec("GB18030");
+    global->beginGroup("GLOBAL");
+    global->setValue("Version",v);
+    this->setWindowTitle(QString("电机综合测试仪%1").arg(v));
+    ui->titleVn->setText(v);
+}
+/**
   * @brief  Initializes can thread
   * @param  None
   * @retval None
@@ -307,6 +323,20 @@ void WinHome::SqlInit()
     connect(thread_sql,SIGNAL(finished()),&sql,SLOT(DeviceQuit()));
     connect(this,SIGNAL(WriteSql(QByteArray)),&sql,SLOT(Write(QByteArray)));
     thread_sql->start();
+}
+/**
+  * @brief  Initializes tcp thread
+  * @param  None
+  * @retval None
+  */
+void WinHome::TcpInit()
+{
+    thread_tcp = new QThread(this);
+    tcp.moveToThread(thread_tcp);
+    connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(TcpInit()));
+    connect(&tcp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    thread_tcp->start();
 }
 /**
   * @brief  Can data read
@@ -591,6 +621,7 @@ void WinHome::showEvent(QShowEvent *)
     if (!isCheckOk) {
         CanInit();
         SqlInit();
+        TcpInit();
         timer->singleShot(50,this,SLOT(WinInitAll()));
     }
 }
