@@ -25,6 +25,7 @@ SqlData::SqlData(QObject *parent) : QObject(parent)
   */
 void SqlData::DeviceOpen()
 {
+    qDebug()<<QTime::currentTime().toString()<<"打开数据库";
     db = QSqlDatabase::addDatabase("QSQLITE","SQL");
     db.setDatabaseName(SQL_PATH);
     if(db.open())

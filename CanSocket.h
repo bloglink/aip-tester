@@ -1,7 +1,7 @@
 #ifndef CANSOCKET_H
 #define CANSOCKET_H
 
-
+#include <QTime>
 #include <QTimer>
 #include <QDebug>
 #include <QObject>

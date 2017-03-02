@@ -12,6 +12,7 @@ CanSocket::CanSocket(QObject *parent) : QObject(parent)
 *******************************************************************************/
 void CanSocket::DeviceOpen()
 {
+    qDebug()<<QTime::currentTime().toString()<<"打开CAN口";
 #ifdef __arm__
     struct sockaddr_can     addr;
     struct ifreq            ifr;
@@ -43,10 +44,12 @@ void CanSocket::DeviceOpen()
     int ret = CAN_ChannelStart(s,0,&InitMsg);
     if (ret <= 0)
         return;
+#endif
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(readAll()));
     timer->start(50);
-#endif
+
+    qDebug()<<QTime::currentTime().toString()<<"打开CAN口";
 }
 /*******************************************************************************
  * version:     1.0
@@ -171,9 +174,9 @@ void CanSocket::readAll()
             in << TxMsg.arryData[i];
     }
     CAN_ClearReceiveBuffer(s,0);
+#endif
     if (!msg.isEmpty())
         emit GetCanData(msg);
-#endif
 }
 /*******************************************************************************
  * version:     1.0
@@ -207,7 +210,7 @@ void CanSocket::WriteAll(QByteArray msg)
             out >> dat;
             TxMsg.arryData[i] = dat;
         }
-        CAN_ChannelSend(s,0,&TxMsg,1);
 #endif
+        DeviceSend();
     }
 }

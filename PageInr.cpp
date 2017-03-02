@@ -217,7 +217,7 @@ void PageInr::TestCheckOk(QByteArray )
 {
     Testing = false;
     if (!isCheckOk) {
-        emit SendMessage(ADDR,CMD_DEBUG,"Ir check ok\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PageInr OK\n");
         isCheckOk = true;
     }
     if (Volt.isEmpty() || Res.isEmpty())
