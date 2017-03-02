@@ -33,7 +33,8 @@ SOURCES += main.cpp\
     PageLck.cpp \
     CanSocket.cpp \
     SqlData.cpp \
-    PageOut.cpp
+    PageOut.cpp \
+    WinBack.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -56,7 +57,8 @@ HEADERS  += \
     PageLck.h \
     CanSocket.h \
     SqlData.h \
-    PageOut.h
+    PageOut.h \
+    WinBack.h
 
 FORMS    += \
     PageKey.ui \
@@ -75,7 +77,8 @@ FORMS    += \
     PagePwr.ui \
     PageLvs.ui \
     PageLck.ui \
-    PageOut.ui
+    PageOut.ui \
+    WinBack.ui
 
 RESOURCES += \
     image.qrc \

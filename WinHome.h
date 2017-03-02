@@ -14,10 +14,12 @@
 
 #include "define.h"
 
+#include "WinBack.h"
 #include "WinSyst.h"
 #include "WinType.h"
 #include "WinData.h"
 #include "WinTest.h"
+
 #include "PageDcr.h"
 #include "PageMag.h"
 #include "PageInr.h"
@@ -27,7 +29,6 @@
 #include "PagePwr.h"
 #include "PageLvs.h"
 #include "PageLck.h"
-
 #include "PageOut.h"
 
 #include "SqlData.h"

@@ -67,6 +67,16 @@ void WinHome::WinInitAll()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口";
 
+    TestText("Initialize WinBack\n");
+    WinBack *winBack = new WinBack(this);
+    ui->desktop->addWidget(winBack);
+    winBack->setObjectName("WinBack");
+    connect(winBack,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winBack,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize WinBack OK\n");
+
     TestText("Initialize WinSyst\n");
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
