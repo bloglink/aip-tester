@@ -67,6 +67,7 @@ void WinHome::WinInitAll()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口";
 
+    TestText("Initialize WinSyst\n");
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
     winSyst->setObjectName("WinSyst");
@@ -74,19 +75,25 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winSyst,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize WinSyst OK\n");
 
+    TestText("Initialize WinType\n");
     WinType *winType = new WinType(this);
     ui->desktop->addWidget(winType);
     winType->setObjectName("WinType");
     connect(winType,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize WinType OK\n");
 
+    TestText("Initialize WinData\n");
     WinData *winData = new WinData(this);
     ui->desktop->addWidget(winData);
     winData->setObjectName("WinData");
     connect(winData,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize WinData OK\n");
 
+    TestText("Initialize WinTest\n");
     WinTest *winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
@@ -94,7 +101,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winTest,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize WinTest OK\n");
 
+    TestText("Initialize PageDcr\n");
     PageDcr *pageDcr = new PageDcr(this);
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
@@ -102,7 +111,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageDcr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageDcr OK\n");
 
+    TestText("Initialize PageMag\n");
     PageMag *pageMag = new PageMag(this);
     ui->desktop->addWidget(pageMag);
     pageMag->setObjectName("PageMag");
@@ -110,7 +121,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageMag,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageMag OK\n");
 
+    TestText("Initialize PageInr\n");
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
@@ -118,7 +131,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageInr OK\n");
 
+    TestText("Initialize PageAcw\n");
     PageAcw *pageAcw = new PageAcw(this);
     ui->desktop->addWidget(pageAcw);
     pageAcw->setObjectName("PageAcw");
@@ -126,7 +141,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageAcw,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageAcw OK\n");
 
+    TestText("Initialize PageImp\n");
     PageImp *pageImp = new PageImp(this);
     ui->desktop->addWidget(pageImp);
     pageImp->setObjectName("PageImp");
@@ -134,7 +151,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageImp,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageImp OK\n");
 
+    TestText("Initialize PageInd\n");
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
@@ -142,7 +161,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInd,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageInd OK\n");
 
+    TestText("Initialize PagePwr\n");
     PagePwr *pagePwr = new PagePwr(this);
     ui->desktop->addWidget(pagePwr);
     pagePwr->setObjectName("PagePwr");
@@ -150,7 +171,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pagePwr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PagePwr OK\n");
 
+    TestText("Initialize PageLvs\n");
     PageLvs *pageLvs = new PageLvs(this);
     ui->desktop->addWidget(pageLvs);
     pageLvs->setObjectName("PageLvs");
@@ -158,7 +181,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageLvs,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageLvs OK\n");
 
+    TestText("Initialize PageLck\n");
     PageLck *pageLck = new PageLck(this);
     ui->desktop->addWidget(pageLck);
     pageLck->setObjectName("PageLck");
@@ -166,6 +191,17 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageLck,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageLck OK\n");
+
+    TestText("Initialize PageOut\n");
+    PageOut *pageOut = new PageOut(this);
+    ui->desktop->addWidget(pageOut);
+    pageOut->setObjectName("PageOut");
+    connect(pageOut,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageOut,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    TestText("Initialize PageOut OK\n");
 
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
@@ -320,7 +356,7 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         emit SendMessage(WIN_ID_TEST,cmd,msg);
         break;
     case CMD_DEBUG:
-        emit SendMessage(ADDR,CMD_DEBUG,msg);
+        TestText(msg);
         break;
     case CMD_WAVE:
         emit SendMessage(ADDR,CMD_WAVE,msg);
@@ -499,6 +535,16 @@ void WinHome::TestPause()
     if(QMessageBox::warning(this,"此项目不合格", "是否继续",
                             QMessageBox::Yes,QMessageBox::No)==QMessageBox::No)
         Testing = false;
+}
+
+void WinHome::TestText(QByteArray msg)
+{
+    if (!ui->Text->isHidden()) {
+        ui->Text->insertPlainText(msg);
+        ui->Text->moveCursor(QTextCursor::EndOfBlock);
+        Delay(1);
+    }
+    emit SendMessage(ADDR,CMD_DEBUG,msg);
 }
 /*******************************************************************************
  * version:    1.0

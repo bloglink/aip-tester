@@ -28,6 +28,8 @@
 #include "PageLvs.h"
 #include "PageLck.h"
 
+#include "PageOut.h"
+
 #include "SqlData.h"
 #include "CanSocket.h"
 
@@ -67,6 +69,7 @@ private slots:
     void TestSaveItem(void);
     void TestSaveJudge(QByteArray msg);
     void TestPause(void);
+    void TestText(QByteArray msg);
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
 
