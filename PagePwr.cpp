@@ -438,7 +438,7 @@ void PagePwr::TestCheck()
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("功率板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"PWR Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PagePwr Error:Time out\n");
     }
 }
 /*******************************************************************************

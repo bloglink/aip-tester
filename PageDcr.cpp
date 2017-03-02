@@ -494,7 +494,7 @@ void PageDcr::TestCheck()
     if (!TestTimeOut(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"DCR Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PageDcr Error:Time out\n");
     }
     qDebug()<<QTime::currentTime().toString()<<"查询电阻状态OK";
 }

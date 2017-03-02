@@ -200,7 +200,7 @@ void PageInr::TestCheck()
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"IR Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
     }
 }
 /*******************************************************************************

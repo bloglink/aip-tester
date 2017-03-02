@@ -114,6 +114,7 @@ void PageOut::TestCheck(quint16 pos)
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),w,QMessageBox::Ok);
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PageOut Error:Time out\n");
     }
     qDebug()<<QTime::currentTime().toString()<<"查询输出状态OK";
 }

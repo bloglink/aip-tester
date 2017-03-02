@@ -478,7 +478,7 @@ void PageInd::TestCheck()
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"INDL Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PageInd Error:Time out\n");
     }
 }
 /*******************************************************************************

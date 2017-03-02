@@ -628,7 +628,7 @@ void PageImp::TestCheck()
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("匝间板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"IMP Error\n");
+        emit SendMessage(ADDR,CMD_DEBUG,"Check PageImp Error:Time out\n");
     }
 }
 /*******************************************************************************
