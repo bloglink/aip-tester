@@ -1,5 +1,5 @@
-#ifndef SQL_H
-#define SQL_H
+#ifndef SQLDATA_H
+#define SQLDATA_H
 
 #include <QUrl>
 #include <QDate>
@@ -14,11 +14,11 @@
 
 #include "define.h"
 
-class Sql : public QObject
+class SqlData : public QObject
 {
     Q_OBJECT
 public:
-    explicit Sql(QObject *parent = 0);
+    explicit SqlData(QObject *parent = 0);
 
 private slots:
     void DeviceOpen(void);
@@ -28,4 +28,4 @@ private:
     QSqlDatabase db;
 };
 
-#endif // SQL_H
+#endif // SQLDATA_H

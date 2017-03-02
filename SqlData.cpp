@@ -1,6 +1,6 @@
 /**
   ******************************************************************************
-  * @file    sql.cpp
+  * @file    SqlData.cpp
   * @author  link
   * @version 2.0.0.0
   * @date    2017-02-27
@@ -8,21 +8,22 @@
   ******************************************************************************
   */
 /* Includes ------------------------------------------------------------------*/
-#include "sql.h"
+#include "SqlData.h"
 /**
   * @brief  Initializes
   * @param  parent:parent object
   * @retval None
   */
-Sql::Sql(QObject *parent) : QObject(parent)
+SqlData::SqlData(QObject *parent) : QObject(parent)
 {
+
 }
 /**
   * @brief  Open sql database
   * @param  None
   * @retval None
   */
-void Sql::DeviceOpen()
+void SqlData::DeviceOpen()
 {
     db = QSqlDatabase::addDatabase("QSQLITE","SQL");
     db.setDatabaseName(SQL_PATH);
@@ -36,7 +37,7 @@ void Sql::DeviceOpen()
   * @param  None
   * @retval None
   */
-void Sql::DeviceQuit()
+void SqlData::DeviceQuit()
 {
     db.close();
 }
@@ -45,7 +46,7 @@ void Sql::DeviceQuit()
   * @param  msg:data to insert
   * @retval None
   */
-void Sql::Write(QByteArray msg)
+void SqlData::Write(QByteArray msg)
 {
     QStringList dat = QString(msg).split("@");
     if (dat.size() < 3)
@@ -74,3 +75,4 @@ void Sql::Write(QByteArray msg)
     query.exec();
 }
 /*********************************END OF FILE**********************************/
+

@@ -32,7 +32,7 @@ SOURCES += main.cpp\
     PageLvs.cpp \
     PageLck.cpp \
     CanSocket.cpp \
-    sql.cpp
+    SqlData.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -54,7 +54,7 @@ HEADERS  += \
     PageLvs.h \
     PageLck.h \
     CanSocket.h \
-    sql.h
+    SqlData.h
 
 FORMS    += \
     PageKey.ui \

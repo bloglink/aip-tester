@@ -28,7 +28,7 @@
 #include "PageLvs.h"
 #include "PageLck.h"
 
-#include "sql.h"
+#include "SqlData.h"
 #include "CanSocket.h"
 
 namespace Ui {
@@ -84,7 +84,7 @@ private:
     QThread *thread_can;
     QThread *thread_sql;
     CanSocket can;
-    Sql sql;
+    SqlData sql;
 };
 
 #endif // WINHOME_H
