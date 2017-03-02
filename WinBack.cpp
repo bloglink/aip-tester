@@ -8,6 +8,7 @@ WinBack::WinBack(QWidget *parent) :
     ui->setupUi(this);
     WinInit();
     BtnInit();
+    DatInit();
 }
 
 WinBack::~WinBack()

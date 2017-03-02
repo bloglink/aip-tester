@@ -15,7 +15,7 @@ public:
     explicit Waveform(QWidget *parent = 0);
 
 signals:
-    void BlockClick(double x);
+    void BlockClick(int x);
 public slots:
     void WaveByteShow(QByteArray msg);
     void WaveTestShow(QByteArray msg);
@@ -38,6 +38,7 @@ public:
 private slots:
     virtual void paintEvent(QPaintEvent *);
     virtual void resizeEvent(QResizeEvent *);
+    virtual void mousePressEvent(QMouseEvent *ev);
 private:
     bool isTest;
     bool isItem;

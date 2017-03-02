@@ -73,8 +73,6 @@ void WinHome::WinInitAll()
     winBack->setObjectName("WinBack");
     connect(winBack,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winBack,
-            SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize WinBack OK\n");
 
     TestText("Initialize WinSyst\n");

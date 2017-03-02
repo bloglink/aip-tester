@@ -29,162 +29,233 @@
    <item>
     <widget class="QStackedWidget" name="StackWinSyst">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="SystemPage">
-      <widget class="QWidget" name="widget" native="true">
-       <property name="geometry">
-        <rect>
-         <x>150</x>
-         <y>170</y>
-         <width>481</width>
-         <height>210</height>
-        </rect>
-       </property>
-       <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
-         <widget class="QLabel" name="TextUser">
-          <property name="text">
-           <string>操作用户：</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="1">
-         <widget class="QComboBox" name="BoxUser">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>97</width>
-            <height>44</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>17</pointsize>
-           </font>
-          </property>
-          <item>
-           <property name="text">
-            <string>操作员</string>
-           </property>
+      <layout class="QGridLayout" name="gridLayout_5">
+       <item row="1" column="1">
+        <widget class="QWidget" name="widget" native="true">
+         <layout class="QGridLayout" name="gridLayout">
+          <item row="4" column="2">
+           <widget class="QPushButton" name="BtnExit">
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>返回</string>
+            </property>
+           </widget>
           </item>
-          <item>
-           <property name="text">
-            <string>管理员</string>
-           </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="TextUser">
+            <property name="text">
+             <string>操作用户：</string>
+            </property>
+           </widget>
           </item>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="BoxMode">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>97</width>
-            <height>44</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>17</pointsize>
-           </font>
-          </property>
-          <item>
-           <property name="text">
-            <string>按钮启动</string>
-           </property>
+          <item row="1" column="1">
+           <widget class="QComboBox" name="BoxMode">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>17</pointsize>
+             </font>
+            </property>
+            <item>
+             <property name="text">
+              <string>按钮启动</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>脚踏启动</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>滑罩启动</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>网络启动</string>
+             </property>
+            </item>
+           </widget>
           </item>
-          <item>
-           <property name="text">
-            <string>脚踏启动</string>
-           </property>
+          <item row="1" column="0">
+           <widget class="QLabel" name="TextMode">
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>启动方式：</string>
+            </property>
+           </widget>
           </item>
-          <item>
-           <property name="text">
-            <string>滑罩启动</string>
-           </property>
+          <item row="2" column="1">
+           <widget class="QComboBox" name="BoxStyle">
+            <property name="enabled">
+             <bool>false</bool>
+            </property>
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <item>
+             <property name="text">
+              <string>孔雀绿</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>濡雨蓝</string>
+             </property>
+            </item>
+           </widget>
           </item>
-          <item>
-           <property name="text">
-            <string>网络启动</string>
-           </property>
+          <item row="0" column="2" rowspan="3">
+           <widget class="QTextBrowser" name="TextDebug"/>
           </item>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="TextStyle">
-          <property name="text">
-           <string>样式风格:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QComboBox" name="BoxStyle">
-          <property name="enabled">
-           <bool>false</bool>
-          </property>
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>97</width>
-            <height>44</height>
-           </size>
-          </property>
-          <item>
-           <property name="text">
-            <string>孔雀绿</string>
-           </property>
+          <item row="0" column="1">
+           <widget class="QComboBox" name="BoxUser">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="font">
+             <font>
+              <pointsize>17</pointsize>
+             </font>
+            </property>
+            <item>
+             <property name="text">
+              <string>操作员</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>管理员</string>
+             </property>
+            </item>
+           </widget>
           </item>
-          <item>
-           <property name="text">
-            <string>濡雨蓝</string>
-           </property>
+          <item row="2" column="0">
+           <widget class="QLabel" name="TextStyle">
+            <property name="text">
+             <string>样式风格:</string>
+            </property>
+           </widget>
           </item>
-         </widget>
-        </item>
-        <item row="0" column="2" rowspan="3">
-         <widget class="QTextBrowser" name="TextDebug"/>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="TextMode">
-          <property name="styleSheet">
-           <string notr="true"/>
-          </property>
-          <property name="text">
-           <string>启动方式：</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="2">
-         <widget class="QPushButton" name="BtnExit">
-          <property name="minimumSize">
-           <size>
-            <width>97</width>
-            <height>44</height>
-           </size>
-          </property>
-          <property name="text">
-           <string>返回</string>
-          </property>
-         </widget>
-        </item>
-       </layout>
-      </widget>
+          <item row="3" column="0" colspan="2">
+           <widget class="QDateTimeEdit" name="EditTime">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+           </widget>
+          </item>
+          <item row="3" column="2">
+           <widget class="QPushButton" name="btnTime">
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>设置时间</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <spacer name="verticalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0">
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="1">
+        <spacer name="verticalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>40</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="2">
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
      </widget>
      <widget class="QWidget" name="PasswordPage">
       <layout class="QVBoxLayout" name="verticalLayout">

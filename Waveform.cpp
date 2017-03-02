@@ -171,4 +171,23 @@ void Waveform::resizeEvent(QResizeEvent *)
     if (isBlock)
         WaveBlock(Block0,Block1);
 }
+/**
+  * @brief  Click to change block
+  * @param  e:Mouse event
+  * @retval None
+  */
+void Waveform::mousePressEvent(QMouseEvent *e)
+{
+    if (!isBlock) {
+        QLabel::mousePressEvent(e);
+        return;
+    }
+    int x = e->x()*400/this->width();
+    if (x >= 200)
+        Block1 = x;
+    else
+        Block0 = x;
+    this->update();
+    emit BlockClick(x);
+}
 /*********************************END OF FILE**********************************/

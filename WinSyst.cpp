@@ -59,6 +59,7 @@ void WinSyst::BtnInit()
     btnGroup->addButton(ui->BtnSystPasswordOK,Qt::Key_3);
     btnGroup->addButton(ui->BtnSystPasswordExit,Qt::Key_4);
     btnGroup->addButton(ui->BtnExit,Qt::Key_4);
+    btnGroup->addButton(ui->btnTime,Qt::Key_5);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 /**
@@ -90,6 +91,9 @@ void WinSyst::BtnJudge(int id)
         QApplication::closeAllWindows();
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
+    case Qt::Key_5:
+        SetDateTime();
+        break;
     default:
         break;
     }
@@ -112,6 +116,8 @@ void WinSyst::SetInit()
     ui->BoxStyle->setCurrentIndex(settings->value("Style","0").toInt());
     password = settings->value("Password","").toString();
     ui->EditPassword->clear();
+
+    ui->EditTime->setDateTime(QDateTime::currentDateTime());
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置OK";
 }
 /**
@@ -130,6 +136,17 @@ void WinSyst::SetSave()
     settings->setValue("Style",QString::number(ui->BoxStyle->currentIndex()));
     settings->setValue("Password",password);
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置OK";
+}
+/**
+  * @brief  None
+  * @param  None
+  * @retval None
+  */
+void WinSyst::SetDateTime()
+{
+    QString time = ui->EditTime->dateTime().toString("yyyy.MM.dd-hh:mm:ss");
+    QProcess::execute(QString("date %1").arg(time));
+    QProcess::execute(QString("hwclock -w"));
 }
 /**
   * @brief  Judge and save the password

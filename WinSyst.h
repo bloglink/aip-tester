@@ -6,6 +6,7 @@
 #include <QWidget>
 #include <QListView>
 #include <QSettings>
+#include <QProcess>
 #include <QButtonGroup>
 
 #include "define.h"
@@ -33,6 +34,7 @@ private slots:
     void BtnJudge(int id);
     void SetInit(void);
     void SetSave(void);
+    void SetDateTime(void);
     void Password(void);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     virtual void showEvent(QShowEvent *);
