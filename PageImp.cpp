@@ -133,7 +133,7 @@ void PageImp::DatInit()
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目
@@ -142,7 +142,7 @@ void PageImp::DatInit()
     set->setIniCodec("GB18030");
     set->beginGroup("SetImp");
     //可用
-    QStringList temp = (QString(set->value("Enable","0 0 0 0 0 0 0 0").toByteArray())).split(" ");
+    QStringList temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
     if (temp.size() > 8)
         ui->TabSetImp->setRowCount(temp.size());
     else
@@ -161,7 +161,7 @@ void PageImp::DatInit()
         Enable.at(row)->setText(temp.at(row));
     }
     //端一
-    temp = (set->value("Terminal1","0 0 0 0 0 0 0 0").toString()).split(" ");
+    temp = (set->value("Terminal1","1 2 3 4 5 6 7 8").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
         if (Terminal1.size() > row)
             continue;
@@ -177,7 +177,7 @@ void PageImp::DatInit()
         Terminal1.at(row)->setText(temp.at(row));
     }
     //端二
-    temp = (set->value("Terminal2","1 1 1 1 1 1 1 1").toString()).split(" ");
+    temp = (set->value("Terminal2","2 3 4 5 6 7 8 1").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
         if (Terminal2.size() > row)
             continue;

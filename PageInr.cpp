@@ -71,7 +71,7 @@ void PageInr::DatInit()
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目

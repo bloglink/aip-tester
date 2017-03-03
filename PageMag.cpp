@@ -96,7 +96,7 @@ void PageMag::DatInit()
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目
@@ -111,7 +111,7 @@ void PageMag::DatInit()
         ui->BoxMain->setValue(temp.at(1).toInt());
         ui->BoxAuxiliary->setValue(temp.at(2).toInt());
     }
-    temp = (QString(set->value("Enable","Y Y Y Y Y Y Y Y").toByteArray())).split(" ");
+    temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
     if (temp.size() > 8)
         ui->TabSetMag->setRowCount(temp.size());
     else

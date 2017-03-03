@@ -40,7 +40,7 @@ WinType::~WinType()
   */
 void WinType::WinInit()
 {
-    ItemNames<<"空"<<"电阻"<<"反嵌"<<"绝缘"<<"交耐"<<"直耐"<<"匝间"<<"电感"<<"功率"<<"低启"<<"堵转"
+    ItemNames<<"清除"<<"电阻"<<"反嵌"<<"绝缘"<<"交耐"<<"直耐"<<"匝间"<<"电感"<<"功率"<<"低启"<<"堵转"
             <<"转速"<<"泄漏"<<"PG"<<"EMF"<<"DCBL";
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabColor->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -231,7 +231,7 @@ void WinType::TypesInit()
         FileNames.append(list.at(i).fileName());
 
     if (FileNames.isEmpty())
-        FileNames.append("default.ini");
+        FileNames.append(INI_DEFAULT);
 
     ui->TabFile->setRowCount(FileNames.size());
     for (int i=0; i<FileNames.size(); i++) {
@@ -262,7 +262,7 @@ void WinType::ItemsInit()
 
             ui->TabProj->setItem(i,1,new QTableWidgetItem);
             ui->TabProj->item(i,1)->setTextAlignment(Qt::AlignCenter);
-            if (ui->TabProj->item(i,0)->text() == "空")
+            if (ui->TabProj->item(i,0)->text() == "清除")
                 ui->TabProj->item(i,1)->setText("返回");
             else
                 ui->TabProj->item(i,1)->setText("设置");
@@ -283,7 +283,7 @@ void WinType::SetInit()
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse","default.ini").toString();
+    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目
@@ -308,7 +308,7 @@ void WinType::SetInit()
         ui->TabWire->item(i/2,i%2)->setBackgroundColor(QColor(temp.at(i)));
     }
 
-    ui->BoxTestNG->setCurrentIndex(c_settings->value("TestNG","0").toInt());
+    ui->BoxTestNG->setCurrentIndex(c_settings->value("TestNG","1").toInt());
     ui->BoxType->setCurrentIndex(c_settings->value("WinType","0").toInt());
     qDebug()<<QTime::currentTime().toString()<<"读取电机型号OK";
 }
@@ -326,7 +326,7 @@ void WinType::SetSave()
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse","default.ini").toString();
+    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目
@@ -453,7 +453,7 @@ void WinType::TypeAdd()
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse","default.ini").toString();
+    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
     QString Source = QString("./config/%1.ini").arg(FileInUse);
     QString Target = QString("./config/%1.ini").arg(t);

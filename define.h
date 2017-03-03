@@ -5,6 +5,7 @@
 
 #define INI_PATH "./nandflash/global.ini"
 #define SQL_PATH "./nandflash/aip.db"
+#define INI_DEFAULT "aip9918.ini"
 
 #define ADDR 6000
 #define GUEST_LOGIN             1000 //登录

@@ -66,7 +66,7 @@ void PageLck::DatInit()
     global->beginGroup("GLOBAL");
 
     //当前使用的测试项目
-    QString t = QString("./config/%1").arg(global->value("FileInUse","default.ini").toString());
+    QString t = QString("./config/%1").arg(global->value("FileInUse",INI_DEFAULT).toString());
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("PageLck");

@@ -148,7 +148,7 @@
        <item row="2" column="0" colspan="2">
         <widget class="QLabel" name="labelType">
          <property name="pixmap">
-          <pixmap resource="../aip-local/aip-image.qrc">:/image/M1S0.png</pixmap>
+          <pixmap resource="image.qrc">:/source/M1S0.png</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>
@@ -646,7 +646,7 @@
   </layout>
  </widget>
  <resources>
-  <include location="../aip-local/aip-image.qrc"/>
+  <include location="image.qrc"/>
  </resources>
  <connections/>
 </ui>

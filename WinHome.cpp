@@ -451,7 +451,7 @@ void WinHome::TestInit()
     QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
     settings_g->setIniCodec("GB18030");
     settings_g->beginGroup("GLOBAL");
-    motor_type = settings_g->value("FileInUse","default.ini").toString();
+    motor_type = settings_g->value("FileInUse",INI_DEFAULT).toString();
     motor_type.remove(".ini");
     //当前配置
     QString n = QString("./config/%1.ini").arg(motor_type);
@@ -462,7 +462,9 @@ void WinHome::TestInit()
     PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
     emit SendMessage(WIN_ID_OUT,CMD_INIT,NULL);//设定启动方式
-    qDebug()<<ItemToTest;
+
+    if (ItemToTest.isEmpty())
+        return;
 
     for (int i=0; i<ItemToTest.size(); i++) {
         emit SendMessage(ItemToTest.at(i).toInt(),CMD_INIT,NULL);

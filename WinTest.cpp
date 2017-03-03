@@ -125,7 +125,7 @@ void WinTest::SetInit()
     if (user == 1)
         ui->TextTestUser->setText(tr("用户:管理员"));
 
-    motor_type = g_settings->value("FileInUse","default.ini").toString();
+    motor_type = g_settings->value("FileInUse",INI_DEFAULT).toString();
     motor_type.remove(".ini");
     ui->TextTestType->setText(QString("型号:%1").arg(motor_type));
     //当前使用的测试项目
@@ -369,6 +369,11 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
   */
 void WinTest::ItemInit(QByteArray msg)
 {
+    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
+    ui->LabelState->setText("--");
+    if (msg.isEmpty()) {
+        return;
+    }
     QStringList item = QString(msg).split("\n");
     ui->TabTest->setRowCount(item.size());
     for (int i=0; i<item.size(); i++) {
@@ -393,9 +398,6 @@ void WinTest::ItemInit(QByteArray msg)
         ui->TabTest->item(i,3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         ui->TabTest->item(i,3)->setText(s.at(3));
     }
-    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
-    ui->LabelState->setText("--");
-
 }
 /**
   * @brief  Initializes data when show

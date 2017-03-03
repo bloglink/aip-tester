@@ -96,7 +96,7 @@ void PageDcr::DatInit()
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse","default.ini").toString();
+    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目
@@ -116,7 +116,7 @@ void PageDcr::DatInit()
         ui->BoxUnbalance->setValue(temp.at(5).toDouble());
     }
     //可用
-    temp = (QString(set->value("Enable","Y Y Y Y Y Y Y Y").toByteArray())).split(" ");
+    temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
     if (temp.size() > 8)
         ui->TabSetDcr->setRowCount(temp.size());
     else

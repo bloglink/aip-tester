@@ -34,7 +34,7 @@ void UdpClient::DatInit()
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse","default.ini").toString();
+    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
     Types = FileNames.join(" ");
     Types.remove(FileInUse);
