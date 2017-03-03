@@ -712,6 +712,8 @@ double PageDcr::TestOffset(double t, quint8 num)
 *******************************************************************************/
 void PageDcr::TestStop()
 {
+    if (!Testing)
+        return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);

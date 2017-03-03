@@ -31,7 +31,7 @@
 #include "PageLck.h"
 #include "PageOut.h"
 
-#include "SqlData.h"
+#include "SqlClient.h"
 #include "CanSocket.h"
 #include "TcpClient.h"
 #include "UdpClient.h"
@@ -96,7 +96,7 @@ private:
     QThread *thread_tcp;
     QThread *thread_udp;
     CanSocket can;
-    SqlData sql;
+    SqlClient sql;
     TcpClient tcp;
     UdpClient udp;
 };

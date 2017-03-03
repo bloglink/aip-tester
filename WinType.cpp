@@ -399,7 +399,7 @@ void WinType::selectItemToTest(int row, int column)
     if (ui->TabTest->currentRow() < 0)
         return;
     if (column > 0) {
-        if (ui->TabProj->item(row,0)->text() == tr("空"))
+        if (ui->TabProj->item(row,0)->text() == tr("清除"))
             ui->Other->setCurrentIndex(0);
         if (ui->TabProj->item(row,0)->text() == tr("电阻"))
             emit SendMessage(ADDR,CMD_JUMP,"PageDcr");

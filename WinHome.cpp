@@ -430,6 +430,7 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         TestStart(msg);
         break;
     case CMD_STOP:
+        emit SendMessage(ADDR,CMD_STOP,msg);
         Testing = false;
         break;
     default:

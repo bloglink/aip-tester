@@ -9,7 +9,6 @@ void UdpClient::UdpInit()
 {
     this->bind(6000);
     connect(this,SIGNAL(readyRead()),this,SLOT(ReadAllFrame()));
-
 }
 
 void UdpClient::UdpQuit()

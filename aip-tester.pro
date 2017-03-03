@@ -32,11 +32,11 @@ SOURCES += main.cpp\
     PageLvs.cpp \
     PageLck.cpp \
     CanSocket.cpp \
-    SqlData.cpp \
     PageOut.cpp \
     WinBack.cpp \
     TcpClient.cpp \
-    UdpClient.cpp
+    UdpClient.cpp \
+    SqlClient.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -58,11 +58,11 @@ HEADERS  += \
     PageLvs.h \
     PageLck.h \
     CanSocket.h \
-    SqlData.h \
     PageOut.h \
     WinBack.h \
     TcpClient.h \
-    UdpClient.h
+    UdpClient.h \
+    SqlClient.h
 
 FORMS    += \
     PageKey.ui \
