@@ -1,5 +1,5 @@
-#ifndef CANSOCKET_H
-#define CANSOCKET_H
+#ifndef CANCLIENT_H
+#define CANCLIENT_H
 
 #include <QTime>
 #include <QTimer>
@@ -168,11 +168,13 @@ extern "C" DWORD __stdcall CAN_GetParam(DWORD dwDeviceHandle, DWORD dwChannel, D
 // 设置参数
 extern "C" DWORD __stdcall CAN_SetParam(DWORD dwDeviceHandle, DWORD dwChannel, DWORD dwParamType, PVOID pData);
 
-class CanSocket : public QObject
+
+class CanClient : public QObject
 {
     Q_OBJECT
 public:
-    explicit CanSocket(QObject *parent = 0);
+    explicit CanClient(QObject *parent = 0);
+
 signals:
     void GetCanData(QByteArray msg);
 private slots:
@@ -193,4 +195,4 @@ private:
 #endif
 };
 
-#endif // CDRIVERCAN_H
+#endif // CANCLIENT_H

@@ -32,7 +32,7 @@
 #include "PageOut.h"
 
 #include "SqlClient.h"
-#include "CanSocket.h"
+#include "CanClient.h"
 #include "TcpClient.h"
 #include "UdpClient.h"
 
@@ -95,7 +95,7 @@ private:
     QThread *thread_sql;
     QThread *thread_tcp;
     QThread *thread_udp;
-    CanSocket can;
+    CanClient can;
     SqlClient sql;
     TcpClient tcp;
     UdpClient udp;

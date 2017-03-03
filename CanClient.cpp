@@ -1,6 +1,6 @@
-#include "CanSocket.h"
+#include "CanClient.h"
 
-CanSocket::CanSocket(QObject *parent) : QObject(parent)
+CanClient::CanClient(QObject *parent) : QObject(parent)
 {
     s = 0;
 }
@@ -10,7 +10,7 @@ CanSocket::CanSocket(QObject *parent) : QObject(parent)
  * date:        2016.12.09
  * brief:       打开设备
 *******************************************************************************/
-void CanSocket::DeviceOpen()
+void CanClient::DeviceOpen()
 {
     qDebug()<<QTime::currentTime().toString()<<"打开CAN口";
 #ifdef __arm__
@@ -57,7 +57,7 @@ void CanSocket::DeviceOpen()
  * date:        2016.12.09
  * brief:       关闭设备
 *******************************************************************************/
-void CanSocket::DeviceQuit()
+void CanClient::DeviceQuit()
 {
     if (s <= 0)
         return;
@@ -77,7 +77,7 @@ void CanSocket::DeviceQuit()
  * date:        2017.01.06
  * brief:       解决自发自收问题TxMsg
 *******************************************************************************/
-bool CanSocket::DeviceSend()
+bool CanClient::DeviceSend()
 {
     if (s <= 0)
         return false;
@@ -102,7 +102,7 @@ bool CanSocket::DeviceSend()
  * date:        2016.12.09
  * brief:       读取一帧数据
 *******************************************************************************/
-bool CanSocket::DeviceRead()
+bool CanClient::DeviceRead()
 {
 #ifdef __arm__
     int nbytes;
@@ -137,7 +137,7 @@ bool CanSocket::DeviceRead()
  * date:        2016.12.09
  * brief:       缓冲区数据
 *******************************************************************************/
-bool CanSocket::BytesAvalible()
+bool CanClient::BytesAvalible()
 {
 #ifndef __arm__
     if (s <= 0)
@@ -155,7 +155,7 @@ bool CanSocket::BytesAvalible()
  * date:        2016.12.09
  * brief:       读取所有数据
 *******************************************************************************/
-void CanSocket::readAll()
+void CanClient::readAll()
 {
     QByteArray msg;
     QDataStream in(&msg, QIODevice::ReadWrite);
@@ -183,7 +183,7 @@ void CanSocket::readAll()
  * date:        2016.12.09
  * brief:       发送数据
 *******************************************************************************/
-void CanSocket::WriteAll(QByteArray msg)
+void CanClient::WriteAll(QByteArray msg)
 {
     quint16 id;
     quint8 dlc;

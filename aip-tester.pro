@@ -8,9 +8,15 @@ QT       += core gui sql network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
+
 TARGET = aip-tester
 TEMPLATE = app
-
+win32{
+LIBS += C:\CanCmd.dll
+}
+linux{
+greaterThan(QT_MAJOR_VERSION, 4):LIBS += /usr/lib/libCanCmd.so
+}
 
 SOURCES += main.cpp\
     Histogram.cpp \
@@ -31,12 +37,12 @@ SOURCES += main.cpp\
     PagePwr.cpp \
     PageLvs.cpp \
     PageLck.cpp \
-    CanSocket.cpp \
     PageOut.cpp \
     WinBack.cpp \
     TcpClient.cpp \
     UdpClient.cpp \
-    SqlClient.cpp
+    SqlClient.cpp \
+    CanClient.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -57,12 +63,12 @@ HEADERS  += \
     PagePwr.h \
     PageLvs.h \
     PageLck.h \
-    CanSocket.h \
     PageOut.h \
     WinBack.h \
     TcpClient.h \
     UdpClient.h \
-    SqlClient.h
+    SqlClient.h \
+    CanClient.h
 
 FORMS    += \
     PageKey.ui \
