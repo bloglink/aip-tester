@@ -21,7 +21,8 @@ TcpClient::TcpClient(QObject *parent) : QTcpSocket(parent)
     connect(this,SIGNAL(connected()),this,SLOT(Connected()));
     connect(this,SIGNAL(readyRead()),this,SLOT(GetBlock()));
     connect(this,SIGNAL(bytesWritten(qint64)),this,SLOT(PutFileData(qint64)));
-    connect(this,SIGNAL(error(QAbstractSocket::SocketError)),this,SLOT(Error(QAbstractSocket::SocketError)));
+    connect(this,SIGNAL(error(QAbstractSocket::SocketError)),this,
+            SLOT(Error(QAbstractSocket::SocketError)));
 }
 /******************************************************************************
   * version:    1.0
@@ -32,7 +33,7 @@ TcpClient::TcpClient(QObject *parent) : QTcpSocket(parent)
 void TcpClient::TcpInit()
 {
     count = 0;
-    qDebug()<<QTime::currentTime().toString()<<"读取网络配置";
+    qDebug()<<QTime::currentTime().toString()<<"读取TCP网络配置";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
@@ -46,7 +47,7 @@ void TcpClient::TcpInit()
     InitString.append(getHardwareAddress());
     InitString.append(" ");
     InitString.append(v);
-    qDebug()<<QTime::currentTime().toString()<<"读取网络配置OK";
+    qDebug()<<QTime::currentTime().toString()<<"读取TCP网络配置OK";
 
     this->connectToHost(h, 6000);
     timer->start(10000);

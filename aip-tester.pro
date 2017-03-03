@@ -35,7 +35,8 @@ SOURCES += main.cpp\
     SqlData.cpp \
     PageOut.cpp \
     WinBack.cpp \
-    TcpClient.cpp
+    TcpClient.cpp \
+    UdpClient.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -60,7 +61,8 @@ HEADERS  += \
     SqlData.h \
     PageOut.h \
     WinBack.h \
-    TcpClient.h
+    TcpClient.h \
+    UdpClient.h
 
 FORMS    += \
     PageKey.ui \

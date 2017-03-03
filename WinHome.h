@@ -34,6 +34,7 @@
 #include "SqlData.h"
 #include "CanSocket.h"
 #include "TcpClient.h"
+#include "UdpClient.h"
 
 namespace Ui {
 class WinHome;
@@ -55,6 +56,7 @@ signals:
     void WriteSql(QByteArray msg);
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
+    void Init(void);
     void WinInit(void);
     void WinInitAll(void);
     void WinJump(QByteArray win);
@@ -64,6 +66,7 @@ private slots:
     void CanInit(void);
     void SqlInit(void);
     void TcpInit(void);
+    void UdpInit(void);
     void CanThread(QByteArray msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
@@ -91,9 +94,11 @@ private:
     QThread *thread_can;
     QThread *thread_sql;
     QThread *thread_tcp;
+    QThread *thread_udp;
     CanSocket can;
     SqlData sql;
     TcpClient tcp;
+    UdpClient udp;
 };
 
 #endif // WINHOME_H

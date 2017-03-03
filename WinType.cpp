@@ -293,7 +293,7 @@ void WinType::SetInit()
     c_settings->beginGroup("GLOBAL");
     ui->TextTypeShow->setText(FileInUse.remove(".ini"));
 
-    temp = (c_settings->value("ProjToTest","0").toString().split(" "));
+    temp = (c_settings->value("ProjToTest","1").toString().split(" "));
     ui->TabTest->setRowCount(temp.size()+1);
     for (int i=0; i<temp.size()+1; i++) {
         ui->TabTest->setItem(i,0,new QTableWidgetItem);

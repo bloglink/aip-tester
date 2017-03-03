@@ -37,7 +37,19 @@ WinHome::~WinHome()
     thread_sql->wait();
     thread_tcp->quit();
     thread_tcp->wait();
+    thread_udp->quit();
+    thread_udp->wait();
     delete ui;
+}
+
+void WinHome::Init()
+{
+    QTimer *timer = new QTimer(this);
+    CanInit();
+    SqlInit();
+    TcpInit();
+    UdpInit();
+    timer->singleShot(50,this,SLOT(WinInitAll()));
 }
 /**
   * @brief  Initializes title version and style
@@ -287,7 +299,7 @@ void WinHome::BtnJudge(int id)
   */
 void WinHome::DatInit()
 {
-    QString v = "V-2.0.1.0";
+    QString v = "V-2.1.0.2";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
@@ -334,9 +346,21 @@ void WinHome::TcpInit()
     thread_tcp = new QThread(this);
     tcp.moveToThread(thread_tcp);
     connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(TcpInit()));
+    connect(thread_tcp,SIGNAL(finished()),&tcp,SLOT(TcpQuit()));
     connect(&tcp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_tcp->start();
+}
+
+void WinHome::UdpInit()
+{
+    thread_udp = new QThread(this);
+    udp.moveToThread(thread_udp);
+    connect(thread_udp,SIGNAL(started()),&udp,SLOT(UdpInit()));
+    connect(thread_udp,SIGNAL(finished()),&udp,SLOT(UdpQuit()));
+    connect(&udp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    thread_udp->start();
 }
 /**
   * @brief  Can data read
@@ -434,10 +458,11 @@ void WinHome::TestInit()
     QSettings *settings_c = new QSettings(n,QSettings::IniFormat);
     settings_c->setIniCodec("GB18030");
 
-    ItemToTest = settings_c->value("/GLOBAL/ProjToTest","").toString().split(" ");
+    ItemToTest = settings_c->value("/GLOBAL/ProjToTest","1").toString().split(" ");
     PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
     emit SendMessage(WIN_ID_OUT,CMD_INIT,NULL);//设定启动方式
+    qDebug()<<ItemToTest;
 
     for (int i=0; i<ItemToTest.size(); i++) {
         emit SendMessage(ItemToTest.at(i).toInt(),CMD_INIT,NULL);
@@ -617,12 +642,8 @@ void WinHome::Delay(int ms)
 
 void WinHome::showEvent(QShowEvent *)
 {
-    QTimer *timer = new QTimer(this);
     if (!isCheckOk) {
-        CanInit();
-        SqlInit();
-        TcpInit();
-        timer->singleShot(50,this,SLOT(WinInitAll()));
+        Init();
     }
 }
 /*********************************END OF FILE**********************************/

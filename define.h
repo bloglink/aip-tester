@@ -47,7 +47,7 @@
 #define CMD_ALARM       0x14    //报警
 #define CAN_CMD_READY   0x15
 
-#define WIN_ID_TEST     0x00    //测试界面
+#define WIN_ID_TEST     0x10    //测试界面
 #define WIN_ID_DCR      0x01    //电阻界面
 #define WIN_ID_MAG      0x02    //反嵌界面
 #define WIN_ID_INR      0x03    //绝缘界面
