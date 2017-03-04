@@ -23,6 +23,8 @@
 #define  ResCu_Al 0.0041  //  铜铝材料
 #define  ResAl    0.0043  //  铝材料
 
+#define MAX_ROW 8
+
 namespace Ui {
 class PageDcr;
 }
@@ -68,7 +70,11 @@ private slots:
     void TestDelay(int ms);
     bool TestTimeOut(quint16 t);
 
-
+    void MetalChange(int index);
+    void UnitChange(int index);
+    void MinResChange(double x);
+    void MaxResChange(double x);
+    void StdResChange(double x);
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
 private:
@@ -90,6 +96,7 @@ private:
     QList<QDoubleSpinBox*> Min;
     QList<QDoubleSpinBox*> Max;
     QList<QDoubleSpinBox*> Std;
+    QList<QDoubleSpinBox*> Offset;
 };
 
 #endif // PAGEDCR_H

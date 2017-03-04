@@ -47,6 +47,62 @@ void PageDcr::WinInit()
     input->BtnInit(t);
     connect(input,SIGNAL(ItemChange(QString)),this,SLOT(ItemChange(QString)));
     input->hide();
+
+    ui->TabSetDcr->setRowCount(MAX_ROW);
+    for (int row=0; row<MAX_ROW; row++) {
+        Enable.append(new QTableWidgetItem);
+        ui->TabSetDcr->setItem(row,0,Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal1.append(new QTableWidgetItem);
+        ui->TabSetDcr->setItem(row,1,Terminal1.at(row));
+        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal2.append(new QTableWidgetItem);
+        ui->TabSetDcr->setItem(row,2,Terminal2.at(row));
+        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Metal.append(new QComboBox(this));
+        ui->TabSetDcr->setCellWidget(row,3,Metal.at(row));
+        QStringList t1;
+        t1 <<tr("铜")<<tr("铝")<<tr("铜铝");
+        Metal.at(row)->setView(new QListView(this));
+        Metal.at(row)->addItems(t1);
+
+        Unit.append(new QComboBox(this));
+        ui->TabSetDcr->setCellWidget(row,4,Unit.at(row));
+        QStringList t2;
+        t2 <<"mΩ"<<"Ω"<<"kΩ";
+        Unit.at(row)->setView(new QListView(this));
+        Unit.at(row)->addItems(t2);
+
+        Min.append(new QDoubleSpinBox(this));
+        ui->TabSetDcr->setCellWidget(row,5,Min.at(row));
+        Min.at(row)->setMaximum(9999);
+        Min.at(row)->setAlignment(Qt::AlignHCenter);
+        Min.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Max.append(new QDoubleSpinBox(this));
+        ui->TabSetDcr->setCellWidget(row,6,Max.at(row));
+        Max.at(row)->setMaximum(9999);
+        Max.at(row)->setAlignment(Qt::AlignHCenter);
+        Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Std.append(new QDoubleSpinBox(this));
+        ui->TabSetDcr->setCellWidget(row,7,Std.at(row));
+        Std.at(row)->setMaximum(9999);
+        Std.at(row)->setAlignment(Qt::AlignHCenter);
+        Std.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Offset.append(new QDoubleSpinBox(this));
+        ui->TabSetDcr->setCellWidget(row,8,Offset.at(row));
+        Offset.at(row)->setMaximum(9999);
+        Offset.at(row)->setAlignment(Qt::AlignHCenter);
+        Offset.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+    }
 }
 /*******************************************************************************
  * version:    1.0
@@ -105,7 +161,6 @@ void PageDcr::DatInit()
     set->setIniCodec("GB18030");
     set->beginGroup("SetDcr");
 
-
     QStringList temp = (set->value("Other","20 0 0.5 10 10 50").toString()).split(" ");
     if (temp.size() >= 6) {
         ui->BoxStd->setValue(temp.at(0).toDouble());
@@ -117,136 +172,41 @@ void PageDcr::DatInit()
     }
     //可用
     temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
-    if (temp.size() > 8)
-        ui->TabSetDcr->setRowCount(temp.size());
-    else
-        ui->TabSetDcr->setRowCount(8);
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Enable.size() > row)
-            continue;
-        Enable.append(new QTableWidgetItem);
-        ui->TabSetDcr->setItem(row,0,Enable.at(row));
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
-        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Enable.size() <= row)
-            break;
-        Enable.at(row)->setText(temp.at(row));
-    }
     //端一
-    temp = (set->value("Terminal1","1 2 3 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Terminal1.size() > row)
-            continue;
-        Terminal1.append(new QTableWidgetItem);
-        ui->TabSetDcr->setItem(row,1,Terminal1.at(row));
+    temp = (set->value("Terminal1","1 2 1 4 5 6 7 8").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
-        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Terminal1.size() <= row)
-            break;
-        Terminal1.at(row)->setText(temp.at(row));
-    }
     //端二
-    temp = (set->value("Terminal2","2 3 4 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Terminal2.size() > row)
-            continue;
-        Terminal2.append(new QTableWidgetItem);
-        ui->TabSetDcr->setItem(row,2,Terminal2.at(row));
-        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Terminal2.size() <= row)
-            break;
+    temp = (set->value("Terminal2","2 3 3 5 6 7 8 1").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
-    }
     //材料
     temp = (QString(set->value("Metal","0 0 0 0 0 0 0 0").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Metal.size() > row)
-            continue;
-        Metal.append(new QComboBox(this));
-        ui->TabSetDcr->setCellWidget(row,3,Metal.at(row));
-        QStringList t;
-        t <<tr("铜")<<tr("铝")<<tr("铜铝");
-        Metal.at(row)->setView(new QListView(this));
-        Metal.at(row)->addItems(t);
-
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Metal.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Metal.at(row)->setCurrentIndex(temp.at(row).toInt());
-    }
     //单位
     temp = (QString(set->value("Unit","1 1 1 1 1 1 1 1").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Unit.size() > row)
-            continue;
-        Unit.append(new QComboBox(this));
-        ui->TabSetDcr->setCellWidget(row,4,Unit.at(row));
-        QStringList t;
-        t <<"mΩ"<<"Ω"<<"kΩ";
-        Unit.at(row)->setView(new QListView(this));
-        Unit.at(row)->addItems(t);
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Unit.at(row)->setCurrentIndex(temp.at(row).toInt());
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Unit.size() <= row)
-            break;
-        Unit.at(row)->setCurrentIndex(temp.at(row).toInt());
-    }
     //最小值
-    temp = (set->value("Min","0.00 0.00 0.00 0.00 0.00 0.00 0.00 0.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Min.size() > row)
-            continue;
-        Min.append(new QDoubleSpinBox(this));
-        ui->TabSetDcr->setCellWidget(row,5,Min.at(row));
-        Min.at(row)->setMaximum(9999);
-        Min.at(row)->setAlignment(Qt::AlignHCenter);
-        Min.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Min.size() <= row)
-            break;
+    temp = (set->value("Min","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Min.at(row)->setValue(temp.at(row).toDouble());
-    }
+
     //最大值
-    temp = (set->value("Max","200.00 200.00 200.00 200.00 200.00 200.00 200.00 200.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Max.size() > row)
-            continue;
-        Max.append(new QDoubleSpinBox(this));
-        ui->TabSetDcr->setCellWidget(row,6,Max.at(row));
-        Max.at(row)->setMaximum(9999);
-        Max.at(row)->setAlignment(Qt::AlignHCenter);
+    temp = (set->value("Max","200 200 200 200 200 200 200 200").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Max.at(row)->setValue(temp.at(row).toDouble());
-        Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Max.size() <= row)
-            break;
-        Max.at(row)->setValue(temp.at(row).toDouble());
-    }
     //标准值
-    temp = (set->value("Std","100.00 100.00 100.00 100.00 100.00 100.00 100.00 100.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetDcr->rowCount()); row++) {
-        if (Std.size() > row)
-            continue;
-        Std.append(new QDoubleSpinBox(this));
-        ui->TabSetDcr->setCellWidget(row,7,Std.at(row));
-        Std.at(row)->setMaximum(9999);
-        Std.at(row)->setAlignment(Qt::AlignHCenter);
+    temp = (set->value("Std","100 100 100 100 100 100 100 100").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Std.at(row)->setValue(temp.at(row).toDouble());
-        Std.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
+    //补偿
+    temp = (set->value("Offset","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+        Offset.at(row)->setValue(temp.at(row).toDouble());
     qDebug()<<QTime::currentTime().toString()<<"读取电阻配置OK";
 }
 /*******************************************************************************
@@ -300,6 +260,10 @@ void PageDcr::DatSave()
     for (int i=0; i<Std.size(); i++)
         temp.append(QString::number(Std.at(i)->value()));
     set->setValue("Std",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Offset.size(); i++)
+        temp.append(Offset.at(i)->text());
+    set->setValue("Offset",(temp.join(" ").toUtf8()));
 }
 /*******************************************************************************
  * version:    1.0
@@ -818,6 +782,36 @@ bool PageDcr::TestTimeOut(quint16 t)
     return true;
 }
 
+void PageDcr::MetalChange(int index)
+{
+    for (int i=1; i<Metal.size(); i++)
+        Metal.at(i)->setCurrentIndex(index);
+}
+
+void PageDcr::UnitChange(int index)
+{
+    for (int i=1; i<Unit.size(); i++)
+        Unit.at(i)->setCurrentIndex(index);
+}
+
+void PageDcr::MinResChange(double x)
+{
+    for (int i=1; i<Min.size(); i++)
+        Min.at(i)->setValue(x);
+}
+
+void PageDcr::MaxResChange(double x)
+{
+    for (int i=1; i<Max.size(); i++)
+        Max.at(i)->setValue(x);
+}
+
+void PageDcr::StdResChange(double x)
+{
+    for (int i=1; i<Std.size(); i++)
+        Std.at(i)->setValue(x);
+}
+
 /*******************************************************************************
  * version:    1.0
  * author:     link
@@ -828,6 +822,12 @@ void PageDcr::showEvent(QShowEvent*)
 {
     DatInit();
     DatStdd();
+    connect(Metal.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(MetalChange(int)));
+    connect(Unit.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(UnitChange(int)));
+    connect(Min.at(0),SIGNAL(valueChanged(double)),this,SLOT(MinResChange(double)));
+    connect(Max.at(0),SIGNAL(valueChanged(double)),this,SLOT(MaxResChange(double)));
+    connect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(StdResChange(double)));
+
 }
 /*******************************************************************************
  * version:    1.0
@@ -837,6 +837,11 @@ void PageDcr::showEvent(QShowEvent*)
 *******************************************************************************/
 void PageDcr::hideEvent(QHideEvent *)
 {
+    disconnect(Metal.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(MetalChange(int)));
+    disconnect(Unit.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(UnitChange(int)));
+    disconnect(Min.at(0),SIGNAL(valueChanged(double)),this,SLOT(MinResChange(double)));
+    disconnect(Max.at(0),SIGNAL(valueChanged(double)),this,SLOT(MaxResChange(double)));
+    disconnect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(StdResChange(double)));
     if(DatStdd())
         DatSave();
 }
