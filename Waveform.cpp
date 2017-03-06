@@ -98,11 +98,12 @@ void Waveform::WaveBlock(int b1, int b2)
   * @param  None
   * @retval None
   */
-void Waveform::InitWaveByte()
+void Waveform::InitWaveByte(quint8 s)
 {
+    QByteArray w = WaveBytes.at(s);
     WaveByteH.clear();
-    for (int i=0; i<WaveByte.size()/2; i++) {
-        WaveByteH.append(quint16(WaveByte.at(i*2)*256) + quint8(WaveByte.at(i*2+1)));
+    for (int i=0; i<w.size()/2; i++) {
+        WaveByteH.append(quint16(w.at(i*2)*256) + quint8(w.at(i*2+1)));
     }
 }
 /**
@@ -110,11 +111,12 @@ void Waveform::InitWaveByte()
   * @param  None
   * @retval None
   */
-void Waveform::InitWaveTest()
+void Waveform::InitWaveTest(quint8 s)
 {
+    QByteArray w = WaveTests.at(s);
     WaveTestH.clear();
-    for (int i=0; i<WaveTest.size()/2; i++) {
-        WaveTestH.append(quint16(WaveTest.at(i*2)*256) + quint8(WaveTest.at(i*2+1)));
+    for (int i=0; i<w.size()/2; i++) {
+        WaveTestH.append(quint16(w.at(i*2)*256) + quint8(w.at(i*2+1)));
     }
 }
 /**

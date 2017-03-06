@@ -1,3 +1,13 @@
+/**
+  ******************************************************************************
+  * @file    PageImp.cpp
+  * @author  link
+  * @version 2.1.0.5
+  * @date    2017-03-06
+  * @brief   匝间测试模块
+  ******************************************************************************
+  */
+/* Includes ------------------------------------------------------------------*/
 #include "PageImp.h"
 #include "ui_PageImp.h"
 
@@ -17,40 +27,37 @@ PageImp::~PageImp()
 {
     delete ui;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       初始化界面
-*******************************************************************************/
+/**
+  * @brief  Initializes the window
+  */
 void PageImp::WinInit()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
-    ui->TabSetImp->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
-    ui->TabSetImp->setColumnWidth(9,400);
-    ui->TabSetImp->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(9,400);
+    ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
-    ui->TabSetImp->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
-    ui->TabSetImp->setColumnWidth(9,400);
-    ui->TabSetImp->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(9,400);
+    ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabSetImp,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
     input = new PageNum(this);
     QStringList t;
     t <<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11"<<"12";
@@ -62,13 +69,72 @@ void PageImp::WinInit()
     connect(ui->LabelWave,SIGNAL(BlockClick(int)),this,SLOT(BlockClick(int)));
     connect(ui->BoxStart,SIGNAL(valueChanged(int)),this,SLOT(BlockClick(int)));
     connect(ui->BoxEnd,SIGNAL(valueChanged(int)),this,SLOT(BlockClick(int)));
+
+    ui->TabParams->setRowCount(MAX_ROW);
+    for (int row=0; row<MAX_ROW; row++) {
+        Enable.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,0,Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal1.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,1,Terminal1.at(row));
+        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal2.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,2,Terminal2.at(row));
+        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Volt.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,3,Volt.at(row));
+        Volt.at(row)->setMaximum(3000);
+        Volt.at(row)->setAlignment(Qt::AlignHCenter);
+        Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Time.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,4,Time.at(row));
+        Time.at(row)->setMaximum(9999);
+        Time.at(row)->setAlignment(Qt::AlignHCenter);
+        Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Flut.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,5,Flut.at(row));
+        Flut.at(row)->setMaximum(9999);
+        Flut.at(row)->setAlignment(Qt::AlignHCenter);
+        Flut.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Phase.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,6,Phase.at(row));
+        Phase.at(row)->setMaximum(9999);
+        Phase.at(row)->setAlignment(Qt::AlignHCenter);
+        Phase.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Area.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,7,Area.at(row));
+        Area.at(row)->setMaximum(9999);
+        Area.at(row)->setAlignment(Qt::AlignHCenter);
+        Area.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Diff.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,8,Diff.at(row));
+        Diff.at(row)->setMaximum(9999);
+        Diff.at(row)->setAlignment(Qt::AlignHCenter);
+        Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Freq.append(7);
+        Block0.append(0);
+        Block1.append(395);
+
+        WaveImp.append(new Waveform(this));
+        ui->TabParams->setCellWidget(row,9,WaveImp.at(row));
+    }
+    station = WIN_ID_OUT13;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       初始化按键
-*******************************************************************************/
+/**
+  * @brief  Initializes the buttons
+  */
 void PageImp::BtnInit()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
@@ -80,14 +146,9 @@ void PageImp::BtnInit()
     btnGroup->addButton(ui->BtnFrequcy3,Qt::Key_5);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       按键功能
- * date:        2017.01.04
- * brief:       增加档位限制
-*******************************************************************************/
+/**
+  * @brief  Button funcitons
+  */
 void PageImp::BtnJudge(int id)
 {
     switch (id) {
@@ -102,31 +163,28 @@ void PageImp::BtnJudge(int id)
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_3:
-        if (Freq[ui->TabSetImp->currentRow()] != 0)
-            Freq[ui->TabSetImp->currentRow()]--;
+        if (Freq[ui->TabParams->currentRow()] != 0)
+            Freq[ui->TabParams->currentRow()]--;
         TestConfig();
-        TestSample(ui->TabSetImp->currentRow());
+        TestSample(ui->TabParams->currentRow());
         break;
     case Qt::Key_4:
         TestConfig();
-        TestSample(ui->TabSetImp->currentRow());
+        TestSample(ui->TabParams->currentRow());
         break;
     case Qt::Key_5:
-        if (Freq[ui->TabSetImp->currentRow()] != 14)
-            Freq[ui->TabSetImp->currentRow()]++;
+        if (Freq[ui->TabParams->currentRow()] != 14)
+            Freq[ui->TabParams->currentRow()]++;
         TestConfig();
-        TestSample(ui->TabSetImp->currentRow());
+        TestSample(ui->TabParams->currentRow());
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       数据初始化
-*******************************************************************************/
+/**
+  * @brief  Initializes settings
+  */
 void PageImp::DatInit()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间数据";
@@ -141,212 +199,66 @@ void PageImp::DatInit()
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetImp");
+    QStringList temp;
     //可用
-    QStringList temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
-    if (temp.size() > 8)
-        ui->TabSetImp->setRowCount(temp.size());
-    else
-        ui->TabSetImp->setRowCount(8);
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Enable.size() > row)
-            continue;
-        Enable.append(new QTableWidgetItem);
-        ui->TabSetImp->setItem(row,0,Enable.at(row));
-        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Enable.size() <= row)
-            break;
+    temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
-    }
     //端一
-    temp = (set->value("Terminal1","1 2 3 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Terminal1.size() > row)
-            continue;
-        Terminal1.append(new QTableWidgetItem);
-        ui->TabSetImp->setItem(row,1,Terminal1.at(row));
+    temp = (set->value("Terminal1","1 2 1 4 5 6 7 8").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
-        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Terminal1.size() <= row)
-            break;
-        Terminal1.at(row)->setText(temp.at(row));
-    }
     //端二
-    temp = (set->value("Terminal2","2 3 4 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Terminal2.size() > row)
-            continue;
-        Terminal2.append(new QTableWidgetItem);
-        ui->TabSetImp->setItem(row,2,Terminal2.at(row));
+    temp = (set->value("Terminal2","2 3 3 5 6 7 8 1").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
-        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Terminal2.size() <= row)
-            break;
-        Terminal2.at(row)->setText(temp.at(row));
-    }
     //电压
     temp = (set->value("Volt","500 500 500 500 500 500 500 500").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Volt.size() > row)
-            continue;
-        Volt.append(new QDoubleSpinBox(this));
-        ui->TabSetImp->setCellWidget(row,3,Volt.at(row));
-        Volt.at(row)->setDecimals(0);
-        Volt.at(row)->setMaximum(3000);
-        Volt.at(row)->setAlignment(Qt::AlignHCenter);
-
-        Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Volt.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Volt.at(row)->setValue(temp.at(row).toDouble());
-    }
-    connect(Volt.at(0),SIGNAL(editingFinished()),this,SLOT(VoltEdit()));
     //次数
     temp = (set->value("Time","1 1 1 1 1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Time.size() > row)
-            continue;
-        Time.append(new QDoubleSpinBox(this));
-        ui->TabSetImp->setCellWidget(row,4,Time.at(row));
-        Time.at(row)->setDecimals(0);
-        Time.at(row)->setMaximum(99);
-        Time.at(row)->setAlignment(Qt::AlignHCenter);
-        Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Time.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Time.at(row)->setValue(temp.at(row).toDouble());
-    }
     //电晕
-    temp = (set->value("Flut","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Flut.size() > row)
-            continue;
-        Flut.append(new QDoubleSpinBox(this));
-        ui->TabSetImp->setCellWidget(row,5,Flut.at(row));
-        Flut.at(row)->setDecimals(0);
-        Flut.at(row)->setMaximum(9999);
-        Flut.at(row)->setAlignment(Qt::AlignHCenter);
-        Flut.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Flut.size() <= row)
-            break;
+    temp = (set->value("Flut","0 0 0 0 0 0 0 0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Flut.at(row)->setValue(temp.at(row).toDouble());
-    }
     //相位
     temp = (set->value("Phase","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Phase.size() > row)
-            continue;
-        Phase.append(new QDoubleSpinBox(this));
-        ui->TabSetImp->setCellWidget(row,6,Phase.at(row));
-        Phase.at(row)->setDecimals(0);
-        Phase.at(row)->setMaximum(9999);
-        Phase.at(row)->setAlignment(Qt::AlignHCenter);
-        Phase.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Phase.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Phase.at(row)->setValue(temp.at(row).toDouble());
-    }
     //面积
     temp = (set->value("Area","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Area.size() > row)
-            continue;
-        Area.append(new QDoubleSpinBox(this));
-        ui->TabSetImp->setCellWidget(row,7,Area.at(row));
-        Area.at(row)->setDecimals(0);
-        Area.at(row)->setMaximum(9999);
-        Area.at(row)->setAlignment(Qt::AlignHCenter);
-        Area.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Area.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Area.at(row)->setValue(temp.at(row).toDouble());
-    }
     //差积
     temp = (set->value("Diff","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Diff.size() > row)
-            continue;
-        Diff.append(new QDoubleSpinBox(this));
-        ui->TabSetImp->setCellWidget(row,8,Diff.at(row));
-        Diff.at(row)->setDecimals(0);
-        Diff.at(row)->setMaximum(9999);
-        Diff.at(row)->setAlignment(Qt::AlignHCenter);
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Diff.at(row)->setValue(temp.at(row).toDouble());
-        Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Diff.size() <= row)
-            break;
-        Diff.at(row)->setValue(temp.at(row).toDouble());
-    }
     //频率
     temp = (set->value("Freq","7 7 7 7 7 7 7 7").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Freq.size() > row)
-            continue;
-        Freq.append(temp.at(row).toInt());
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Freq.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Freq[row] = temp.at(row).toInt();
-    }
     //计算起点
     temp = (set->value("Block0","5 5 5 5 5 5 5 5").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Block0.size() > row)
-            continue;
-        Block0.append(temp.at(row).toInt());
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Block0.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Block0[row] = temp.at(row).toInt();
-    }
     //计算终点
     temp = (set->value("Block1","395 395 395 395 395 395 395 395").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Block1.size() > row)
-            continue;
-        Block1.append(temp.at(row).toInt());
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetImp->rowCount()); row++) {
-        if (Block1.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Block1[row] = temp.at(row).toInt();
-    }
     //波形
-    for (int row=0; row<ui->TabSetImp->rowCount(); row++) {
-        if (WaveImp.size() > row)
-            continue;
-        WaveImp.append(new Waveform(this));
-        ui->TabSetImp->setCellWidget(row,9,WaveImp.at(row));
-    }
-    if (WaveImp.size() != 8)
-        return;
     QByteArray w;
-    for (int row=0; row<qMin(WaveImp.size(),ui->TabSetImp->rowCount()); row++) {
-        QString byte = "WaveImp"+QString::number(row);
-        w = set->value(byte,"1000000000000000").toByteArray();
-        WaveImp.at(row)->WaveByteShow(w);
+    for (int row=0; row<qMin(WaveImp.size(),MAX_ROW); row++) {
+        QString ByteL = "WaveImpL"+QString::number(row);
+        w = set->value(ByteL,"1000000000000000").toByteArray();
+        WaveImp.at(row)->WaveBytes[0] = w;
+
+        QString ByteR = "WaveImpR"+QString::number(row);
+        w = set->value(ByteR,"1000000000000000").toByteArray();
+        WaveImp.at(row)->WaveBytes[1] = w;
+
         QString T1 = Terminal1.at(row)->text();
         QString T2 = Terminal2.at(row)->text();
         WaveImp.at(row)->WaveItem = QString(tr("匝间%1-%2")).arg(T1).arg(T2).toUtf8();
@@ -412,9 +324,12 @@ void PageImp::DatSave()
         temp.append(QString::number(Block1.at(i)));
     set->setValue("Block1",(temp.join(" ").toUtf8()));
 
-    for (int row=0; row<qMin(WaveImp.size(),ui->TabSetImp->rowCount()); row++) {
-        QString byte = "WaveImp"+QString::number(row);
-        set->setValue(byte,WaveImp.at(row)->WaveByte);
+    for (int row=0; row<qMin(WaveImp.size(),ui->TabParams->rowCount()); row++) {
+
+        QString ByteL = "WaveImpL"+QString::number(row);
+        QString ByteR = "WaveImpR"+QString::number(row);
+        set->setValue(ByteL,WaveImp.at(row)->WaveBytes.at(0));
+        set->setValue(ByteR,WaveImp.at(row)->WaveBytes.at(1));
     }
     qDebug()<<QTime::currentTime().toString()<<"匝间保存OK";
 }
@@ -464,7 +379,7 @@ void PageImp::ItemClick(int r, int c)
 *******************************************************************************/
 void PageImp::ItemChange(QString msg)
 {
-    ui->TabSetImp->currentItem()->setText(msg);
+    ui->TabParams->currentItem()->setText(msg);
 }
 /*******************************************************************************
  * version:     1.0
@@ -659,6 +574,10 @@ void PageImp::TestCheckOk(QByteArray)
 *******************************************************************************/
 void PageImp::TestSampleAuto()
 {
+    if (ui->BoxStation->currentIndex() == 0)
+        station = WIN_ID_OUT13;
+    if (ui->BoxStation->currentIndex() == 1)
+        station = WIN_ID_OUT14;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -667,7 +586,7 @@ void PageImp::TestSampleAuto()
         if (Enable.at(row)->text() == "Y")
             tt += 0x0001<<row;
     }
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x01)<<quint8(0x13)
+    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x01)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Sampling = true;
@@ -680,11 +599,16 @@ void PageImp::TestSampleAuto()
 *******************************************************************************/
 void PageImp::TestSample(quint16 t)
 {
+    if (ui->BoxStation->currentIndex() == 0)
+        station = WIN_ID_OUT13;
+    if (ui->BoxStation->currentIndex() == 1)
+        station = WIN_ID_OUT14;
+
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0x0001<<t;
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x02)<<quint8(0x13)
+    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x02)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Sampling = true;
@@ -702,6 +626,8 @@ void PageImp::TestStart(quint8 pos)
     if (Testing || Sampling)
         return;
 
+    station = pos;
+
     emit SendMessage(ADDR,CMD_WAVE_HIDE,NULL);
 
     QByteArray msg;
@@ -712,7 +638,7 @@ void PageImp::TestStart(quint8 pos)
         if (Enable.at(row)->text() == "Y")
             tt += 0x0001<<row;
     }
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(pos)
+    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
@@ -747,8 +673,14 @@ void PageImp::TestResult(QByteArray )
 {
     if (Sampling)
         return;
-    WaveImp.at(CurrentWave)->InitWaveByte();
-    WaveImp.at(CurrentWave)->InitWaveTest();
+    if (station == WIN_ID_OUT13) {
+        WaveImp.at(CurrentWave)->InitWaveByte(0);
+        WaveImp.at(CurrentWave)->InitWaveTest(0);
+    }
+    if (station == WIN_ID_OUT14) {
+        WaveImp.at(CurrentWave)->InitWaveByte(1);
+        WaveImp.at(CurrentWave)->InitWaveTest(1);
+    }
     qint32 Area1=0;
     qint32 Area2=0;
     qint32 Area3=0;
@@ -824,6 +756,46 @@ void PageImp::TestWave(QByteArray msg)
         WaveImp.at(CurrentWave)->WaveTest.append(msg);
 }
 
+void PageImp::TestWaveOk(QByteArray msg)
+{
+    if (station == WIN_ID_OUT13) {
+        WaveImp.at(CurrentWave)->InitWaveByte(0);
+        WaveImp.at(CurrentWave)->InitWaveTest(0);
+    }
+    if (station == WIN_ID_OUT14) {
+        WaveImp.at(CurrentWave)->InitWaveByte(1);
+        WaveImp.at(CurrentWave)->InitWaveTest(1);
+    }
+
+    QByteArray w;
+    if (Sampling) {
+        w = WaveImp.at(CurrentWave)->WaveByte;
+        if (station == WIN_ID_OUT13) {
+            WaveImp.at(CurrentWave)->WaveBytes[0] = w;
+        }
+        if (station == WIN_ID_OUT14) {
+            WaveImp.at(CurrentWave)->WaveBytes[1] = w;
+        }
+
+        WaveImp.at(CurrentWave)->WaveByteShow(w);
+        ui->LabelWave->WaveByteShow(w);
+
+    }
+    if (Testing) {
+        w = WaveImp.at(CurrentWave)->WaveTest;
+
+        if (station == WIN_ID_OUT13) {
+            WaveImp.at(CurrentWave)->WaveTests[0] = w;
+        }
+        if (station == WIN_ID_OUT14) {
+            WaveImp.at(CurrentWave)->WaveTests[1] = w;
+        }
+
+        emit SendMessage(ADDR,CMD_WAVE_TEST,w);
+        TestResult(msg);
+
+    }
+}
 /*******************************************************************************
  * version:     1.0
  * author:      link
@@ -951,6 +923,7 @@ void PageImp::Delay(int ms)
 void PageImp::showEvent(QShowEvent *)
 {
     DatInit();
+    connect(Volt.at(0),SIGNAL(editingFinished()),this,SLOT(VoltEdit()));
 }
 /*******************************************************************************
  * version:     1.0

@@ -15,6 +15,8 @@
 #include "Waveform.h"
 #include "PageNum.h"
 
+#define MAX_ROW 8
+
 namespace Ui {
 class PageImp;
 }
@@ -55,9 +57,10 @@ private slots:
     void TestCheckOk(QByteArray msg);
     void TestSampleAuto();
     void TestSample(quint16 row);
-    void TestStart(quint8 pos);
+    void TestStart(quint8 station);
     void TestResult(QByteArray msg);
     void TestWave(QByteArray msg);
+    void TestWaveOk(QByteArray msg);
     void TestWaveShow(QByteArray msg);
 
     void TestStop(void);
@@ -81,6 +84,8 @@ private:
     QString Judge;
     QString FileInUse;
 
+    quint8 station;
+
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
     QList<QTableWidgetItem*> Terminal2;
@@ -96,6 +101,8 @@ private:
     QList<int> Freq;
     QList<int> Block0;
     QList<int> Block1;
+
+
 };
 
 #endif // PAGEIMP_H

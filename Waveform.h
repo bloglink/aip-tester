@@ -8,6 +8,8 @@
 #include <QPainter>
 #include <QMouseEvent>
 
+#define MAX_WAVE 5
+
 class Waveform : public QLabel
 {
     Q_OBJECT
@@ -21,8 +23,8 @@ public slots:
     void WaveTestShow(QByteArray msg);
     void WaveItemShow(QByteArray msg);
     void WaveBlock(int o,int t);
-    void InitWaveByte(void);
-    void InitWaveTest(void);
+    void InitWaveByte(quint8 s);
+    void InitWaveTest(quint8 s);
 public:
     int Block0;
     int Block1;
@@ -35,6 +37,9 @@ public:
     QList<quint16> WaveTestH;
     QList<quint16> WaveByteY;
     QList<quint16> WaveTestY;
+
+    QList<QByteArray> WaveBytes;
+    QList<QByteArray> WaveTests;
 private slots:
     virtual void paintEvent(QPaintEvent *);
     virtual void resizeEvent(QResizeEvent *);

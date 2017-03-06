@@ -25,7 +25,7 @@ PageOut::~PageOut()
 *******************************************************************************/
 void PageOut::ReadMessage(quint16 addr, quint16 cmd, QByteArray data)
 {
-    if (addr!=WIN_ID_OUT && addr!=CAN_ID_13OUT && addr!=CAN_ID_14OUT && addr!=CAN_ID_15OUT)
+    if (addr!=WIN_ID_OUT13 && addr!=CAN_ID_13OUT && addr!=CAN_ID_14OUT && addr!=CAN_ID_15OUT)
         return;
     switch (cmd) {
     case CMD_CAN:

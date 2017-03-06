@@ -462,7 +462,7 @@ void WinHome::TestInit()
     ItemToTest = settings_c->value("/GLOBAL/ProjToTest","1").toString().split(" ");
     PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
-    emit SendMessage(WIN_ID_OUT,CMD_INIT,NULL);//设定启动方式
+    emit SendMessage(WIN_ID_OUT13,CMD_INIT,NULL);//设定启动方式
 
     if (ItemToTest.isEmpty())
         return;
@@ -497,7 +497,7 @@ void WinHome::TestCheck()
     }
     QStringList s = (settings_g->value("OutEnable","0").toString()).split(" ");
     for (int i=0; i<s.size(); i++) {
-        emit SendMessage(WIN_ID_OUT,CMD_CHECK,s.at(i).toUtf8());
+        emit SendMessage(WIN_ID_OUT13,CMD_CHECK,s.at(i).toUtf8());
     }
     qDebug()<<QTime::currentTime().toString()<<"开机自检OK";
 
