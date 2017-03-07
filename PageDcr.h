@@ -1,6 +1,7 @@
 #ifndef PAGEDCR_H
 #define PAGEDCR_H
 
+#include <qmath.h>
 #include <cmath>
 #include <QDate>
 #include <QTimer>
@@ -43,49 +44,53 @@ private:
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitializesWindow(void);
+    void InitializesButton(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
-    void DatAuto(void);
-    bool DatStdd(void);
+    void InitializesSetting(void);
+    void SaveSetting(void);
+    void CalculateAuto(void);
+    bool CheckSetting(void);
     void ItemClick(int r,int c);
     void ItemChange(QString msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestStatus(QByteArray msg);
-    void TestStart(quint8 pos);
-    void TestWait(void);
-    void TestJudge(void);
-    void TestResult(QByteArray msg);
-    double TestOffset(double t,quint8 num);
-    void TestStop(void);
-    void TestConfig(void);
-    int TestGear(int row);
-    void TestVersion(void);
-    void TestDelay(int ms);
-    bool TestTimeOut(quint16 t);
+    void InitializesItems(void);
+    void SendStatusCmd(void);
+    void ReadStatus(QByteArray msg);
+    void ReadOffset(QByteArray msg);
+    void SendStartCmd(quint8 pos);
+    void WaitTestFinished(void);
+    void SendTestJudge(void);
+    void ReadResult(QByteArray msg);
+    double CalculateOffset(double t,quint8 num);
+    void CalculateBalance(void);
+    void SendStopCmd(void);
+    void SendConfigCmd(void);
+    int CalculateGear(int row);
+    void SendVersionCmd(void);
+    void Delay(int ms);
+    bool WaitTestTimeOut(quint16 t);
+    bool WaitOffset(quint16 t);
 
-    void MetalChange(int index);
-    void UnitChange(int index);
-    void MinResChange(double x);
-    void MaxResChange(double x);
-    void StdResChange(double x);
+    void AutoChangeMetal(int index);
+    void AutoChangeUnit(int index);
+    void AutoChangeMin(double x);
+    void AutoChangeMax(double x);
+    void AutoChangeStd(double x);
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
     bool isCheckOk;
     bool Testing;
+    bool Offsetting;
     quint16 TimeOut;
     PageNum *input;
     QStringList Items;
     QList<double> Results;
-    QString Judge;
+    QString JudgeAll;
     QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;

@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="3,1">
    <item>
-    <widget class="QTableWidget" name="TabSetDcr">
+    <widget class="QTableWidget" name="TabParams">
      <property name="editTriggers">
       <set>QAbstractItemView::AllEditTriggers</set>
      </property>
@@ -226,6 +226,19 @@
            </property>
            <property name="text">
             <string>自动计算</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="BtnOffset">
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>Offset</string>
            </property>
           </widget>
          </item>

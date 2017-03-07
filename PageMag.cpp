@@ -6,9 +6,9 @@ PageMag::PageMag(QWidget *parent) :
     ui(new Ui::PageMag)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
+    InitializesWindow();
+    InitializesButton();
+    InitializesSetting();
     Testing = false;
     Sampling = false;
 }
@@ -17,63 +17,78 @@ PageMag::~PageMag()
 {
     delete ui;
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      初始化界面
-*******************************************************************************/
-void PageMag::WinInit()
+
+void PageMag::InitializesWindow()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
-    ui->TabSetMag->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
-    ui->TabSetMag->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
-    ui->TabSetMag->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
-    ui->TabSetMag->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
-    ui->TabSetMag->setColumnWidth(4,400);
-    ui->TabSetMag->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(4,400);
+    ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabSetMag->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
-    ui->TabSetMag->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    ui->TabSetMag->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
-    ui->TabSetMag->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
-    ui->TabSetMag->setColumnWidth(4,400);
-    ui->TabSetMag->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(4,400);
+    ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     ui->BoxDir->setView(new QListView(this));
-    connect(ui->TabSetMag,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
     input = new PageNum(this);
     QStringList t;
     t <<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11"<<"12";
     input->BtnInit(t);
     connect(input,SIGNAL(ItemChange(QString)),this,SLOT(ItemChange(QString)));
     input->hide();
+
+    ui->TabParams->setRowCount(MAX_ROW);
+    for (int row=0; row<MAX_ROW; row++) {
+        Enable.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,0,Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal1.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,1,Terminal1.at(row));
+        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal2.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,2,Terminal2.at(row));
+        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Max.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,3,Max.at(row));
+        Max.at(row)->setMaximum(9999);
+        Max.at(row)->setAlignment(Qt::AlignHCenter);
+        Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        WaveMag.append(new Waveform(this));
+        ui->TabParams->setCellWidget(row,4,WaveMag.at(row));
+
+        Area.append(1000);
+        Freq.append(1000);
+    }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      初始化按键
-*******************************************************************************/
-void PageMag::BtnInit()
+
+void PageMag::InitializesButton()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSampleMag,Qt::Key_0);
     btnGroup->addButton(ui->BtnExitMag,Qt::Key_2);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      按键功能
-*******************************************************************************/
+
 void PageMag::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        TestConfig();
-        TestSample();
+        SendConfigCmd();
+        SendSampleCmd();
         break;
     case Qt::Key_1:
         break;
@@ -84,13 +99,8 @@ void PageMag::BtnJudge(int id)
         break;
     }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      数据初始化
-*******************************************************************************/
-void PageMag::DatInit()
+
+void PageMag::InitializesSetting()
 {
     qDebug()<<QTime::currentTime().toString()<<"反嵌数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -111,118 +121,48 @@ void PageMag::DatInit()
         ui->BoxMain->setValue(temp.at(1).toInt());
         ui->BoxAuxiliary->setValue(temp.at(2).toInt());
     }
+    //可用
     temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
-    if (temp.size() > 8)
-        ui->TabSetMag->setRowCount(temp.size());
-    else
-        ui->TabSetMag->setRowCount(8);
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Enable.size() > row)
-            continue;
-        Enable.append(new QTableWidgetItem);
-        ui->TabSetMag->setItem(row,0,Enable.at(row));
-        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Enable.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
-    }
-    temp = (set->value("Terminal1","1 2 3 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Terminal1.size() > row)
-            continue;
-        Terminal1.append(new QTableWidgetItem);
-        ui->TabSetMag->setItem(row,1,Terminal1.at(row));
-        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Terminal1.size() <= row)
-            break;
+    //端一
+    temp = (set->value("Terminal1","1 2 1 4 5 6 7 8").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
-    }
-    temp = (set->value("Terminal2","2 3 4 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Terminal2.size() > row)
-            continue;
-        Terminal2.append(new QTableWidgetItem);
-        ui->TabSetMag->setItem(row,2,Terminal2.at(row));
-        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Terminal2.size() <= row)
-            break;
+    //端二
+    temp = (set->value("Terminal2","2 3 3 5 6 7 8 1").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
-    }
-    temp = (set->value("Max","10.00 10.00 10.00 10.00 10.00 10.00 10.00 10.00").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Max.size() > row)
-            continue;
-        Max.append(new QDoubleSpinBox(this));
-        ui->TabSetMag->setCellWidget(row,3,Max.at(row));
-        Max.at(row)->setMaximum(9999);
-        Max.at(row)->setAlignment(Qt::AlignHCenter);
+    //最大值
+    temp = (set->value("Max","200 200 200 200 200 200 200 200").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Max.at(row)->setValue(temp.at(row).toDouble());
-        Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Max.size() <= row)
-            break;
-        Max.at(row)->setValue(temp.at(row).toDouble());
-    }
-    temp = (set->value("Area","1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Area.size() > row)
-            continue;
-        Area.append(temp.at(row).toInt());
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Area.size() <= row)
-            break;
-        Area[row] = temp.at(row).toInt();
-    }
     //频率
     temp = (set->value("Freq","0 0 0 0 0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Freq.size() > row)
-            continue;
-        Freq.append(temp.at(row).toInt());
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabSetMag->rowCount()); row++) {
-        if (Freq.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Freq[row] = temp.at(row).toInt();
-    }
+    temp = (set->value("Area","1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+        Area[row] = temp.at(row).toInt();
     //波形
-    for (int row=0; row<ui->TabSetMag->rowCount(); row++) {
-        if (WaveMag.size() > row)
-            continue;
-        WaveMag.append(new Waveform(this));
-        ui->TabSetMag->setCellWidget(row,4,WaveMag.at(row));
-    }
-    if (WaveMag.size() != 8)
-        return;
     QByteArray w;
-    for (int row=0; row<qMin(WaveMag.size(),ui->TabSetMag->rowCount()); row++) {
-        QString byte = "WaveMag"+QString::number(row);
-        w = set->value(byte,"1000000000000000").toByteArray();
-        WaveMag.at(row)->WaveByteShow(w);
+    for (int row=0; row<qMin(WaveMag.size(),MAX_ROW); row++) {
+        QString ByteL = "WaveMagL"+QString::number(row);
+        w = set->value(ByteL,"1000000000000000").toByteArray();
+        WaveMag.at(row)->WaveBytes[0] = w;
+
+        QString ByteR = "WaveMagR"+QString::number(row);
+        w = set->value(ByteR,"1000000000000000").toByteArray();
+        WaveMag.at(row)->WaveBytes[1] = w;
+
         QString T1 = Terminal1.at(row)->text();
         QString T2 = Terminal2.at(row)->text();
         WaveMag.at(row)->WaveItem = QString(tr("反嵌%1-%2")).arg(T1).arg(T2).toUtf8();
     }
     qDebug()<<QTime::currentTime().toString()<<"反嵌数据OK";
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      数据保存
-*******************************************************************************/
-void PageMag::DatSave()
+
+void PageMag::SaveSetting()
 {
     qDebug()<<QTime::currentTime().toString()<<"反嵌保存";
     QStringList temp;
@@ -255,18 +195,15 @@ void PageMag::DatSave()
         temp.append(QString::number(Freq.at(i)));
     set->setValue("Freq",(temp.join(" ").toUtf8()));
 
-    for (int row=0; row<qMin(WaveMag.size(),ui->TabSetMag->rowCount()); row++) {
-        QString byte = "WaveMag"+QString::number(row);
-        set->setValue(byte,WaveMag.at(row)->WaveByte);
+    for (int row=0; row<WaveMag.size(); row++) {
+        QString ByteL = "WaveMagL"+QString::number(row);
+        QString ByteR = "WaveMagR"+QString::number(row);
+        set->setValue(ByteL,WaveMag.at(row)->WaveBytes.at(0));
+        set->setValue(ByteR,WaveMag.at(row)->WaveBytes.at(1));
     }
     qDebug()<<QTime::currentTime().toString()<<"反嵌保存OK";
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.23
- * brief:      点击
-*******************************************************************************/
+
 void PageMag::ItemClick(int r, int c)
 {
     switch (c) {
@@ -282,72 +219,60 @@ void PageMag::ItemClick(int r, int c)
         break;
     }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.23
- * brief:      切换文字
-*******************************************************************************/
+
 void PageMag::ItemChange(QString msg)
 {
-    ui->TabSetMag->currentItem()->setText(msg);
+    ui->TabParams->currentItem()->setText(msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.15
- * brief:      命令处理
-*******************************************************************************/
+
 void PageMag::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_MAG && addr != CAN_ID_DCR && addr != CAN_ID_DCR_WAVE)
+    if (addr != ADDR &&
+            addr != WIN_ID_MAG &&
+            addr != CAN_ID_DCR &&
+            addr != CAN_ID_DCR_WAVE)
         return;
     switch (cmd) {
     case CMD_CAN:
         ExcuteCanCmd(addr,msg);
         break;
     case CMD_CHECK:
-        TestCheck();
+        SendStatusCmd();
         break;
     case CMD_START:
-        TestStart(msg.toInt());
+        SendStartCmd(msg.toInt());
         break;
     case CMD_STOP:
-        TestStop();
+        SendStopCmd();
         break;
     case CMD_INIT:
-        DatInit();
-        TestInit();
-        TestConfig();
+        InitializesSetting();
+        InitializesItems();
+        SendConfigCmd();
         break;
     case CMD_WAVE:
-        TestWaveShow(msg);
+        SendWave(msg);
         break;
     default:
         break;
 
     }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      CAN命令处理
-*******************************************************************************/
+
 void PageMag::ExcuteCanCmd(int id, QByteArray msg)
 {
     if (!Testing && !Sampling)
         return;
     TimeOut = 0;
     if (id == CAN_ID_DCR_WAVE) {
-        TestWave(msg);
+        ReadWave(msg);
         return;
     }
     if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-        TestCheckOk(msg);
+        ReadStatus(msg);
     }
     if (msg.size()==5 && (quint8)msg.at(0)==0x02) {
-        TestResult(msg);
+        ReadResult(msg);
     }
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)!=0xff) {
         if (Sampling)
@@ -356,29 +281,11 @@ void PageMag::ExcuteCanCmd(int id, QByteArray msg)
             WaveMag.at(CurrentWave)->WaveTest.clear();
     }
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff) {
-        QByteArray w;
-        QByteArray i;
-        if (Sampling) {
-            w = WaveMag.at(CurrentWave)->WaveByte;
-            WaveMag.at(CurrentWave)->WaveByteShow(w);
-        }
-        if (Testing) {
-            w = WaveMag.at(CurrentWave)->WaveTest;
-            i = WaveMag.at(CurrentWave)->WaveItem;
-            emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
-            emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
-        }
+        ReadWaveOk(msg);
     }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      更新显示
- * date:       2017.02.14
- * brief:      修改显示方式
-*******************************************************************************/
-void PageMag::TestInit()
+
+void PageMag::InitializesItems()
 {
     Items.clear();
     WaveNumber.clear();
@@ -412,27 +319,13 @@ void PageMag::TestInit()
     }
     emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      检测状态
- * date:       2017.02.15
- * brief:      取消功能,移到电阻模块
-*******************************************************************************/
-void PageMag::TestCheck()
+
+void PageMag::SendStatusCmd()
 {
 
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.27
- * brief:      更新状态
- * date:       2017.02.15
- * brief:      修改磁旋判断方式
-*******************************************************************************/
-void PageMag::TestCheckOk(QByteArray )
+
+void PageMag::ReadStatus(QByteArray )
 {
     if (Testing) {
         if (ui->BoxDir->currentIndex() != 0) {
@@ -449,18 +342,15 @@ void PageMag::TestCheckOk(QByteArray )
         emit SendMessage(ADDR,CMD_DEBUG,"MAG check ok\n");
     }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      开始采样
- * date:       2017.02.15
- * brief:      增加测试或采样中返回
-*******************************************************************************/
-void PageMag::TestSample()
+
+void PageMag::SendSampleCmd()
 {
     if (Testing || Sampling)
         return;
+    if (ui->BoxStation->currentIndex() == 0)
+        station = WIN_ID_OUT13;
+    if (ui->BoxStation->currentIndex() == 1)
+        station = WIN_ID_OUT14;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -470,23 +360,18 @@ void PageMag::TestSample()
             tt += 0x0001<<row;
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
-      <<quint8(0x13)<<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(station)<<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Sampling = true;
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      开始测试
- * date:       2017.02.15
- * brief:      增加测试或采样中返回,增加超时判断
-*******************************************************************************/
-void PageMag::TestStart(quint8 pos)
+
+void PageMag::SendStartCmd(quint8 pos)
 {
-    WaitTestOver(100);
+    WaitTestTimeOut(100);
     if (Testing || Sampling)
         return;
+
+    station = pos;
 
     emit SendMessage(ADDR,CMD_WAVE_HIDE,NULL);
 
@@ -499,11 +384,11 @@ void PageMag::TestStart(quint8 pos)
             tt += 0x0001<<row;
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
-      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(station)<<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
-    if(!WaitTestOver(100)) {
+    if(!WaitTestTimeOut(100)) {
         Testing = false;
         Judge = "NG";
         for (int row = 0; row<Enable.size(); row++) {
@@ -531,15 +416,8 @@ void PageMag::TestStart(quint8 pos)
     s.append(Judge);
     emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.27
- * brief:       更新测试数据
- * date:        2017.02.15
- * brief:       修改显示方式
-*******************************************************************************/
-void PageMag::TestResult(QByteArray msg)
+
+void PageMag::ReadResult(QByteArray msg)
 {
     CurrentWave = (quint8)msg.at(1);
     quint16 Area1 = Area[CurrentWave];
@@ -563,26 +441,54 @@ void PageMag::TestResult(QByteArray msg)
         s[3] = judge;
     emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.27
- * brief:      接收波形
-*******************************************************************************/
-void PageMag::TestWave(QByteArray msg)
+
+void PageMag::ReadWave(QByteArray msg)
 {
     if (Sampling)
         WaveMag.at(CurrentWave)->WaveByte.append(msg);
     else
         WaveMag.at(CurrentWave)->WaveTest.append(msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      显示波形
-*******************************************************************************/
-void PageMag::TestWaveShow(QByteArray msg)
+
+void PageMag::ReadWaveOk(QByteArray )
+{
+    if (station == WIN_ID_OUT13) {
+        WaveMag.at(CurrentWave)->InitWaveByte(0);
+        WaveMag.at(CurrentWave)->InitWaveTest(0);
+    }
+    if (station == WIN_ID_OUT14) {
+        WaveMag.at(CurrentWave)->InitWaveByte(1);
+        WaveMag.at(CurrentWave)->InitWaveTest(1);
+    }
+    QByteArray w;
+    QByteArray i;
+    if (Sampling) {
+        w = WaveMag.at(CurrentWave)->WaveByte;
+        if (station == WIN_ID_OUT13) {
+            WaveMag.at(CurrentWave)->WaveBytes[0] = w;
+        }
+        if (station == WIN_ID_OUT14) {
+            WaveMag.at(CurrentWave)->WaveBytes[1] = w;
+        }
+        WaveMag.at(CurrentWave)->WaveByteShow(w);
+    }
+    if (Testing) {
+        w = WaveMag.at(CurrentWave)->WaveTest;
+        i = WaveMag.at(CurrentWave)->WaveItem;
+
+        if (station == WIN_ID_OUT13) {
+            WaveMag.at(CurrentWave)->WaveTests[0] = w;
+        }
+        if (station == WIN_ID_OUT14) {
+            WaveMag.at(CurrentWave)->WaveTests[1] = w;
+        }
+
+        emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
+        emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
+    }
+}
+
+void PageMag::SendWave(QByteArray msg)
 {
     int t = WaveNumber.size();
     for (int i=0; i<WaveNumber.size(); i++) {
@@ -599,12 +505,7 @@ void PageMag::TestWaveShow(QByteArray msg)
         emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.11.28
- * brief:       显示旋向
-*******************************************************************************/
+
 void PageMag::TestDir()
 {
     //计算主副相的面积，差积，和左右移动的差积
@@ -655,13 +556,8 @@ void PageMag::TestDir()
         s[3] = judge;
     emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      停止测试
-*******************************************************************************/
-void PageMag::TestStop()
+
+void PageMag::SendStopCmd()
 {
     if (!Testing)
         return;
@@ -672,13 +568,8 @@ void PageMag::TestStop()
     emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = false;
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      配置
-*******************************************************************************/
-void PageMag::TestConfig()
+
+void PageMag::SendConfigCmd()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -693,13 +584,8 @@ void PageMag::TestConfig()
     }
     emit SendMessage(ADDR,CMD_CAN,msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      等待测试结束
-*******************************************************************************/
-bool PageMag::WaitTestOver(quint16 t)
+
+bool PageMag::WaitTestTimeOut(quint16 t)
 {
     TimeOut = 0;
     while (Testing) {
@@ -710,12 +596,7 @@ bool PageMag::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      延时
-*******************************************************************************/
+
 void PageMag::Delay(int ms)
 {
     QElapsedTimer t;
@@ -723,26 +604,14 @@ void PageMag::Delay(int ms)
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      更新显示
-*******************************************************************************/
+
 void PageMag::showEvent(QShowEvent *)
 {
-    DatInit();
+    InitializesSetting();
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      退出保存
-*******************************************************************************/
+
 void PageMag::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSetting();
 }
-/*******************************************************************************
- *                                  END
-*******************************************************************************/
+/*********************************END OF FILE**********************************/

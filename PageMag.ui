@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
    <item>
-    <widget class="QTableWidget" name="TabSetMag">
+    <widget class="QTableWidget" name="TabParams">
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
@@ -66,8 +66,40 @@
    </item>
    <item>
     <layout class="QGridLayout" name="LayoutCtrl">
-     <item row="0" column="3">
-      <widget class="QSpinBox" name="BoxMain">
+     <item row="0" column="10">
+      <widget class="QPushButton" name="BtnExitMag">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>97</width>
+         <height>44</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>返回</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="7">
+      <widget class="QLabel" name="TextDebug">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="5">
+      <widget class="QSpinBox" name="BoxAuxiliary">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -82,20 +114,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="6">
-      <widget class="QLabel" name="TextDebug">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string/>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="7">
+     <item row="0" column="9">
       <widget class="QPushButton" name="BtnSampleMag">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -121,33 +140,10 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="5">
-      <widget class="QSpinBox" name="BoxAuxiliary">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>12</number>
-       </property>
-      </widget>
-     </item>
      <item row="0" column="0">
       <widget class="QLabel" name="TextDir">
        <property name="text">
         <string>磁旋:</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="TextAuxiliary">
-       <property name="text">
-        <string>副相：</string>
        </property>
       </widget>
      </item>
@@ -176,23 +172,47 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="8">
-      <widget class="QPushButton" name="BtnExitMag">
+     <item row="0" column="4">
+      <widget class="QLabel" name="TextAuxiliary">
+       <property name="text">
+        <string>副相：</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QSpinBox" name="BoxMain">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
          <verstretch>0</verstretch>
         </sizepolicy>
        </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>12</number>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="8">
+      <widget class="QComboBox" name="BoxStation">
        <property name="minimumSize">
         <size>
          <width>97</width>
          <height>44</height>
         </size>
        </property>
-       <property name="text">
-        <string>返回</string>
-       </property>
+       <item>
+        <property name="text">
+         <string>L</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>R</string>
+        </property>
+       </item>
       </widget>
      </item>
     </layout>
