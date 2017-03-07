@@ -80,8 +80,10 @@ private:
     QList<QTableWidgetItem*> Terminal2;
     QList<QDoubleSpinBox*> Max;
     QList<int> WaveNumber;
-    QList<int> Area;
-    QList<int> Freq;
+    QList<int> AreaL;
+    QList<int> FreqL;
+    QList<int> AreaR;
+    QList<int> FreqR;
 
     quint8 station;
 };

@@ -70,8 +70,10 @@ void PageMag::InitializesWindow()
         WaveMag.append(new Waveform(this));
         ui->TabParams->setCellWidget(row,4,WaveMag.at(row));
 
-        Area.append(1000);
-        Freq.append(1000);
+        AreaL.append(0);
+        FreqL.append(0);
+        AreaR.append(0);
+        FreqR.append(0);
     }
 }
 
@@ -140,16 +142,17 @@ void PageMag::InitializesSetting()
     //频率
     temp = (set->value("Freq","0 0 0 0 0 0 0 0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
-        Freq[row] = temp.at(row).toInt();
+        FreqL[row] = temp.at(row).toInt();
     temp = (set->value("Area","1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
-        Area[row] = temp.at(row).toInt();
+        AreaL[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
     for (int row=0; row<qMin(WaveMag.size(),MAX_ROW); row++) {
         QString ByteL = "WaveMagL"+QString::number(row);
         w = set->value(ByteL,"1000000000000000").toByteArray();
         WaveMag.at(row)->WaveBytes[0] = w;
+        WaveMag.at(row)->WaveByteShow(w);
 
         QString ByteR = "WaveMagR"+QString::number(row);
         w = set->value(ByteR,"1000000000000000").toByteArray();
@@ -187,12 +190,12 @@ void PageMag::SaveSetting()
         temp.append(QString::number(Max.at(i)->value()));
     set->setValue("Max",(temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Area.size(); i++)
-        temp.append(QString::number(Area.at(i)));
+    for (int i=0; i<AreaL.size(); i++)
+        temp.append(QString::number(AreaL.at(i)));
     set->setValue("Area",(temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Freq.size(); i++)
-        temp.append(QString::number(Freq.at(i)));
+    for (int i=0; i<FreqL.size(); i++)
+        temp.append(QString::number(FreqL.at(i)));
     set->setValue("Freq",(temp.join(" ").toUtf8()));
 
     for (int row=0; row<WaveMag.size(); row++) {
@@ -420,11 +423,22 @@ void PageMag::SendStartCmd(quint8 pos)
 void PageMag::ReadResult(QByteArray msg)
 {
     CurrentWave = (quint8)msg.at(1);
-    quint16 Area1 = Area[CurrentWave];
+    quint16 Area1 = 0;
+    if (station == WIN_ID_OUT13)
+        Area1 = AreaL[CurrentWave];
+    if (station == WIN_ID_OUT14) {
+        Area1 = AreaR[CurrentWave];
+    }
     quint16 Area2 = quint16(msg.at(2)*256)+quint8(msg.at(3));
     if (Sampling) {
-        Area[CurrentWave] = Area2;
-        Freq[CurrentWave] = quint8(msg.at(4));
+        if (station == WIN_ID_OUT13) {
+            AreaL[CurrentWave] = Area2;
+            FreqL[CurrentWave] = quint8(msg.at(4));
+        }
+        if (station == WIN_ID_OUT14) {
+            AreaR[CurrentWave] = Area2;
+            FreqR[CurrentWave] = quint8(msg.at(4));
+        }
         return;
     }
     quint16 area = abs((Area2-Area1)*100/Area1);
@@ -579,7 +593,7 @@ void PageMag::SendConfigCmd()
             out<<quint16(0x22)<<quint8(0x05)<<quint8(0x04)<<quint8(row)
               <<quint8(Terminal1.at(row)->text().toInt())
              <<quint8(Terminal2.at(row)->text().toInt())
-            <<quint8(Freq.at(row));
+            <<quint8(FreqL.at(row));
         }
     }
     emit SendMessage(ADDR,CMD_CAN,msg);
