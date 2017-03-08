@@ -1,6 +1,7 @@
 #ifndef WINSYST_H
 #define WINSYST_H
 
+#include <QFile>
 #include <QTime>
 #include <QDebug>
 #include <QWidget>
@@ -8,6 +9,7 @@
 #include <QSettings>
 #include <QProcess>
 #include <QButtonGroup>
+#include <QTextStream>
 
 #include "define.h"
 
@@ -37,10 +39,12 @@ private slots:
     void SetDateTime(void);
     void Password(void);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void WriteLog(QByteArray msg);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 private:
     QString password;
+    QFile *file;
 };
 
 #endif // WINSYST_H

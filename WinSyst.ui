@@ -65,7 +65,7 @@
              </date>
             </property>
             <property name="displayFormat">
-             <string>yyyy/MM/dd hh:mm</string>
+             <string>yyyyMMdd hh:mm</string>
             </property>
            </widget>
           </item>

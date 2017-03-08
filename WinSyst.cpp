@@ -44,6 +44,8 @@ void WinSyst::WinInit()
     ui->BoxMode->setView(new QListView(this));
     ui->BoxStyle->setView(new QListView(this));
     password.clear();
+    file = new QFile("log.txt");
+    file->open(QFile::ReadWrite);
 }
 /**
   * @brief  Initializes the buttons
@@ -172,12 +174,22 @@ void WinSyst::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         return;
     switch (cmd) {
     case CMD_DEBUG:
-        ui->TextDebug->insertPlainText(msg);
-        ui->TextDebug->moveCursor(QTextCursor::End);
+        WriteLog(msg);
         break;
     default:
         break;
     }
+}
+
+void WinSyst::WriteLog(QByteArray msg)
+{
+    ui->TextDebug->insertPlainText(msg);
+    ui->TextDebug->moveCursor(QTextCursor::End);
+    QTextStream out(file);
+
+    out.seek(file->size());
+    out<<QDateTime::currentDateTime().toString("yyyyMMdd hh:mm ");
+    out<<msg;
 }
 /**
   * @brief  Initializes data when show
