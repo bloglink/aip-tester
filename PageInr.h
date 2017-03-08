@@ -31,22 +31,22 @@ private:
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitializesWindow(void);
+    void InitializesButton(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
+    void InitializesSetting(void);
+    void SaveSetting(void);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
-    void TestStart(quint8 pos);
-    void TestResult(QByteArray msg);
-    void TestStop(void);
-    void TestConfig(void);
-    void TestAlarm(quint8 port);
+    void InitializesItem(void);
+    void SendStatusCmd(void);
+    void ReadStatus(QByteArray msg);
+    void SendStartCmd(quint8 pos);
+    void ReadResult(QByteArray msg);
+    void SendStopCmd(void);
+    void SendConfigCmd(void);
+    void SendAlarmCmd(quint8 port);
 
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
@@ -64,7 +64,6 @@ private:
     QStringList Items;
     QString Judge;
     QString FileInUse;
-
 };
 
 #endif // PAGEINR_H

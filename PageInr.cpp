@@ -6,9 +6,9 @@ PageInr::PageInr(QWidget *parent) :
     ui(new Ui::PageInr)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
+    InitializesWindow();
+    InitializesButton();
+    InitializesSetting();
     Testing = false;
     isCheckOk = false;
 }
@@ -17,55 +17,31 @@ PageInr::~PageInr()
 {
     delete ui;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       初始化界面
-*******************************************************************************/
-void PageInr::WinInit()
+
+void PageInr::InitializesWindow()
 {
     ui->BoxVoltage->setView(new QListView(this));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       初始化按键
-*******************************************************************************/
-void PageInr::BtnInit()
+
+void PageInr::InitializesButton()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->BtnExitIr,Qt::Key_2);
+    btnGroup->addButton(ui->BtnExitIr,Qt::Key_0);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       按键功能
-*******************************************************************************/
+
 void PageInr::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        break;
-    case Qt::Key_1:
-        break;
-    case Qt::Key_2:
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       数据初始化
-*******************************************************************************/
-void PageInr::DatInit()
+
+void PageInr::InitializesSetting()
 {
     qDebug()<<QTime::currentTime().toString()<<"绝缘数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -91,13 +67,8 @@ void PageInr::DatInit()
     Testing = false;
     qDebug()<<QTime::currentTime().toString()<<"绝缘数据OK";
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       数据保存
-*******************************************************************************/
-void PageInr::DatSave()
+
+void PageInr::SaveSetting()
 {
     qDebug()<<QTime::currentTime().toString()<<"绝缘保存";
     QStringList temp;
@@ -109,12 +80,6 @@ void PageInr::DatSave()
     set->setValue("Other",(temp.join(" ").toUtf8()));
     qDebug()<<QTime::currentTime().toString()<<"绝缘保存OK";
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       命令处理
-*******************************************************************************/
 
 void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
@@ -125,51 +90,44 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        TestCheck();
+        Testing = true;
+        SendStatusCmd();
+        Testing = false;
         break;
     case CMD_START:
-        TestStart(msg.toInt());
+        Testing = true;
+        SendStartCmd(msg.toInt());
+        Testing = false;
         break;
     case CMD_STOP:
-        TestStop();
+        SendStopCmd();
+        Testing = false;
         break;
     case CMD_INIT:
-        DatInit();
-        TestInit();
-        TestConfig();
+        InitializesSetting();
+        InitializesItem();
+        SendConfigCmd();
         break;
     case CMD_ALARM:
-        TestAlarm(quint8(msg.at(0)));
+        SendAlarmCmd(quint8(msg.at(0)));
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       CAN命令处理
-*******************************************************************************/
+
 void PageInr::ExcuteCanCmd(QByteArray msg)
 {
     if (!Testing)
         return;
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        TestCheckOk(msg);
+        ReadStatus(msg);
     if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        TestResult(msg);
+        ReadResult(msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      更新显示
- * date:       2017.02.15
- * brief:      修改显示方式
-*******************************************************************************/
-void PageInr::TestInit()
+
+void PageInr::InitializesItem()
 {
     Items.clear();
     QStringList s;
@@ -183,39 +141,22 @@ void PageInr::TestInit()
     Items.append(s.join("@"));
     emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       检测状态
-*******************************************************************************/
-void PageInr::TestCheck()
+
+void PageInr::SendStatusCmd()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
     if (!WaitTestOver(100)) {
-        Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
         emit SendMessage(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新状态
- * date:        2017.01.13
- * brief:       清理测试结果
- * date:        2017.02.15
- * brief:       增加求平均
-*******************************************************************************/
-void PageInr::TestCheckOk(QByteArray )
+
+void PageInr::ReadStatus(QByteArray )
 {
-    Testing = false;
     if (!isCheckOk) {
         emit SendMessage(ADDR,CMD_DEBUG,"Check PageInr OK\n");
         isCheckOk = true;
@@ -252,28 +193,17 @@ void PageInr::TestCheckOk(QByteArray )
     Volt.clear();
     Res.clear();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       开始测试
- * date:        2017.02.15
- * brief:       增加超时判断
-*******************************************************************************/
-void PageInr::TestStart(quint8 pos)
+
+void PageInr::SendStartCmd(quint8 pos)
 {
-    if (Testing)
-        return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x04)<<quint8(0x00)
       <<quint8(pos)<<quint8(0x01);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
-        Testing = false;
         Judge = "NG";
         emit SendMessage(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
@@ -291,47 +221,25 @@ void PageInr::TestStart(quint8 pos)
     s.append(Judge);
     emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新测试数据
- * date:        2017.01.13
- * brief:       求平均
- * date:        2017.02.15
- * brief:       移除求平均计算,移到TestCheckOk
-*******************************************************************************/
-void PageInr::TestResult(QByteArray msg)
+
+void PageInr::ReadResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     Volt.append(v);
     Res.append(tt);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       停止测试
-*******************************************************************************/
-void PageInr::TestStop()
+
+void PageInr::SendStopCmd()
 {
-    if (!Testing)
-        return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = false;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       配置
-*******************************************************************************/
-void PageInr::TestConfig()
+
+void PageInr::SendConfigCmd()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -348,29 +256,16 @@ void PageInr::TestConfig()
       <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);//上限
     emit SendMessage(ADDR,CMD_CAN,msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.01.17
- * brief:       报警输出
-*******************************************************************************/
-void PageInr::TestAlarm(quint8 port)
-{
 
+void PageInr::SendAlarmCmd(quint8 port)
+{
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x02)<<quint8(0x09)<<quint8(port);
     emit SendMessage(ADDR,CMD_CAN,msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       等待测试结束
- * date:        2017.02.15
- * brief:       去除超时处理
-*******************************************************************************/
+
 bool PageInr::WaitTestOver(quint16 t)
 {
     TimeOut = 0;
@@ -382,12 +277,7 @@ bool PageInr::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       延时
-*******************************************************************************/
+
 void PageInr::Delay(int ms)
 {
     QElapsedTimer t;
@@ -395,26 +285,14 @@ void PageInr::Delay(int ms)
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       更新显示
-*******************************************************************************/
+
 void PageInr::showEvent(QShowEvent *)
 {
-    DatInit();
+    InitializesSetting();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.19
- * brief:       退出保存
-*******************************************************************************/
+
 void PageInr::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSetting();
 }
-/*******************************************************************************
- *                                  END
-*******************************************************************************/
+/*********************************END OF FILE**********************************/
