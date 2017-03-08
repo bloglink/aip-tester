@@ -46,6 +46,8 @@ void WinSyst::WinInit()
     password.clear();
     file = new QFile("log.txt");
     file->open(QFile::ReadWrite);
+
+    dateTime = ui->EditTime->dateTime();
 }
 /**
   * @brief  Initializes the buttons
@@ -118,7 +120,16 @@ void WinSyst::SetInit()
     password = settings->value("Password","").toString();
     ui->EditPassword->clear();
 
-    ui->EditTime->setDateTime(QDateTime::currentDateTime());
+    int t = settings->value("AddSeconds","0").toInt();
+    if (dateTime.secsTo(QDateTime::currentDateTime()) < t) {
+        QDateTime tt = dateTime;
+        tt = tt.addSecs(t);
+        ui->EditTime->setDateTime(tt);
+        SetDateTime();
+        QMessageBox::warning(this,tr("警告"),tr("日期丢失,请重新设定日期"),QMessageBox::Ok);
+    } else {
+        ui->EditTime->setDateTime(QDateTime::currentDateTime());
+    }
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置OK";
 }
 /**
@@ -136,6 +147,7 @@ void WinSyst::SetSave()
     settings->setValue("Mode",QString::number(ui->BoxMode->currentIndex()));
     settings->setValue("Style",QString::number(ui->BoxStyle->currentIndex()));
     settings->setValue("Password",password);
+    settings->setValue("AddSeconds",dateTime.secsTo(QDateTime::currentDateTime()));
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置OK";
 }
 /**

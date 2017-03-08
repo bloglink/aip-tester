@@ -10,6 +10,7 @@
 #include <QProcess>
 #include <QButtonGroup>
 #include <QTextStream>
+#include <QMessageBox>
 
 #include "define.h"
 
@@ -45,6 +46,7 @@ private slots:
 private:
     QString password;
     QFile *file;
+    QDateTime dateTime;
 };
 
 #endif // WINSYST_H

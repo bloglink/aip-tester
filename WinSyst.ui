@@ -57,15 +57,8 @@
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
-            <property name="date">
-             <date>
-              <year>2001</year>
-              <month>1</month>
-              <day>1</day>
-             </date>
-            </property>
             <property name="displayFormat">
-             <string>yyyyMMdd hh:mm</string>
+             <string>yyyy-MM-dd hh:mm</string>
             </property>
            </widget>
           </item>
