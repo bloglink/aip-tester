@@ -583,7 +583,11 @@ void PageDcr::CalculateBalance()
         }
         avr = sum/Results.size();
         for (int i=0; i<Results.size(); i++) {
-            double un = fabs(Results.at(i)-avr)*100/avr;
+            double un;
+            if (avr == 0)
+                un = 0;
+            else
+                un = fabs(Results.at(i)-avr)*100/avr;
             u.append(QString::number(un,'f',1));
             u.append("% ");
             if (un >= ui->BoxUnbalance->value()) {
