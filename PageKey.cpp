@@ -147,6 +147,8 @@ void PageKey::focusChanged(QWidget *, QWidget *nowWidget)
             visible = true;
         if (nowWidget->inherits("QDoubleSpinBox"))
             visible = true;
+        if (nowWidget->inherits("QDateTimeEdit"))
+            visible = true;
         this->setVisible(visible);
     }
 }

@@ -88,7 +88,6 @@ void WinSyst::BtnJudge(int id)
         Password();
         break;
     case Qt::Key_4:
-        QApplication::closeAllWindows();
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_5:
