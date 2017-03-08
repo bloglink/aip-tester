@@ -16,6 +16,12 @@
 #include "PageNum.h"
 
 #define MAX_ROW 8
+#define IMP_FREE        0
+#define IMP_INIT        4
+#define IMP_TEST        1
+#define IMP_SAMPLE      2
+#define IMP_SAMPLE_ADD  5
+#define IMP_SAMPLE_OTHER 3
 
 namespace Ui {
 class PageImp;
@@ -37,12 +43,13 @@ signals:
 public:
     QList<Waveform *> WaveImp;
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitializesWindow(void);
+    void InitializesButton(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
-    void VoltEdit(void);
+    void InitializesSetting(void);
+    void InitializesStation(void);
+    void SaveSetting(void);
+
 
     void ItemClick(int r, int c);
     void ItemChange(QString msg);
@@ -50,38 +57,39 @@ private slots:
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
-    void TestSampleAuto();
-    void TestSample(quint16 row);
-    void TestStart(quint8 station);
-    void TestResult(QByteArray msg);
-    void TestWave(QByteArray msg);
-    void TestWaveOk(QByteArray msg);
-    void TestWaveShow(QByteArray msg);
+    void InitializesItem(void);
+    void SendStatusCmd(void);
+    void ReadStatus(QByteArray msg);
+    void SendSampleAutoCmd();
+    void SendSampleCmd(quint16 row);
+    void SendStartCmd(quint8 station);
+    void WaitTestFinished(void);
+    void CalculateResult(QByteArray msg);
+    void ReadSample(QByteArray msg);
+    void ReadWave(QByteArray msg);
+    void ReadWaveOk(QByteArray msg);
+    void ReadWaveStart(QByteArray msg);
+    void SendWave(QByteArray msg);
 
-    void TestStop(void);
-    void TestConfig(void);
-    int TestGear(int row);
+    void SendStopCmd(void);
+    void SendConfigCmd(void);
+    int CalculateGear(int row);
 
-    bool WaitTestOver(quint16 t);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+
+    void AutoChangeVolt(void);
 
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
-    bool Sampling;
-    bool isAvarage;
     quint16 AvrCount;
     quint16 TimeOut;
     PageNum *input;
     quint8 CurrentWave;
     QStringList Items;
-    QString Judge;
+    QString JudgeAll;
     QString FileInUse;
 
     quint8 station;
@@ -101,6 +109,8 @@ private:
     QList<int> Freq;
     QList<int> Block0;
     QList<int> Block1;
+    QList<int> VoltTest;
+    quint8 ImpMode;
 
 
 };

@@ -16,23 +16,17 @@ PageImp::PageImp(QWidget *parent) :
     ui(new Ui::PageImp)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
-    Testing = false;
-    Sampling = false;
-    isAvarage = false;
-    AvrCount = 0;
+    InitializesWindow();
+    InitializesButton();
+    InitializesSetting();
 }
 
 PageImp::~PageImp()
 {
     delete ui;
 }
-/**
-  * @brief  Initializes the window
-  */
-void PageImp::WinInit()
+
+void PageImp::InitializesWindow()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
@@ -94,50 +88,58 @@ void PageImp::WinInit()
         Volt.at(row)->setMaximum(3000);
         Volt.at(row)->setAlignment(Qt::AlignHCenter);
         Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Volt.at(row)->setDecimals(0);
 
         Time.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row,4,Time.at(row));
         Time.at(row)->setMaximum(9999);
         Time.at(row)->setAlignment(Qt::AlignHCenter);
         Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Time.at(row)->setDecimals(0);
 
         Flut.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row,5,Flut.at(row));
         Flut.at(row)->setMaximum(9999);
         Flut.at(row)->setAlignment(Qt::AlignHCenter);
         Flut.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Flut.at(row)->setDecimals(0);
 
         Phase.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row,6,Phase.at(row));
         Phase.at(row)->setMaximum(9999);
         Phase.at(row)->setAlignment(Qt::AlignHCenter);
         Phase.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Phase.at(row)->setDecimals(0);
 
         Area.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row,7,Area.at(row));
         Area.at(row)->setMaximum(9999);
         Area.at(row)->setAlignment(Qt::AlignHCenter);
         Area.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Area.at(row)->setDecimals(0);
 
         Diff.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row,8,Diff.at(row));
         Diff.at(row)->setMaximum(9999);
         Diff.at(row)->setAlignment(Qt::AlignHCenter);
         Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Diff.at(row)->setDecimals(0);
 
         Freq.append(7);
         Block0.append(0);
         Block1.append(395);
+        VoltTest.append(0);
 
         WaveImp.append(new Waveform(this));
         ui->TabParams->setCellWidget(row,9,WaveImp.at(row));
     }
     station = WIN_ID_OUT13;
+    connect(Volt.at(0),SIGNAL(editingFinished()),this,SLOT(AutoChangeVolt()));
+    AvrCount = 0;
+    ImpMode = IMP_FREE;
 }
-/**
-  * @brief  Initializes the buttons
-  */
-void PageImp::BtnInit()
+
+void PageImp::InitializesButton()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSampleImp,Qt::Key_0);
@@ -149,50 +151,59 @@ void PageImp::BtnInit()
     btnGroup->addButton(ui->BtnAvarage,Qt::Key_6);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/**
-  * @brief  Button funcitons
-  */
+
 void PageImp::BtnJudge(int id)
 {
     switch (id) {
-    case Qt::Key_0:
-        TestConfig();
-        TestSampleAuto();
+    case Qt::Key_0: //自动采样
+        ImpMode = IMP_SAMPLE;
+        InitializesStation();
+        SendConfigCmd();
+        SendSampleAutoCmd();
+        AvrCount = 0;
         break;
     case Qt::Key_1:
         ui->WindgetSetImp->setCurrentIndex(0);
         break;
-    case Qt::Key_2:
+    case Qt::Key_2: //退出
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
-    case Qt::Key_3:
+    case Qt::Key_3: //减频采样
+        ImpMode = IMP_SAMPLE;
+        InitializesStation();
         if (Freq[ui->TabParams->currentRow()] != 0)
             Freq[ui->TabParams->currentRow()]--;
-        TestConfig();
-        TestSample(ui->TabParams->currentRow());
+        SendConfigCmd();
+        SendSampleCmd(ui->TabParams->currentRow());
+        AvrCount = 0;
         break;
-    case Qt::Key_4:
-        TestConfig();
-        TestSample(ui->TabParams->currentRow());
+    case Qt::Key_4://定频采样
+        ImpMode = IMP_SAMPLE;
+        InitializesStation();
+        SendConfigCmd();
+        SendSampleCmd(ui->TabParams->currentRow());
+        AvrCount = 0;
         break;
-    case Qt::Key_5:
+    case Qt::Key_5://加频采样
+        ImpMode = IMP_SAMPLE;
+        InitializesStation();
         if (Freq[ui->TabParams->currentRow()] != 14)
             Freq[ui->TabParams->currentRow()]++;
-        TestConfig();
-        TestSample(ui->TabParams->currentRow());
+        SendConfigCmd();
+        SendSampleCmd(ui->TabParams->currentRow());
+        AvrCount = 0;
         break;
-    case Qt::Key_6:
-        TestConfig();
-        TestSampleAuto();
-        isAvarage = true;
+    case Qt::Key_6: //添加样品
+        ImpMode = IMP_SAMPLE_ADD;
+        InitializesStation();
+        SendConfigCmd();
+        SendStartCmd(station);
     default:
         break;
     }
 }
-/**
-  * @brief  Initializes settings
-  */
-void PageImp::DatInit()
+
+void PageImp::InitializesSetting()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -223,6 +234,9 @@ void PageImp::DatInit()
     temp = (set->value("Volt","500 500 500 500 500 500 500 500").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Volt.at(row)->setValue(temp.at(row).toDouble());
+    temp = (set->value("VoltTest","500 500 500 500 500 500 500 500").toString().split(" "));
+    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+        VoltTest[row] = temp.at(row).toInt();
     //次数
     temp = (set->value("Time","1 1 1 1 1 1 1 1").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
@@ -272,13 +286,16 @@ void PageImp::DatInit()
     }
     qDebug()<<QTime::currentTime().toString()<<"匝间数据OK";
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       数据保存
-*******************************************************************************/
-void PageImp::DatSave()
+
+void PageImp::InitializesStation()
+{
+    if (ui->BoxStation->currentIndex() == 0)
+        station = WIN_ID_OUT13;
+    if (ui->BoxStation->currentIndex() == 1)
+        station = WIN_ID_OUT14;
+}
+
+void PageImp::SaveSetting()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间保存";
     QStringList temp;
@@ -341,17 +358,8 @@ void PageImp::DatSave()
     qDebug()<<QTime::currentTime().toString()<<"匝间保存OK";
 }
 
-void PageImp::VoltEdit()
-{
-    for (int i=0; i<Volt.size(); i++)
-        Volt.at(i)->setValue(Volt.at(0)->value());
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       点击
-*******************************************************************************/
+
+
 void PageImp::ItemClick(int r, int c)
 {
     switch (c) {
@@ -378,22 +386,12 @@ void PageImp::ItemClick(int r, int c)
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       切换文字
-*******************************************************************************/
+
 void PageImp::ItemChange(QString msg)
 {
     ui->TabParams->currentItem()->setText(msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       切换文字
-*******************************************************************************/
+
 void PageImp::BlockClick(int x)
 {
     if (x >=200) {
@@ -406,91 +404,70 @@ void PageImp::BlockClick(int x)
         Block0[CurrentWave] = x;
     }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.15
- * brief:      命令处理
-*******************************************************************************/
+
 void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_IMP && addr != CAN_ID_IMP && addr != CAN_ID_IMP_WAVE)
+    switch (addr) {
+    case ADDR:
+    case WIN_ID_IMP:
+    case CAN_ID_IMP:
+    case CAN_ID_IMP_WAVE:
+        break;
+    default:
         return;
+        break;
+    }
     switch (cmd) {
     case CMD_CAN:
         ExcuteCanCmd(addr,msg);
         break;
     case CMD_CHECK:
-        TestCheck();
+        ImpMode = IMP_INIT;
+        SendStatusCmd();
+        ImpMode = IMP_FREE;
         break;
     case CMD_START:
-        TestStart(msg.toInt());
+        ImpMode = IMP_TEST;
+        SendStartCmd(msg.toInt());
+        ImpMode = IMP_FREE;
         break;
     case CMD_STOP:
-        TestStop();
+        SendStopCmd();
+        ImpMode = IMP_FREE;
         break;
     case CMD_INIT:
-        DatInit();
-        TestInit();
-        TestConfig();
+        InitializesSetting();
+        InitializesItem();
+        SendConfigCmd();
         break;
     case CMD_WAVE:
-        TestWaveShow(msg);
+        SendWave(msg);
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       命令处理
-*******************************************************************************/
+
 void PageImp::ExcuteCanCmd(int id,QByteArray msg)
 {
-    if (!Testing && !Sampling)
+    if (ImpMode == IMP_FREE)
         return;
     TimeOut = 0;
     if (id == CAN_ID_IMP_WAVE) {
-        TestWave(msg);
+        ReadWave(msg);
         return;
     }
-    if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-        TestCheckOk(msg);
-    }
-    if (msg.size()==7 && (quint8)msg.at(0)==0x02) {
-        quint8 num = quint8(msg.at(1));
-        Freq[num] = quint8(msg.at(3));
-        int v = quint16(msg.at(4)*256)+quint8(msg.at(5));
-        Volt.at(num)->setValue(v);
-    }
-    if (msg.size()==5 && (quint8)msg.at(0)==0x03) {
-        CurrentWave = (quint8)msg.at(1);
-        if (Sampling) {
-            WaveImp.at(CurrentWave)->WaveByte.clear();
-        }
-        if (Testing) {
-            WaveImp.at(CurrentWave)->WaveTest.clear();
-            QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
-            QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
-            emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
-            emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
-        }
-    }
-    if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff) {
-        TestWaveOk(msg);
-    }
+    if (msg.size()==4 && (quint8)msg.at(0)==0x00)
+        ReadStatus(msg);
+    if (msg.size()==7 && (quint8)msg.at(0)==0x02)
+        ReadSample(msg);
+    if (msg.size()==5 && (quint8)msg.at(0)==0x03)
+        ReadWaveStart(msg);
+    if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff)
+        ReadWaveOk(msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       更新显示
- * date:        2017.02.15
- * brief:       修改显示方式
-*******************************************************************************/
-void PageImp::TestInit()
+
+void PageImp::InitializesItem()
 {
     Items.clear();
     WaveNumber.clear();
@@ -523,58 +500,28 @@ void PageImp::TestInit()
     }
     emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       检测状态
-*******************************************************************************/
-void PageImp::TestCheck()
+
+void PageImp::SendStatusCmd()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x24)<<quint8(0x01)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
-    if (!WaitTestOver(100)) {
-        Testing = false;
+
+    if (!WaitTimeOut(100)) {
         QMessageBox::warning(this,tr("警告"),tr("匝间板异常"),QMessageBox::Ok);
         emit SendMessage(ADDR,CMD_DEBUG,"Check PageImp Error:Time out\n");
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       更新状态
-*******************************************************************************/
-void PageImp::TestCheckOk(QByteArray)
+
+void PageImp::ReadStatus(QByteArray)
 {
-    if (Testing) {
-        Testing = false;
-    }
-    if (Sampling) {
-        Sampling = false;
-        emit SendMessage(ADDR,CMD_DEBUG,"IMP Sample ok\n");
-    }
-    if (!isCheckOk) {
-        isCheckOk = true;
-        emit SendMessage(ADDR,CMD_DEBUG,"IMP check ok\n");
-    }
+    ImpMode = IMP_FREE;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       自动采样
-*******************************************************************************/
-void PageImp::TestSampleAuto()
+
+void PageImp::SendSampleAutoCmd()
 {
-    if (ui->BoxStation->currentIndex() == 0)
-        station = WIN_ID_OUT13;
-    if (ui->BoxStation->currentIndex() == 1)
-        station = WIN_ID_OUT14;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -586,21 +533,10 @@ void PageImp::TestSampleAuto()
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x01)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Sampling = true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       定频采集一个波形
-*******************************************************************************/
-void PageImp::TestSample(quint16 t)
-{
-    if (ui->BoxStation->currentIndex() == 0)
-        station = WIN_ID_OUT13;
-    if (ui->BoxStation->currentIndex() == 1)
-        station = WIN_ID_OUT14;
 
+void PageImp::SendSampleCmd(quint16 t)
+{
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -608,21 +544,10 @@ void PageImp::TestSample(quint16 t)
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x02)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Sampling = true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       开始测试
- * date:        2017.02.15
- * brief:       增加测试或采样中返回,增加超时判断
-*******************************************************************************/
-void PageImp::TestStart(quint8 pos)
-{
-    if (Testing || Sampling)
-        return;
 
+void PageImp::SendStartCmd(quint8 pos)
+{
     station = pos;
 
     emit SendMessage(ADDR,CMD_WAVE_HIDE,NULL);
@@ -638,11 +563,20 @@ void PageImp::TestStart(quint8 pos)
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
-    Judge = "OK";
-    if(!WaitTestOver(100)) {
-        Testing = false;
-        Judge = "NG";
+
+    WaitTestFinished();
+    QStringList s;
+    s.append("匝间");
+    s.append(FileInUse);
+    s.append(JudgeAll);
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+}
+
+void PageImp::WaitTestFinished()
+{
+    JudgeAll = "OK";
+    if(!WaitTimeOut(100)) {
+        JudgeAll = "NG";
         for (int row = 0; row<Enable.size(); row++) {
             if (Enable.at(row)->text() == "Y") {
                 QStringList s = QString(Items.at(row)).split("@");
@@ -654,22 +588,10 @@ void PageImp::TestStart(quint8 pos)
             }
         }
     }
-    QStringList s;
-    s.append("匝间");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       更新测试数据
-*******************************************************************************/
-void PageImp::TestResult(QByteArray )
+
+void PageImp::CalculateResult(QByteArray )
 {
-    if (Sampling)
-        return;
     quint8 num = station - WIN_ID_OUT13;
     WaveImp.at(CurrentWave)->InitWaveByte(num);
     WaveImp.at(CurrentWave)->InitWaveTest(num);
@@ -727,7 +649,7 @@ void PageImp::TestResult(QByteArray )
     else if (abs(P) >= Phase.at(qMin(number,Phase.size()-1))->value())
         judge = "NG";
     if (judge == "NG")
-        Judge = "NG";
+        JudgeAll = "NG";
     QStringList t = QString(Items.at(CurrentWave)).split("@");
     if (t.at(2) == " ")
         t[2] = n;
@@ -735,53 +657,91 @@ void PageImp::TestResult(QByteArray )
         t[3] = judge;
     emit SendMessage(ADDR,CMD_ITEM,t.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       接收波形
-*******************************************************************************/
-void PageImp::TestWave(QByteArray msg)
+
+void PageImp::ReadSample(QByteArray msg)
 {
-    if (Sampling)
-        WaveImp.at(CurrentWave)->WaveByte.append(msg);
-    else
-        WaveImp.at(CurrentWave)->WaveTest.append(msg);
+    quint8 num = quint8(msg.at(1));
+    Freq[num] = quint8(msg.at(3));
+    VoltTest[num] = quint16(msg.at(4)*256)+quint8(msg.at(5));
 }
 
-void PageImp::TestWaveOk(QByteArray msg)
+void PageImp::ReadWave(QByteArray msg)
+{
+    switch (ImpMode) {
+    case IMP_FREE:
+    case IMP_INIT:
+        break;
+    case IMP_SAMPLE:
+    case IMP_SAMPLE_ADD:
+    case IMP_SAMPLE_OTHER:
+        WaveImp.at(CurrentWave)->WaveByte.append(msg);
+        break;
+    case IMP_TEST:
+        WaveImp.at(CurrentWave)->WaveTest.append(msg);
+        break;
+    default:
+        break;
+    }
+}
+
+void PageImp::ReadWaveOk(QByteArray msg)
 {
     QByteArray w;
     quint8 num = station - WIN_ID_OUT13;
-    if (Sampling) {
-        if (isAvarage) {
-            AvrCount++;
-            QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
-            QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
-            for (int i=0; i<qMin(byte.size(),test.size()); i++)
-                w.append(test.at(i)+(test.at(i)-byte.at(i))/AvrCount);
-        } else {
-            w = WaveImp.at(CurrentWave)->WaveByte;
-        }
+    QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
+    QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
+    switch (ImpMode) {
+    case IMP_SAMPLE:
+    case IMP_SAMPLE_OTHER:
+        w = WaveImp.at(CurrentWave)->WaveByte;
         WaveImp.at(CurrentWave)->WaveBytes[num] = w;
         WaveImp.at(CurrentWave)->WaveByteShow(w);
         ui->LabelWave->WaveByteShow(w);
-
-    }
-    if (Testing) {
+        break;
+    case IMP_SAMPLE_ADD:
+        AvrCount++;
+        for (int i=0; i<qMin(byte.size(),test.size()); i++)
+            w.append(test.at(i)+(test.at(i)-byte.at(i))/AvrCount);
+        if (AvrCount == 1)
+            w = WaveImp.at(CurrentWave)->WaveByte;
+        WaveImp.at(CurrentWave)->WaveBytes[num] = w;
+        WaveImp.at(CurrentWave)->WaveByteShow(w);
+        ui->LabelWave->WaveByteShow(w);
+        break;
+    case IMP_TEST:
         w = WaveImp.at(CurrentWave)->WaveTest;
         WaveImp.at(CurrentWave)->WaveTests[num] = w;
         emit SendMessage(ADDR,CMD_WAVE_TEST,w);
-        TestResult(msg);
+        CalculateResult(msg);
+        break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       更新显示波形
-*******************************************************************************/
-void PageImp::TestWaveShow(QByteArray msg)
+
+void PageImp::ReadWaveStart(QByteArray msg)
+{
+    CurrentWave = (quint8)msg.at(1);
+    QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
+    QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
+    switch (ImpMode) {
+    case IMP_FREE:
+    case IMP_INIT:
+        break;
+    case IMP_SAMPLE:
+    case IMP_SAMPLE_ADD:
+    case IMP_SAMPLE_OTHER:
+        WaveImp.at(CurrentWave)->WaveByte.clear();
+        break;
+    case IMP_TEST:
+        WaveImp.at(CurrentWave)->WaveTest.clear();
+        emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
+        emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
+        break;
+    default:
+        break;
+    }
+}
+
+void PageImp::SendWave(QByteArray msg)
 {
     int t = WaveNumber.size();
     for (int i=0; i<WaveNumber.size(); i++) {
@@ -800,54 +760,45 @@ void PageImp::TestWaveShow(QByteArray msg)
         emit SendMessage(ADDR,CMD_WAVE_TEST,w);
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       停止测试
-*******************************************************************************/
-void PageImp::TestStop()
+
+void PageImp::SendStopCmd()
 {
-    if (!Testing)
-        return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x24)<<quint8(0x01)<<quint8(0x02);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = false;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       配置
- * date:        2017.01.04
- * brief:       增加档位
-*******************************************************************************/
-void PageImp::TestConfig()
+
+void PageImp::SendConfigCmd()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     for (int row=0; row<Enable.size(); row++) {
+        int v = 0;
+        switch (ImpMode) {
+        case IMP_FREE:
+        case IMP_INIT:
+        case IMP_TEST:
+        case IMP_SAMPLE_OTHER:
+            v = VoltTest.at(row);
+            break;
+        case IMP_SAMPLE:
+            v = Volt.at(row)->value();
+        default:
+            break;
+        }
         out<<quint16(0x24)<<quint8(0x08)<<quint8(0x03)<<quint8(row)
           <<quint8(Terminal1.at(row)->text().toInt())
          <<quint8(Terminal2.at(row)->text().toInt())
-        <<quint8(int(Volt.at(row)->value())/256)<<quint8(int(Volt.at(row)->value())%256)
-        <<quint8(TestGear(row))<<quint8(Freq.at(row));
+        <<quint8(v/256)<<quint8(v%256)
+        <<quint8(CalculateGear(row))<<quint8(Freq.at(row));
     }
     emit SendMessage(ADDR,CMD_CAN,msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.01.04
- * brief:       档位
- * date:        2017.01.07
- * brief:       修正档位数据
-*******************************************************************************/
-int PageImp::TestGear(int row)
+
+int PageImp::CalculateGear(int row)
 {
     int gear = 0;
     if (Volt.at(row)->value() <= 1000)
@@ -862,16 +813,11 @@ int PageImp::TestGear(int row)
     gear += Time.at(row)->value()+1;
     return gear;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       等待测试结束
-*******************************************************************************/
-bool PageImp::WaitTestOver(quint16 t)
+
+bool PageImp::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Testing) {
+    while (ImpMode != IMP_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -879,12 +825,7 @@ bool PageImp::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       延时
-*******************************************************************************/
+
 void PageImp::Delay(int ms)
 {
     QElapsedTimer t;
@@ -893,27 +834,19 @@ void PageImp::Delay(int ms)
         QCoreApplication::processEvents();
 }
 
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       更新显示
-*******************************************************************************/
+void PageImp::AutoChangeVolt()
+{
+    for (int i=1; i<Volt.size(); i++)
+        Volt.at(i)->setValue(Volt.at(0)->value());
+}
+
 void PageImp::showEvent(QShowEvent *)
 {
-    DatInit();
-    connect(Volt.at(0),SIGNAL(editingFinished()),this,SLOT(VoltEdit()));
+    InitializesSetting();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       退出保存
-*******************************************************************************/
+
 void PageImp::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSetting();
 }
-/*******************************************************************************
- *                                        END
-*******************************************************************************/
+/*********************************END OF FILE**********************************/

@@ -225,7 +225,7 @@
             </size>
            </property>
            <property name="text">
-            <string>采样平均</string>
+            <string>添加样品</string>
            </property>
           </widget>
          </item>

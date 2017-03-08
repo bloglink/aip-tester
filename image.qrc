@@ -35,5 +35,6 @@
         <file>source/TitleEn.png</file>
         <file>source/up_arrow.png</file>
         <file>source/uparrow.png</file>
+        <file>source/wifi.png</file>
     </qresource>
 </RCC>

@@ -71,6 +71,7 @@ void TcpClient::TcpQuit()
 void TcpClient::Connected()
 {
     ExcuteCmd(quint16(ADDR),quint16(GUEST_LOGIN),NULL);
+    emit SendMessage(ADDR,CMD_NET,NULL);
 }
 /******************************************************************************
   * version:    1.0

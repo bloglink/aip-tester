@@ -433,6 +433,12 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         emit SendMessage(ADDR,CMD_STOP,msg);
         Testing = false;
         break;
+    case CMD_NET:
+        ui->IconNet->setPixmap(QPixmap(":/source/wifi.png"));
+        break;
+    case CMD_SQL:
+        ui->IconNet->setPixmap(QPixmap(":/source/radio_1.png"));
+        break;
     default:
         qDebug()<<addr<<cmd<<msg;
         break;
