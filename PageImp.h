@@ -48,8 +48,6 @@ private slots:
     void ItemChange(QString msg);
     void BlockClick(int x);
 
-
-
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
     void TestInit(void);
@@ -77,6 +75,8 @@ private:
     bool isCheckOk;
     bool Testing;
     bool Sampling;
+    bool isAvarage;
+    quint16 AvrCount;
     quint16 TimeOut;
     PageNum *input;
     quint8 CurrentWave;

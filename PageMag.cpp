@@ -332,7 +332,7 @@ void PageMag::ReadStatus(QByteArray )
 {
     if (Testing) {
         if (ui->BoxDir->currentIndex() != 0) {
-            TestDir();
+            CalculateDir();
         }
         Testing = false;
     }
@@ -466,37 +466,20 @@ void PageMag::ReadWave(QByteArray msg)
 
 void PageMag::ReadWaveOk(QByteArray )
 {
-    if (station == WIN_ID_OUT13) {
-        WaveMag.at(CurrentWave)->InitWaveByte(0);
-        WaveMag.at(CurrentWave)->InitWaveTest(0);
-    }
-    if (station == WIN_ID_OUT14) {
-        WaveMag.at(CurrentWave)->InitWaveByte(1);
-        WaveMag.at(CurrentWave)->InitWaveTest(1);
-    }
+    quint8 num = station - WIN_ID_OUT13;
+    WaveMag.at(CurrentWave)->InitWaveByte(num);
+    WaveMag.at(CurrentWave)->InitWaveTest(num);
     QByteArray w;
     QByteArray i;
     if (Sampling) {
         w = WaveMag.at(CurrentWave)->WaveByte;
-        if (station == WIN_ID_OUT13) {
-            WaveMag.at(CurrentWave)->WaveBytes[0] = w;
-        }
-        if (station == WIN_ID_OUT14) {
-            WaveMag.at(CurrentWave)->WaveBytes[1] = w;
-        }
+        WaveMag.at(CurrentWave)->WaveBytes[num] = w;
         WaveMag.at(CurrentWave)->WaveByteShow(w);
     }
     if (Testing) {
         w = WaveMag.at(CurrentWave)->WaveTest;
         i = WaveMag.at(CurrentWave)->WaveItem;
-
-        if (station == WIN_ID_OUT13) {
-            WaveMag.at(CurrentWave)->WaveTests[0] = w;
-        }
-        if (station == WIN_ID_OUT14) {
-            WaveMag.at(CurrentWave)->WaveTests[1] = w;
-        }
-
+        WaveMag.at(CurrentWave)->WaveTests[num] = w;
         emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
         emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
     }
@@ -520,7 +503,7 @@ void PageMag::SendWave(QByteArray msg)
     }
 }
 
-void PageMag::TestDir()
+void PageMag::CalculateDir()
 {
     //计算主副相的面积，差积，和左右移动的差积
     qint32 	area1,area2,diff,diff1,diff2;
@@ -552,7 +535,7 @@ void PageMag::TestDir()
     QString judge = "OK";
 
     if(((diff*3<area1)&&(diff*3<area2))||(area1<(area2>>4))||(area2<(area1>>4)))
-        n = tr("不转");
+        n = tr("不转"); //偏移不超过1/3,或面积差大于3/4,判定为不转
     else if(diff1<diff2) //副相在前
         n = tr("正转");
     else if(diff1>diff2)//主相在前

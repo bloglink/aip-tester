@@ -54,7 +54,7 @@ private slots:
     void ReadWave(QByteArray msg);
     void ReadWaveOk(QByteArray msg);
     void SendWave(QByteArray msg);
-    void TestDir();
+    void CalculateDir();
     void SendStopCmd(void);
     void SendConfigCmd(void);
 

@@ -138,8 +138,8 @@
         </widget>
        </item>
        <item>
-        <layout class="QGridLayout" name="LayoutCtrl" columnstretch="1,0,0,0">
-         <item row="0" column="3">
+        <layout class="QGridLayout" name="LayoutCtrl" columnstretch="1,0,0,0,0">
+         <item row="0" column="4">
           <widget class="QPushButton" name="BtnExitImp">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -208,6 +208,25 @@
              <string>右工位</string>
             </property>
            </item>
+          </widget>
+         </item>
+         <item row="0" column="3">
+          <widget class="QPushButton" name="BtnAvarage">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>采样平均</string>
+           </property>
           </widget>
          </item>
         </layout>

@@ -21,6 +21,8 @@ PageImp::PageImp(QWidget *parent) :
     DatInit();
     Testing = false;
     Sampling = false;
+    isAvarage = false;
+    AvrCount = 0;
 }
 
 PageImp::~PageImp()
@@ -144,6 +146,7 @@ void PageImp::BtnInit()
     btnGroup->addButton(ui->BtnFrequcy1,Qt::Key_3);
     btnGroup->addButton(ui->BtnFrequcy2,Qt::Key_4);
     btnGroup->addButton(ui->BtnFrequcy3,Qt::Key_5);
+    btnGroup->addButton(ui->BtnAvarage,Qt::Key_6);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 /**
@@ -178,6 +181,10 @@ void PageImp::BtnJudge(int id)
         TestConfig();
         TestSample(ui->TabParams->currentRow());
         break;
+    case Qt::Key_6:
+        TestConfig();
+        TestSampleAuto();
+        isAvarage = true;
     default:
         break;
     }
@@ -472,17 +479,7 @@ void PageImp::ExcuteCanCmd(int id,QByteArray msg)
         }
     }
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff) {
-        QByteArray w;
-        if (Sampling) {
-            w = WaveImp.at(CurrentWave)->WaveByte;
-            WaveImp.at(CurrentWave)->WaveByteShow(w);
-            ui->LabelWave->WaveByteShow(w);
-        }
-        if (Testing) {
-            w = WaveImp.at(CurrentWave)->WaveTest;
-            emit SendMessage(ADDR,CMD_WAVE_TEST,w);
-            TestResult(msg);
-        }
+        TestWaveOk(msg);
     }
 }
 /*******************************************************************************
@@ -673,14 +670,10 @@ void PageImp::TestResult(QByteArray )
 {
     if (Sampling)
         return;
-    if (station == WIN_ID_OUT13) {
-        WaveImp.at(CurrentWave)->InitWaveByte(0);
-        WaveImp.at(CurrentWave)->InitWaveTest(0);
-    }
-    if (station == WIN_ID_OUT14) {
-        WaveImp.at(CurrentWave)->InitWaveByte(1);
-        WaveImp.at(CurrentWave)->InitWaveTest(1);
-    }
+    quint8 num = station - WIN_ID_OUT13;
+    WaveImp.at(CurrentWave)->InitWaveByte(num);
+    WaveImp.at(CurrentWave)->InitWaveTest(num);
+
     qint32 Area1=0;
     qint32 Area2=0;
     qint32 Area3=0;
@@ -758,42 +751,28 @@ void PageImp::TestWave(QByteArray msg)
 
 void PageImp::TestWaveOk(QByteArray msg)
 {
-    if (station == WIN_ID_OUT13) {
-        WaveImp.at(CurrentWave)->InitWaveByte(0);
-        WaveImp.at(CurrentWave)->InitWaveTest(0);
-    }
-    if (station == WIN_ID_OUT14) {
-        WaveImp.at(CurrentWave)->InitWaveByte(1);
-        WaveImp.at(CurrentWave)->InitWaveTest(1);
-    }
-
     QByteArray w;
+    quint8 num = station - WIN_ID_OUT13;
     if (Sampling) {
-        w = WaveImp.at(CurrentWave)->WaveByte;
-        if (station == WIN_ID_OUT13) {
-            WaveImp.at(CurrentWave)->WaveBytes[0] = w;
+        if (isAvarage) {
+            AvrCount++;
+            QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
+            QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
+            for (int i=0; i<qMin(byte.size(),test.size()); i++)
+                w.append(test.at(i)+(test.at(i)-byte.at(i))/AvrCount);
+        } else {
+            w = WaveImp.at(CurrentWave)->WaveByte;
         }
-        if (station == WIN_ID_OUT14) {
-            WaveImp.at(CurrentWave)->WaveBytes[1] = w;
-        }
-
+        WaveImp.at(CurrentWave)->WaveBytes[num] = w;
         WaveImp.at(CurrentWave)->WaveByteShow(w);
         ui->LabelWave->WaveByteShow(w);
 
     }
     if (Testing) {
         w = WaveImp.at(CurrentWave)->WaveTest;
-
-        if (station == WIN_ID_OUT13) {
-            WaveImp.at(CurrentWave)->WaveTests[0] = w;
-        }
-        if (station == WIN_ID_OUT14) {
-            WaveImp.at(CurrentWave)->WaveTests[1] = w;
-        }
-
+        WaveImp.at(CurrentWave)->WaveTests[num] = w;
         emit SendMessage(ADDR,CMD_WAVE_TEST,w);
         TestResult(msg);
-
     }
 }
 /*******************************************************************************
