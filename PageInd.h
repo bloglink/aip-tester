@@ -19,6 +19,9 @@
 
 #include "define.h"
 #include "PageNum.h"
+
+#define MAX_ROW 8
+
 union  Resultunion // 接收电感数据
 {
     float   Result;
@@ -43,28 +46,30 @@ private:
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitializesWindow(void);
+    void InitializesButton(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
-    void DatAuto(void);
+    void InitializesSetting(void);
+    void SaveSetting(void);
+    void CalculateAuto(void);
     void ItemClick(int r,int c);
     void ItemChange(QString msg);
-    int TestGear(int row);
-    int TestMode(int row);
+    int CalculateGear(int row);
+    int CalculateMode(int row);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
-    void TestStart(quint8 pos);
-    void TestResult(QByteArray msg);
-    void TestStop(void);
-    void TestConfig(void);
+    void InitializesItem(void);
+    void SendStatusCmd(void);
+    void ReadStatus(QByteArray msg);
+    void SendStartCmd(quint8 pos);
+    void ReadResult(QByteArray msg);
+    void ReadOffset(QByteArray msg);
+    void SendStopCmd(void);
+    void SendConfigCmd(void);
 
     bool WaitTestOver(quint16 t);
+    bool WaitOffset(quint16 t);
     void Delay(int ms);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
@@ -72,6 +77,7 @@ private:
     QSettings *set;
     bool isCheckOk;
     bool Testing;
+    bool Offsetting;
     quint16 TimeOut;
     PageNum *input;
     QStringList Items;
@@ -88,6 +94,7 @@ private:
     QList<QDoubleSpinBox*> QMin;
     QList<QDoubleSpinBox*> QMax;
     QList<QDoubleSpinBox*> Std;
+    QList<QDoubleSpinBox*> Offset;
 
     Resultunion  Result1;
     Resultunion  Result2;

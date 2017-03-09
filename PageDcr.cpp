@@ -202,6 +202,7 @@ void PageDcr::InitializesSetting()
 
 void PageDcr::SaveSetting()
 {
+    qDebug()<<QTime::currentTime().toString()<<"电阻保存";
     QStringList temp;
     temp.append(QString::number(ui->BoxStd->value()));
     temp.append(QString::number(ui->BoxOffset->value()));
@@ -247,6 +248,7 @@ void PageDcr::SaveSetting()
     for (int i=0; i<Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     set->setValue("Offset",(temp.join(" ").toUtf8()));
+    qDebug()<<QTime::currentTime().toString()<<"电阻保存OK";
 }
 
 void PageDcr::CalculateAuto()

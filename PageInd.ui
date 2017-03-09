@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="3,1">
    <item>
-    <widget class="QTableWidget" name="TabInductance">
+    <widget class="QTableWidget" name="TabParams">
      <property name="focusPolicy">
       <enum>Qt::WheelFocus</enum>
      </property>
@@ -81,7 +81,7 @@
      </column>
      <column>
       <property name="text">
-       <string>测试</string>
+       <string>补偿</string>
       </property>
      </column>
     </widget>
@@ -127,6 +127,25 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="BtnOffset">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>校准补偿</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="BtnSDLRExit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -142,25 +161,6 @@
            </property>
            <property name="text">
             <string>返回</string>
-           </property>
-          </widget>
-         </item>
-         <item>
-          <widget class="QPushButton" name="Button_Comp">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>97</width>
-             <height>44</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>校准补偿</string>
            </property>
           </widget>
          </item>

@@ -75,7 +75,7 @@ void WinSyst::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        if (ui->EditPassword->text() == "aip9981")
+        if (ui->EditPassword->text() == "aip9918")
             emit SendMessage(ADDR,CMD_JUMP,"WinBack");
         else if (ui->EditPassword->text() == password)
             ui->StackWinSyst->setCurrentIndex(0);

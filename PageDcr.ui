@@ -27,7 +27,7 @@
      </attribute>
      <column>
       <property name="text">
-       <string>选中</string>
+       <string>电阻</string>
       </property>
      </column>
      <column>
@@ -238,7 +238,7 @@
             </size>
            </property>
            <property name="text">
-            <string>Offset</string>
+            <string>校准补偿</string>
            </property>
           </widget>
          </item>
