@@ -64,6 +64,7 @@ void WinSyst::BtnInit()
     btnGroup->addButton(ui->BtnSystPasswordExit,Qt::Key_4);
     btnGroup->addButton(ui->BtnExit,Qt::Key_4);
     btnGroup->addButton(ui->btnTime,Qt::Key_5);
+    btnGroup->addButton(ui->BtnStatus,Qt::Key_6);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 /**
@@ -96,6 +97,9 @@ void WinSyst::BtnJudge(int id)
         break;
     case Qt::Key_5:
         SetDateTime();
+        break;
+    case Qt::Key_6:
+        emit SendMessage(ADDR,CMD_STATUS,NULL);
         break;
     default:
         break;

@@ -46,7 +46,7 @@
 #define CMD_START       0x12    //启动测试
 #define CMD_STOP        0x13    //停止测试
 #define CMD_ALARM       0x14    //报警
-#define CAN_CMD_READY   0x15
+#define CMD_STATUS      0x15    //状态查询
 #define CMD_NET         0x16    //网络已连接
 #define CMD_SQL         0x17    //数据库已连接
 

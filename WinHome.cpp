@@ -402,6 +402,9 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_INIT:
         TestInit();
         break;
+    case CMD_STATUS:
+        TestCheck();
+        break;
     case CMD_INIT_ITEM:
         Items.append(QString(msg).split("\n"));
         break;
