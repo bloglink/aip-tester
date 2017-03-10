@@ -6,11 +6,10 @@ PagePwr::PagePwr(QWidget *parent) :
     ui(new Ui::PagePwr)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
-    Testing = false;
-    isCheckOk = false;
+    InitWindow();
+    InitButton();
+    InitSetting();
+    Mode = PWR_FREE;
 }
 
 PagePwr::~PagePwr()
@@ -23,41 +22,87 @@ PagePwr::~PagePwr()
  * date:        2017.02.16
  * brief:       初始化界面
 *******************************************************************************/
-void PagePwr::WinInit()
+void PagePwr::InitWindow()
 {
-//    ui->BoxPG->hide();
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
-    ui->TabPower->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->TabPower->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->TabPG->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->TabPG->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabPower->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->TabPower->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->TabPG->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->TabPG->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabPower,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    ui->TabParams->setRowCount(PWR_ROW);
+    for (int row=0; row<PWR_ROW; row++) {
+        Enable.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,0,Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        CurrMax.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,1,CurrMax.at(row));
+        CurrMax.at(row)->setMaximum(20);
+        CurrMax.at(row)->setAlignment(Qt::AlignHCenter);
+        CurrMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        CurrMin.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,2,CurrMin.at(row));
+        CurrMin.at(row)->setMaximum(20);
+        CurrMin.at(row)->setAlignment(Qt::AlignHCenter);
+        CurrMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PowerMax.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,3,PowerMax.at(row));
+        PowerMax.at(row)->setMaximum(9999);
+        PowerMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PowerMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PowerMin.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,4,PowerMin.at(row));
+        PowerMin.at(row)->setMaximum(9999);
+        PowerMin.at(row)->setAlignment(Qt::AlignHCenter);
+        PowerMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        CapMax.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,5,CapMax.at(row));
+        CapMax.at(row)->setMaximum(9999);
+        CapMax.at(row)->setAlignment(Qt::AlignHCenter);
+        CapMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        CapMin.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,6,CapMin.at(row));
+        CapMin.at(row)->setMaximum(9999);
+        CapMin.at(row)->setAlignment(Qt::AlignHCenter);
+        CapMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        TestDir.append(new QComboBox(this));
+        ui->TabParams->setCellWidget(row,7,TestDir.at(row));
+        QStringList t1;
+        t1 <<tr("不转")<<tr("正转")<<tr("反转");
+        TestDir.at(row)->setView(new QListView(this));
+        TestDir.at(row)->addItems(t1);
+
+        TestTime.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,8,TestTime.at(row));
+        TestTime.at(row)->setMaximum(9999);
+        TestTime.at(row)->setAlignment(Qt::AlignHCenter);
+        TestTime.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Grade.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row,9,Grade.at(row));
+        Grade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        Grade.at(row)->setTextAlignment(Qt::AlignCenter);
+    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       初始化按键
-*******************************************************************************/
-void PagePwr::BtnInit()
+
+void PagePwr::InitButton()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExit,Qt::Key_0);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButton(int)));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       按键功能
-*******************************************************************************/
-void PagePwr::BtnJudge(int id)
+
+void PagePwr::ReadButton(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -67,13 +112,8 @@ void PagePwr::BtnJudge(int id)
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       数据初始化
-*******************************************************************************/
-void PagePwr::DatInit()
+
+void PagePwr::InitSetting()
 {
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
@@ -85,196 +125,62 @@ void PagePwr::DatInit()
     QString t = QString("./config/%1.ini").arg(FileInUse);
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
-    set->beginGroup("SetPower");
+    set->beginGroup("PagePwr");
 
-    QStringList temp = (set->value("Other","20 0 0.5 10 10 50").toString()).split(" ");
-    if (temp.size() >= 6) {
-        ui->BoxFreq->setValue(temp.at(0).toDouble());
-        ui->BoxVolt->setValue(temp.at(1).toDouble());
+    QStringList temp = (set->value("Other","220 50 1").toString()).split(" ");
+    if (temp.size() >= 3) {
+        ui->BoxVolt->setValue(temp.at(0).toDouble());
+        ui->BoxFreq->setValue(temp.at(1).toDouble());
         ui->BoxCap->setValue(temp.at(2).toDouble());
-        ui->BoxVoltMax->setValue(temp.at(3).toDouble());
-        ui->BoxVoltMin->setValue(temp.at(4).toDouble());
-        ui->BoxVoltPG->setValue(temp.at(5).toDouble());
     }
-
     //可用
-    temp = (QString(set->value("Enable","Y Y Y Y Y Y").toByteArray())).split(" ");
-    if (temp.size() > 6)
-        ui->TabPower->setRowCount(temp.size());
-    else
-        ui->TabPower->setRowCount(6);
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (Enable.size() > row)
-            continue;
-        Enable.append(new QTableWidgetItem);
-        ui->TabPower->setItem(row,0,Enable.at(row));
+    temp = (QString(set->value("Enable","Y Y Y N N N").toByteArray())).split(" ");
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
-        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (Enable.size() <= row)
-            break;
-        Enable.at(row)->setText(temp.at(row));
-    }
-
-    //最大电流
+    //最小电流
     temp = (set->value("CurrMin","0 0 0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CurrMin.size() > row)
-            continue;
-        CurrMin.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,1,CurrMin.at(row));
-        CurrMin.at(row)->setMaximum(20);
-        CurrMin.at(row)->setAlignment(Qt::AlignHCenter);
-        CurrMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CurrMin.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         CurrMin.at(row)->setValue(temp.at(row).toDouble());
-    }
     //最大电流
     temp = (set->value("CurrMax","5 5 5 5 5 5").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CurrMax.size() > row)
-            continue;
-        CurrMax.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,2,CurrMax.at(row));
-        CurrMax.at(row)->setMaximum(20);
-        CurrMax.at(row)->setAlignment(Qt::AlignHCenter);
-        CurrMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CurrMax.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         CurrMax.at(row)->setValue(temp.at(row).toDouble());
-    }
     //最小功率
     temp = (set->value("PowerMin","1 1 1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (PowerMin.size() > row)
-            continue;
-        PowerMin.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,3,PowerMin.at(row));
-        PowerMin.at(row)->setMaximum(20);
-        PowerMin.at(row)->setAlignment(Qt::AlignHCenter);
-        PowerMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (PowerMin.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         PowerMin.at(row)->setValue(temp.at(row).toDouble());
-    }
     //最大功率
     temp = (set->value("PowerMax","500 500 500 500 500 500").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (PowerMax.size() > row)
-            continue;
-        PowerMax.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,4,PowerMax.at(row));
-        PowerMax.at(row)->setMaximum(20);
-        PowerMax.at(row)->setAlignment(Qt::AlignHCenter);
-        PowerMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (PowerMax.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         PowerMax.at(row)->setValue(temp.at(row).toDouble());
-    }
     //最小容压
     temp = (set->value("CapMin","1 1 1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CapMin.size() > row)
-            continue;
-        CapMin.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,5,CapMin.at(row));
-        CapMin.at(row)->setMaximum(20);
-        CapMin.at(row)->setAlignment(Qt::AlignHCenter);
-        CapMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CapMin.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         CapMin.at(row)->setValue(temp.at(row).toDouble());
-    }
     //最大容压
     temp = (set->value("CapMax","500 500 500 500 500 500").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CapMax.size() > row)
-            continue;
-        CapMax.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,6,CapMax.at(row));
-        CapMax.at(row)->setMaximum(20);
-        CapMax.at(row)->setAlignment(Qt::AlignHCenter);
-        CapMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (CapMax.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         CapMax.at(row)->setValue(temp.at(row).toDouble());
-    }
     //转向
     temp = (QString(set->value("TestDir","0 0 0 0 0 0 0 0").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (TestDir.size() > row)
-            continue;
-        TestDir.append(new QComboBox(this));
-        ui->TabPower->setCellWidget(row,7,TestDir.at(row));
-        QStringList t;
-        t <<tr("不转")<<tr("正转")<<tr("反转");
-        TestDir.at(row)->setView(new QListView(this));
-        TestDir.at(row)->addItems(t);
-
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (TestDir.size() <= row)
-            break;
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         TestDir.at(row)->setCurrentIndex(temp.at(row).toInt());
-    }
     //测试时间
     temp = (set->value("TestTime","1 1 1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (TestTime.size() > row)
-            continue;
-        TestTime.append(new QDoubleSpinBox(this));
-        ui->TabPower->setCellWidget(row,8,TestTime.at(row));
-        TestTime.at(row)->setMaximum(20);
-        TestTime.at(row)->setAlignment(Qt::AlignHCenter);
-        TestTime.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-    }
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
+        TestTime.at(row)->setValue(temp.at(row).toDouble());
     temp.clear();
     temp<<"123"<<"124"<<"125"<<"126"<<"127"<<"128";
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (Grade.size() > row)
-            continue;
-        Grade.append(new QTableWidgetItem);
-        ui->TabPower->setItem(row,9,Grade.at(row));
+    for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         Grade.at(row)->setText(temp.at(row));
-        Grade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Grade.at(row)->setTextAlignment(Qt::AlignCenter);
-    }
-    for (int row=0; row<qMin(temp.size(),ui->TabPower->rowCount()); row++) {
-        if (Grade.size() <= row)
-            break;
-        Grade.at(row)->setText(temp.at(row));
-    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       数据保存
-*******************************************************************************/
-void PagePwr::DatSave()
+
+void PagePwr::SaveSetting()
 {
     QStringList temp;
-    temp.append(QString::number(ui->BoxFreq->value()));
     temp.append(QString::number(ui->BoxVolt->value()));
+    temp.append(QString::number(ui->BoxFreq->value()));
     temp.append(QString::number(ui->BoxCap->value()));
-    temp.append(QString::number(ui->BoxVoltMax->value()));
-    temp.append(QString::number(ui->BoxVoltMin->value()));
-    temp.append(QString::number(ui->BoxVoltPG->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
 
     temp.clear();
@@ -340,12 +246,7 @@ void PagePwr::ItemClick(int r, int c)
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       命令处理
-*******************************************************************************/
+
 void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR && addr != WIN_ID_PWR && addr != CAN_ID_PWR)
@@ -355,49 +256,61 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        TestCheck();
+        Mode = PWR_INIT;
+        SendCanCmdStatus();
+        if (!WaitTimeOut(100)) {
+            QMessageBox::warning(this,tr("警告"),tr("功率板异常"),QMessageBox::Ok);
+            emit SendMessage(ADDR,CMD_DEBUG,"Check PagePwr Error:Time out\n");
+        }
+        Mode = PWR_FREE;
         break;
     case CMD_START:
-        TestStart(msg.toInt());
+        for (int row = 0; row<Enable.size(); row++) {
+            if (Enable.at(row)->text() == "Y") {
+                Mode = PWR_TEST;
+                TestRow = row;
+                Judge = "OK";
+                SendCanCmdStart();
+                if(!WaitTimeOut(100)) {
+                    Judge = "NG";
+                    SendTestItemsAllError();
+                    break;
+                }
+                Mode = PWR_FREE;
+            }
+        }
+        Mode = PWR_FREE;
+        SendTestJudge();
         break;
     case CMD_STOP:
-        TestStop();
+        SendCanCmdStop();
+        Mode = PWR_FREE;
         break;
     case CMD_INIT:
-        DatInit();
-        TestInit();
-        TestConfig();
+        InitSetting();
+        InitTestItems();
+        SendTestItems();
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       CAN命令处理
-*******************************************************************************/
+
 void PagePwr::ExcuteCanCmd(QByteArray msg)
 {
-    if (!Testing)
+    if (Mode == PWR_FREE)
         return;
     TimeOut = 0;
+    qDebug()<<QTime::currentTime().toString()<<msg.toHex();
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        TestCheckOk(msg);
-    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        TestResult(msg);
+        ReadCanCmdStatus(msg);
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
+        ReadCanCmdResult(msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.16
- * brief:      更新显示
-*******************************************************************************/
-void PagePwr::TestInit()
+
+void PagePwr::InitTestItems()
 {
     Items.clear();
-    QStringList n;
     for (int row = 0; row<Enable.size(); row++) {
         QStringList s;
         QString G1 = Grade.at(qMin(row,Grade.size()))->text();
@@ -413,96 +326,104 @@ void PagePwr::TestInit()
         s.append(" ");
         Items.append(s.join("@"));
     }
+}
+
+void PagePwr::SendTestItems()
+{
+    QStringList n;
     for (int row = 0; row<Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
         }
     }
-
     emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       检测状态
-*******************************************************************************/
-void PagePwr::TestCheck()
+
+void PagePwr::SendTestItemsAllError()
+{
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s = QString(Items.at(row)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+}
+
+void PagePwr::SendCanCmdStatus()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
-    if (!WaitTestOver(100)) {
-        Testing = false;
-        QMessageBox::warning(this,tr("警告"),tr("功率板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PagePwr Error:Time out\n");
-    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新状态,求平均并清理测试结果
-*******************************************************************************/
-void PagePwr::TestCheckOk(QByteArray)
+
+void PagePwr::SendCanCmdStart()
 {
-    Testing = false;
-    if (!isCheckOk) {
-        emit SendMessage(ADDR,CMD_DEBUG,"Power check ok\n");
-        isCheckOk = true;
-    }
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       开始测试
-*******************************************************************************/
-void PagePwr::TestStart(quint8 pos)
-{
-    if (Testing)
-        return;
-    qDebug()<<pos;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    quint16 v = ui->BoxVolt->value()*10;
-    out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
-      <<quint8(Time/256)<<quint8(Time%256)<<quint8(v/256)<<quint8(v%256)
+    quint16 v = ui->BoxVolt->value();
+    quint16 t = TestTime.at(TestRow)->value()*10;
+
+    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1)
+      <<quint8(t/256)<<quint8(t%256)<<quint8(0x10+v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
-    Judge = "OK";
-    if(!WaitTestOver(100)) {
-        Testing = false;
-        Judge = "NG";
-        for (int row = 0; row<Enable.size(); row++) {
-            if (Enable.at(row)->text() == "Y") {
-                QStringList s = QString(Items.at(row)).split("@");
-                if (s.at(2) == " ")
-                    s[2] = "---";
-                if (s.at(3) == " ")
-                    s[3] = "NG";
-                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
-            }
-        }
-    }
+}
+
+void PagePwr::SendCanCmdStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
+    emit SendMessage(ADDR,CMD_CAN,msg);
+}
+
+void PagePwr::SendTestJudge()
+{
     QStringList s;
-    s.append("电感");
+    s.append("功率");
     s.append(FileInUse);
     s.append(Judge);
     emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新测试数据
-*******************************************************************************/
-void PagePwr::TestResult(QByteArray msg)
+
+void PagePwr::SendItemJudge()
+{
+    QString vvv = QString::number(Volt.last()/10,'f',1);
+    QString rrr = QString::number(Curr.last()/1000,'f',3);
+    QString ppp = QString::number(Power.last()/10,'f',1);
+    QString t = QString("%1A,%2W,%3V").arg(rrr).arg(ppp).arg(vvv);
+
+    QStringList s = QString(Items.at(TestRow)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = Judge;
+    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+}
+
+void PagePwr::ReadCanCmdStatus(QByteArray msg)
+{
+    if (quint8(msg.at(1)) != 0x00)
+        return;
+
+    if (Mode == PWR_INIT)
+        emit SendMessage(ADDR,CMD_DEBUG,"Power check ok\n");
+    if (Mode == PWR_TEST) {
+        SendItemJudge();
+        ClearResults();
+    }
+    Mode = PWR_FREE;
+}
+
+void PagePwr::ReadCanCmdResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
@@ -510,42 +431,44 @@ void PagePwr::TestResult(QByteArray msg)
     Volt.append(v);
     Curr.append(c);
     Power.append(p);
+    CalculateResult();
+    if (Judge == "NG") {
+        SendCanCmdStop();
+        SendItemJudge();
+        ClearResults();
+        Mode = PWR_FREE;
+    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       停止测试
-*******************************************************************************/
-void PagePwr::TestStop()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = false;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       配置
-*******************************************************************************/
-void PagePwr::TestConfig()
-{
 
+void PagePwr::CalculateResult()
+{
+    if (Volt.size()<5 || Curr.size()<5 || Power.size()<5)
+        return;
+    double vv = Volt.last()/10;
+    double rr = Curr.last()/1000;
+    double pp = Power.last()/10;
+
+    if (rr>CurrMax.at(TestRow)->value() ||
+            rr<CurrMin.at(TestRow)->value() ||
+            pp>PowerMax.at(TestRow)->value() ||
+            pp<PowerMin.at(TestRow)->value() ||
+            vv>CapMax.at(TestRow)->value() ||
+            vv<CapMin.at(TestRow)->value()) {
+        Judge = "NG";
+    }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.16
- * brief:      等待测试结束
-*******************************************************************************/
-bool PagePwr::WaitTestOver(quint16 t)
+
+void PagePwr::ClearResults()
+{
+    Volt.clear();
+    Curr.clear();
+    Power.clear();
+}
+
+bool PagePwr::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Testing) {
+    while (Mode != PWR_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -553,12 +476,7 @@ bool PagePwr::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       延时
-*******************************************************************************/
+
 void PagePwr::Delay(int ms)
 {
     QElapsedTimer t;
@@ -566,23 +484,14 @@ void PagePwr::Delay(int ms)
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新显示
-*******************************************************************************/
+
 void PagePwr::showEvent(QShowEvent *)
 {
-    DatInit();
+    InitSetting();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       退出保存
-*******************************************************************************/
+
 void PagePwr::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSetting();
 }
+/*********************************END OF FILE**********************************/

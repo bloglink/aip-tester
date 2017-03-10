@@ -1,7 +1,7 @@
 #ifndef PAGEPWR_H
 #define PAGEPWR_H
 
-
+#include <QTime>
 #include <cmath>
 #include <QDebug>
 #include <QWidget>
@@ -16,6 +16,12 @@
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
 #include "define.h"
+
+#define PWR_ROW 6
+
+#define PWR_FREE        0
+#define PWR_INIT        4
+#define PWR_TEST        1
 
 namespace Ui {
 class PagePwr;
@@ -35,31 +41,32 @@ private:
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
-    void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
+    void InitWindow(void);
+    void InitButton(void);
+    void ReadButton(int id);
+    void InitSetting(void);
+    void SaveSetting(void);
     void ItemClick(int r,int c);
-
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
-    void TestStart(quint8 pos);
-    void TestResult(QByteArray msg);
-    void TestStop(void);
-    void TestConfig(void);
-
-    bool WaitTestOver(quint16 t);
+    void InitTestItems(void);
+    void SendTestItems(void);
+    void SendTestItemsAllError(void);
+    void SendCanCmdStatus(void);
+    void SendCanCmdStart(void);
+    void SendCanCmdStop(void);
+    void SendTestJudge(void);
+    void SendItemJudge(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void CalculateResult(void);
+    void ClearResults(void);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
     quint16 TimeOut;
     quint16 Time;
     QStringList Items;
@@ -81,6 +88,8 @@ private:
     QList<QComboBox*> TestDir;
     QList<QDoubleSpinBox*> TestTime;
     QList<QTableWidgetItem*> Grade;
+    quint8 TestRow;
+    quint8 Mode;
 };
 
 #endif // PAGEPWR_H
