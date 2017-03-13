@@ -16,9 +16,9 @@ PageImp::PageImp(QWidget *parent) :
     ui(new Ui::PageImp)
 {
     ui->setupUi(this);
-    InitializesWindow();
-    InitializesButton();
-    InitializesSetting();
+    InitWindows();
+    InitButtons();
+    InitSettings();
 }
 
 PageImp::~PageImp()
@@ -26,7 +26,7 @@ PageImp::~PageImp()
     delete ui;
 }
 
-void PageImp::InitializesWindow()
+void PageImp::InitWindows()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
@@ -139,7 +139,7 @@ void PageImp::InitializesWindow()
     ImpMode = IMP_FREE;
 }
 
-void PageImp::InitializesButton()
+void PageImp::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSampleImp,Qt::Key_0);
@@ -157,9 +157,9 @@ void PageImp::BtnJudge(int id)
     switch (id) {
     case Qt::Key_0: //自动采样
         ImpMode = IMP_SAMPLE;
-        InitializesStation();
-        SendConfigCmd();
-        SendSampleAutoCmd();
+        InitStation();
+        SendCanCmdConfig();
+        SendCanCmdSampleAuto();
         AvrCount = 0;
         break;
     case Qt::Key_1:
@@ -170,40 +170,51 @@ void PageImp::BtnJudge(int id)
         break;
     case Qt::Key_3: //减频采样
         ImpMode = IMP_SAMPLE;
-        InitializesStation();
+        InitStation();
         if (Freq[ui->TabParams->currentRow()] != 0)
             Freq[ui->TabParams->currentRow()]--;
-        SendConfigCmd();
-        SendSampleCmd(ui->TabParams->currentRow());
+        SendCanCmdConfig();
+        SendCanCmdSample(ui->TabParams->currentRow());
         AvrCount = 0;
         break;
     case Qt::Key_4://定频采样
         ImpMode = IMP_SAMPLE;
-        InitializesStation();
-        SendConfigCmd();
-        SendSampleCmd(ui->TabParams->currentRow());
+        InitStation();
+        SendCanCmdConfig();
+        SendCanCmdSample(ui->TabParams->currentRow());
         AvrCount = 0;
         break;
     case Qt::Key_5://加频采样
         ImpMode = IMP_SAMPLE;
-        InitializesStation();
+        InitStation();
         if (Freq[ui->TabParams->currentRow()] != 14)
             Freq[ui->TabParams->currentRow()]++;
-        SendConfigCmd();
-        SendSampleCmd(ui->TabParams->currentRow());
+        SendCanCmdConfig();
+        SendCanCmdSample(ui->TabParams->currentRow());
         AvrCount = 0;
         break;
     case Qt::Key_6: //添加样品
         ImpMode = IMP_SAMPLE_ADD;
-        InitializesStation();
-        SendConfigCmd();
-        SendStartCmd(station);
+        InitStation();
+        SendCanCmdConfig();
+        SendCanCmdStart(station);
+        WaitTimeOut(1000);
+        CalculateAvarageWave();
+        break;
     default:
         break;
     }
 }
 
-void PageImp::InitializesSetting()
+void PageImp::InitStation()
+{
+    if (ui->BoxStation->currentIndex() == 0)
+        station = WIN_ID_OUT13;
+    if (ui->BoxStation->currentIndex() == 1)
+        station = WIN_ID_OUT14;
+}
+
+void PageImp::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -287,15 +298,7 @@ void PageImp::InitializesSetting()
     qDebug()<<QTime::currentTime().toString()<<"匝间数据OK";
 }
 
-void PageImp::InitializesStation()
-{
-    if (ui->BoxStation->currentIndex() == 0)
-        station = WIN_ID_OUT13;
-    if (ui->BoxStation->currentIndex() == 1)
-        station = WIN_ID_OUT14;
-}
-
-void PageImp::SaveSetting()
+void PageImp::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间保存";
     QStringList temp;
@@ -315,6 +318,10 @@ void PageImp::SaveSetting()
     for (int i=0; i<Volt.size(); i++)
         temp.append(Volt.at(i)->text());
     set->setValue("Volt",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<VoltTest.size(); i++)
+        temp.append(QString::number(VoltTest.at(i)));
+    set->setValue("VoltTest",(temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i<Time.size(); i++)
         temp.append(Time.at(i)->text());
@@ -357,8 +364,6 @@ void PageImp::SaveSetting()
     }
     qDebug()<<QTime::currentTime().toString()<<"匝间保存OK";
 }
-
-
 
 void PageImp::ItemClick(int r, int c)
 {
@@ -423,22 +428,29 @@ void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_CHECK:
         ImpMode = IMP_INIT;
-        SendStatusCmd();
+        SendCanCmdStatus();
         ImpMode = IMP_FREE;
         break;
     case CMD_START:
         ImpMode = IMP_TEST;
-        SendStartCmd(msg.toInt());
+        emit SendCommand(ADDR,CMD_WAVE_HIDE,NULL);
+        SendCanCmdStart(msg.toInt());
+        JudgeAll = "OK";
+        if(!WaitTimeOut(100)) {
+            JudgeAll = "NG";
+            SendTestItemsAllError();
+        }
+        SendTestJudge();
         ImpMode = IMP_FREE;
         break;
     case CMD_STOP:
-        SendStopCmd();
+        SendCanCmdStop();
         ImpMode = IMP_FREE;
         break;
     case CMD_INIT:
-        InitializesSetting();
-        InitializesItem();
-        SendConfigCmd();
+        InitSettings();
+        InitTestItems();
+        SendCanCmdConfig();
         break;
     case CMD_WAVE:
         SendWave(msg);
@@ -454,20 +466,20 @@ void PageImp::ExcuteCanCmd(int id,QByteArray msg)
         return;
     TimeOut = 0;
     if (id == CAN_ID_IMP_WAVE) {
-        ReadWave(msg);
+        ReadCanCmdWave(msg);
         return;
     }
     if (msg.size()==4 && (quint8)msg.at(0)==0x00)
-        ReadStatus(msg);
+        ReadCanCmdStatus(msg);
     if (msg.size()==7 && (quint8)msg.at(0)==0x02)
-        ReadSample(msg);
+        ReadCanCmdSample(msg);
     if (msg.size()==5 && (quint8)msg.at(0)==0x03)
-        ReadWaveStart(msg);
+        ReadCanCmdWaveStart(msg);
     if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff)
-        ReadWaveOk(msg);
+        ReadCanCmdWaveOk(msg);
 }
 
-void PageImp::InitializesItem()
+void PageImp::InitTestItems()
 {
     Items.clear();
     WaveNumber.clear();
@@ -501,7 +513,21 @@ void PageImp::InitializesItem()
     emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 
-void PageImp::SendStatusCmd()
+void PageImp::SendTestItemsAllError()
+{
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s = QString(Items.at(row)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+}
+
+void PageImp::SendCanCmdStatus()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -515,12 +541,9 @@ void PageImp::SendStatusCmd()
     }
 }
 
-void PageImp::ReadStatus(QByteArray)
-{
-    ImpMode = IMP_FREE;
-}
 
-void PageImp::SendSampleAutoCmd()
+
+void PageImp::SendCanCmdSampleAuto()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -535,7 +558,7 @@ void PageImp::SendSampleAutoCmd()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageImp::SendSampleCmd(quint16 t)
+void PageImp::SendCanCmdSample(quint16 t)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -546,12 +569,9 @@ void PageImp::SendSampleCmd(quint16 t)
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageImp::SendStartCmd(quint8 pos)
+void PageImp::SendCanCmdStart(quint8 pos)
 {
     station = pos;
-
-    emit SendCommand(ADDR,CMD_WAVE_HIDE,NULL);
-
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -563,8 +583,49 @@ void PageImp::SendStartCmd(quint8 pos)
     out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendCommand(ADDR,CMD_CAN,msg);
+}
 
-    WaitTestFinished();
+void PageImp::SendCanCmdStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x24)<<quint8(0x01)<<quint8(0x02);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageImp::SendCanCmdConfig()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    for (int row=0; row<Enable.size(); row++) {
+        int v = 0;
+        switch (ImpMode) {
+        case IMP_FREE:
+        case IMP_INIT:
+        case IMP_TEST:
+        case IMP_SAMPLE_ADD:
+        case IMP_SAMPLE_OTHER:
+            v = VoltTest.at(row);
+            break;
+        case IMP_SAMPLE:
+            v = Volt.at(row)->value();
+            break;
+        default:
+            break;
+        }
+        out<<quint16(0x24)<<quint8(0x08)<<quint8(0x03)<<quint8(row)
+          <<quint8(Terminal1.at(row)->text().toInt())
+         <<quint8(Terminal2.at(row)->text().toInt())
+        <<quint8(v/256)<<quint8(v%256)
+        <<quint8(CalculateGear(row))<<quint8(Freq.at(row));
+    }
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageImp::SendTestJudge()
+{
     QStringList s;
     s.append("匝间");
     s.append(FileInUse);
@@ -572,22 +633,11 @@ void PageImp::SendStartCmd(quint8 pos)
     emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
-void PageImp::WaitTestFinished()
+void PageImp::ReadCanCmdStatus(QByteArray msg)
 {
-    JudgeAll = "OK";
-    if(!WaitTimeOut(100)) {
-        JudgeAll = "NG";
-        for (int row = 0; row<Enable.size(); row++) {
-            if (Enable.at(row)->text() == "Y") {
-                QStringList s = QString(Items.at(row)).split("@");
-                if (s.at(2) == " ")
-                    s[2] = "---";
-                if (s.at(3) == " ")
-                    s[3] = "NG";
-                emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-            }
-        }
-    }
+    if (quint8(msg.at(1)) != 0x00)
+        return;
+    ImpMode = IMP_FREE;
 }
 
 void PageImp::CalculateResult(QByteArray )
@@ -658,14 +708,30 @@ void PageImp::CalculateResult(QByteArray )
     emit SendCommand(ADDR,CMD_ITEM,t.join("@").toUtf8());
 }
 
-void PageImp::ReadSample(QByteArray msg)
+void PageImp::CalculateAvarageWave()
+{
+    QByteArray w;
+    quint8 num = station - WIN_ID_OUT13;
+    QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
+    QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
+    AvrCount++;
+    for (int i=0; i<qMin(byte.size(),test.size()); i++)
+        w.append(quint8(test.at(i))+(quint8(test.at(i))-quint8(byte.at(i)))/AvrCount);
+    if (AvrCount == 1)
+        w = WaveImp.at(CurrentWave)->WaveByte;
+    WaveImp.at(CurrentWave)->WaveBytes[num] = w;
+    WaveImp.at(CurrentWave)->WaveByteShow(w);
+    ui->LabelWave->WaveByteShow(w);
+}
+
+void PageImp::ReadCanCmdSample(QByteArray msg)
 {
     quint8 num = quint8(msg.at(1));
     Freq[num] = quint8(msg.at(3));
     VoltTest[num] = quint16(msg.at(4)*256)+quint8(msg.at(5));
 }
 
-void PageImp::ReadWave(QByteArray msg)
+void PageImp::ReadCanCmdWave(QByteArray msg)
 {
     switch (ImpMode) {
     case IMP_FREE:
@@ -684,26 +750,15 @@ void PageImp::ReadWave(QByteArray msg)
     }
 }
 
-void PageImp::ReadWaveOk(QByteArray msg)
+void PageImp::ReadCanCmdWaveOk(QByteArray msg)
 {
     QByteArray w;
     quint8 num = station - WIN_ID_OUT13;
-    QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
-    QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
     switch (ImpMode) {
     case IMP_SAMPLE:
+    case IMP_SAMPLE_ADD:
     case IMP_SAMPLE_OTHER:
         w = WaveImp.at(CurrentWave)->WaveByte;
-        WaveImp.at(CurrentWave)->WaveBytes[num] = w;
-        WaveImp.at(CurrentWave)->WaveByteShow(w);
-        ui->LabelWave->WaveByteShow(w);
-        break;
-    case IMP_SAMPLE_ADD:
-        AvrCount++;
-        for (int i=0; i<qMin(byte.size(),test.size()); i++)
-            w.append(test.at(i)+(test.at(i)-byte.at(i))/AvrCount);
-        if (AvrCount == 1)
-            w = WaveImp.at(CurrentWave)->WaveByte;
         WaveImp.at(CurrentWave)->WaveBytes[num] = w;
         WaveImp.at(CurrentWave)->WaveByteShow(w);
         ui->LabelWave->WaveByteShow(w);
@@ -717,7 +772,7 @@ void PageImp::ReadWaveOk(QByteArray msg)
     }
 }
 
-void PageImp::ReadWaveStart(QByteArray msg)
+void PageImp::ReadCanCmdWaveStart(QByteArray msg)
 {
     CurrentWave = (quint8)msg.at(1);
     QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
@@ -761,42 +816,7 @@ void PageImp::SendWave(QByteArray msg)
     }
 }
 
-void PageImp::SendStopCmd()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x24)<<quint8(0x01)<<quint8(0x02);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
 
-void PageImp::SendConfigCmd()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    for (int row=0; row<Enable.size(); row++) {
-        int v = 0;
-        switch (ImpMode) {
-        case IMP_FREE:
-        case IMP_INIT:
-        case IMP_TEST:
-        case IMP_SAMPLE_OTHER:
-            v = VoltTest.at(row);
-            break;
-        case IMP_SAMPLE:
-            v = Volt.at(row)->value();
-        default:
-            break;
-        }
-        out<<quint16(0x24)<<quint8(0x08)<<quint8(0x03)<<quint8(row)
-          <<quint8(Terminal1.at(row)->text().toInt())
-         <<quint8(Terminal2.at(row)->text().toInt())
-        <<quint8(v/256)<<quint8(v%256)
-        <<quint8(CalculateGear(row))<<quint8(Freq.at(row));
-    }
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
 
 int PageImp::CalculateGear(int row)
 {
@@ -842,11 +862,11 @@ void PageImp::AutoChangeVolt()
 
 void PageImp::showEvent(QShowEvent *)
 {
-    InitializesSetting();
+    InitSettings();
 }
 
 void PageImp::hideEvent(QHideEvent *)
 {
-    SaveSetting();
+    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

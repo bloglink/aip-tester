@@ -43,36 +43,35 @@ signals:
 public:
     QList<Waveform *> WaveImp;
 private slots:
-    void InitializesWindow(void);
-    void InitializesButton(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void InitializesSetting(void);
-    void InitializesStation(void);
-    void SaveSetting(void);
-
-
+    void InitSettings(void);
+    void InitStation(void);
+    void SaveSettings(void);
     void ItemClick(int r, int c);
     void ItemChange(QString msg);
     void BlockClick(int x);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
-    void InitializesItem(void);
-    void SendStatusCmd(void);
-    void ReadStatus(QByteArray msg);
-    void SendSampleAutoCmd();
-    void SendSampleCmd(quint16 row);
-    void SendStartCmd(quint8 station);
-    void WaitTestFinished(void);
+    void InitTestItems(void);
+    void SendTestItemsAllError(void);
+    void SendCanCmdStatus(void);
+    void SendCanCmdSampleAuto();
+    void SendCanCmdSample(quint16 row);
+    void SendCanCmdStart(quint8 station);
+    void SendCanCmdStop(void);
+    void SendCanCmdConfig(void);
+    void SendTestJudge(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdSample(QByteArray msg);
+    void ReadCanCmdWave(QByteArray msg);
+    void ReadCanCmdWaveOk(QByteArray msg);
+    void ReadCanCmdWaveStart(QByteArray msg);
     void CalculateResult(QByteArray msg);
-    void ReadSample(QByteArray msg);
-    void ReadWave(QByteArray msg);
-    void ReadWaveOk(QByteArray msg);
-    void ReadWaveStart(QByteArray msg);
+    void CalculateAvarageWave(void);
     void SendWave(QByteArray msg);
-
-    void SendStopCmd(void);
-    void SendConfigCmd(void);
     int CalculateGear(int row);
 
     bool WaitTimeOut(quint16 t);
