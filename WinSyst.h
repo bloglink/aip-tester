@@ -32,13 +32,13 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void SetInit(void);
-    void SetSave(void);
+    void InitSettings(void);
+    void SaveSettings(void);
     void SetDateTime(void);
-    void Password(void);
+    void SetPassword(void);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void SendWinCmdStartMode(void);
     void WriteLog(QByteArray msg);

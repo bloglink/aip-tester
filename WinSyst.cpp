@@ -10,35 +10,23 @@
 /* Includes ------------------------------------------------------------------*/
 #include "WinSyst.h"
 #include "ui_WinSyst.h"
-/**
-  * @brief  Initializes
-  * @param  *parent:parent widget
-  * @retval None
-  */
+
 WinSyst::WinSyst(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WinSyst)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    SetInit();
+    InitWindows();
+    InitButtons();
+    InitSettings();
 }
-/**
-  * @brief  Destruct the window
-  * @param  None
-  * @retval None
-  */
+
 WinSyst::~WinSyst()
 {
     delete ui;
 }
-/**
-  * @brief  Initializes the window
-  * @param  None
-  * @retval None
-  */
-void WinSyst::WinInit()
+
+void WinSyst::InitWindows()
 {
     ui->BoxUser->setView(new QListView(this));
     ui->BoxMode->setView(new QListView(this));
@@ -49,12 +37,8 @@ void WinSyst::WinInit()
 
     dateTime = ui->EditTime->dateTime();
 }
-/**
-  * @brief  Initializes the buttons
-  * @param  None
-  * @retval None
-  */
-void WinSyst::BtnInit()
+
+void WinSyst::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnOk,Qt::Key_0);
@@ -67,11 +51,7 @@ void WinSyst::BtnInit()
     btnGroup->addButton(ui->BtnStatus,Qt::Key_6);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/**
-  * @brief  Button functions
-  * @param  id:button id
-  * @retval None
-  */
+
 void WinSyst::BtnJudge(int id)
 {
     switch (id) {
@@ -90,7 +70,7 @@ void WinSyst::BtnJudge(int id)
         ui->StackWinSyst->setCurrentIndex(2);
         break;
     case Qt::Key_3:
-        Password();
+        SetPassword();
         break;
     case Qt::Key_4:
         emit SendCommand(ADDR,CMD_JUMP,NULL);
@@ -105,12 +85,8 @@ void WinSyst::BtnJudge(int id)
         break;
     }
 }
-/**
-  * @brief  Initializes the data
-  * @param  None
-  * @retval None
-  */
-void WinSyst::SetInit()
+
+void WinSyst::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置";
 
@@ -136,12 +112,8 @@ void WinSyst::SetInit()
     }
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置OK";
 }
-/**
-  * @brief  Save the data
-  * @param  None
-  * @retval None
-  */
-void WinSyst::SetSave()
+
+void WinSyst::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置";
     QSettings *settings = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -154,36 +126,24 @@ void WinSyst::SetSave()
     settings->setValue("AddSeconds",dateTime.secsTo(QDateTime::currentDateTime()));
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置OK";
 }
-/**
-  * @brief  None
-  * @param  None
-  * @retval None
-  */
+
 void WinSyst::SetDateTime()
 {
     QString time = ui->EditTime->dateTime().toString("yyyy.MM.dd-hh:mm:ss");
     QProcess::execute(QString("date %1").arg(time));
     QProcess::execute(QString("hwclock -w"));
 }
-/**
-  * @brief  Judge and save the password
-  * @param  None
-  * @retval None
-  */
-void WinSyst::Password()
+
+void WinSyst::SetPassword()
 {
     QString old = ui->EditPwdOld->text();
     QString new1 = ui->EditPwdNew->text();
     QString new2 = ui->EditPwdNewR->text();
     if ( old == password && new1 == new2)
         password = new1;
-    SetSave();
+    SaveSettings();
 }
-/**
-  * @brief  Excute command
-  * @param  addr:target address;cmd:command to excute;msg:command param
-  * @retval None
-  */
+
 void WinSyst::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr!=ADDR && addr!=WIN_ID_SYS)
@@ -217,23 +177,15 @@ void WinSyst::WriteLog(QByteArray msg)
     out<<QDateTime::currentDateTime().toString("yyyyMMdd hh:mm ");
     out<<msg;
 }
-/**
-  * @brief  Initializes data when show
-  * @param  None
-  * @retval None
-  */
+
 void WinSyst::showEvent(QShowEvent *)
 {
-    SetInit();
+    InitSettings();
     ui->StackWinSyst->setCurrentIndex(1);
 }
-/**
-  * @brief  Save data when hide
-  * @param  None
-  * @retval None
-  */
+
 void WinSyst::hideEvent(QHideEvent *)
 {
-    SetSave();
+    SaveSettings();
 }
 /*********************************END OF FILE**********************************/
