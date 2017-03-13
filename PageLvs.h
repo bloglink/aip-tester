@@ -50,8 +50,8 @@ private slots:
     void SendTestItemsAllError();
     void SendCanCmdStart(void);
     void SendCanCmdStop(void);
-    void SendTestJudge(void);
     void SendItemJudge(void);
+    void SendTestJudge(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void CalculateResult(void);
@@ -62,8 +62,6 @@ private slots:
     virtual void hideEvent(QHideEvent *);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
     quint16 TimeOut;
     QStringList Items;
     QList<double> Volt;

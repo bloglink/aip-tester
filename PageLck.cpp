@@ -89,6 +89,7 @@ void PageLck::SaveSettings()
 
 void PageLck::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
+    return;
     if (addr != ADDR && addr != WIN_ID_LCK && addr != CAN_ID_PWR)
         return;
     switch (cmd) {
@@ -148,8 +149,6 @@ void PageLck::InitTestItems()
 
 void PageLck::ReadCanCmdStatus(QByteArray)
 {
-    Testing = false;
-
     if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty())
         return;
     double vv = 0;
@@ -277,9 +276,7 @@ void PageLck::TestSampleOver()
 
 void PageLck::SendCanCmdStart(quint8 pos)
 {
-    if (Testing)
-        return;
-    qDebug()<<pos;
+
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -290,9 +287,9 @@ void PageLck::SendCanCmdStart(quint8 pos)
       <<quint8(t/256)<<quint8(t%256)<<quint8(v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
     emit SendCommand(ADDR,CMD_CAN,msg);
-    Testing = true;
+
     if(!WaitTimeOut(100)) {
-        Testing = false;
+
         emit SendCommand(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");

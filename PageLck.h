@@ -57,8 +57,6 @@ private slots:
     virtual void hideEvent(QHideEvent *);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
     quint16 TimeOut;
     QStringList Items;
     QList<double> Volt;

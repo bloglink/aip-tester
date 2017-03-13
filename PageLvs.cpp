@@ -9,8 +9,6 @@ PageLvs::PageLvs(QWidget *parent) :
     InitWindows();
     InitButton();
     InitSettings();
-    Testing = false;
-    isCheckOk = false;
     Mode = LVS_FREE;
 }
 
@@ -86,8 +84,6 @@ void PageLvs::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_CAN:
         ExcuteCanCmd(msg);
         break;
-    case CMD_CHECK:
-        break;
     case CMD_START:
         Mode = LVS_TEST;
         Judge = "OK";
@@ -120,7 +116,7 @@ void PageLvs::ExcuteCanCmd(QByteArray msg)
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
 }
 
@@ -134,7 +130,7 @@ void PageLvs::InitTestItems()
     double M2 = ui->BoxCurrMax->value();
     double Q1 = ui->BoxPowerMin->value();
     double Q2 = ui->BoxPowerMax->value();
-    s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
+    s.append(QString("%1~%2A,%3~%4W").arg(M1).arg(M2).arg(Q1).arg(Q2));
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
@@ -175,17 +171,12 @@ void PageLvs::SendCanCmdStop()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageLvs::SendTestJudge()
-{
-    QStringList s;
-    s.append("低启");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
-}
-
 void PageLvs::SendItemJudge()
 {
+    if (Curr.isEmpty()) {
+        SendTestItemsAllError();
+        return;
+    }
     QString rrr = QString::number(Curr.last()/1000,'f',3);
     QString ppp = QString::number(Power.last()/10,'f',1);
     QString t = QString("%1A,%2W").arg(rrr).arg(ppp);
@@ -196,6 +187,15 @@ void PageLvs::SendItemJudge()
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+}
+
+void PageLvs::SendTestJudge()
+{
+    QStringList s;
+    s.append("低启");
+    s.append(FileInUse);
+    s.append(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
 void PageLvs::ReadCanCmdStatus(QByteArray msg)
