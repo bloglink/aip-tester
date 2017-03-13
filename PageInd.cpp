@@ -29,12 +29,12 @@ void PageInd::InitializesWindow()
     ui->TabParams->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabParam->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
-    ui->TabParam->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
-    ui->TabParam->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
-    ui->TabParam->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
-    ui->TabParam->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
-    ui->TabParam->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
+    ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
     input = new PageNum(this);
