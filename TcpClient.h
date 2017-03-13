@@ -28,7 +28,7 @@ public:
     explicit TcpClient(QObject *parent = 0);
 
 signals:
-    void SendMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray msg);
 private slots:
     void TcpInit(void);
     void TcpQuit(void);

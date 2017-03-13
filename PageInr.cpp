@@ -34,7 +34,7 @@ void PageInr::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -139,7 +139,7 @@ void PageInr::InitializesItem()
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
-    emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 
 void PageInr::SendStatusCmd()
@@ -148,17 +148,17 @@ void PageInr::SendStatusCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     if (!WaitTestOver(100)) {
         QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
     }
 }
 
 void PageInr::ReadStatus(QByteArray )
 {
     if (!isCheckOk) {
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PageInr OK\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr OK\n");
         isCheckOk = true;
     }
     if (Volt.isEmpty() || Res.isEmpty())
@@ -188,7 +188,7 @@ void PageInr::ReadStatus(QByteArray )
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
     Volt.clear();
     Res.clear();
@@ -201,25 +201,25 @@ void PageInr::SendStartCmd(quint8 pos)
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x04)<<quint8(0x00)
       <<quint8(pos)<<quint8(0x01);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Judge = "OK";
     if(!WaitTestOver(100)) {
         Judge = "NG";
-        emit SendMessage(ADDR,CMD_JUDGE,"NG");
+        emit SendCommand(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
     QStringList s;
     s.append("绝缘");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
 void PageInr::ReadResult(QByteArray msg)
@@ -236,7 +236,7 @@ void PageInr::SendStopCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PageInr::SendConfigCmd()
@@ -254,7 +254,7 @@ void PageInr::SendConfigCmd()
       <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
     out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x01)
       <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);//上限
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PageInr::SendAlarmCmd(quint8 port)
@@ -263,7 +263,7 @@ void PageInr::SendAlarmCmd(quint8 port)
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x02)<<quint8(0x09)<<quint8(port);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 bool PageInr::WaitTestOver(quint16 t)

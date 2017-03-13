@@ -129,7 +129,7 @@ void PageDcr::BtnJudge(int id)
             qDebug()<<"Offset time out";
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -386,7 +386,7 @@ void PageDcr::InitializesItems()
         Items.append(s.join("@"));
         n.append(Items.last());
     }
-    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 
 void PageDcr::SendStatusCmd()
@@ -398,12 +398,12 @@ void PageDcr::SendStatusCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x22)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = true;
     if (!WaitTestTimeOut(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PageDcr Error:Time out\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageDcr Error:Time out\n");
     }
     qDebug()<<QTime::currentTime().toString()<<"查询电阻状态OK";
 }
@@ -412,7 +412,7 @@ void PageDcr::ReadStatus(QByteArray msg)
 {
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PageDcr OK\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageDcr OK\n");
     }
     if (Testing)
         Testing = false;
@@ -421,7 +421,7 @@ void PageDcr::ReadStatus(QByteArray msg)
     double offset = ui->BoxOffset->value();
     double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
     QString t = QString(tr("温度:%1°C")).arg(temp);
-    emit SendMessage(ADDR,CMD_TEMP,t.toUtf8());
+    emit SendCommand(ADDR,CMD_TEMP,t.toUtf8());
 }
 
 void PageDcr::ReadOffset(QByteArray msg)
@@ -458,7 +458,7 @@ void PageDcr::SendStartCmd(quint8 pos)
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x01)<<quint8(0x00)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 /**
   * @brief  Wait for test finish or time out
@@ -479,7 +479,7 @@ void PageDcr::WaitTestFinished()
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+                emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
         if (ui->BoxUnbalance->value() != 0) {
@@ -488,7 +488,7 @@ void PageDcr::WaitTestFinished()
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
 }
@@ -499,7 +499,7 @@ void PageDcr::SendTestJudge()
     s.append("电阻");
     s.append(FileInUse);
     s.append(JudgeAll);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 
 }
 
@@ -546,7 +546,7 @@ void PageDcr::ReadResult(QByteArray msg)
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = JudgeItem;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
     CalculateBalance();
 }
@@ -602,7 +602,7 @@ void PageDcr::CalculateBalance()
             s[2] = u;
         if (s.at(3) == " ")
             s[3] = JudgeItem;
-        emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
     }
 }
 
@@ -614,7 +614,7 @@ void PageDcr::SendStopCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 
@@ -632,7 +632,7 @@ void PageDcr::SendConfigCmd()
             <<quint8(ui->BoxTime->value()*10);
         }
     }
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 int PageDcr::CalculateGear(int row)

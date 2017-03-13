@@ -54,7 +54,7 @@ void PageAcw::BtnJudge(int id)
     case Qt::Key_1:
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -181,7 +181,7 @@ void PageAcw::TestInit()
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
-    emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -234,7 +234,7 @@ void PageAcw::TestCheckOk(QByteArray )
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
     Volt.clear();
     Curr.clear();
@@ -256,27 +256,27 @@ void PageAcw::TestStart(quint8 pos)
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x05)<<quint8(0x00)
       <<quint8(pos)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
         Testing = false;
         Judge = "NG";
-        emit SendMessage(ADDR,CMD_JUDGE,"NG");
+        emit SendCommand(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
     QStringList s;
     s.append("交耐");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 /*******************************************************************************
  * version:     1.0
@@ -307,7 +307,7 @@ void PageAcw::TestStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 /*******************************************************************************
@@ -332,7 +332,7 @@ void PageAcw::TestConfig()
       <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
     out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x00)
       <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:    1.0

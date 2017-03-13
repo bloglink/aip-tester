@@ -35,7 +35,7 @@ void PageLvs::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -138,7 +138,7 @@ void PageLvs::InitTestItems()
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
-    emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 
 void PageLvs::SendTestItemsAllError()
@@ -149,7 +149,7 @@ void PageLvs::SendTestItemsAllError()
             s[2] = "---";
         if (s.at(3) == " ")
             s[3] = "NG";
-        emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
     }
 }
 
@@ -163,7 +163,7 @@ void PageLvs::SendCanCmdStart()
     out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
       <<quint8(t/256)<<quint8(t%256)<<quint8(0x10+v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PageLvs::SendCanCmdStop()
@@ -172,7 +172,7 @@ void PageLvs::SendCanCmdStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PageLvs::SendTestJudge()
@@ -181,7 +181,7 @@ void PageLvs::SendTestJudge()
     s.append("低启");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
 void PageLvs::SendItemJudge()
@@ -195,7 +195,7 @@ void PageLvs::SendItemJudge()
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = Judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 
 void PageLvs::ReadCanCmdStatus(QByteArray msg)

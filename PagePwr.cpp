@@ -106,7 +106,7 @@ void PagePwr::ReadButton(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -260,7 +260,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         SendCanCmdStatus();
         if (!WaitTimeOut(100)) {
             QMessageBox::warning(this,tr("警告"),tr("功率板异常"),QMessageBox::Ok);
-            emit SendMessage(ADDR,CMD_DEBUG,"Check PagePwr Error:Time out\n");
+            emit SendCommand(ADDR,CMD_DEBUG,"Check PagePwr Error:Time out\n");
         }
         Mode = PWR_FREE;
         break;
@@ -336,7 +336,7 @@ void PagePwr::SendTestItems()
             n.append(Items.at(row));
         }
     }
-    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 
 void PagePwr::SendTestItemsAllError()
@@ -348,7 +348,7 @@ void PagePwr::SendTestItemsAllError()
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
 }
@@ -359,7 +359,7 @@ void PagePwr::SendCanCmdStatus()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PagePwr::SendCanCmdStart()
@@ -373,7 +373,7 @@ void PagePwr::SendCanCmdStart()
     out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1)
       <<quint8(t/256)<<quint8(t%256)<<quint8(0x10+v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PagePwr::SendCanCmdStop()
@@ -382,7 +382,7 @@ void PagePwr::SendCanCmdStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PagePwr::SendTestJudge()
@@ -391,7 +391,7 @@ void PagePwr::SendTestJudge()
     s.append("功率");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
 void PagePwr::SendItemJudge()
@@ -406,7 +406,7 @@ void PagePwr::SendItemJudge()
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = Judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 
 void PagePwr::ReadCanCmdStatus(QByteArray msg)
@@ -415,7 +415,7 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
         return;
 
     if (Mode == PWR_INIT)
-        emit SendMessage(ADDR,CMD_DEBUG,"Power check ok\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Power check ok\n");
     if (Mode == PWR_TEST) {
         SendItemJudge();
         ClearResults();

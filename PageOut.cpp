@@ -68,12 +68,12 @@ void PageOut::ExcuteCanCmd(quint16 id,QByteArray msg)
         if (id == CAN_ID_13OUT && Pos == 0x13) {
             isStop = true;
             Testing = false;
-            emit SendMessage(ADDR,CMD_STOP,NULL);
+            emit SendCommand(ADDR,CMD_STOP,NULL);
         }
         if (id == CAN_ID_14OUT && Pos == 0x14) {
             isStop = true;
             Testing = false;
-            emit SendMessage(ADDR,CMD_STOP,NULL);
+            emit SendCommand(ADDR,CMD_STOP,NULL);
         }
     }
 }
@@ -110,11 +110,11 @@ void PageOut::TestCheck(quint16 pos)
     default:
         break;
     }
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),w,QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PageOut Error:Time out\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageOut Error:Time out\n");
     }
     qDebug()<<QTime::currentTime().toString()<<"查询输出状态OK";
 }
@@ -127,7 +127,7 @@ void PageOut::TestCheck(quint16 pos)
 void PageOut::TestStart()
 {
     Timer->stop();
-    emit SendMessage(ADDR,CMD_START,QString::number(Pos).toUtf8());
+    emit SendCommand(ADDR,CMD_START,QString::number(Pos).toUtf8());
 }
 /******************************************************************************
  * version:     1.0
@@ -144,7 +144,7 @@ void PageOut::TestConfig(QByteArray data)
     quint8 mode = quint8(data.at(0));
     out<<quint16(0x13)<<quint8(0x02)<<quint8(0x03)<<quint8(mode);
     out<<quint16(0x14)<<quint8(0x02)<<quint8(0x03)<<quint8(mode);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 /*******************************************************************************
  * version:    1.0

@@ -95,7 +95,7 @@ void PageMag::BtnJudge(int id)
     case Qt::Key_1:
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -320,7 +320,7 @@ void PageMag::InitializesItems()
         Items.append(s.join("@"));
         n.append(Items.last());
     }
-    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 
 void PageMag::SendStatusCmd()
@@ -338,11 +338,11 @@ void PageMag::ReadStatus(QByteArray )
     }
     if (Sampling) {
         Sampling = false;
-        emit SendMessage(ADDR,CMD_DEBUG,"MAG Sample ok\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"MAG Sample ok\n");
     }
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,CMD_DEBUG,"MAG check ok\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"MAG check ok\n");
     }
 }
 
@@ -364,7 +364,7 @@ void PageMag::SendSampleCmd()
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
       <<quint8(station)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Sampling = true;
 }
 
@@ -376,7 +376,7 @@ void PageMag::SendStartCmd(quint8 pos)
 
     station = pos;
 
-    emit SendMessage(ADDR,CMD_WAVE_HIDE,NULL);
+    emit SendCommand(ADDR,CMD_WAVE_HIDE,NULL);
 
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -388,7 +388,7 @@ void PageMag::SendStartCmd(quint8 pos)
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
       <<quint8(station)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestTimeOut(100)) {
@@ -401,7 +401,7 @@ void PageMag::SendStartCmd(quint8 pos)
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+                emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
         if (ui->BoxDir->currentIndex() != 0) {
@@ -410,14 +410,14 @@ void PageMag::SendStartCmd(quint8 pos)
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
     QStringList s;
     s.append("反嵌");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
 void PageMag::ReadResult(QByteArray msg)
@@ -453,7 +453,7 @@ void PageMag::ReadResult(QByteArray msg)
         s[2] = n;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 
 void PageMag::ReadWave(QByteArray msg)
@@ -480,8 +480,8 @@ void PageMag::ReadWaveOk(QByteArray )
         w = WaveMag.at(CurrentWave)->WaveTest;
         i = WaveMag.at(CurrentWave)->WaveItem;
         WaveMag.at(CurrentWave)->WaveTests[num] = w;
-        emit SendMessage(ADDR,CMD_WAVE_ITEM,i);
-        emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
+        emit SendCommand(ADDR,CMD_WAVE_ITEM,i);
+        emit SendCommand(ADDR,CMD_WAVE_BYTE,w);
     }
 }
 
@@ -497,9 +497,9 @@ void PageMag::SendWave(QByteArray msg)
     for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
         QByteArray w;
         w = WaveMag.at(WaveNumber.at(t+i))->WaveItem;
-        emit SendMessage(ADDR,CMD_WAVE_ITEM,w);
+        emit SendCommand(ADDR,CMD_WAVE_ITEM,w);
         w = WaveMag.at(WaveNumber.at(t+i))->WaveTest;
-        emit SendMessage(ADDR,CMD_WAVE_BYTE,w);
+        emit SendCommand(ADDR,CMD_WAVE_BYTE,w);
     }
 }
 
@@ -551,7 +551,7 @@ void PageMag::CalculateDir()
         s[2] = n;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 
 void PageMag::SendStopCmd()
@@ -562,7 +562,7 @@ void PageMag::SendStopCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 
@@ -579,7 +579,7 @@ void PageMag::SendConfigCmd()
             <<quint8(FreqL.at(row));
         }
     }
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 bool PageMag::WaitTestTimeOut(quint16 t)

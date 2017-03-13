@@ -39,7 +39,7 @@ private:
     Ui::PageImp *ui;
 
 signals:
-    void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 public:
     QList<Waveform *> WaveImp;
 private slots:

@@ -32,7 +32,7 @@ private:
     Ui::PageLck *ui;
 
 signals:
-    void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);

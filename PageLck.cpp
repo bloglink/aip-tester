@@ -38,7 +38,7 @@ void PageLck::BtnJudge(int id)
         Mode = LCK_FREE;
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -142,7 +142,7 @@ void PageLck::InitTestItems()
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
-    emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 
 
@@ -177,7 +177,7 @@ void PageLck::ReadCanCmdStatus(QByteArray)
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
     Volt.clear();
     Curr.clear();
@@ -197,7 +197,7 @@ void PageLck::TestSample(void)
     out<<quint16(0x27)<<quint8(0x05)<<quint8(0x03)
       <<quint8(ui->BoxGrade->value())<<quint8(ui->BoxTime->value()/10)
      <<quint8(int(ui->BoxVolt)/256)<<quint8(int(ui->BoxVolt)%256);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PageLck::TestSampleOver()
@@ -289,18 +289,18 @@ void PageLck::SendCanCmdStart(quint8 pos)
     out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(g)
       <<quint8(t/256)<<quint8(t%256)<<quint8(v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = true;
     if(!WaitTimeOut(100)) {
         Testing = false;
-        emit SendMessage(ADDR,CMD_JUDGE,"NG");
+        emit SendCommand(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
             QStringList s = QString(Items.at(i)).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
 }
@@ -321,7 +321,7 @@ void PageLck::SendCanCmdStop()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 bool PageLck::WaitTimeOut(quint16 t)

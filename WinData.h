@@ -26,7 +26,7 @@ public:
 private:
     Ui::WinData *ui;
 signals:
-    void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
     void WinInit(void);
     void BtnInit(void);

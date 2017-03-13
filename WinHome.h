@@ -54,7 +54,7 @@ private:
 signals:
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
-    void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
     void Init(void);
     void WinInit(void);

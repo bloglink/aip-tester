@@ -39,7 +39,7 @@ private:
     Ui::PagePwr *ui;
 
 signals:
-    void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
     void InitWindow(void);
     void InitButton(void);

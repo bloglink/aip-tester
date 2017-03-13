@@ -84,7 +84,7 @@ void WinHome::WinInitAll()
     WinBack *winBack = new WinBack(this);
     ui->desktop->addWidget(winBack);
     winBack->setObjectName("WinBack");
-    connect(winBack,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(winBack,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize WinBack OK\n");
 
@@ -92,9 +92,9 @@ void WinHome::WinInitAll()
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
     winSyst->setObjectName("WinSyst");
-    connect(winSyst,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(winSyst,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winSyst,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),winSyst,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize WinSyst OK\n");
 
@@ -102,7 +102,7 @@ void WinHome::WinInitAll()
     WinType *winType = new WinType(this);
     ui->desktop->addWidget(winType);
     winType->setObjectName("WinType");
-    connect(winType,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(winType,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize WinType OK\n");
 
@@ -110,7 +110,7 @@ void WinHome::WinInitAll()
     WinData *winData = new WinData(this);
     ui->desktop->addWidget(winData);
     winData->setObjectName("WinData");
-    connect(winData,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(winData,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize WinData OK\n");
 
@@ -118,9 +118,9 @@ void WinHome::WinInitAll()
     WinTest *winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
-    connect(winTest,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(winTest,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),winTest,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),winTest,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize WinTest OK\n");
 
@@ -128,9 +128,9 @@ void WinHome::WinInitAll()
     PageDcr *pageDcr = new PageDcr(this);
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
-    connect(pageDcr,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageDcr,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageDcr,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageDcr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageDcr OK\n");
 
@@ -138,9 +138,9 @@ void WinHome::WinInitAll()
     PageMag *pageMag = new PageMag(this);
     ui->desktop->addWidget(pageMag);
     pageMag->setObjectName("PageMag");
-    connect(pageMag,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageMag,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageMag,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageMag,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageMag OK\n");
 
@@ -148,9 +148,9 @@ void WinHome::WinInitAll()
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
-    connect(pageInr,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageInr,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInr,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageInr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageInr OK\n");
 
@@ -158,9 +158,9 @@ void WinHome::WinInitAll()
     PageAcw *pageAcw = new PageAcw(this);
     ui->desktop->addWidget(pageAcw);
     pageAcw->setObjectName("PageAcw");
-    connect(pageAcw,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageAcw,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageAcw,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageAcw,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageAcw OK\n");
 
@@ -168,9 +168,9 @@ void WinHome::WinInitAll()
     PageImp *pageImp = new PageImp(this);
     ui->desktop->addWidget(pageImp);
     pageImp->setObjectName("PageImp");
-    connect(pageImp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageImp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageImp,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageImp,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageImp OK\n");
 
@@ -178,9 +178,9 @@ void WinHome::WinInitAll()
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
-    connect(pageInd,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageInd,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageInd,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageInd,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageInd OK\n");
 
@@ -188,9 +188,9 @@ void WinHome::WinInitAll()
     PagePwr *pagePwr = new PagePwr(this);
     ui->desktop->addWidget(pagePwr);
     pagePwr->setObjectName("PagePwr");
-    connect(pagePwr,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pagePwr,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pagePwr,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pagePwr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PagePwr OK\n");
 
@@ -198,9 +198,9 @@ void WinHome::WinInitAll()
     PageLvs *pageLvs = new PageLvs(this);
     ui->desktop->addWidget(pageLvs);
     pageLvs->setObjectName("PageLvs");
-    connect(pageLvs,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageLvs,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageLvs,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageLvs,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageLvs OK\n");
 
@@ -208,9 +208,9 @@ void WinHome::WinInitAll()
     PageLck *pageLck = new PageLck(this);
     ui->desktop->addWidget(pageLck);
     pageLck->setObjectName("PageLck");
-    connect(pageLck,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageLck,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageLck,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageLck,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageLck OK\n");
 
@@ -218,9 +218,9 @@ void WinHome::WinInitAll()
     PageOut *pageOut = new PageOut(this);
     ui->desktop->addWidget(pageOut);
     pageOut->setObjectName("PageOut");
-    connect(pageOut,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(pageOut,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    connect(this,SIGNAL(SendMessage(quint16,quint16,QByteArray)),pageOut,
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageOut,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     TestText("Initialize PageOut OK\n");
 
@@ -347,7 +347,7 @@ void WinHome::TcpInit()
     tcp.moveToThread(thread_tcp);
     connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(TcpInit()));
     connect(thread_tcp,SIGNAL(finished()),&tcp,SLOT(TcpQuit()));
-    connect(&tcp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(&tcp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_tcp->start();
 }
@@ -358,7 +358,7 @@ void WinHome::UdpInit()
     udp.moveToThread(thread_udp);
     connect(thread_udp,SIGNAL(started()),&udp,SLOT(UdpInit()));
     connect(thread_udp,SIGNAL(finished()),&udp,SLOT(UdpQuit()));
-    connect(&udp,SIGNAL(SendMessage(quint16,quint16,QByteArray)),this,
+    connect(&udp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_udp->start();
 }
@@ -384,7 +384,7 @@ void WinHome::CanThread(QByteArray msg)
                 in >> dat;
                 cmd.append(dat);
             }
-            emit SendMessage(id,CMD_CAN,cmd);
+            emit SendCommand(id,CMD_CAN,cmd);
         }
     }
 }
@@ -418,13 +418,13 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_WAVE_TEST:
     case CMD_WAVE_ITEM:
     case CMD_WAVE_HIDE:
-        emit SendMessage(WIN_ID_TEST,cmd,msg);
+        emit SendCommand(WIN_ID_TEST,cmd,msg);
         break;
     case CMD_DEBUG:
         TestText(msg);
         break;
     case CMD_WAVE:
-        emit SendMessage(ADDR,CMD_WAVE,msg);
+        emit SendCommand(ADDR,CMD_WAVE,msg);
         break;
     case CMD_CAN:
         emit PutCanData(msg);
@@ -433,7 +433,7 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         TestStart(msg);
         break;
     case CMD_STOP:
-        emit SendMessage(ADDR,CMD_STOP,msg);
+        emit SendCommand(ADDR,CMD_STOP,msg);
         Testing = false;
         break;
     case CMD_NET:
@@ -471,15 +471,15 @@ void WinHome::TestInit()
     ItemToTest = settings_c->value("/GLOBAL/ProjToTest","1").toString().split(" ");
     PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
-    emit SendMessage(WIN_ID_OUT13,CMD_INIT,NULL);//设定启动方式
+    emit SendCommand(WIN_ID_OUT13,CMD_INIT,NULL);//设定启动方式
 
     if (ItemToTest.isEmpty())
         return;
 
     for (int i=0; i<ItemToTest.size(); i++) {
-        emit SendMessage(ItemToTest.at(i).toInt(),CMD_INIT,NULL);
+        emit SendCommand(ItemToTest.at(i).toInt(),CMD_INIT,NULL);
     }
-    emit SendMessage(WIN_ID_TEST,CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
+    emit SendCommand(WIN_ID_TEST,CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
@@ -502,11 +502,11 @@ void WinHome::TestCheck()
 
     QStringList t = (settings_g->value("ItemEnable","0 1 2 3 4 6").toString()).split(" ");
     for (int i=0; i<t.size(); i++) {
-        emit SendMessage(t.at(i).toInt(),CMD_CHECK,NULL);
+        emit SendCommand(t.at(i).toInt(),CMD_CHECK,NULL);
     }
     QStringList s = (settings_g->value("OutEnable","0").toString()).split(" ");
     for (int i=0; i<s.size(); i++) {
-        emit SendMessage(WIN_ID_OUT13,CMD_CHECK,s.at(i).toUtf8());
+        emit SendCommand(WIN_ID_OUT13,CMD_CHECK,s.at(i).toUtf8());
     }
     qDebug()<<QTime::currentTime().toString()<<"开机自检OK";
 
@@ -537,14 +537,14 @@ void WinHome::TestStart(QByteArray station)
 
     TestInit();
 
-    emit SendMessage(WIN_ID_TEST,CMD_START,station);
+    emit SendCommand(WIN_ID_TEST,CMD_START,station);
 
     QByteArray msg;
     msg.append(0x02 | 0x00);
-    emit SendMessage(ADDR,CMD_ALARM,msg);
+    emit SendCommand(ADDR,CMD_ALARM,msg);
 
     for (int i=0; i<ItemToTest.size(); i++) {
-        emit SendMessage(ItemToTest.at(i).toInt(),CMD_START,station);
+        emit SendCommand(ItemToTest.at(i).toInt(),CMD_START,station);
         if (!Testing)
             break;
     }
@@ -552,21 +552,21 @@ void WinHome::TestStart(QByteArray station)
     if (ItemJudge == "NG") {
         msg.clear();
         msg.append(0x08 | 0x01);
-        emit SendMessage(ADDR,CMD_ALARM,msg);
+        emit SendCommand(ADDR,CMD_ALARM,msg);
         Delay(500);
         msg.clear();
         msg.append(0x08 | 0x00);
-        emit SendMessage(ADDR,CMD_ALARM,msg);
+        emit SendCommand(ADDR,CMD_ALARM,msg);
     } else {
         msg.clear();
         msg.append(0x04 | 0x01);
-        emit SendMessage(ADDR,CMD_ALARM,msg);
+        emit SendCommand(ADDR,CMD_ALARM,msg);
         Delay(200);
         msg.clear();
         msg.append(0x04 | 0x00);
-        emit SendMessage(ADDR,CMD_ALARM,msg);
+        emit SendCommand(ADDR,CMD_ALARM,msg);
     }
-    emit SendMessage(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
+    emit SendCommand(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
     Testing = false;
 }
 /**
@@ -619,7 +619,7 @@ void WinHome::TestText(QByteArray msg)
         ui->Text->moveCursor(QTextCursor::EndOfBlock);
         Delay(1);
     }
-    emit SendMessage(ADDR,CMD_DEBUG,msg);
+    emit SendCommand(ADDR,CMD_DEBUG,msg);
 }
 /*******************************************************************************
  * version:    1.0

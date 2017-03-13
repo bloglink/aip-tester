@@ -31,7 +31,7 @@ void WinBack::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;

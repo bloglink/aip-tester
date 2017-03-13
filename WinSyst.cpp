@@ -77,14 +77,14 @@ void WinSyst::BtnJudge(int id)
     switch (id) {
     case Qt::Key_0:
         if (ui->EditPassword->text() == "aip9918")
-            emit SendMessage(ADDR,CMD_JUMP,"WinBack");
+            emit SendCommand(ADDR,CMD_JUMP,"WinBack");
         else if (ui->EditPassword->text() == password)
             ui->StackWinSyst->setCurrentIndex(0);
         else
-            emit SendMessage(ADDR,CMD_JUMP,NULL);
+            emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_2:
         ui->StackWinSyst->setCurrentIndex(2);
@@ -93,13 +93,13 @@ void WinSyst::BtnJudge(int id)
         Password();
         break;
     case Qt::Key_4:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_5:
         SetDateTime();
         break;
     case Qt::Key_6:
-        emit SendMessage(ADDR,CMD_STATUS,NULL);
+        emit SendCommand(ADDR,CMD_STATUS,NULL);
         break;
     default:
         break;

@@ -71,7 +71,7 @@ void TcpClient::TcpQuit()
 void TcpClient::Connected()
 {
     ExcuteCmd(quint16(ADDR),quint16(GUEST_LOGIN),NULL);
-    emit SendMessage(ADDR,CMD_NET,NULL);
+    emit SendCommand(ADDR,CMD_NET,NULL);
 }
 /******************************************************************************
   * version:    1.0
@@ -253,10 +253,10 @@ void TcpClient::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray data)
         PutBlock(ADDR,ADMIN_LOGIN,InitString.toUtf8());
         break;
     case ADMIN_LOGIN_ERROR:
-        emit SendMessage(addr,cmd,data);
+        emit SendCommand(addr,cmd,data);
         break;
     case ADMIN_LOGIN_SUCCESS:
-        emit SendMessage(addr,cmd,data);
+        emit SendCommand(addr,cmd,data);
         break;
     case GUEST_PUT_HEAD:
         PutFileHead(data);
@@ -283,10 +283,10 @@ void TcpClient::ExcuteCmd(quint16 addr, quint16 cmd, QByteArray data)
         Display(data);
         break;
     case ONLINE_DEVICES:
-        emit SendMessage(addr,cmd,data);
+        emit SendCommand(addr,cmd,data);
         break;
     case GUEST_DISPLAY:
-        emit SendMessage(addr,cmd,data);
+        emit SendCommand(addr,cmd,data);
         break;
     case HEART_BEAT:
         break;
@@ -339,7 +339,7 @@ void TcpClient::Error(QAbstractSocket::SocketError socketError)
 void TcpClient::Display(QByteArray msg)
 {
     if (TramsmitAddr != this->peerPort())
-        emit SendMessage(TramsmitAddr,GUEST_DISPLAY,msg);
+        emit SendCommand(TramsmitAddr,GUEST_DISPLAY,msg);
     else
-        emit SendMessage(ADDR,GUEST_DISPLAY,msg);
+        emit SendCommand(ADDR,GUEST_DISPLAY,msg);
 }

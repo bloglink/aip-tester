@@ -129,7 +129,7 @@ void PageInd::BtnJudge(int id)
             qDebug()<<"Offset time out";
         break;
     case Qt::Key_2:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -375,7 +375,7 @@ void PageInd::InitializesItem()
         Items.append(s.join("@"));
         n.append(Items.last());
     }
-    emit SendMessage(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 
 void PageInd::SendStatusCmd()
@@ -386,12 +386,12 @@ void PageInd::SendStatusCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = true;
     if (!WaitTestOver(100)) {
         Testing = false;
         QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
-        emit SendMessage(ADDR,CMD_DEBUG,"Check PageInd Error:Time out\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInd Error:Time out\n");
     }
 }
 
@@ -399,7 +399,7 @@ void PageInd::ReadStatus(QByteArray )
 {
     if (!isCheckOk) {
         isCheckOk = true;
-        emit SendMessage(ADDR,CMD_DEBUG,"INDL check ok\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"INDL check ok\n");
     }
     if (Testing)
         Testing = false;
@@ -419,7 +419,7 @@ void PageInd::SendStartCmd(quint8 pos)
     }
     out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = true;
     Judge = "OK";
     if(!WaitTestOver(100)) {
@@ -432,7 +432,7 @@ void PageInd::SendStartCmd(quint8 pos)
                     s[2] = "---";
                 if (s.at(3) == " ")
                     s[3] = "NG";
-                emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+                emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
             }
         }
         if (ui->BoxUnbalance->value() != 0) {
@@ -441,14 +441,14 @@ void PageInd::SendStartCmd(quint8 pos)
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
     QStringList s;
     s.append("电感");
     s.append(FileInUse);
     s.append(Judge);
-    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
 void PageInd::ReadResult(QByteArray msg)
@@ -500,7 +500,7 @@ void PageInd::ReadResult(QByteArray msg)
             s[2] = t;
         if (s.at(3) == " ")
             s[3] = judge;
-        emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 
         if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
             double sum = 0;
@@ -525,7 +525,7 @@ void PageInd::ReadResult(QByteArray msg)
                 s[2] = u;
             if (s.at(3) == " ")
                 s[3] = judge;
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
     }
 }
@@ -558,7 +558,7 @@ void PageInd::SendStopCmd()
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x26)<<quint8(0x01)<<quint8(0x02);
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
     Testing = false;
 }
 
@@ -576,7 +576,7 @@ void PageInd::SendConfigCmd()
             <<quint8(CalculateGear(i))<<quint8(CalculateMode(i));
         }
     }
-    emit SendMessage(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 int PageInd::CalculateGear(int row)

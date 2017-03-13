@@ -208,7 +208,7 @@ void WinType::judgeButton(int id)
         TypeQuery();
         break;
     case Qt::Key_4:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -402,25 +402,25 @@ void WinType::selectItemToTest(int row, int column)
         if (ui->TabProj->item(row,0)->text() == tr("清除"))
             ui->Other->setCurrentIndex(0);
         if (ui->TabProj->item(row,0)->text() == tr("电阻"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageDcr");
+            emit SendCommand(ADDR,CMD_JUMP,"PageDcr");
         if (ui->TabProj->item(row,0)->text() == tr("反嵌"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageMag");
+            emit SendCommand(ADDR,CMD_JUMP,"PageMag");
         if (ui->TabProj->item(row,0)->text() == tr("绝缘"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageInr");
+            emit SendCommand(ADDR,CMD_JUMP,"PageInr");
         if (ui->TabProj->item(row,0)->text() == tr("交耐"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageAcw");
+            emit SendCommand(ADDR,CMD_JUMP,"PageAcw");
         if (ui->TabProj->item(row,0)->text() == tr("直耐"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageDcw");
+            emit SendCommand(ADDR,CMD_JUMP,"PageDcw");
         if (ui->TabProj->item(row,0)->text() == tr("匝间"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageImp");
+            emit SendCommand(ADDR,CMD_JUMP,"PageImp");
         if (ui->TabProj->item(row,0)->text() == tr("电感"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageInd");
+            emit SendCommand(ADDR,CMD_JUMP,"PageInd");
         if (ui->TabProj->item(row,0)->text() == tr("功率"))
-            emit SendMessage(ADDR,CMD_JUMP,"PagePwr");
+            emit SendCommand(ADDR,CMD_JUMP,"PagePwr");
         if (ui->TabProj->item(row,0)->text() == tr("低启"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageLvs");
+            emit SendCommand(ADDR,CMD_JUMP,"PageLvs");
         if (ui->TabProj->item(row,0)->text() == tr("堵转"))
-            emit SendMessage(ADDR,CMD_JUMP,"PageLck");
+            emit SendCommand(ADDR,CMD_JUMP,"PageLck");
         return;
     }
     if (ui->TabTest->currentRow() == ui->TabTest->rowCount()-1) {

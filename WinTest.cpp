@@ -85,18 +85,18 @@ void WinTest::BtnJudge(int win)
 {
     switch (win) {
     case Qt::Key_0:
-        emit SendMessage(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
-        emit SendMessage(ADDR,CMD_JUMP,"WinType");
+        emit SendCommand(ADDR,CMD_JUMP,"WinType");
         break;
     case Qt::Key_3:
         if (ui->BtnCmdStart->text() == "单次测试") {
             ui->BtnCmdStart->setText("中断测试");
-            emit SendMessage(ADDR,CMD_START,QString::number(0x13).toUtf8());
+            emit SendCommand(ADDR,CMD_START,QString::number(0x13).toUtf8());
         } else {
             ui->BtnCmdStart->setText("单次测试");
-            emit SendMessage(ADDR,CMD_STOP,NULL);
+            emit SendCommand(ADDR,CMD_STOP,NULL);
         }
         break;
     default:
@@ -146,7 +146,7 @@ void WinTest::SetInit()
     }
 
     qDebug()<<QTime::currentTime().toString()<<"读取测试配置OK";
-    emit SendMessage(ADDR,CMD_INIT,NULL);
+    emit SendCommand(ADDR,CMD_INIT,NULL);
 }
 /**
   * @brief  Save settings
@@ -316,7 +316,7 @@ void WinTest::ItemClick(int r, int )
     QString t = ui->TabTest->item(r,0)->text();
     if (t.contains(tr("反嵌")) || t.contains(tr("匝间"))) {
         WaveClear();
-        emit SendMessage(ADDR,CMD_WAVE,t.toUtf8());
+        emit SendCommand(ADDR,CMD_WAVE,t.toUtf8());
     }
 }
 /**
