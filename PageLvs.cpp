@@ -6,45 +6,31 @@ PageLvs::PageLvs(QWidget *parent) :
     ui(new Ui::PageLvs)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
+    InitWindows();
+    InitButton();
+    InitSettings();
     Testing = false;
     isCheckOk = false;
+    Mode = LVS_FREE;
 }
 
 PageLvs::~PageLvs()
 {
     delete ui;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       初始化界面
-*******************************************************************************/
-void PageLvs::WinInit()
+
+void PageLvs::InitWindows()
 {
 
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       初始化按键
-*******************************************************************************/
-void PageLvs::BtnInit()
+
+void PageLvs::InitButton()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExit,Qt::Key_0);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       按键功能
-*******************************************************************************/
+
 void PageLvs::BtnJudge(int id)
 {
     switch (id) {
@@ -55,13 +41,8 @@ void PageLvs::BtnJudge(int id)
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       数据初始化
-*******************************************************************************/
-void PageLvs::DatInit()
+
+void PageLvs::InitSettings()
 {
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
@@ -84,13 +65,8 @@ void PageLvs::DatInit()
     }
 
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       数据保存
-*******************************************************************************/
-void PageLvs::DatSave()
+
+void PageLvs::SaveSettings()
 {
     QStringList temp;
     temp.append(QString::number(ui->BoxVolt->value()));
@@ -101,12 +77,7 @@ void PageLvs::DatSave()
     temp.append(QString::number(ui->BoxPowerMax->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       命令处理
-*******************************************************************************/
+
 void PageLvs::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR && addr != WIN_ID_LVS && addr != CAN_ID_PWR)
@@ -116,46 +87,44 @@ void PageLvs::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        TestCheck();
         break;
     case CMD_START:
-        TestStart(msg.toInt());
+        Mode = LVS_TEST;
+        Judge = "OK";
+        SendCanCmdStart();
+        if(!WaitTimeOut(100)) {
+            Judge = "NG";
+            SendTestItemsAllError();
+            break;
+        }
+        SendTestJudge();
+        Mode = LVS_FREE;
         break;
     case CMD_STOP:
-        TestStop();
+        SendCanCmdStop();
+        Mode = LVS_FREE;
         break;
     case CMD_INIT:
-        DatInit();
-        TestInit();
-        TestConfig();
+        InitSettings();
+        InitTestItems();
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       CAN命令处理
-*******************************************************************************/
+
 void PageLvs::ExcuteCanCmd(QByteArray msg)
 {
-    if (!Testing)
+    if (Mode == LVS_FREE)
         return;
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        TestCheckOk(msg);
+        ReadCanCmdStatus(msg);
     if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        TestResult(msg);
+        ReadCanCmdResult(msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.16
- * brief:      更新显示
-*******************************************************************************/
-void PageLvs::TestInit()
+
+void PageLvs::InitTestItems()
 {
     Items.clear();
     QStringList s;
@@ -171,100 +140,77 @@ void PageLvs::TestInit()
     Items.append(s.join("@"));
     emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       检测状态
-*******************************************************************************/
-void PageLvs::TestCheck()
-{
 
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新状态,求平均并清理测试结果
-*******************************************************************************/
-void PageLvs::TestCheckOk(QByteArray )
+void PageLvs::SendTestItemsAllError()
 {
-    Testing = false;
-
-    if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty())
-        return;
-    double vv = 0;
-    double rr = 0;
-    double pp = 0;
-    for (int i=0; i<Volt.size(); i++) {
-        vv += Volt.at(i);
-        rr += Curr.at(i);
-        pp += Power.at(i);
+    for (int i=0; i<Items.size(); i++) {
+        QStringList s = QString(Items.at(i)).split("@");
+        if (s.at(2) == " ")
+            s[2] = "---";
+        if (s.at(3) == " ")
+            s[3] = "NG";
+        emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
     }
-    vv /= Volt.size();
-    rr /= Curr.size();
-    pp /= Power.size();
-    if (abs(vv-ui->BoxVolt->value()) <5)
-        vv = ui->BoxVolt->value();
-    QString t = QString("%1V,%2mA,%3W").arg(vv).arg(rr/10).arg(pp);
-    QString judge = "OK";
-
-    if (rr/100>ui->BoxCurrMax->value() || rr/10<ui->BoxCurrMin->value() )
-        judge = "NG";
-    if (pp>ui->BoxPowerMax->value() || pp<ui->BoxPowerMin->value() )
-        judge = "NG";
-    QStringList s = QString(Items.at(0)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    if (s.at(3) == " ")
-        s[3] = judge;
-    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
-
-    Volt.clear();
-    Curr.clear();
-    Power.clear();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       开始测试
-*******************************************************************************/
-void PageLvs::TestStart(quint8 pos)
+
+void PageLvs::SendCanCmdStart()
 {
-    if (Testing)
-        return;
-    qDebug()<<pos;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 t = ui->BoxTime->value()*10;
-    quint16 v = ui->BoxVolt->value()*10;
+    quint16 v = ui->BoxVolt->value();
     out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
-      <<quint8(t/256)<<quint8(t%256)<<quint8(v/256)<<quint8(v%256)
+      <<quint8(t/256)<<quint8(t%256)<<quint8(0x10+v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
-    Testing = true;
-    if(!WaitTestOver(100)) {
-        Testing = false;
-        emit SendMessage(ADDR,CMD_JUDGE,"NG");
-        for (int i=0; i<Items.size(); i++) {
-            QStringList s = QString(Items.at(i)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
-        }
-    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新测试数据
-*******************************************************************************/
-void PageLvs::TestResult(QByteArray msg)
+
+void PageLvs::SendCanCmdStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
+    emit SendMessage(ADDR,CMD_CAN,msg);
+}
+
+void PageLvs::SendTestJudge()
+{
+    QStringList s;
+    s.append("低启");
+    s.append(FileInUse);
+    s.append(Judge);
+    emit SendMessage(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+}
+
+void PageLvs::SendItemJudge()
+{
+    QString rrr = QString::number(Curr.last()/1000,'f',3);
+    QString ppp = QString::number(Power.last()/10,'f',1);
+    QString t = QString("%1A,%2W").arg(rrr).arg(ppp);
+
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = Judge;
+    emit SendMessage(ADDR,CMD_ITEM,s.join("@").toUtf8());
+}
+
+void PageLvs::ReadCanCmdStatus(QByteArray msg)
+{
+    if (quint8(msg.at(1)) != 0x00)
+        return;
+
+    if (Mode == LVS_TEST) {
+        SendItemJudge();
+        ClearResults();
+    }
+    Mode = LVS_FREE;
+}
+
+void PageLvs::ReadCanCmdResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
@@ -272,37 +218,38 @@ void PageLvs::TestResult(QByteArray msg)
     Volt.append(v);
     Curr.append(c);
     Power.append(p);
+    CalculateResult();
+    if (Judge == "NG") {
+        SendCanCmdStop();
+        SendItemJudge();
+        ClearResults();
+        Mode = LVS_FREE;
+    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       停止测试
-*******************************************************************************/
-void PageLvs::TestStop()
-{
 
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       配置
-*******************************************************************************/
-void PageLvs::TestConfig()
+void PageLvs::CalculateResult()
 {
+    if (Volt.size()<5 || Curr.size()<5 || Power.size()<5)
+        return;
+    double rr = Curr.last()/1000;
+    double pp = Power.last()/10;
 
+    if (rr>ui->BoxCurrMax->value() || rr<ui->BoxCurrMin->value() ||
+            pp>ui->BoxPowerMax->value() || pp<ui->BoxPowerMin->value())
+        Judge = "NG";
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.16
- * brief:      等待测试结束
-*******************************************************************************/
-bool PageLvs::WaitTestOver(quint16 t)
+
+void PageLvs::ClearResults()
+{
+    Volt.clear();
+    Curr.clear();
+    Power.clear();
+}
+
+bool PageLvs::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Testing) {
+    while (Mode != LVS_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -310,12 +257,7 @@ bool PageLvs::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       延时
-*******************************************************************************/
+
 void PageLvs::Delay(int ms)
 {
     QElapsedTimer t;
@@ -323,23 +265,14 @@ void PageLvs::Delay(int ms)
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新显示
-*******************************************************************************/
+
 void PageLvs::showEvent(QShowEvent *)
 {
-    DatInit();
+    InitSettings();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       退出保存
-*******************************************************************************/
+
 void PageLvs::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSettings();
 }
+/*********************************END OF FILE**********************************/

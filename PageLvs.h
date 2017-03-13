@@ -16,6 +16,10 @@
 #include <QTableWidgetItem>
 #include "define.h"
 
+#define LVS_FREE        0
+#define LVS_INIT        4
+#define LVS_TEST        1
+
 namespace Ui {
 class PageLvs;
 }
@@ -34,23 +38,25 @@ private:
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitWindows(void);
+    void InitButton(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
+    void InitSettings(void);
+    void SaveSettings(void);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
-    void TestStart(quint8 pos);
-    void TestResult(QByteArray msg);
-    void TestStop(void);
-    void TestConfig(void);
-
-    bool WaitTestOver(quint16 t);
+    void InitTestItems(void);
+    void SendTestItemsAllError();
+    void SendCanCmdStart(void);
+    void SendCanCmdStop(void);
+    void SendTestJudge(void);
+    void SendItemJudge(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void CalculateResult(void);
+    void ClearResults(void);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
@@ -63,6 +69,10 @@ private:
     QList<double> Volt;
     QList<double> Curr;
     QList<double> Power;
+
+    quint8 Mode;
+    QString Judge;
+    QString FileInUse;
 };
 
 #endif // PAGELVS_H
