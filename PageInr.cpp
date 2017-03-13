@@ -6,11 +6,11 @@ PageInr::PageInr(QWidget *parent) :
     ui(new Ui::PageInr)
 {
     ui->setupUi(this);
-    InitializesWindow();
-    InitializesButton();
-    InitializesSetting();
-    Testing = false;
-    isCheckOk = false;
+    InitWindows();
+    InitButtons();
+    InitSettings();
+    Mode = INR_FREE;
+    TestTime = 0;
 }
 
 PageInr::~PageInr()
@@ -18,12 +18,12 @@ PageInr::~PageInr()
     delete ui;
 }
 
-void PageInr::InitializesWindow()
+void PageInr::InitWindows()
 {
     ui->BoxVoltage->setView(new QListView(this));
 }
 
-void PageInr::InitializesButton()
+void PageInr::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExitIr,Qt::Key_0);
@@ -41,7 +41,7 @@ void PageInr::BtnJudge(int id)
     }
 }
 
-void PageInr::InitializesSetting()
+void PageInr::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"绝缘数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -64,11 +64,10 @@ void PageInr::InitializesSetting()
         ui->BoxTime->setValue(temp.at(3).toInt());
         ui->BoxOffset->setValue(temp.at(4).toInt());
     }
-    Testing = false;
     qDebug()<<QTime::currentTime().toString()<<"绝缘数据OK";
 }
 
-void PageInr::SaveSetting()
+void PageInr::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"绝缘保存";
     QStringList temp;
@@ -90,26 +89,36 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        Testing = true;
-        SendStatusCmd();
-        Testing = false;
+        Mode = INR_INIT;
+        SendCanCmdStatus();
+        if (!WaitTimeOut(1000)) {
+            QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
+            emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
+        }
+        Mode = INR_FREE;
         break;
     case CMD_START:
-        Testing = true;
-        SendStartCmd(msg.toInt());
-        Testing = false;
+        Mode = INR_TEST;
+        Judge = "OK";
+        SendCanCmdStart(msg.toInt());
+        if(!WaitTimeOut(100)) {
+            Judge = "NG";
+            SendTestItemsAllError();
+        }
+        SendTestJudge();
+        Mode = INR_FREE;
         break;
     case CMD_STOP:
-        SendStopCmd();
-        Testing = false;
+        SendCanCmdStop();
+        Mode = INR_FREE;
         break;
     case CMD_INIT:
-        InitializesSetting();
-        InitializesItem();
-        SendConfigCmd();
+        InitSettings();
+        InitTestItems();
+        SendCanCmdConfig();
         break;
     case CMD_ALARM:
-        SendAlarmCmd(quint8(msg.at(0)));
+        SendCanCmdAlarm(quint8(msg.at(0)));
         break;
     default:
         break;
@@ -118,16 +127,16 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 
 void PageInr::ExcuteCanCmd(QByteArray msg)
 {
-    if (!Testing)
+    if (Mode == INR_FREE)
         return;
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        ReadStatus(msg);
+        ReadCanCmdStatus(msg);
     if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        ReadResult(msg);
+        ReadCanCmdResult(msg);
 }
 
-void PageInr::InitializesItem()
+void PageInr::InitTestItems()
 {
     Items.clear();
     QStringList s;
@@ -135,66 +144,35 @@ void PageInr::InitializesItem()
     QString M1 = ui->BoxMin->text();
     QString M2 = ui->BoxMax->text();
     s.append(QString(tr("绝缘")));
-    s.append(QString("%1V,%2~%3MΩ").arg(U1).arg(M1).arg(M2));
+    s.append(QString("%1V,%2~%3Mohm").arg(U1).arg(M1).arg(M2));
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
     emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 
-void PageInr::SendStatusCmd()
+void PageInr::SendTestItemsAllError()
+{
+    for (int i=0; i<Items.size(); i++) {
+        QStringList s = QString(Items.at(i)).split("@");
+        if (s.at(2) == " ")
+            s[2] = "---";
+        if (s.at(3) == " ")
+            s[3] = "NG";
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    }
+}
+
+void PageInr::SendCanCmdStatus()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
     emit SendCommand(ADDR,CMD_CAN,msg);
-    if (!WaitTestOver(100)) {
-        QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
-    }
 }
 
-void PageInr::ReadStatus(QByteArray )
-{
-    if (!isCheckOk) {
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr OK\n");
-        isCheckOk = true;
-    }
-    if (Volt.isEmpty() || Res.isEmpty())
-        return;
-    double vv = 0;
-    double rr = 0;
-    for (int i=0; i<Volt.size(); i++) {
-        vv += Volt.at(i);
-        rr += Res.at(i);
-    }
-    vv /= Volt.size();
-    rr /= Res.size();
-    if (abs(vv-ui->BoxVoltage->currentText().toInt()) <5)
-        vv = ui->BoxVoltage->currentText().toInt();
-    QString vvv = QString::number(vv,'f',0);
-    QString rrr = QString::number(rr/10,'f',1);
-    QString t = QString("%1V,%2MΩ").arg(vvv).arg(rrr);
-    QString judge = "OK";
-
-    if (rr/10>ui->BoxMax->value() || rr/10<ui->BoxMin->value()) {
-        Judge = "NG";
-        judge = "NG";
-    }
-
-    QStringList s = QString(Items.at(0)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    if (s.at(3) == " ")
-        s[3] = judge;
-    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-
-    Volt.clear();
-    Res.clear();
-}
-
-void PageInr::SendStartCmd(quint8 pos)
+void PageInr::SendCanCmdStart(quint8 pos)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -202,35 +180,9 @@ void PageInr::SendStartCmd(quint8 pos)
     out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x04)<<quint8(0x00)
       <<quint8(pos)<<quint8(0x01);
     emit SendCommand(ADDR,CMD_CAN,msg);
-    Judge = "OK";
-    if(!WaitTestOver(100)) {
-        Judge = "NG";
-        emit SendCommand(ADDR,CMD_JUDGE,"NG");
-        for (int i=0; i<Items.size(); i++) {
-            QStringList s = QString(Items.at(i)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-        }
-    }
-    QStringList s;
-    s.append("绝缘");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
 }
 
-void PageInr::ReadResult(QByteArray msg)
-{
-    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
-    Volt.append(v);
-    Res.append(tt);
-}
-
-void PageInr::SendStopCmd()
+void PageInr::SendCanCmdStop()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -239,7 +191,7 @@ void PageInr::SendStopCmd()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageInr::SendConfigCmd()
+void PageInr::SendCanCmdConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -257,7 +209,30 @@ void PageInr::SendConfigCmd()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageInr::SendAlarmCmd(quint8 port)
+void PageInr::SendItemJudge()
+{
+    QString vvv = QString::number(Volt.last(),'f',0);
+    QString rrr = QString::number(Res.last()/10,'f',1);
+    QString t = QString("%1V,%2Mohm").arg(vvv).arg(rrr);
+
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = Judge;
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+}
+
+void PageInr::SendTestJudge()
+{
+    QStringList s;
+    s.append("绝缘");
+    s.append(FileInUse);
+    s.append(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+}
+
+void PageInr::SendCanCmdAlarm(quint8 port)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -266,10 +241,49 @@ void PageInr::SendAlarmCmd(quint8 port)
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-bool PageInr::WaitTestOver(quint16 t)
+void PageInr::ReadCanCmdStatus(QByteArray )
+{
+    if (Mode == INR_INIT)
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr OK\n");
+    if (Mode == INR_TEST) {
+        SendItemJudge();
+        ClearResults();
+    }
+    Mode = INR_FREE;
+}
+
+void PageInr::ReadCanCmdResult(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    if (TestTime%2 == 0) {
+        Volt.append(v);
+        Res.append(tt);
+    }
+    if (TestTime%2 == 1 && quint8(msg.at(6)) == 0x00) {
+        Volt[TestTime/2] = (Volt[TestTime/2]+v)/2;
+        Res[TestTime/2] = (Res[TestTime/2]+tt)/2;
+    }
+    TestTime++;
+    if (quint8(msg.at(6)) != 0x00) {
+        Judge = "NG";
+        SendItemJudge();
+        ClearResults();
+        Mode = INR_FREE;
+    }
+}
+
+void PageInr::ClearResults()
+{
+    Volt.clear();
+    Res.clear();
+    TestTime = 0;
+}
+
+bool PageInr::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Testing) {
+    while (Mode != INR_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -288,11 +302,11 @@ void PageInr::Delay(int ms)
 
 void PageInr::showEvent(QShowEvent *)
 {
-    InitializesSetting();
+    InitSettings();
 }
 
 void PageInr::hideEvent(QHideEvent *)
 {
-    SaveSetting();
+    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

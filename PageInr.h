@@ -13,6 +13,11 @@
 #include <QDoubleSpinBox>
 #include "define.h"
 
+
+#define INR_FREE        0
+#define INR_INIT        4
+#define INR_TEST        1
+
 namespace Ui {
 class PageInr;
 }
@@ -31,24 +36,28 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void InitializesWindow(void);
-    void InitializesButton(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void InitializesSetting(void);
-    void SaveSetting(void);
+    void InitSettings(void);
+    void SaveSettings(void);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void InitializesItem(void);
-    void SendStatusCmd(void);
-    void ReadStatus(QByteArray msg);
-    void SendStartCmd(quint8 pos);
-    void ReadResult(QByteArray msg);
-    void SendStopCmd(void);
-    void SendConfigCmd(void);
-    void SendAlarmCmd(quint8 port);
+    void InitTestItems(void);
+    void SendTestItemsAllError(void);
+    void SendCanCmdStatus(void);
+    void SendCanCmdStart(quint8 pos);
+    void SendCanCmdStop(void);
+    void SendCanCmdConfig(void);
+    void SendItemJudge(void);
+    void SendTestJudge(void);
+    void SendCanCmdAlarm(quint8 port);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void ClearResults(void);
 
-    bool WaitTestOver(quint16 t);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
     virtual void showEvent(QShowEvent*);
@@ -56,14 +65,17 @@ private slots:
 
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
-    quint16 TimeOut;
+
     QList<double> Volt;
     QList<double> Res;
-    QStringList Items;
+
     QString Judge;
     QString FileInUse;
+    QStringList Items;
+
+    quint8 Mode;
+    quint16 TestTime;
+    quint16 TimeOut;
 };
 
 #endif // PAGEINR_H
