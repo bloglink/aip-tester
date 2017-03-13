@@ -11,6 +11,11 @@
 #include <QDoubleSpinBox>
 #include "define.h"
 
+#define LCK_FREE        0
+#define LCK_INIT        4
+#define LCK_TEST        1
+#define LCK_SAMPLE      2
+
 namespace Ui {
 class PageLck;
 }
@@ -29,25 +34,24 @@ private:
 signals:
     void SendMessage(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
+    void InitSettings(void);
+    void SaveSettings(void);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
+    void InitTestItems(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdSample(QByteArray msg);
     void TestSample(void);
     void TestSampleOver(void);
-    void TestStart(quint8 pos);
-    void TestResult(QByteArray msg);
-    void TestStop(void);
-    void TestConfig(void);
+    void SendCanCmdStart(quint8 pos);
+    void ReadCanCmdResult(QByteArray msg);
+    void SendCanCmdStop(void);
 
-    bool WaitTestOver(quint16 t);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
@@ -60,6 +64,8 @@ private:
     QList<double> Volt;
     QList<double> Curr;
     QList<double> Power;
+
+    quint8 Mode;
 };
 
 #endif // PAGELCK_H

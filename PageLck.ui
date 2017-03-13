@@ -14,6 +14,110 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
+   <item row="4" column="2">
+    <widget class="QDoubleSpinBox" name="BoxVoltMin">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <double>255.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="2">
+    <widget class="QDoubleSpinBox" name="BoxVoltMax">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <double>255.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="1">
+    <widget class="QLabel" name="label">
+     <property name="text">
+      <string>电压上限</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="8" rowspan="7">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>59</width>
+       <height>339</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="3">
+    <widget class="QLabel" name="label_4">
+     <property name="text">
+      <string>电流下限</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="5">
+    <widget class="QLabel" name="label_6">
+     <property name="text">
+      <string>功率下限</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="1">
+    <widget class="QLabel" name="label_2">
+     <property name="text">
+      <string>电压下限</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="5">
+    <widget class="QLabel" name="label_pwr">
+     <property name="text">
+      <string>功率:</string>
+     </property>
+    </widget>
+   </item>
    <item row="0" column="1" colspan="6">
     <spacer name="verticalSpacer">
      <property name="orientation">
@@ -27,18 +131,119 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="0" rowspan="6">
-    <spacer name="horizontalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
+   <item row="3" column="6">
+    <widget class="QDoubleSpinBox" name="BoxPowerMax">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="sizeHint" stdset="0">
+     <property name="minimumSize">
       <size>
-       <width>60</width>
-       <height>339</height>
+       <width>97</width>
+       <height>35</height>
       </size>
      </property>
-    </spacer>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>1</number>
+     </property>
+     <property name="minimum">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1275.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="5">
+    <widget class="QLabel" name="label_grade_9">
+     <property name="text">
+      <string>通道:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="5">
+    <widget class="QLabel" name="label_5">
+     <property name="text">
+      <string>功率上限</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="4">
+    <widget class="QDoubleSpinBox" name="BoxCurr">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="minimum">
+      <double>0.001000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>5.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="3">
+    <widget class="QLabel" name="label_3">
+     <property name="text">
+      <string>电流上限</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="2">
+    <widget class="QDoubleSpinBox" name="BoxFreq">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+    </widget>
    </item>
    <item row="1" column="1">
     <widget class="QLabel" name="label_grade_8">
@@ -47,8 +252,8 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
-    <widget class="QDoubleSpinBox" name="BoxVolt">
+   <item row="3" column="4">
+    <widget class="QDoubleSpinBox" name="BoxCurrMax">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -68,25 +273,45 @@
       <enum>QAbstractSpinBox::NoButtons</enum>
      </property>
      <property name="decimals">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="minimum">
-      <double>1.000000000000000</double>
+      <double>0.001000000000000</double>
      </property>
      <property name="maximum">
-      <double>255.000000000000000</double>
+      <double>5.000000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="1" column="3">
-    <widget class="QLabel" name="label_grade_10">
+   <item row="8" column="4">
+    <widget class="QPushButton" name="BtnSample">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>44</height>
+      </size>
+     </property>
      <property name="text">
-      <string>时间(ms)：</string>
+      <string>采样</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="4">
-    <widget class="QDoubleSpinBox" name="BoxTime">
+   <item row="6" column="3">
+    <widget class="QLabel" name="label_current">
+     <property name="text">
+      <string>电流:</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QLabel" name="label_cycle">
+     <property name="text">
+      <string>采样点</string>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="4">
+    <widget class="QDoubleSpinBox" name="BoxCurrMin">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -106,20 +331,44 @@
       <enum>QAbstractSpinBox::NoButtons</enum>
      </property>
      <property name="decimals">
-      <number>0</number>
+      <number>3</number>
      </property>
      <property name="minimum">
-      <double>10.000000000000000</double>
+      <double>0.001000000000000</double>
      </property>
      <property name="maximum">
-      <double>2000.000000000000000</double>
+      <double>5.000000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="1" column="5">
-    <widget class="QLabel" name="label_grade_9">
-     <property name="text">
-      <string>档位：</string>
+   <item row="4" column="6">
+    <widget class="QDoubleSpinBox" name="BoxPowerMin">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>1</number>
+     </property>
+     <property name="minimum">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1275.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -154,28 +403,157 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="8" rowspan="6">
-    <spacer name="horizontalSpacer">
+   <item row="2" column="2">
+    <widget class="QDoubleSpinBox" name="BoxTime">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>2</number>
+     </property>
+     <property name="minimum">
+      <double>0.000000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>2000.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1">
+    <widget class="QLabel" name="label_grade_10">
+     <property name="text">
+      <string>测试时间(s)：</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="6">
+    <widget class="QDoubleSpinBox" name="BoxPower">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::NoFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>1</number>
+     </property>
+     <property name="minimum">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="maximum">
+      <double>1275.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QLabel" name="label_7">
+     <property name="text">
+      <string>频率(Hz):</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QDoubleSpinBox" name="doubleSpinBox">
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="minimum">
+      <double>50.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>50.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="6">
+    <widget class="QPushButton" name="BtnExit">
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>44</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>返回</string>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" rowspan="7">
+    <spacer name="horizontalSpacer_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>59</width>
+       <width>60</width>
        <height>339</height>
       </size>
      </property>
     </spacer>
    </item>
-   <item row="2" column="1">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>电压上限</string>
+   <item row="9" column="1" colspan="6">
+    <spacer name="verticalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
      </property>
-    </widget>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>551</width>
+       <height>111</height>
+      </size>
+     </property>
+    </spacer>
    </item>
-   <item row="2" column="2">
-    <widget class="QDoubleSpinBox" name="BoxVoltMax">
+   <item row="1" column="2">
+    <widget class="QDoubleSpinBox" name="BoxVolt">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -197,199 +575,18 @@
      <property name="decimals">
       <number>0</number>
      </property>
-     <property name="maximum">
-      <double>255.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="3">
-    <widget class="QLabel" name="label_3">
-     <property name="text">
-      <string>电流上限</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="4">
-    <widget class="QDoubleSpinBox" name="BoxCurrMax">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
      <property name="minimum">
-      <double>0.001000000000000</double>
-     </property>
-     <property name="maximum">
-      <double>5.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="5">
-    <widget class="QLabel" name="label_5">
-     <property name="text">
-      <string>功率上限</string>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="6">
-    <widget class="QDoubleSpinBox" name="BoxPowerMax">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>1</number>
-     </property>
-     <property name="minimum">
-      <double>0.100000000000000</double>
-     </property>
-     <property name="maximum">
-      <double>1275.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="1">
-    <widget class="QLabel" name="label_2">
-     <property name="text">
-      <string>电压下限</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="2">
-    <widget class="QDoubleSpinBox" name="BoxVoltMin">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>0</number>
+      <double>1.000000000000000</double>
      </property>
      <property name="maximum">
       <double>255.000000000000000</double>
      </property>
-    </widget>
-   </item>
-   <item row="3" column="3">
-    <widget class="QLabel" name="label_4">
-     <property name="text">
-      <string>电流下限</string>
+     <property name="value">
+      <double>220.000000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="3" column="4">
-    <widget class="QDoubleSpinBox" name="BoxCurrMin">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="minimum">
-      <double>0.001000000000000</double>
-     </property>
-     <property name="maximum">
-      <double>5.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="5">
-    <widget class="QLabel" name="label_6">
-     <property name="text">
-      <string>功率下限</string>
-     </property>
-    </widget>
-   </item>
-   <item row="3" column="6">
-    <widget class="QDoubleSpinBox" name="BoxPowerMin">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>1</number>
-     </property>
-     <property name="minimum">
-      <double>0.100000000000000</double>
-     </property>
-     <property name="maximum">
-      <double>1275.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="4" column="1" colspan="6">
+   <item row="7" column="1" colspan="6">
     <widget class="QLabel" name="LabelWave">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -407,173 +604,6 @@
       <string>TextLabel</string>
      </property>
     </widget>
-   </item>
-   <item row="5" column="1">
-    <widget class="QLabel" name="label_cycle">
-     <property name="text">
-      <string>周期:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="2">
-    <widget class="QDoubleSpinBox" name="BoxFreq">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>0</number>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="3">
-    <widget class="QLabel" name="label_current">
-     <property name="text">
-      <string>电流:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="4">
-    <widget class="QDoubleSpinBox" name="BoxCurr">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>3</number>
-     </property>
-     <property name="minimum">
-      <double>0.001000000000000</double>
-     </property>
-     <property name="maximum">
-      <double>5.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="5">
-    <widget class="QLabel" name="label_pwr">
-     <property name="text">
-      <string>功率:</string>
-     </property>
-    </widget>
-   </item>
-   <item row="5" column="6">
-    <widget class="QDoubleSpinBox" name="BoxPower">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>1</number>
-     </property>
-     <property name="minimum">
-      <double>0.100000000000000</double>
-     </property>
-     <property name="maximum">
-      <double>1275.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1" colspan="2">
-    <widget class="QPushButton" name="BtnCollect">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>44</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>采集</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="3" colspan="2">
-    <widget class="QPushButton" name="BtnChange">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>44</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>更换电机</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="5" colspan="2">
-    <widget class="QPushButton" name="BtnFinish">
-     <property name="minimumSize">
-      <size>
-       <width>0</width>
-       <height>44</height>
-      </size>
-     </property>
-     <property name="text">
-      <string>采集完成</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="7">
-    <widget class="QPushButton" name="BtnExit">
-     <property name="text">
-      <string>返回</string>
-     </property>
-    </widget>
-   </item>
-   <item row="7" column="1" colspan="6">
-    <spacer name="verticalSpacer_2">
-     <property name="orientation">
-      <enum>Qt::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>551</width>
-       <height>111</height>
-      </size>
-     </property>
-    </spacer>
    </item>
   </layout>
  </widget>

@@ -6,46 +6,37 @@ PageLck::PageLck(QWidget *parent) :
     ui(new Ui::PageLck)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
+    InitWindows();
+    InitButtons();
+    InitSettings();
+    Mode = LCK_FREE;
 }
 
 PageLck::~PageLck()
 {
     delete ui;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       初始化界面
-*******************************************************************************/
-void PageLck::WinInit()
+
+void PageLck::InitWindows()
 {
 
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       初始化按键
-*******************************************************************************/
-void PageLck::BtnInit()
+
+void PageLck::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
+    btnGroup->addButton(ui->BtnSample,Qt::Key_0);
     btnGroup->addButton(ui->BtnExit,Qt::Key_2);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       按键功能
-*******************************************************************************/
+
 void PageLck::BtnJudge(int id)
 {
     switch (id) {
+    case Qt::Key_0:
+        Mode = LCK_SAMPLE;
+        Mode = LCK_FREE;
+        break;
     case Qt::Key_2:
         emit SendMessage(ADDR,CMD_JUMP,NULL);
         break;
@@ -53,13 +44,8 @@ void PageLck::BtnJudge(int id)
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       数据初始化
-*******************************************************************************/
-void PageLck::DatInit()
+
+void PageLck::InitSettings()
 {
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
@@ -71,8 +57,8 @@ void PageLck::DatInit()
     set->setIniCodec("GB18030");
     set->beginGroup("PageLck");
 
-    ui->BoxVolt->setValue(set->value("Voltage","1").toDouble());
-    ui->BoxTime->setValue(set->value("TimeUse","10").toDouble());
+    ui->BoxVolt->setValue(set->value("Voltage","220").toDouble());
+    ui->BoxTime->setValue(set->value("TimeUse","1").toDouble());
     ui->BoxGrade->setValue(set->value("Grade","1").toDouble());
     ui->BoxVoltMax->setValue(set->value("VoltMax","255").toDouble());
     ui->BoxVoltMin->setValue(set->value("VoltMin","1").toDouble());
@@ -84,13 +70,8 @@ void PageLck::DatInit()
     ui->BoxCurr->setValue(set->value("Current","0.001").toDouble());
     ui->BoxPower->setValue(set->value("Power","1").toDouble());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       数据保存
-*******************************************************************************/
-void PageLck::DatSave()
+
+void PageLck::SaveSettings()
 {
     set->setValue("Voltage",QString::number(ui->BoxVolt->value()));
     set->setValue("TimeUse",QString::number(ui->BoxTime->value()));
@@ -105,12 +86,7 @@ void PageLck::DatSave()
     set->setValue("Current",QString::number(ui->BoxCurr->value()));
     set->setValue("Power",QString::number(ui->BoxPower->value()));
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       命令处理
-*******************************************************************************/
+
 void PageLck::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR && addr != WIN_ID_LCK && addr != CAN_ID_PWR)
@@ -120,46 +96,38 @@ void PageLck::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        TestCheck();
         break;
     case CMD_START:
-        TestStart(msg.toInt());
+        SendCanCmdStart(msg.toInt());
         break;
     case CMD_STOP:
-        TestStop();
+        SendCanCmdStop();
         break;
     case CMD_INIT:
-        DatInit();
-        TestInit();
-        TestConfig();
+        InitSettings();
+        InitTestItems();
         break;
     default:
         break;
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       CAN命令处理
-*******************************************************************************/
+
 void PageLck::ExcuteCanCmd(QByteArray msg)
 {
-    if (!Testing)
+    if (Mode == LCK_FREE)
         return;
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
-        TestCheckOk(msg);
-    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
-        TestResult(msg);
+        ReadCanCmdStatus(msg);
+    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01) {
+        if (Mode == LCK_TEST)
+            ReadCanCmdResult(msg);
+        if (Mode == LCK_SAMPLE)
+            ReadCanCmdSample(msg);
+    }
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.16
- * brief:      更新显示
-*******************************************************************************/
-void PageLck::TestInit()
+
+void PageLck::InitTestItems()
 {
     Items.clear();
     QStringList s;
@@ -176,23 +144,9 @@ void PageLck::TestInit()
     Items.append(s.join("@"));
     emit SendMessage(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       检测状态
-*******************************************************************************/
-void PageLck::TestCheck()
-{
 
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新状态,求平均并清理测试结果
-*******************************************************************************/
-void PageLck::TestCheckOk(QByteArray)
+
+void PageLck::ReadCanCmdStatus(QByteArray)
 {
     Testing = false;
 
@@ -229,12 +183,12 @@ void PageLck::TestCheckOk(QByteArray)
     Curr.clear();
     Power.clear();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.28
- * brief:       定频采集一个波形
-*******************************************************************************/
+
+void PageLck::ReadCanCmdSample(QByteArray msg)
+{
+
+}
+
 void PageLck::TestSample(void)
 {
     QByteArray msg;
@@ -242,96 +196,86 @@ void PageLck::TestSample(void)
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x27)<<quint8(0x05)<<quint8(0x03)
       <<quint8(ui->BoxGrade->value())<<quint8(ui->BoxTime->value()/10)
-       <<quint8(int(ui->BoxVolt)/256)<<quint8(int(ui->BoxVolt)%256);
+     <<quint8(int(ui->BoxVolt)/256)<<quint8(int(ui->BoxVolt)%256);
     emit SendMessage(ADDR,CMD_CAN,msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       采样波形计算
-*******************************************************************************/
+
 void PageLck::TestSampleOver()
 {
-//    int i,k;
-//    int Trough,Trough_Point;  // 波谷
-//    int average_data=0,variance=0;
-//    int wave_avage = wave[0]->Block_Save_Point.size()/Collect_Cycle;
-//    pushButton_Count=0;
-//    ui->pushButton_3->setDisabled(true);
-//    Collect_pwr_one_cycle_average.clear();
-//    if(wave[0]->Block_Save_Point.size()!=0)   //  Collect_pwr_one_cycle_average 平均数
-//    {
-//        Trough=0;
-//        for(k=0;k<Collect_Cycle;k++)
-//        {
-//            average_data=0;
-//            variance=0;
-//            for(i=0;i<wave_avage;i++)
-//            {
-//                average_data += wave[0]->Block_Save_Point.at(i*Collect_Cycle+k).toInt();
-//            }
-//            average_data = average_data/wave_avage;   // 得到平均数
+    //    int i,k;
+    //    int Trough,Trough_Point;  // 波谷
+    //    int average_data=0,variance=0;
+    //    int wave_avage = wave[0]->Block_Save_Point.size()/Collect_Cycle;
+    //    pushButton_Count=0;
+    //    ui->pushButton_3->setDisabled(true);
+    //    Collect_pwr_one_cycle_average.clear();
+    //    if(wave[0]->Block_Save_Point.size()!=0)   //  Collect_pwr_one_cycle_average 平均数
+    //    {
+    //        Trough=0;
+    //        for(k=0;k<Collect_Cycle;k++)
+    //        {
+    //            average_data=0;
+    //            variance=0;
+    //            for(i=0;i<wave_avage;i++)
+    //            {
+    //                average_data += wave[0]->Block_Save_Point.at(i*Collect_Cycle+k).toInt();
+    //            }
+    //            average_data = average_data/wave_avage;   // 得到平均数
 
-//            for(i=0;i<wave_avage;i++) // 求取方差
-//            {
-//                variance += ((average_data-wave[0]->Block_Save_Point.at(i*Collect_Cycle+k).toInt()))*((average_data-wave[0]->Block_Save_Point.at(i*Collect_Cycle+k).toInt()));
-//            }
-//            variance = variance / wave_avage;
-//            Collect_pwr_one_cycle_average.append(QString::number(variance));
-//        }
-//        qDebug()<<"Collect_pwr_one_cycle_average"<<Collect_pwr_one_cycle_average;
-//        Collect_pwr_one_cycle_average.removeAt(Collect_pwr_one_cycle_average.size()-1);
-//        Collect_pwr_one_cycle_average.removeAt(1);
-//        Collect_pwr_one_cycle_average.removeAt(0);
-//        Trough = Collect_pwr_one_cycle_average.at(0).toInt();
-//        Trough_Point = 2;
+    //            for(i=0;i<wave_avage;i++) // 求取方差
+    //            {
+    //                variance += ((average_data-wave[0]->Block_Save_Point.at(i*Collect_Cycle+k).toInt()))*((average_data-wave[0]->Block_Save_Point.at(i*Collect_Cycle+k).toInt()));
+    //            }
+    //            variance = variance / wave_avage;
+    //            Collect_pwr_one_cycle_average.append(QString::number(variance));
+    //        }
+    //        qDebug()<<"Collect_pwr_one_cycle_average"<<Collect_pwr_one_cycle_average;
+    //        Collect_pwr_one_cycle_average.removeAt(Collect_pwr_one_cycle_average.size()-1);
+    //        Collect_pwr_one_cycle_average.removeAt(1);
+    //        Collect_pwr_one_cycle_average.removeAt(0);
+    //        Trough = Collect_pwr_one_cycle_average.at(0).toInt();
+    //        Trough_Point = 2;
 
 
-//        for(i=0;i<Collect_pwr_one_cycle_average.size()-1;i++) // 寻找测试点
-//        {
-//            if((Trough>Collect_pwr_one_cycle_average.at(i+1).toInt())&&(Trough>0))
-//            {
-//                Trough = Collect_pwr_one_cycle_average.at(i+1).toInt();
-//                Trough_Point = i+3;
-//            }
-//            else if(Trough<Collect_pwr_one_cycle_average.at(i+1).toInt())
-//            {
-//                break;
-//            }
-//            else if(Trough==0)
-//            {
-//                break;
-//            }
-//        }
-//        ui->label_cycle->setText(QString(tr("周期:"))+QString::number(Trough_Point+1));
+    //        for(i=0;i<Collect_pwr_one_cycle_average.size()-1;i++) // 寻找测试点
+    //        {
+    //            if((Trough>Collect_pwr_one_cycle_average.at(i+1).toInt())&&(Trough>0))
+    //            {
+    //                Trough = Collect_pwr_one_cycle_average.at(i+1).toInt();
+    //                Trough_Point = i+3;
+    //            }
+    //            else if(Trough<Collect_pwr_one_cycle_average.at(i+1).toInt())
+    //            {
+    //                break;
+    //            }
+    //            else if(Trough==0)
+    //            {
+    //                break;
+    //            }
+    //        }
+    //        ui->label_cycle->setText(QString(tr("周期:"))+QString::number(Trough_Point+1));
 
-//        double current_average=0;
-//        for(i=0;i<wave_avage;i++)
-//        {
-//            qDebug()<<"Collect_current_data.at(i*Collect_Cycle+Trough_Point).toInt()"<<Collect_current_data.at(i*Collect_Cycle+Trough_Point).toInt();
-//            current_average += Collect_current_data.at(i*Collect_Cycle+Trough_Point).toInt();
-//        }
-//        current_average = current_average/wave_avage;
-//        ui->label_current->setText(QString(tr("电流:"))+QString::number(current_average/1000,'f',3));
+    //        double current_average=0;
+    //        for(i=0;i<wave_avage;i++)
+    //        {
+    //            qDebug()<<"Collect_current_data.at(i*Collect_Cycle+Trough_Point).toInt()"<<Collect_current_data.at(i*Collect_Cycle+Trough_Point).toInt();
+    //            current_average += Collect_current_data.at(i*Collect_Cycle+Trough_Point).toInt();
+    //        }
+    //        current_average = current_average/wave_avage;
+    //        ui->label_current->setText(QString(tr("电流:"))+QString::number(current_average/1000,'f',3));
 
-//        double pwr_average=0; // 功率平均数
-//        for(i=0;i<wave_avage;i++)
-//        {
-//            qDebug()<<"Collect_pwr_data_copy.at(i*Collect_Cycle+Trough_Point).toInt()"<<Collect_pwr_data_copy.at(i*Collect_Cycle+Trough_Point).toInt();
-//            pwr_average += Collect_pwr_data_copy.at(i*Collect_Cycle+Trough_Point).toInt();
-//        }
-//        pwr_average = pwr_average/wave_avage;
-//        ui->label_pwr->setText(QString(tr("功率:"))+QString::number(pwr_average/10,'f',1));
-//    }
+    //        double pwr_average=0; // 功率平均数
+    //        for(i=0;i<wave_avage;i++)
+    //        {
+    //            qDebug()<<"Collect_pwr_data_copy.at(i*Collect_Cycle+Trough_Point).toInt()"<<Collect_pwr_data_copy.at(i*Collect_Cycle+Trough_Point).toInt();
+    //            pwr_average += Collect_pwr_data_copy.at(i*Collect_Cycle+Trough_Point).toInt();
+    //        }
+    //        pwr_average = pwr_average/wave_avage;
+    //        ui->label_pwr->setText(QString(tr("功率:"))+QString::number(pwr_average/10,'f',1));
+    //    }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       开始测试
-*******************************************************************************/
-void PageLck::TestStart(quint8 pos)
+
+void PageLck::SendCanCmdStart(quint8 pos)
 {
     if (Testing)
         return;
@@ -347,7 +291,7 @@ void PageLck::TestStart(quint8 pos)
      <<quint8(0x00)<<quint8(0x00);
     emit SendMessage(ADDR,CMD_CAN,msg);
     Testing = true;
-    if(!WaitTestOver(100)) {
+    if(!WaitTimeOut(100)) {
         Testing = false;
         emit SendMessage(ADDR,CMD_JUDGE,"NG");
         for (int i=0; i<Items.size(); i++) {
@@ -360,13 +304,8 @@ void PageLck::TestStart(quint8 pos)
         }
     }
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       更新测试数据
-*******************************************************************************/
-void PageLck::TestResult(QByteArray msg)
+
+void PageLck::ReadCanCmdResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
@@ -375,36 +314,20 @@ void PageLck::TestResult(QByteArray msg)
     Curr.append(c);
     Power.append(p);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       停止测试
-*******************************************************************************/
-void PageLck::TestStop()
-{
 
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       配置
-*******************************************************************************/
-void PageLck::TestConfig()
+void PageLck::SendCanCmdStop()
 {
-
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
+    emit SendMessage(ADDR,CMD_CAN,msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.16
- * brief:      等待测试结束
-*******************************************************************************/
-bool PageLck::WaitTestOver(quint16 t)
+
+bool PageLck::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Testing) {
+    while (Mode != LCK_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -412,12 +335,7 @@ bool PageLck::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       延时
-*******************************************************************************/
+
 void PageLck::Delay(int ms)
 {
     QElapsedTimer t;
@@ -425,23 +343,14 @@ void PageLck::Delay(int ms)
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       更新显示
-*******************************************************************************/
+
 void PageLck::showEvent(QShowEvent *)
 {
-    DatInit();
+    InitSettings();
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.20
- * brief:       退出保存
-*******************************************************************************/
+
 void PageLck::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSettings();
 }
+/*********************************END OF FILE**********************************/
