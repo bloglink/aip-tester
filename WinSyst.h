@@ -40,6 +40,7 @@ private slots:
     void SetDateTime(void);
     void Password(void);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void SendWinCmdStartMode(void);
     void WriteLog(QByteArray msg);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);

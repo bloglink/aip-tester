@@ -50,6 +50,7 @@
 #define CMD_NET         0x16    //网络已连接
 #define CMD_SQL         0x17    //数据库已连接
 
+#define WIN_ID_SYS      0x00
 #define WIN_ID_TEST     0x10    //测试界面
 #define WIN_ID_DCR      0x01    //电阻界面
 #define WIN_ID_MAG      0x02    //反嵌界面

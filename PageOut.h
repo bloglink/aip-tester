@@ -12,6 +12,10 @@
 #include <QElapsedTimer>
 #include "define.h"
 
+#define OUT_FREE        0
+#define OUT_INIT        4
+#define OUT_TEST        1
+
 namespace Ui {
 class PageOut;
 }
@@ -32,10 +36,13 @@ signals:
 private slots:
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
     void ExcuteCanCmd(quint16 id,QByteArray msg);
-    void TestCheck(quint16 pos);
-    void TestStart(void);
+    void SendCanCmdStatus(quint16 pos);
+    void SendWinCmdStart(void);
 
-    void TestConfig(QByteArray msg);
+    void SendCanCmdConfig(QByteArray msg);
+    void ReadCanCmdStatus(quint16 addr,QByteArray msg);
+    void ReadCanCmdStart(quint16 addr);
+    void ReadCanCmdStop(quint16 addr);
 
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
@@ -45,6 +52,7 @@ private:
     quint16 TimeOut;
     quint16 Pos;
     QTimer *Timer;
+    quint8 Mode;
 };
 
 #endif // PAGEOUT_H

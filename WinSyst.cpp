@@ -186,15 +186,25 @@ void WinSyst::Password()
   */
 void WinSyst::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr!=ADDR)
+    if (addr!=ADDR && addr!=WIN_ID_SYS)
         return;
     switch (cmd) {
     case CMD_DEBUG:
         WriteLog(msg);
         break;
+    case CMD_INIT:
+        SendWinCmdStartMode();
+        break;
     default:
         break;
     }
+}
+
+void WinSyst::SendWinCmdStartMode()
+{
+    QByteArray msg;
+    msg.append(quint8(ui->BoxMode->currentIndex()));
+    emit SendCommand(WIN_ID_OUT13,CMD_INIT,msg);
 }
 
 void WinSyst::WriteLog(QByteArray msg)

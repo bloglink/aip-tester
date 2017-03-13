@@ -395,6 +395,10 @@ void WinHome::CanThread(QByteArray msg)
   */
 void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
+    if (addr != ADDR) {
+        emit SendCommand(addr,cmd,msg);
+        return;
+    }
     switch (cmd) {
     case CMD_JUMP:
         WinJump(msg);
@@ -471,7 +475,7 @@ void WinHome::TestInit()
     ItemToTest = settings_c->value("/GLOBAL/ProjToTest","1").toString().split(" ");
     PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
 
-    emit SendCommand(WIN_ID_OUT13,CMD_INIT,NULL);//设定启动方式
+    emit SendCommand(WIN_ID_SYS,CMD_INIT,NULL);//设定启动方式
 
     if (ItemToTest.isEmpty())
         return;
