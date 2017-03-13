@@ -43,13 +43,15 @@ private slots:
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void InitTestItems(void);
+    void SendTestItemsAllError(void);
     void ReadCanCmdStatus(QByteArray msg);
-    void ReadCanCmdSample(QByteArray msg);
-    void TestSample(void);
-    void TestSampleOver(void);
-    void SendCanCmdStart(quint8 pos);
+    void SendCanCmdStart(void);
     void ReadCanCmdResult(QByteArray msg);
     void SendCanCmdStop(void);
+    void SendItemJudge(void);
+    void SendTestJudge(void);
+    void CalculateSample(void);
+    void ClearResults(void);
 
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
@@ -64,6 +66,8 @@ private:
     QList<double> Power;
 
     quint8 Mode;
+    QString Judge;
+    QString FileInUse;
 };
 
 #endif // PAGELCK_H
