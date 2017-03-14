@@ -321,7 +321,7 @@ void WinHome::InitTcp()
 {
     thread_tcp = new QThread(this);
     tcp.moveToThread(thread_tcp);
-    connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(InitTcp()));
+    connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(TcpInit()));
     connect(thread_tcp,SIGNAL(finished()),&tcp,SLOT(TcpQuit()));
     connect(&tcp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
@@ -332,7 +332,7 @@ void WinHome::InitUdp()
 {
     thread_udp = new QThread(this);
     udp.moveToThread(thread_udp);
-    connect(thread_udp,SIGNAL(started()),&udp,SLOT(InitUdp()));
+    connect(thread_udp,SIGNAL(started()),&udp,SLOT(UdpInit()));
     connect(thread_udp,SIGNAL(finished()),&udp,SLOT(UdpQuit()));
     connect(&udp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
