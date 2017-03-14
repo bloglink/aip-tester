@@ -22,6 +22,8 @@ private slots:
     void OpenSerial(void);
     void CloseSerial(void);
     void ReadSerial(void);
+    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void SendAlarm(QByteArray msg);
 private:
     QSerialPort *com;
     QTimer *timer;

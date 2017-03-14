@@ -347,6 +347,8 @@ void WinHome::InitSerial()
     connect(thread_all,SIGNAL(finished()),&serial,SLOT(CloseSerial()));
     connect(&serial,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),&serial,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_all->start();
 }
 

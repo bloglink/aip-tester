@@ -48,3 +48,26 @@ void SerialPort::ReadSerial()
         SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
 }
 
+void SerialPort::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR)
+        return;
+    switch (cmd) {
+    case CMD_ALARM:
+        SendAlarm(msg);
+        break;
+    }
+}
+
+void SerialPort::SendAlarm(QByteArray msg)
+{
+    if (!com->isOpen() || msg.isEmpty())
+        return;
+    if (msg.at(0) & 0x02)
+        com->write("LEDY");
+    if (msg.at(0) & 0x04)
+        com->write("LEDG");
+    if (msg.at(0) & 0x08)
+        com->write("LEDR");
+}
+
