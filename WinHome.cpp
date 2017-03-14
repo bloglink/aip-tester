@@ -10,19 +10,15 @@
 /* Includes ------------------------------------------------------------------*/
 #include "WinHome.h"
 #include "ui_WinHome.h"
-/**
-  * @brief  Initializes
-  * @param  parent:parent widget
-  * @retval None
-  */
+
 WinHome::WinHome(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WinHome)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
+    InitWindows();
+    InitButtons();
+    InitSettings();
 }
 /**
   * @brief  Destruct the window
@@ -47,19 +43,15 @@ WinHome::~WinHome()
 void WinHome::Init()
 {
     QTimer *timer = new QTimer(this);
-    CanInit();
-    SqlInit();
-    TcpInit();
-    UdpInit();
-    SerialInit();
-    timer->singleShot(50,this,SLOT(WinInitAll()));
+    InitCan();
+    InitSql();
+    InitTcp();
+    InitUdp();
+    InitSerial();
+    timer->singleShot(50,this,SLOT(InitWindowsAll()));
 }
-/**
-  * @brief  Initializes title version and style
-  * @param  None
-  * @retval None
-  */
-void WinHome::WinInit()
+
+void WinHome::InitWindows()
 {
     ui->titleVn->hide();
 
@@ -74,24 +66,20 @@ void WinHome::WinInit()
     Testing = false;
     isCheckOk = false;
 }
-/**
-  * @brief  Initializes all window used
-  * @param  None
-  * @retval None
-  */
-void WinHome::WinInitAll()
+
+void WinHome::InitWindowsAll()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口";
 
-    TestText("Initialize WinBack\n");
+    ShowLogMessage("Initialize WinBack\n");
     WinBack *winBack = new WinBack(this);
     ui->desktop->addWidget(winBack);
     winBack->setObjectName("WinBack");
     connect(winBack,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize WinBack OK\n");
+    ShowLogMessage("Initialize WinBack OK\n");
 
-    TestText("Initialize WinSyst\n");
+    ShowLogMessage("Initialize WinSyst\n");
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
     winSyst->setObjectName("WinSyst");
@@ -99,25 +87,25 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),winSyst,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize WinSyst OK\n");
+    ShowLogMessage("Initialize WinSyst OK\n");
 
-    TestText("Initialize WinType\n");
+    ShowLogMessage("Initialize WinType\n");
     WinType *winType = new WinType(this);
     ui->desktop->addWidget(winType);
     winType->setObjectName("WinType");
     connect(winType,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize WinType OK\n");
+    ShowLogMessage("Initialize WinType OK\n");
 
-    TestText("Initialize WinData\n");
+    ShowLogMessage("Initialize WinData\n");
     WinData *winData = new WinData(this);
     ui->desktop->addWidget(winData);
     winData->setObjectName("WinData");
     connect(winData,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize WinData OK\n");
+    ShowLogMessage("Initialize WinData OK\n");
 
-    TestText("Initialize WinTest\n");
+    ShowLogMessage("Initialize WinTest\n");
     WinTest *winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
@@ -125,9 +113,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),winTest,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize WinTest OK\n");
+    ShowLogMessage("Initialize WinTest OK\n");
 
-    TestText("Initialize PageDcr\n");
+    ShowLogMessage("Initialize PageDcr\n");
     PageDcr *pageDcr = new PageDcr(this);
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
@@ -135,9 +123,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageDcr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageDcr OK\n");
+    ShowLogMessage("Initialize PageDcr OK\n");
 
-    TestText("Initialize PageMag\n");
+    ShowLogMessage("Initialize PageMag\n");
     PageMag *pageMag = new PageMag(this);
     ui->desktop->addWidget(pageMag);
     pageMag->setObjectName("PageMag");
@@ -145,9 +133,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageMag,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageMag OK\n");
+    ShowLogMessage("Initialize PageMag OK\n");
 
-    TestText("Initialize PageInr\n");
+    ShowLogMessage("Initialize PageInr\n");
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
@@ -155,9 +143,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageInr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageInr OK\n");
+    ShowLogMessage("Initialize PageInr OK\n");
 
-    TestText("Initialize PageAcw\n");
+    ShowLogMessage("Initialize PageAcw\n");
     PageAcw *pageAcw = new PageAcw(this);
     ui->desktop->addWidget(pageAcw);
     pageAcw->setObjectName("PageAcw");
@@ -165,9 +153,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageAcw,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageAcw OK\n");
+    ShowLogMessage("Initialize PageAcw OK\n");
 
-    TestText("Initialize PageImp\n");
+    ShowLogMessage("Initialize PageImp\n");
     PageImp *pageImp = new PageImp(this);
     ui->desktop->addWidget(pageImp);
     pageImp->setObjectName("PageImp");
@@ -175,9 +163,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageImp,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageImp OK\n");
+    ShowLogMessage("Initialize PageImp OK\n");
 
-    TestText("Initialize PageInd\n");
+    ShowLogMessage("Initialize PageInd\n");
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
@@ -185,9 +173,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageInd,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageInd OK\n");
+    ShowLogMessage("Initialize PageInd OK\n");
 
-    TestText("Initialize PagePwr\n");
+    ShowLogMessage("Initialize PagePwr\n");
     PagePwr *pagePwr = new PagePwr(this);
     ui->desktop->addWidget(pagePwr);
     pagePwr->setObjectName("PagePwr");
@@ -195,9 +183,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pagePwr,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PagePwr OK\n");
+    ShowLogMessage("Initialize PagePwr OK\n");
 
-    TestText("Initialize PageLvs\n");
+    ShowLogMessage("Initialize PageLvs\n");
     PageLvs *pageLvs = new PageLvs(this);
     ui->desktop->addWidget(pageLvs);
     pageLvs->setObjectName("PageLvs");
@@ -205,9 +193,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageLvs,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageLvs OK\n");
+    ShowLogMessage("Initialize PageLvs OK\n");
 
-    TestText("Initialize PageLck\n");
+    ShowLogMessage("Initialize PageLck\n");
     PageLck *pageLck = new PageLck(this);
     ui->desktop->addWidget(pageLck);
     pageLck->setObjectName("PageLck");
@@ -215,9 +203,9 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageLck,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageLck OK\n");
+    ShowLogMessage("Initialize PageLck OK\n");
 
-    TestText("Initialize PageOut\n");
+    ShowLogMessage("Initialize PageOut\n");
     PageOut *pageOut = new PageOut(this);
     ui->desktop->addWidget(pageOut);
     pageOut->setObjectName("PageOut");
@@ -225,19 +213,15 @@ void WinHome::WinInitAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),pageOut,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    TestText("Initialize PageOut OK\n");
+    ShowLogMessage("Initialize PageOut OK\n");
 
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
-    TestCheck();
+    ReadCanStatus();
 
 }
-/**
-  * @brief  Jump to another window
-  * @param  msg:window name
-  * @retval None
-  */
-void WinHome::WinJump(QByteArray win)
+
+void WinHome::JumpToWindow(QByteArray win)
 {
     int WinCurrent = ui->desktop->currentIndex();
     if (win.isNull()) { //空代表返回
@@ -256,12 +240,8 @@ void WinHome::WinJump(QByteArray win)
         previous_window.removeFirst();
     }
 }
-/**
-  * @brief  Initializes the buttons
-  * @param  None
-  * @retval None
-  */
-void WinHome::BtnInit()
+
+void WinHome::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->btnSyst,Qt::Key_1);
@@ -270,67 +250,63 @@ void WinHome::BtnInit()
     btnGroup->addButton(ui->btnTest,Qt::Key_4);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
-/**
-  * @brief  Button functions
-  * @param  id:button id
-  * @retval None
-  */
+
 void WinHome::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_1:
-        WinJump("WinSyst");
+        JumpToWindow("WinSyst");
         break;
     case Qt::Key_2:
-        WinJump("WinType");
+        JumpToWindow("WinType");
         break;
     case Qt::Key_3:
-        WinJump("WinData");
+        JumpToWindow("WinData");
         break;
     case Qt::Key_4:
-        WinJump("WinTest");
+        JumpToWindow("WinTest");
         break;
     case Qt::Key_5:
         QApplication::closeAllWindows();
         break;
     }
 }
-/**
-  * @brief  Initializes data
-  * @param  None
-  * @retval None
-  */
-void WinHome::DatInit()
+
+void WinHome::InitSettings()
 {
-    QString v = "V-2.1.0.2";
-    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
-    global->setIniCodec("GB18030");
-    global->beginGroup("GLOBAL");
-    global->setValue("Version",v);
+    QString v = "V-2.1.0.160314";
+    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    g_ini->setIniCodec("GB18030");
+    g_ini->beginGroup("GLOBAL");
+    g_ini->setValue("Version",v);
     this->setWindowTitle(QString("电机综合测试仪%1").arg(v));
     ui->titleVn->setText(v);
+    TimeNG = g_ini->value("TimeNG","0.2").toDouble()*1000;
+    TimeOK = g_ini->value("TimeOK","0.1").toDouble()*1000;
+
+    FileInUse = g_ini->value("FileInUse",INI_DEFAULT).toString();
+    FileInUse.remove(".ini");
+    //当前配置
+    QString n = QString("./config/%1.ini").arg(FileInUse);
+    QSettings *c_ini = new QSettings(n,QSettings::IniFormat);
+    c_ini->setIniCodec("GB18030");
+
+    ItemToTest = c_ini->value("/GLOBAL/ProjToTest","1").toString().split(" ");
+    PauseMode = c_ini->value("/GLOBAL/TestNG","1").toInt();
 }
-/**
-  * @brief  Initializes can thread
-  * @param  None
-  * @retval None
-  */
-void WinHome::CanInit()
+
+void WinHome::InitCan()
 {
     thread_can = new QThread(this);
     can.moveToThread(thread_can);
     connect(thread_can,SIGNAL(started()),&can,SLOT(DeviceOpen()));
     connect(thread_can,SIGNAL(finished()),&can,SLOT(DeviceQuit()));
     connect(this,SIGNAL(PutCanData(QByteArray)),&can,SLOT(WriteAll(QByteArray)));
-    connect(&can,SIGNAL(GetCanData(QByteArray)),this,SLOT(CanThread(QByteArray)));
+    connect(&can,SIGNAL(GetCanData(QByteArray)),this,SLOT(ReadCanCmd(QByteArray)));
     thread_can->start();
 }
-/**
-  * @brief  Initializes sql thread
-  * @param  None
-  * @retval None
-  */
-void WinHome::SqlInit()
+
+void WinHome::InitSql()
 {
     thread_sql = new QThread(this);
     sql.moveToThread(thread_sql);
@@ -339,34 +315,30 @@ void WinHome::SqlInit()
     connect(this,SIGNAL(WriteSql(QByteArray)),&sql,SLOT(Write(QByteArray)));
     thread_sql->start();
 }
-/**
-  * @brief  Initializes tcp thread
-  * @param  None
-  * @retval None
-  */
-void WinHome::TcpInit()
+
+void WinHome::InitTcp()
 {
     thread_tcp = new QThread(this);
     tcp.moveToThread(thread_tcp);
-    connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(TcpInit()));
+    connect(thread_tcp,SIGNAL(started()),&tcp,SLOT(InitTcp()));
     connect(thread_tcp,SIGNAL(finished()),&tcp,SLOT(TcpQuit()));
     connect(&tcp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_tcp->start();
 }
 
-void WinHome::UdpInit()
+void WinHome::InitUdp()
 {
     thread_udp = new QThread(this);
     udp.moveToThread(thread_udp);
-    connect(thread_udp,SIGNAL(started()),&udp,SLOT(UdpInit()));
+    connect(thread_udp,SIGNAL(started()),&udp,SLOT(InitUdp()));
     connect(thread_udp,SIGNAL(finished()),&udp,SLOT(UdpQuit()));
     connect(&udp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_udp->start();
 }
 
-void WinHome::SerialInit()
+void WinHome::InitSerial()
 {
     thread_all = new QThread(this);
     serial.moveToThread(thread_all);
@@ -376,12 +348,8 @@ void WinHome::SerialInit()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_all->start();
 }
-/**
-  * @brief  Can data read
-  * @param  msg:can data
-  * @retval None
-  */
-void WinHome::CanThread(QByteArray msg)
+
+void WinHome::ReadCanCmd(QByteArray msg)
 {
     if (!msg.isEmpty()) {
         quint16 id;
@@ -402,11 +370,7 @@ void WinHome::CanThread(QByteArray msg)
         }
     }
 }
-/**
-  * @brief  Excute command
-  * @param  addr:target address;cmd:command to excute;msg:command param
-  * @retval None
-  */
+
 void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR) {
@@ -415,19 +379,19 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     }
     switch (cmd) {
     case CMD_JUMP:
-        WinJump(msg);
+        JumpToWindow(msg);
         break;
     case CMD_INIT:
-        TestInit();
+        InitTest();
         break;
     case CMD_STATUS:
-        TestCheck();
+        ReadCanStatus();
         break;
     case CMD_INIT_ITEM:
         Items.append(QString(msg).split("\n"));
         break;
     case CMD_JUDGE:
-        TestSaveJudge(msg);
+        SaveItemJudge(msg);
         break;
     case CMD_ITEM:
         emit WriteSql(msg);
@@ -439,7 +403,7 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         emit SendCommand(WIN_ID_TEST,cmd,msg);
         break;
     case CMD_DEBUG:
-        TestText(msg);
+        ShowLogMessage(msg);
         break;
     case CMD_WAVE:
         emit SendCommand(ADDR,CMD_WAVE,msg);
@@ -448,7 +412,7 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         emit PutCanData(msg);
         break;
     case CMD_START:
-        TestStart(msg);
+        StartTest(msg);
         break;
     case CMD_STOP:
         emit SendCommand(ADDR,CMD_STOP,msg);
@@ -465,30 +429,13 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     }
 }
-/**
-  * @brief  Initializes before test
-  * @param  None
-  * @retval None
-  */
-void WinHome::TestInit()
+
+void WinHome::InitTest()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化测试";
+    InitSettings();
 
     Items.clear();
-    //全局配置
-    QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
-    settings_g->setIniCodec("GB18030");
-    settings_g->beginGroup("GLOBAL");
-    motor_type = settings_g->value("FileInUse",INI_DEFAULT).toString();
-    motor_type.remove(".ini");
-    //当前配置
-    QString n = QString("./config/%1.ini").arg(motor_type);
-    QSettings *settings_c = new QSettings(n,QSettings::IniFormat);
-    settings_c->setIniCodec("GB18030");
-
-    ItemToTest = settings_c->value("/GLOBAL/ProjToTest","1").toString().split(" ");
-    PauseMode = settings_c->value("/GLOBAL/TestNG","1").toInt();
-
     emit SendCommand(WIN_ID_SYS,CMD_INIT,NULL);//设定启动方式
 
     if (ItemToTest.isEmpty())
@@ -501,12 +448,8 @@ void WinHome::TestInit()
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
-/**
-  * @brief  Check the board status
-  * @param  None
-  * @retval None
-  */
-void WinHome::TestCheck()
+
+void WinHome::ReadCanStatus()
 {
     qDebug()<<QTime::currentTime().toString()<<"开机自检";
     if (Testing)
@@ -535,17 +478,13 @@ void WinHome::TestCheck()
     if (!isCheckOk) {
         isCheckOk = true;
         Delay(1000);
-        WinJump("WinTest");
+        JumpToWindow("WinTest");
     }
 }
-/**
-  * @brief  Test thread
-  * @param  data:station to test
-  * @retval None
-  */
-void WinHome::TestStart(QByteArray station)
+
+void WinHome::StartTest(QByteArray station)
 {
-    WaitTestOver(100);
+    WaitTimeOut(100);
     if (Testing)
         return;
     if (ui->desktop->currentWidget()->objectName() != "WinTest")
@@ -553,7 +492,7 @@ void WinHome::TestStart(QByteArray station)
     Testing = true;
     ItemJudge = "OK";
 
-    TestInit();
+    InitTest();
 
     emit SendCommand(WIN_ID_TEST,CMD_START,station);
 
@@ -566,47 +505,30 @@ void WinHome::TestStart(QByteArray station)
         if (!Testing)
             break;
     }
-    TestSaveItem();
+    SaveTestJudge();
     if (ItemJudge == "NG") {
-        msg.clear();
-        msg.append(0x08 | 0x01);
-        emit SendCommand(ADDR,CMD_ALARM,msg);
-        Delay(500);
-        msg.clear();
-        msg.append(0x08 | 0x00);
-        emit SendCommand(ADDR,CMD_ALARM,msg);
+        emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x08 | 0x01));
+        Delay(TimeNG);
+        emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x08 | 0x00));
     } else {
-        msg.clear();
-        msg.append(0x04 | 0x01);
-        emit SendCommand(ADDR,CMD_ALARM,msg);
-        Delay(200);
-        msg.clear();
-        msg.append(0x04 | 0x00);
-        emit SendCommand(ADDR,CMD_ALARM,msg);
+        emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x04 | 0x01));
+        Delay(TimeOK);
+        emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x04 | 0x00));
     }
     emit SendCommand(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
     Testing = false;
 }
-/**
-  * @brief  Save test data
-  * @param  None
-  * @retval None
-  */
-void WinHome::TestSaveItem()
+
+void WinHome::SaveTestJudge()
 {
     QStringList s;
     s.append("总数");
-    s.append(motor_type);
+    s.append(FileInUse);
     s.append(ItemJudge);
     emit WriteSql(s.join("@").toUtf8());
 }
-/******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       测试结果判定保存
-******************************************************************************/
-void WinHome::TestSaveJudge(QByteArray msg)
+
+void WinHome::SaveItemJudge(QByteArray msg)
 {
     emit WriteSql(msg);
     QStringList s = QString(msg).split("@");
@@ -617,12 +539,7 @@ void WinHome::TestSaveJudge(QByteArray msg)
     if (s.at(2) == "NG" && PauseMode != 1)
         TestPause();
 }
-/******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.30
- * brief:       不合格警告
-******************************************************************************/
+
 void WinHome::TestPause()
 {
     if(QMessageBox::warning(this,"此项目不合格", "是否继续",
@@ -630,7 +547,7 @@ void WinHome::TestPause()
         Testing = false;
 }
 
-void WinHome::TestText(QByteArray msg)
+void WinHome::ShowLogMessage(QByteArray msg)
 {
     if (!ui->Text->isHidden()) {
         ui->Text->insertPlainText(msg);
@@ -639,13 +556,8 @@ void WinHome::TestText(QByteArray msg)
     }
     emit SendCommand(ADDR,CMD_DEBUG,msg);
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2017.02.18
- * brief:      等待测试结束
-*******************************************************************************/
-bool WinHome::WaitTestOver(quint16 t)
+
+bool WinHome::WaitTimeOut(quint16 t)
 {
     int TimeOut = 0;
     while (Testing) {
@@ -656,12 +568,7 @@ bool WinHome::WaitTestOver(quint16 t)
     }
     return true;
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.30
- * brief:      延时
-*******************************************************************************/
+
 void WinHome::Delay(int ms)
 {
     QElapsedTimer t;

@@ -58,34 +58,34 @@ signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
     void Init(void);
-    void WinInit(void);
-    void WinInitAll(void);
-    void WinJump(QByteArray win);
-    void BtnInit(void);
+    void InitWindows(void);
+    void InitWindowsAll(void);
+    void JumpToWindow(QByteArray win);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void DatInit(void);
-    void CanInit(void);
-    void SqlInit(void);
-    void TcpInit(void);
-    void UdpInit(void);
-    void SerialInit(void);
-    void CanThread(QByteArray msg);
+    void InitSettings(void);
+    void InitCan(void);
+    void InitSql(void);
+    void InitTcp(void);
+    void InitUdp(void);
+    void InitSerial(void);
+    void ReadCanCmd(QByteArray msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestStart(QByteArray msg);
-    void TestSaveItem(void);
-    void TestSaveJudge(QByteArray msg);
+    void InitTest(void);
+    void ReadCanStatus(void);
+    void StartTest(QByteArray msg);
+    void SaveTestJudge(void);
+    void SaveItemJudge(QByteArray msg);
     void TestPause(void);
-    void TestText(QByteArray msg);
-    bool WaitTestOver(quint16 t);
+    void ShowLogMessage(QByteArray msg);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
     virtual void showEvent(QShowEvent *);
 private:
     QList<int> previous_window;
-    QString motor_type;
+    QString FileInUse;
     bool Testing;
     bool isCheckOk;
     QString ItemJudge;
@@ -103,6 +103,9 @@ private:
     TcpClient tcp;
     UdpClient udp;
     SerialPort serial;
+
+    quint16 TimeNG;
+    quint16 TimeOK;
 };
 
 #endif // WINHOME_H

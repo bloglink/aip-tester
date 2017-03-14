@@ -40,8 +40,8 @@ void SerialPort::ReadSerial()
     if (msg.isEmpty())
         return;
     if (msg.size()==4 && quint8(msg.at(1)==0x32))
-        SendCommand(ADDR,CMD_START,"Serial");
+        SendCommand(ADDR,CMD_START,QByteArray(1,0x13));
     if (msg.size()==4 && quint8(msg.at(1)==0x31))
-        SendCommand(ADDR,CMD_STOP,"Serial");
+        SendCommand(ADDR,CMD_STOP,QByteArray(1,0x13));
 }
 

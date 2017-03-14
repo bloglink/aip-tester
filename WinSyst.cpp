@@ -90,17 +90,20 @@ void WinSyst::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置";
 
-    QSettings *settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    settings->setIniCodec("GB18030");
-    settings->beginGroup("GLOBAL");
+    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    g_ini->setIniCodec("GB18030");
+    g_ini->beginGroup("GLOBAL");
 
-    ui->BoxUser->setCurrentIndex(settings->value("User","0").toInt());
-    ui->BoxMode->setCurrentIndex(settings->value("Mode","0").toInt());
-    ui->BoxStyle->setCurrentIndex(settings->value("Style","0").toInt());
-    password = settings->value("Password","").toString();
+    ui->BoxUser->setCurrentIndex(g_ini->value("User","0").toInt());
+    ui->BoxMode->setCurrentIndex(g_ini->value("Mode","0").toInt());
+    ui->BoxStyle->setCurrentIndex(g_ini->value("Style","0").toInt());
+    ui->BoxTimeNG->setValue(g_ini->value("TimeNG","0.5").toDouble());
+    ui->BoxTimeOK->setValue(g_ini->value("TimeOK","0.2").toDouble());
+
+    password = g_ini->value("Password","").toString();
     ui->EditPassword->clear();
 
-    int t = settings->value("AddSeconds","0").toInt();
+    int t = g_ini->value("AddSeconds","0").toInt();
     if (dateTime.secsTo(QDateTime::currentDateTime()) < t) {
         QDateTime tt = dateTime;
         tt = tt.addSecs(t);
@@ -116,14 +119,16 @@ void WinSyst::InitSettings()
 void WinSyst::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置";
-    QSettings *settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    settings->setIniCodec("GB18030");
-    settings->beginGroup("GLOBAL");
-    settings->setValue("User",QString::number(ui->BoxUser->currentIndex()));
-    settings->setValue("Mode",QString::number(ui->BoxMode->currentIndex()));
-    settings->setValue("Style",QString::number(ui->BoxStyle->currentIndex()));
-    settings->setValue("Password",password);
-    settings->setValue("AddSeconds",dateTime.secsTo(QDateTime::currentDateTime()));
+    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    g_ini->setIniCodec("GB18030");
+    g_ini->beginGroup("GLOBAL");
+    g_ini->setValue("User",QString::number(ui->BoxUser->currentIndex()));
+    g_ini->setValue("Mode",QString::number(ui->BoxMode->currentIndex()));
+    g_ini->setValue("Style",QString::number(ui->BoxStyle->currentIndex()));
+    g_ini->setValue("Password",password);
+    g_ini->setValue("AddSeconds",dateTime.secsTo(QDateTime::currentDateTime()));
+    g_ini->setValue("TimeNG",ui->BoxTimeNG->value());
+    g_ini->setValue("TimeOK",ui->BoxTimeOK->value());
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置OK";
 }
 
