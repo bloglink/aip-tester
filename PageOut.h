@@ -39,7 +39,7 @@ private slots:
     void SendCanCmdStatus(quint16 pos);
     void SendWinCmdStart(void);
 
-    void SendCanCmdConfig(QByteArray msg);
+    void SendCanCmdConfig();
     void ReadCanCmdStatus(quint16 addr,QByteArray msg);
     void ReadCanCmdStart(quint16 addr);
     void ReadCanCmdStop(quint16 addr);

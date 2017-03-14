@@ -36,12 +36,15 @@ void SerialPort::CloseSerial()
 
 void SerialPort::ReadSerial()
 {
-    QByteArray msg = com->readAll();
-    if (msg.isEmpty())
+    QByteArray cmd = com->readAll();
+    if (cmd.isEmpty())
         return;
-    if (msg.size()==4 && quint8(msg.at(1)==0x32))
-        SendCommand(ADDR,CMD_START,QByteArray::fromHex("1300"));
-    if (msg.size()==4 && quint8(msg.at(1)==0x31))
-        SendCommand(ADDR,CMD_STOP,QByteArray::fromHex("1300"));
+    QStringList msg;
+    msg.append(QString::number(0x13));
+    msg.append(QString::number(0x00));
+    if (cmd.size()==4 && quint8(cmd.at(1)==0x32))
+        SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
+    if (cmd.size()==4 && quint8(cmd.at(1)==0x31))
+        SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
 }
 

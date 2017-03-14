@@ -5,6 +5,7 @@
 #include <QTimer>
 #include <QDebug>
 #include <QObject>
+#include <QStringList>
 #include <QtSerialPort/QSerialPort>
 #include <QtSerialPort/QSerialPortInfo>
 #include "define.h"

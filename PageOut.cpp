@@ -34,7 +34,7 @@ void PageOut::ReadMessage(quint16 addr, quint16 cmd, QByteArray data)
         qDebug()<<QTime::currentTime().toString()<<"查询输出状态OK";
         break;
     case CMD_INIT:
-        SendCanCmdConfig(data);
+        SendCanCmdConfig();
         break;
     default:
         break;
@@ -86,20 +86,20 @@ void PageOut::SendCanCmdStatus(quint16 pos)
 
 void PageOut::SendWinCmdStart()
 {
+    QStringList msg;
+    msg.append(QString::number(Pos));
+    msg.append(QString::number(0x02));
     Timer->stop();
-    emit SendCommand(ADDR,CMD_START,QString::number(Pos).toUtf8());
+    emit SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
 }
 
-void PageOut::SendCanCmdConfig(QByteArray data)
+void PageOut::SendCanCmdConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-
-    quint8 mode = quint8(data.at(0));
-    emit SendCommand(ADDR,CMD_DEBUG,data.toHex());
-    out<<quint16(0x13)<<quint8(0x02)<<quint8(0x03)<<quint8(mode);
-    out<<quint16(0x14)<<quint8(0x02)<<quint8(0x03)<<quint8(mode);
+    out<<quint16(0x13)<<quint8(0x02)<<quint8(0x03)<<quint8(0x02);
+    out<<quint16(0x14)<<quint8(0x02)<<quint8(0x03)<<quint8(0x02);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 

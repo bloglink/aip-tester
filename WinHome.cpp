@@ -413,14 +413,11 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         emit PutCanData(msg);
         break;
     case CMD_START:
-        if (msg.size()<2)
+        if (QString(msg).split(" ").size()<2)
             return;
-        if (quint8(msg.at(1)) != StartMode)
+        if (QString(msg).split(" ").at(1).toInt() != StartMode)
             return;
-        if (quint8(msg.at(0)) == 0x13)
-            StartTest(QString::number(0x13).toUtf8());
-        if (quint8(msg.at(0)) == 0x14)
-            StartTest(QString::number(0x14).toUtf8());
+        StartTest(QString(msg).split(" ").at(0).toUtf8());
         break;
     case CMD_STOP:
         emit SendCommand(ADDR,CMD_STOP,msg);
@@ -442,12 +439,11 @@ void WinHome::InitTest()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化测试";
     InitSettings();
-
-    Items.clear();
-    emit SendCommand(WIN_ID_SYS,CMD_INIT,NULL);//设定启动方式
-
     if (ItemToTest.isEmpty())
         return;
+    Items.clear();
+    if (StartMode == 2) //滑罩启动
+        emit SendCommand(WIN_ID_OUT13,CMD_INIT,NULL);
 
     for (int i=0; i<ItemToTest.size(); i++) {
         emit SendCommand(ItemToTest.at(i).toInt(),CMD_INIT,NULL);

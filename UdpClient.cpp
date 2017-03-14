@@ -103,13 +103,13 @@ void UdpClient::ReadAllFrame()
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3008: //启动测试
-            emit SendCommand(ADDR,CMD_START,QString::number(0x13).toUtf8());
+            emit SendCommand(ADDR,CMD_START,QString("%1 %2").arg(0x13).arg(0x03).toUtf8());
             TxMsg = "3009 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3010: //停止测试
-            emit SendCommand(ADDR,CMD_STOP,QString::number(0x13).toUtf8());
+            emit SendCommand(ADDR,CMD_STOP,QString("%1 %2").arg(0x13).arg(0x03).toUtf8());
             TxMsg = "3011 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
