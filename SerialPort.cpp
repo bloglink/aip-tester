@@ -2,6 +2,7 @@
 
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
 {
+    fd = -1;
     com = NULL;
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(ReadSerial()));
@@ -69,5 +70,37 @@ void SerialPort::SendAlarm(QByteArray msg)
         com->write("LEDG");
     if (msg.at(0) & 0x08)
         com->write("LEDR");
+    if (msg.at(0) & 0x01)
+        StartBeep();
+    else
+        StopBeep();
+}
+
+void SerialPort::StartBeep()
+{
+#ifdef __arm__
+    struct pwm_config_info	conf;
+    fd = open("/dev/em335x_pwm2",O_RDWR);
+    if (fd < 0) {
+        qDebug()<<"pwm2 open fail";
+        return;
+    }
+    conf.freq = 2000;
+    conf.duty = 99;
+    conf.polarity = POLARITY;
+    conf.count = 10;
+    int ret = write(fd, &conf, sizeof(struct pwm_config_info));
+    qDebug()<<ret;
+#endif
+}
+
+void SerialPort::StopBeep()
+{
+#ifdef __arm__
+    struct pwm_config_info	conf;
+    fd = open("/dev/em335x_pwm2",O_RDWR);
+    memset(&conf, 0, sizeof(struct pwm_config_info));
+    write(fd, &conf, sizeof(struct pwm_config_info));
+#endif
 }
 
