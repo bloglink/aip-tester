@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network
+QT       += core gui sql network serialport
+CONFIG   += serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -42,7 +43,8 @@ SOURCES += main.cpp\
     TcpClient.cpp \
     UdpClient.cpp \
     SqlClient.cpp \
-    CanClient.cpp
+    CanClient.cpp \
+    SerialPort.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -68,7 +70,8 @@ HEADERS  += \
     TcpClient.h \
     UdpClient.h \
     SqlClient.h \
-    CanClient.h
+    CanClient.h \
+    SerialPort.h
 
 FORMS    += \
     PageKey.ui \

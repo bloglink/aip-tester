@@ -35,6 +35,7 @@
 #include "CanClient.h"
 #include "TcpClient.h"
 #include "UdpClient.h"
+#include "SerialPort.h"
 
 namespace Ui {
 class WinHome;
@@ -67,6 +68,7 @@ private slots:
     void SqlInit(void);
     void TcpInit(void);
     void UdpInit(void);
+    void SerialInit(void);
     void CanThread(QByteArray msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
@@ -95,10 +97,12 @@ private:
     QThread *thread_sql;
     QThread *thread_tcp;
     QThread *thread_udp;
+    QThread *thread_all;
     CanClient can;
     SqlClient sql;
     TcpClient tcp;
     UdpClient udp;
+    SerialPort serial;
 };
 
 #endif // WINHOME_H
