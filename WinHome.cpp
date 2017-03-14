@@ -283,6 +283,7 @@ void WinHome::InitSettings()
     ui->titleVn->setText(v);
     TimeNG = g_ini->value("TimeNG","0.2").toDouble()*1000;
     TimeOK = g_ini->value("TimeOK","0.1").toDouble()*1000;
+    StartMode = g_ini->value("Mode","0").toInt();
 
     FileInUse = g_ini->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
@@ -412,7 +413,14 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         emit PutCanData(msg);
         break;
     case CMD_START:
-        StartTest(msg);
+        if (msg.size()<2)
+            return;
+        if (quint8(msg.at(1)) != StartMode)
+            return;
+        if (quint8(msg.at(0)) == 0x13)
+            StartTest(QString::number(0x13).toUtf8());
+        if (quint8(msg.at(0)) == 0x14)
+            StartTest(QString::number(0x14).toUtf8());
         break;
     case CMD_STOP:
         emit SendCommand(ADDR,CMD_STOP,msg);
@@ -496,9 +504,7 @@ void WinHome::StartTest(QByteArray station)
 
     emit SendCommand(WIN_ID_TEST,CMD_START,station);
 
-    QByteArray msg;
-    msg.append(0x02 | 0x00);
-    emit SendCommand(ADDR,CMD_ALARM,msg);
+    emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x02 | 0x00));
 
     for (int i=0; i<ItemToTest.size(); i++) {
         emit SendCommand(ItemToTest.at(i).toInt(),CMD_START,station);

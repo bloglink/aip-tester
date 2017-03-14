@@ -106,6 +106,7 @@ private:
 
     quint16 TimeNG;
     quint16 TimeOK;
+    quint8 StartMode;
 };
 
 #endif // WINHOME_H

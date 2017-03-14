@@ -93,10 +93,10 @@ void WinTest::BtnJudge(int win)
     case Qt::Key_3:
         if (ui->BtnCmdStart->text() == "单次测试") {
             ui->BtnCmdStart->setText("中断测试");
-            emit SendCommand(ADDR,CMD_START,QString::number(0x13).toUtf8());
+            emit SendCommand(ADDR,CMD_START,QByteArray::fromHex("1300"));
         } else {
             ui->BtnCmdStart->setText("单次测试");
-            emit SendCommand(ADDR,CMD_STOP,NULL);
+            emit SendCommand(ADDR,CMD_STOP,QByteArray::fromHex("1300"));
         }
         break;
     default:
