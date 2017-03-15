@@ -332,9 +332,11 @@ void WinHome::InitUdp()
 {
     thread_udp = new QThread(this);
     udp.moveToThread(thread_udp);
-    connect(thread_udp,SIGNAL(started()),&udp,SLOT(UdpInit()));
-    connect(thread_udp,SIGNAL(finished()),&udp,SLOT(UdpQuit()));
+    connect(thread_udp,SIGNAL(started()),&udp,SLOT(Init()));
+    connect(thread_udp,SIGNAL(finished()),&udp,SLOT(Quit()));
     connect(&udp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
+    connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),&udp,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_udp->start();
 }
@@ -398,6 +400,8 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_ITEM:
         emit WriteSql(msg);
+        emit SendCommand(ADDR,cmd,msg);
+        break;
     case CMD_TEMP:
     case CMD_WAVE_BYTE:
     case CMD_WAVE_TEST:
@@ -499,6 +503,7 @@ void WinHome::StartTest(QByteArray station)
     ItemJudge = "OK";
 
     InitTest();
+    emit SendCommand(ADDR,CMD_STATUS,"buzy");
 
     emit SendCommand(WIN_ID_TEST,CMD_START,station);
 
@@ -521,6 +526,7 @@ void WinHome::StartTest(QByteArray station)
     }
     emit SendCommand(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
     Testing = false;
+    emit SendCommand(ADDR,CMD_STATUS,"ready");
 }
 
 void WinHome::SaveTestJudge()

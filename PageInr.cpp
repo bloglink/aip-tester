@@ -91,7 +91,7 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_CHECK:
         Mode = INR_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(1000)) {
+        if (!WaitTimeOut(10)) {
             QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
             emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
         }

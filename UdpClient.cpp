@@ -2,21 +2,21 @@
 
 UdpClient::UdpClient(QObject *parent) : QUdpSocket(parent)
 {
-
+    Status = "free";
 }
 
-void UdpClient::UdpInit()
+void UdpClient::Init()
 {
     this->bind(6000);
-    connect(this,SIGNAL(readyRead()),this,SLOT(ReadAllFrame()));
+    connect(this,SIGNAL(readyRead()),this,SLOT(ReadAll()));
 }
 
-void UdpClient::UdpQuit()
+void UdpClient::Quit()
 {
     this->close();
 }
 
-void UdpClient::DatInit()
+void UdpClient::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取UDP网络配置";
 
@@ -29,53 +29,45 @@ void UdpClient::DatInit()
     for (int i=0; i<list.size(); i++)
         FileNames.append(list.at(i).fileName().remove(".ini"));
 
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
+    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    g_ini->setIniCodec("GB18030");
+    g_ini->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
+    FileInUse = g_ini->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
     Types = FileNames.join(" ");
-    Types.remove(FileInUse);
-    Types.insert(0,FileInUse);
-
-    Number = g_settings->value("UserNumber").toString();
+    Number = g_ini->value("UserNumber").toString();
     if (Number.isEmpty())
-        Number = g_settings->value("Number","168912000X").toString();
+        Number = g_ini->value("Number","168912000X").toString();
     qDebug()<<QTime::currentTime().toString()<<"读取UDP网络配置OK";
 }
 
-void UdpClient::DatSave()
+void UdpClient::SaveSettings()
 {
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
-    g_settings->setValue("UserNumber",Number);
-    g_settings->setValue("FileInUse",FileInUse);
+    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    g_ini->setIniCodec("GB18030");
+    g_ini->beginGroup("GLOBAL");
+    g_ini->setValue("UserNumber",Number);
+    g_ini->setValue("FileInUse",FileInUse);
 }
 
-void UdpClient::GetCommand(QByteArray msg)
-{
-    QStringList n = QString(msg).split(" ");
-    Command = quint16(n.at(0).toInt());
-    n.removeFirst();
-    Param = n.join(" ").toUtf8();
-}
-
-void UdpClient::ReadAllFrame()
+void UdpClient::ReadAll()
 {
     while (this->hasPendingDatagrams()) {
         QByteArray msg;
         msg.resize(this->pendingDatagramSize());
         QHostAddress sender;
         quint16 senderPort;
-
         this->readDatagram(msg.data(),msg.size(),&sender,&senderPort);
-        GetCommand(msg);
+
+        QStringList n = QString(msg).split(" ");
+        Command = quint16(n.at(0).toInt());
+        n.removeFirst();
+        Param = n.join(" ").toUtf8();
 
         switch (Command) {
         case 3000: //查询在线主机
-            DatInit();
+            InitSettings();
             TxMsg = "3001 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
@@ -83,13 +75,13 @@ void UdpClient::ReadAllFrame()
         case 3002: //修改主机编号
             if (!Param.isEmpty())
                 Number = Param;
-            DatSave();
+            SaveSettings();
             TxMsg = "3002 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3004: //获取测试型号
-            DatInit();
+            InitSettings();
             TxMsg = "3005 ";
             TxMsg.append(Types);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
@@ -97,7 +89,7 @@ void UdpClient::ReadAllFrame()
         case 3006: //设置测试型号
             if (!Param.isEmpty())
                 FileInUse = Param;
-            DatSave();
+            SaveSettings();
             TxMsg = "3007 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
@@ -116,12 +108,12 @@ void UdpClient::ReadAllFrame()
             break;
         case 3012: //获取状态
             TxMsg = "3013 ";
-            TxMsg.append("free");
+            TxMsg.append(Status);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3014:
-            TxMsg = "3014 ";
-            TxMsg.append("测试@测试@测试@测试\n测试@测试@100@测试");
+            TxMsg = "3015 ";
+            TxMsg.append(Items.join("\n"));
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         default:
@@ -130,4 +122,24 @@ void UdpClient::ReadAllFrame()
         }
     }
 }
+
+void UdpClient::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR)
+        return;
+    switch (cmd) {
+    case CMD_ITEM:
+        Items.append(msg);
+        break;
+    case CMD_STATUS:
+        Status = msg;
+        if (Status == "buzy")
+            Items.clear();
+        break;
+    default:
+        break;
+    }
+}
+
+
 

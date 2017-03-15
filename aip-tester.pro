@@ -95,3 +95,5 @@ FORMS    += \
 
 RESOURCES += \
     image.qrc
+
+RC_FILE += ico.rc

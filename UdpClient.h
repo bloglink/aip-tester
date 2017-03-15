@@ -21,12 +21,12 @@ signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray msg);
 
 private slots:
-    void UdpInit(void);
-    void UdpQuit(void);
-    void DatInit(void);
-    void DatSave(void);
-    void GetCommand(QByteArray msg);
-    void ReadAllFrame(void);
+    void Init(void);
+    void Quit(void);
+    void InitSettings(void);
+    void SaveSettings(void);
+    void ReadAll(void);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
 private:
     QString Number;
     QString Types;
@@ -34,6 +34,8 @@ private:
     QByteArray Param;
     QString FileInUse;
     QString TxMsg;
+    QStringList Items;
+    QString Status;
 };
 
 #endif // UDPCLIENT_H
