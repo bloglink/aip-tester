@@ -156,10 +156,16 @@ void PageImp::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0: //自动采样
-        ImpMode = IMP_SAMPLE;
         InitStation();
-        SendCanCmdConfig();
-        SendCanCmdSampleAuto();
+        if (ui->BoxStation->currentIndex() == 0) {
+            ImpMode = IMP_SAMPLE;
+            SendCanCmdConfig();
+            SendCanCmdSampleAuto();
+        } else {
+            ImpMode = IMP_SAMPLE_OTHER;
+            SendCanCmdConfig();
+            SendCanCmdStart(station);
+        }
         AvrCount = 0;
         break;
     case Qt::Key_1:
@@ -775,7 +781,8 @@ void PageImp::ReadCanCmdWaveOk(QByteArray msg)
 void PageImp::ReadCanCmdWaveStart(QByteArray msg)
 {
     CurrentWave = (quint8)msg.at(1);
-    QByteArray w = WaveImp.at(CurrentWave)->WaveByte;
+    quint8 num = station - WIN_ID_OUT13;
+    QByteArray w = WaveImp.at(CurrentWave)->WaveBytes[num];
     QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
     switch (ImpMode) {
     case IMP_FREE:

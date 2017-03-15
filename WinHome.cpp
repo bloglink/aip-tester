@@ -274,7 +274,7 @@ void WinHome::BtnJudge(int id)
 
 void WinHome::InitSettings()
 {
-    QString v = "V-2.1.0.160314";
+    QString v = "V-2.1.0.160315";
     QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
     g_ini->setIniCodec("GB18030");
     g_ini->beginGroup("GLOBAL");
