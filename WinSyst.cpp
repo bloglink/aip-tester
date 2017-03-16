@@ -31,6 +31,7 @@ void WinSyst::InitWindows()
     ui->BoxUser->setView(new QListView(this));
     ui->BoxMode->setView(new QListView(this));
     ui->BoxStyle->setView(new QListView(this));
+    ui->BoxPower->setView(new QListView(this));
     password.clear();
     file = new QFile("log.txt");
     file->open(QFile::ReadWrite);
@@ -99,6 +100,7 @@ void WinSyst::InitSettings()
     ui->BoxStyle->setCurrentIndex(g_ini->value("Style","0").toInt());
     ui->BoxTimeNG->setValue(g_ini->value("TimeNG","0.5").toDouble());
     ui->BoxTimeOK->setValue(g_ini->value("TimeOK","0.2").toDouble());
+    ui->BoxPower->setCurrentIndex(g_ini->value("PowerSupply","0").toInt());
 
     password = g_ini->value("Password","").toString();
     ui->EditPassword->clear();
@@ -129,6 +131,7 @@ void WinSyst::SaveSettings()
     g_ini->setValue("AddSeconds",dateTime.secsTo(QDateTime::currentDateTime()));
     g_ini->setValue("TimeNG",ui->BoxTimeNG->value());
     g_ini->setValue("TimeOK",ui->BoxTimeOK->value());
+    g_ini->setValue("PowerSupply",ui->BoxPower->currentIndex());
     qDebug()<<QTime::currentTime().toString()<<"保存系统配置OK";
 }
 

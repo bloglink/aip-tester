@@ -90,6 +90,7 @@ private:
     QList<QTableWidgetItem*> Grade;
     quint8 TestRow;
     quint8 Mode;
+    quint8 PowerSupply;
 };
 
 #endif // PAGEPWR_H

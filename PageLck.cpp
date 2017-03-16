@@ -59,6 +59,7 @@ void PageLck::InitSettings()
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
+    PowerSupply = global->value("PowerSupply","0").toInt();
     FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
@@ -168,6 +169,9 @@ void PageLck::SendCanCmdStart()
     out.setVersion(QDataStream::Qt_4_8);
     quint16 t = ui->BoxTime->value()*10;
     quint16 v = ui->BoxVolt->value();
+    quint8 p = PowerSupply<<4;
+    if (ui->BoxFreq->value() == 60)
+        p += 0x02;
     out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
       <<quint8(t/256)<<quint8(t%256)<<quint8(0x10+v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);

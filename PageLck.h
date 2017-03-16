@@ -68,6 +68,7 @@ private:
     quint8 Mode;
     QString Judge;
     QString FileInUse;
+    quint8 PowerSupply;
 };
 
 #endif // PAGELCK_H
