@@ -18,13 +18,11 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitSettings();
+    InitVersion("V-2.1.0.160316");
+    HomeMode = HOME_FREE;
+    InitThreadAll();
 }
-/**
-  * @brief  Destruct the window
-  * @param  None
-  * @retval None
-  */
+
 WinHome::~WinHome()
 {
     thread_can->quit();
@@ -40,7 +38,7 @@ WinHome::~WinHome()
     delete ui;
 }
 
-void WinHome::Init()
+void WinHome::InitThreadAll()
 {
     QTimer *timer = new QTimer(this);
     InitCan();
@@ -62,9 +60,6 @@ void WinHome::InitWindows()
     file.open(QFile::ReadOnly);
     qss = QLatin1String(file.readAll());
     qApp->setStyleSheet(qss);
-
-    Testing = false;
-    isCheckOk = false;
 }
 
 void WinHome::InitWindowsAll()
@@ -217,7 +212,7 @@ void WinHome::InitWindowsAll()
 
     qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
 
-    ReadCanStatus();
+    ReadStatusAll();
 
 }
 
@@ -272,28 +267,12 @@ void WinHome::BtnJudge(int id)
     }
 }
 
-void WinHome::InitSettings()
-{
-    QString v = "V-2.1.0.160316";
-    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_ini->setIniCodec("GB18030");
-    g_ini->beginGroup("GLOBAL");
-    g_ini->setValue("Version",v);
+void WinHome::InitVersion(QString v)
+{   
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    ini->setValue("/GLOBAL/Version",v);
     this->setWindowTitle(QString("电机综合测试仪%1").arg(v));
     ui->titleVn->setText(v);
-    TimeNG = g_ini->value("TimeNG","0.2").toDouble()*1000;
-    TimeOK = g_ini->value("TimeOK","0.1").toDouble()*1000;
-    StartMode = g_ini->value("Mode","0").toInt();
-
-    FileInUse = g_ini->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-    //当前配置
-    QString n = QString("./config/%1.ini").arg(FileInUse);
-    QSettings *c_ini = new QSettings(n,QSettings::IniFormat);
-    c_ini->setIniCodec("GB18030");
-
-    ItemToTest = c_ini->value("/GLOBAL/ProjToTest","1").toString().split(" ");
-    PauseMode = c_ini->value("/GLOBAL/TestNG","1").toInt();
 }
 
 void WinHome::InitCan()
@@ -332,7 +311,7 @@ void WinHome::InitUdp()
 {
     thread_udp = new QThread(this);
     udp.moveToThread(thread_udp);
-    connect(thread_udp,SIGNAL(started()),&udp,SLOT(Init()));
+    connect(thread_udp,SIGNAL(started()),&udp,SLOT(InitThreadAll()));
     connect(thread_udp,SIGNAL(finished()),&udp,SLOT(Quit()));
     connect(&udp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
@@ -387,10 +366,10 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         JumpToWindow(msg);
         break;
     case CMD_INIT:
-        InitTest();
+        InitTestItems();
         break;
     case CMD_STATUS:
-        ReadCanStatus();
+        ReadStatusAll();
         break;
     case CMD_INIT_ITEM:
         Items.append(QString(msg).split("\n"));
@@ -421,13 +400,13 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_START:
         if (QString(msg).split(" ").size()<2)
             return;
-        if (QString(msg).split(" ").at(1).toInt() != StartMode)
+        if (QString(msg).split(" ").at(1).toInt() != CurrentStartMode())
             return;
         StartTest(QString(msg).split(" ").at(0).toUtf8());
         break;
     case CMD_STOP:
         emit SendCommand(ADDR,CMD_STOP,msg);
-        Testing = false;
+        HomeMode = HOME_FREE;
         break;
     case CMD_NET:
         ui->IconNet->setPixmap(QPixmap(":/source/wifi.png"));
@@ -441,41 +420,37 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     }
 }
 
-void WinHome::InitTest()
+void WinHome::InitTestItems()
 {
     qDebug()<<QTime::currentTime().toString()<<"初始化测试";
-    InitSettings();
-    if (ItemToTest.isEmpty())
+
+    QStringList n = CurrentItems();
+    if (n.isEmpty())
         return;
     Items.clear();
-    if (StartMode == 2) //滑罩启动
+    if (CurrentStartMode() == 2) //滑罩启动
         emit SendCommand(WIN_ID_OUT13,CMD_INIT,NULL);
 
-    for (int i=0; i<ItemToTest.size(); i++) {
-        emit SendCommand(ItemToTest.at(i).toInt(),CMD_INIT,NULL);
+    for (int i=0; i<n.size(); i++) {
+        emit SendCommand(n.at(i).toInt(),CMD_INIT,NULL);
     }
     emit SendCommand(WIN_ID_TEST,CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
 
     qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
 
-void WinHome::ReadCanStatus()
+void WinHome::ReadStatusAll()
 {
     qDebug()<<QTime::currentTime().toString()<<"开机自检";
-    if (Testing)
+    if (HomeMode != HOME_FREE)
         return;
-    Testing = true;
+    HomeMode = HOME_TEST;
 
-    //全局配置
-    QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
-    settings_g->setIniCodec("GB18030");
-    settings_g->beginGroup("GLOBAL");
-
-    QStringList t = (settings_g->value("ItemEnable","0 1 2 3 4 6").toString()).split(" ");
+    QStringList t = EnableItems();
     for (int i=0; i<t.size(); i++) {
         emit SendCommand(t.at(i).toInt(),CMD_CHECK,NULL);
     }
-    QStringList s = (settings_g->value("OutEnable","0").toString()).split(" ");
+    QStringList s = EnableOutput();
     for (int i=0; i<s.size(); i++) {
         emit SendCommand(WIN_ID_OUT13,CMD_CHECK,s.at(i).toUtf8());
     }
@@ -484,9 +459,8 @@ void WinHome::ReadCanStatus()
     ui->titleVn->show();
     ui->Text->hide();
 
-    Testing = false;
-    if (!isCheckOk) {
-        isCheckOk = true;
+    HomeMode = HOME_FREE;
+    if (ui->desktop->currentWidget()->objectName() == "MainPage") {
         Delay(1000);
         JumpToWindow("WinTest");
     }
@@ -495,47 +469,43 @@ void WinHome::ReadCanStatus()
 void WinHome::StartTest(QByteArray station)
 {
     WaitTimeOut(100);
-    if (Testing)
+    if (HomeMode == HOME_TEST)
         return;
     if (ui->desktop->currentWidget()->objectName() != "WinTest")
         return;
-    Testing = true;
+    HomeMode = HOME_TEST;
     ItemJudge = "OK";
 
-    InitTest();
+    InitTestItems();
     emit SendCommand(ADDR,CMD_STATUS,"buzy");
-
     emit SendCommand(WIN_ID_TEST,CMD_START,station);
-
     emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x02 | 0x00));
 
-    for (int i=0; i<ItemToTest.size(); i++) {
-        emit SendCommand(ItemToTest.at(i).toInt(),CMD_START,station);
-        if (!Testing)
+    QStringList n = CurrentItems();
+    for (int i=0; i<n.size(); i++) {
+        emit SendCommand(n.at(i).toInt(),CMD_START,station);
+        if (HomeMode == HOME_FREE)
             break;
     }
     SaveTestJudge();
     if (ItemJudge == "NG") {
         emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x08 | 0x01));
-        Delay(TimeNG);
+        Delay(CurrentAlarmTime("NG"));
         emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x08 | 0x00));
     } else {
         emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x04 | 0x01));
-        Delay(TimeOK);
+        Delay(CurrentAlarmTime("OK"));
         emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x04 | 0x00));
     }
     emit SendCommand(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
-    Testing = false;
+    HomeMode = HOME_FREE;
     emit SendCommand(ADDR,CMD_STATUS,"ready");
 }
 
 void WinHome::SaveTestJudge()
 {
-    QStringList s;
-    s.append("总数");
-    s.append(FileInUse);
-    s.append(ItemJudge);
-    emit WriteSql(s.join("@").toUtf8());
+    QString s = QString(tr("总数@%1@%2")).arg(CurrentSettings()).arg(ItemJudge);
+    emit WriteSql(s.toUtf8());
 }
 
 void WinHome::SaveItemJudge(QByteArray msg)
@@ -546,7 +516,7 @@ void WinHome::SaveItemJudge(QByteArray msg)
         return;
     if (s.at(2) == "NG")
         ItemJudge = "NG";
-    if (s.at(2) == "NG" && PauseMode != 1)
+    if (s.at(2) == "NG" && CurrentPauseMode() != 1)
         TestPause();
 }
 
@@ -554,7 +524,7 @@ void WinHome::TestPause()
 {
     if(QMessageBox::warning(this,"此项目不合格", "是否继续",
                             QMessageBox::Yes,QMessageBox::No)==QMessageBox::No)
-        Testing = false;
+        HomeMode = HOME_FREE;
 }
 
 void WinHome::ShowLogMessage(QByteArray msg)
@@ -570,7 +540,7 @@ void WinHome::ShowLogMessage(QByteArray msg)
 bool WinHome::WaitTimeOut(quint16 t)
 {
     int TimeOut = 0;
-    while (Testing) {
+    while (HomeMode != HOME_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -587,10 +557,55 @@ void WinHome::Delay(int ms)
         QCoreApplication::processEvents();
 }
 
-void WinHome::showEvent(QShowEvent *)
+QString WinHome::CurrentSettings()
 {
-    if (!isCheckOk) {
-        Init();
-    }
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    return n.remove(".ini");
 }
+
+QStringList WinHome::CurrentItems()
+{
+    QString n = QString("./config/%1.ini").arg(CurrentSettings());
+    QSettings *ini = new QSettings(n,QSettings::IniFormat);
+    QString s = ini->value("/GLOBAL/ProjToTest","1").toString();
+    return s.split(" ");
+}
+
+QStringList WinHome::EnableItems()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/ItemEnable",INI_DEFAULT).toString();
+    return n.split(" ");
+}
+
+QStringList WinHome::EnableOutput()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/OutEnable",INI_DEFAULT).toString();
+    return n.split(" ");
+}
+
+int WinHome::CurrentStartMode()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    return ini->value("/GLOBAL/Mode","0").toInt();
+}
+
+int WinHome::CurrentPauseMode()
+{
+    QString n = QString("./config/%1.ini").arg(CurrentSettings());
+    QSettings *ini = new QSettings(n,QSettings::IniFormat);
+    return ini->value("/GLOBAL/TestNG","1").toInt();
+}
+
+int WinHome::CurrentAlarmTime(QString msg)
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    if (msg == "NG")
+        return ini->value("/GLOBAL/TimeNG","0.2").toDouble()*1000;
+    else
+        return ini->value("/GLOBAL/TimeOK","0.1").toDouble()*1000;
+}
+
 /*********************************END OF FILE**********************************/

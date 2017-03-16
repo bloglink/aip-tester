@@ -37,6 +37,10 @@
 #include "UdpClient.h"
 #include "SerialPort.h"
 
+#define HOME_UNKOWN 0xff
+#define HOME_FREE 0x00
+#define HOME_TEST 0x01
+
 namespace Ui {
 class WinHome;
 }
@@ -57,13 +61,13 @@ signals:
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void Init(void);
+    void InitThreadAll(void);
     void InitWindows(void);
     void InitWindowsAll(void);
     void JumpToWindow(QByteArray win);
     void InitButtons(void);
     void BtnJudge(int id);
-    void InitSettings(void);
+    void InitVersion(QString v);
     void InitCan(void);
     void InitSql(void);
     void InitTcp(void);
@@ -72,8 +76,8 @@ private slots:
     void ReadCanCmd(QByteArray msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
-    void InitTest(void);
-    void ReadCanStatus(void);
+    void InitTestItems(void);
+    void ReadStatusAll(void);
     void StartTest(QByteArray msg);
     void SaveTestJudge(void);
     void SaveItemJudge(QByteArray msg);
@@ -82,15 +86,17 @@ private slots:
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
-    virtual void showEvent(QShowEvent *);
+    QString CurrentSettings(void);
+    QStringList CurrentItems(void);
+    QStringList EnableItems(void);
+    QStringList EnableOutput(void);
+    int CurrentStartMode(void);
+    int CurrentPauseMode(void);
+    int CurrentAlarmTime(QString msg);
+
 private:
     QList<int> previous_window;
-    QString FileInUse;
-    bool Testing;
-    bool isCheckOk;
     QString ItemJudge;
-    QStringList ItemToTest;
-    int PauseMode;
     QStringList Items;
 
     QThread *thread_can;
@@ -103,10 +109,7 @@ private:
     TcpClient tcp;
     UdpClient udp;
     SerialPort serial;
-
-    quint16 TimeNG;
-    quint16 TimeOK;
-    quint8 StartMode;
+    quint8 HomeMode;
 };
 
 #endif // WINHOME_H
