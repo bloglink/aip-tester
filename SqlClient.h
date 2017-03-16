@@ -1,15 +1,16 @@
 #ifndef SQLCLIENT_H
 #define SQLCLIENT_H
-#include <QUrl>
+
+#include <QFile>
 #include <QDate>
 #include <QTime>
+#include <QDebug>
 #include <QObject>
 #include <QVariant>
 #include <QSqlQuery>
 #include <QSqlError>
 #include <QSqlDatabase>
 #include <QStringList>
-#include <QDebug>
 
 #include "define.h"
 

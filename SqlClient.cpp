@@ -9,44 +9,42 @@
   */
 /* Includes ------------------------------------------------------------------*/
 #include "SqlClient.h"
-/**
-  * @brief  Initializes
-  * @param  parent:parent object
-  * @retval None
-  */
+
 SqlClient::SqlClient(QObject *parent) : QObject(parent)
 {
 
 }
-/**
-  * @brief  Open sql database
-  * @param  None
-  * @retval None
-  */
+
 void SqlClient::DeviceOpen()
 {
     qDebug()<<QTime::currentTime().toString()<<"打开数据库";
+    QFile file(SQL_PATH);
+    if (!file.exists()) {
+        file.open(QIODevice::ReadWrite);
+        file.close();
+    }
+
     db = QSqlDatabase::addDatabase("QSQLITE","SQL");
     db.setDatabaseName(SQL_PATH);
     if(db.open())
         qDebug()<<QTime::currentTime().toString()<<"打开数据库OK";
     else
         qDebug()<<QTime::currentTime().toString()<<"打开数据库Error";
+
+    QSqlQuery query(db);
+    query.prepare("select count(*) from sqlite_master where type='table' and name='TestData'");
+    query.exec();
+    if(query.next() && query.value(0).toInt() == 0) {
+        query.prepare("create table TestData (id int primary key,item text,para text,result text,judge text,b1 text,b2 text,b3 text)");
+        query.exec();
+    }
 }
-/**
-  * @brief  Close sql database
-  * @param  None
-  * @retval None
-  */
+
 void SqlClient::DeviceQuit()
 {
     db.close();
 }
-/**
-  * @brief  insert sql data
-  * @param  msg:data to insert
-  * @retval None
-  */
+
 void SqlClient::Write(QByteArray msg)
 {
     QStringList dat = QString(msg).split("@");
