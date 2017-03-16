@@ -547,8 +547,6 @@ void PageImp::SendCanCmdStatus()
     }
 }
 
-
-
 void PageImp::SendCanCmdSampleAuto()
 {
     QByteArray msg;

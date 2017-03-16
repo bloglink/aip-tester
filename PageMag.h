@@ -14,7 +14,14 @@
 #include "define.h"
 #include "Waveform.h"
 #include "PageNum.h"
+
 #define MAX_ROW 8
+
+#define MAG_FREE        0
+#define MAG_INIT        4
+#define MAG_TEST        1
+#define MAG_SAMPLE      2
+
 namespace Ui {
 class PageMag;
 }
@@ -35,39 +42,40 @@ signals:
 public:
     QList<Waveform *> WaveMag;
 private slots:
-    void InitializesWindow(void);
-    void InitializesButton(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void InitializesSetting(void);
-    void SaveSetting(void);
+    void InitStation(void);
+    void InitSettings(void);
+    void SaveSettings(void);
     void ItemClick(int r, int c);
     void ItemChange(QString msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
-    void InitializesItems(void);
-    void SendStatusCmd(void);
-    void ReadStatus(QByteArray msg);
-    void SendSampleCmd(void);
-    void SendStartCmd(quint8 pos);
-    void ReadResult(QByteArray msg);
-    void ReadWave(QByteArray msg);
-    void ReadWaveOk(QByteArray msg);
+    void InitTestItems(void);
+    void SendTestItemsAllError(void);
+    void SendCanCmdSample(void);
+    void SendCanCmdStart(quint8 pos);
+    void SendCanCmdStop(void);
+    void SendCanCmdConfig(void);
+    void SendTestJudge(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void ReadCanCmdWaveStart(QByteArray msg);
+    void ReadCanCmdWave(QByteArray msg);
+    void ReadCanCmdWaveOk(QByteArray msg);
     void SendWave(QByteArray msg);
     void CalculateDir();
-    void SendStopCmd(void);
-    void SendConfigCmd(void);
 
-    bool WaitTestTimeOut(quint16 t);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
-    bool Sampling;
+
     quint16 TimeOut;
     PageNum *input;
     quint8 CurrentWave;
@@ -86,6 +94,7 @@ private:
     QList<int> FreqR;
 
     quint8 station;
+    quint8 MagMode;
 };
 
 #endif // PAGEMAG_H

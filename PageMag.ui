@@ -205,12 +205,12 @@
        </property>
        <item>
         <property name="text">
-         <string>L</string>
+         <string>左工位</string>
         </property>
        </item>
        <item>
         <property name="text">
-         <string>R</string>
+         <string>右工位</string>
         </property>
        </item>
       </widget>
