@@ -6,9 +6,9 @@ WinBack::WinBack(QWidget *parent) :
     ui(new Ui::WinBack)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    DatInit();
+    InitWindows();
+    InitButtons();
+    InitSettings();
 }
 
 WinBack::~WinBack()
@@ -16,11 +16,30 @@ WinBack::~WinBack()
     delete ui;
 }
 
-void WinBack::WinInit()
+void WinBack::InitWindows()
 {
+#if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
+    ui->TabItems->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+#else
+    ui->TabItems->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabOutput->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
+    for (int i=0; i<ui->TabItems->columnCount(); i++) {
+        for (int row=0; row<ui->TabItems->rowCount(); row++) {
+            ui->TabItems->item(row,i)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+            ui->TabItems->item(row,i)->setTextAlignment(Qt::AlignCenter);
+        }
+    }
+    for (int i=0; i<ui->TabOutput->columnCount(); i++) {
+        for (int row=0; row<ui->TabOutput->rowCount(); row++) {
+            ui->TabOutput->item(row,i)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+            ui->TabOutput->item(row,i)->setTextAlignment(Qt::AlignCenter);
+        }
+    }
+    connect(ui->TabItems,SIGNAL(cellClicked(int,int)),this,SLOT(ClickItem(int,int)));
 }
 
-void WinBack::BtnInit()
+void WinBack::InitButtons()
 {
     QButtonGroup *BtnGroup = new QButtonGroup;
     BtnGroup->addButton(ui->BtnExit,Qt::Key_0);
@@ -38,32 +57,17 @@ void WinBack::BtnJudge(int id)
     }
 }
 
-void WinBack::DatInit()
+void WinBack::InitSettings()
 {
     QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
     g_ini->setIniCodec("GB18030");
     g_ini->beginGroup("GLOBAL");
     QStringList temp = g_ini->value("ItemEnable","1 2 3 4 6").toString().split(" ");
-    if (temp.contains("1"))
-        ui->BoxEnableDcr->setChecked(true);
-    if (temp.contains("2"))
-        ui->BoxEnableMag->setChecked(true);
-    if (temp.contains("3"))
-        ui->BoxEnableIr->setChecked(true);
-    if (temp.contains("4"))
-        ui->BoxEnableAcw->setChecked(true);
-    if (temp.contains("5"))
-        ui->BoxEnableDcw->setChecked(true);
-    if (temp.contains("6"))
-        ui->BoxEnableImp->setChecked(true);
-    if (temp.contains("7"))
-        ui->BoxEnableInd->setChecked(true);
-    if (temp.contains("8"))
-        ui->BoxEnablePwr->setChecked(true);
-    if (temp.contains("9"))
-        ui->BoxEnableLvs->setChecked(true);
-    if (temp.contains("10"))
-        ui->BoxEnableLck->setChecked(true);
+    for (int i=0; i<temp.size(); i++) {
+        int row = temp.at(i).toInt();
+        if (row > 0)
+        ui->TabItems->item(row-1,1)->setText("Y");
+    }
 
     temp = g_ini->value("OutEnable","0 1").toString().split(" ");
     if (temp.contains("0"))
@@ -90,26 +94,10 @@ void WinBack::DatSave()
     g_ini->beginGroup("GLOBAL");
     QStringList temp;
     temp.append("0");
-    if (ui->BoxEnableDcr->isChecked())
-        temp.append("1");
-    if (ui->BoxEnableMag->isChecked())
-        temp.append("2");
-    if (ui->BoxEnableIr->isChecked())
-        temp.append("3");
-    if (ui->BoxEnableAcw->isChecked())
-        temp.append("4");
-    if (ui->BoxEnableDcw->isChecked())
-        temp.append("5");
-    if (ui->BoxEnableImp->isChecked())
-        temp.append("6");
-    if (ui->BoxEnableInd->isChecked())
-        temp.append("7");
-    if (ui->BoxEnablePwr->isChecked())
-        temp.append("8");
-    if (ui->BoxEnableLvs->isChecked())
-        temp.append("9");
-    if (ui->BoxEnableLck->isChecked())
-        temp.append("10");
+    for (int i=0; i<ui->TabItems->rowCount(); i++) {
+        if (ui->TabItems->item(i,1)->text() == "Y")
+            temp.append(QString::number(i+1));
+    }
     g_ini->setValue("ItemEnable",temp.join(" "));
 
     temp.clear();
@@ -130,9 +118,26 @@ void WinBack::DatSave()
     g_ini->setValue("HideVoltage",ui->HideVoltage->isChecked());
 }
 
+void WinBack::ClickItem(int r, int c)
+{
+    if (c != 1)
+        return;
+    if (ui->TabItems->item(r,c)->text() == "N")
+        ui->TabItems->item(r,c)->setText("Y");
+    else
+        ui->TabItems->item(r,c)->setText("N");
+}
+
+void WinBack::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+{
+    if (addr != ADDR)
+        return;
+    qDebug()<<addr<<cmd<<msg;
+}
+
 void WinBack::showEvent(QShowEvent *)
 {
-    DatInit();
+    InitSettings();
 }
 
 void WinBack::hideEvent(QHideEvent *)

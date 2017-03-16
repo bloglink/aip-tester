@@ -1,6 +1,7 @@
 #ifndef WINBACK_H
 #define WINBACK_H
 
+#include <QDebug>
 #include <QWidget>
 #include <QSettings>
 #include "define.h"
@@ -20,13 +21,15 @@ public:
 private:
     Ui::WinBack *ui;
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr,quint16 cmd,QByteArray msg);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void DatInit(void);
+    void InitSettings(void);
     void DatSave(void);
+    void ClickItem(int r,int c);
+    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 };

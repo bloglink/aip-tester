@@ -311,7 +311,7 @@ void WinHome::InitUdp()
 {
     thread_udp = new QThread(this);
     udp.moveToThread(thread_udp);
-    connect(thread_udp,SIGNAL(started()),&udp,SLOT(InitThreadAll()));
+    connect(thread_udp,SIGNAL(started()),&udp,SLOT(Init()));
     connect(thread_udp,SIGNAL(finished()),&udp,SLOT(Quit()));
     connect(&udp,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
