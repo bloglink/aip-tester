@@ -45,7 +45,6 @@ private slots:
     void InitWindows(void);
     void InitButtons(void);
     void BtnJudge(int id);
-    void InitStation(void);
     void InitSettings(void);
     void SaveSettings(void);
     void ItemClick(int r, int c);
@@ -55,10 +54,10 @@ private slots:
     void ExcuteCanCmd(int id, QByteArray msg);
     void InitTestItems(void);
     void SendTestItemsAllError(void);
-    void SendCanCmdSample(void);
-    void SendCanCmdStart(quint8 pos);
+    void SendCanCmdSample(quint8 s);
+    void SendCanCmdStart(quint8 s);
     void SendCanCmdStop(void);
-    void SendCanCmdConfig(void);
+    void SendCanCmdConfig(quint8 s);
     void SendTestJudge(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);

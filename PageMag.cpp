@@ -88,10 +88,15 @@ void PageMag::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        InitStation();
         MagMode = MAG_SAMPLE;
-        SendCanCmdConfig();
-        SendCanCmdSample();
+        if (ui->BoxStation->currentIndex() == 0) {
+            SendCanCmdConfig(WIN_ID_OUT13);
+            SendCanCmdSample(WIN_ID_OUT13);
+        }
+        if (ui->BoxStation->currentIndex() == 1) {
+            SendCanCmdConfig(WIN_ID_OUT14);
+            SendCanCmdSample(WIN_ID_OUT14);
+        }
         break;
     case Qt::Key_1:
         break;
@@ -101,14 +106,6 @@ void PageMag::BtnJudge(int id)
     default:
         break;
     }
-}
-
-void PageMag::InitStation()
-{
-    if (ui->BoxStation->currentIndex() == 0)
-        station = WIN_ID_OUT13;
-    if (ui->BoxStation->currentIndex() == 1)
-        station = WIN_ID_OUT14;
 }
 
 void PageMag::InitSettings()
@@ -265,6 +262,7 @@ void PageMag::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_START:
         MagMode = MAG_TEST;
+        SendCanCmdConfig(msg.toInt());
         emit SendCommand(ADDR,CMD_WAVE_HIDE,NULL);
         SendCanCmdStart(msg.toInt());
         Judge = "OK";
@@ -282,7 +280,6 @@ void PageMag::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_INIT:
         InitSettings();
         InitTestItems();
-        SendCanCmdConfig();
         break;
     case CMD_WAVE:
         SendWave(msg);
@@ -372,7 +369,7 @@ void PageMag::ReadCanCmdStatus(QByteArray )
     MagMode = MAG_FREE;
 }
 
-void PageMag::SendCanCmdSample()
+void PageMag::SendCanCmdSample(quint8 s)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -383,13 +380,12 @@ void PageMag::SendCanCmdSample()
             tt += 0x0001<<row;
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
-      <<quint8(station)<<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(s)<<quint8(tt/256)<<quint8(tt%256);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageMag::SendCanCmdStart(quint8 pos)
+void PageMag::SendCanCmdStart(quint8 s)
 {
-    station = pos;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -399,7 +395,7 @@ void PageMag::SendCanCmdStart(quint8 pos)
             tt += 0x0001<<row;
     }
     out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
-      <<quint8(station)<<quint8(tt/256)<<quint8(tt%256);
+      <<quint8(s)<<quint8(tt/256)<<quint8(tt%256);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
@@ -412,17 +408,18 @@ void PageMag::SendCanCmdStop()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageMag::SendCanCmdConfig()
+void PageMag::SendCanCmdConfig(quint8 s)
 {
+    station = s;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     for (int row=0; row<Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             quint8 freq = FreqL.at(row);
-            if (station == WIN_ID_OUT13)
+            if (s == WIN_ID_OUT13)
                 freq = FreqL.at(row);
-            if (station == WIN_ID_OUT14)
+            if (s == WIN_ID_OUT14)
                 freq = FreqR.at(row);
             out<<quint16(0x22)<<quint8(0x05)<<quint8(0x04)<<quint8(row)
               <<quint8(Terminal1.at(row)->text().toInt())
