@@ -27,9 +27,11 @@ private slots:
     void InitButtons(void);
     void BtnJudge(int id);
     void InitSettings(void);
-    void DatSave(void);
+    void SaveSettings(void);
     void ClickItem(int r,int c);
+    void ClickOutput(int r,int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void SendCanCmdVersion(void);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 };

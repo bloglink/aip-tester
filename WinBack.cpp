@@ -23,6 +23,8 @@ void WinBack::InitWindows()
 #else
     ui->TabItems->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabOutput->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabItems->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->TabOutput->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     for (int i=0; i<ui->TabItems->columnCount(); i++) {
         for (int row=0; row<ui->TabItems->rowCount(); row++) {
@@ -37,6 +39,7 @@ void WinBack::InitWindows()
         }
     }
     connect(ui->TabItems,SIGNAL(cellClicked(int,int)),this,SLOT(ClickItem(int,int)));
+    connect(ui->TabOutput,SIGNAL(cellClicked(int,int)),this,SLOT(ClickOutput(int,int)));
 }
 
 void WinBack::InitButtons()
@@ -70,16 +73,9 @@ void WinBack::InitSettings()
     }
 
     temp = g_ini->value("OutEnable","0 1").toString().split(" ");
-    if (temp.contains("0"))
-        ui->BoxEnableOut13->setChecked(true);
-    if (temp.contains("1"))
-        ui->BoxEnableOut14->setChecked(true);
-    if (temp.contains("2"))
-        ui->BoxEnableOut15->setChecked(true);
-    if (temp.contains("3"))
-        ui->BoxEnableOut16->setChecked(true);
-    if (temp.contains("4"))
-        ui->BoxEnableOut17->setChecked(true);
+    for (int i=0; i<temp.size(); i++) {
+        ui->TabOutput->item(temp.at(i).toInt(),1)->setText("Y");
+    }
 
     QString t = g_ini->value("Number","168912000X").toString();
     ui->EditNumber->setText(t);
@@ -87,35 +83,29 @@ void WinBack::InitSettings()
     ui->HideVoltage->setChecked(g_ini->value("HideVoltage",false).toBool());
 }
 
-void WinBack::DatSave()
+void WinBack::SaveSettings()
 {
-    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_ini->setIniCodec("GB18030");
-    g_ini->beginGroup("GLOBAL");
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
     QStringList temp;
     temp.append("0");
     for (int i=0; i<ui->TabItems->rowCount(); i++) {
         if (ui->TabItems->item(i,1)->text() == "Y")
             temp.append(QString::number(i+1));
     }
-    g_ini->setValue("ItemEnable",temp.join(" "));
+    ini->setValue("ItemEnable",temp.join(" "));
 
     temp.clear();
-    if (ui->BoxEnableOut13->isChecked())
-        temp.append("0");
-    if (ui->BoxEnableOut14->isChecked())
-        temp.append("1");
-    if (ui->BoxEnableOut15->isChecked())
-        temp.append("2");
-    if (ui->BoxEnableOut16->isChecked())
-        temp.append("3");
-    if (ui->BoxEnableOut17->isChecked())
-        temp.append("4");
-    g_ini->setValue("OutEnable",temp.join(" "));
+    for (int i=0; i<ui->TabOutput->rowCount(); i++) {
+        if (ui->TabOutput->item(i,1)->text() == "Y")
+            temp.append(QString::number(i));
+    }
+    ini->setValue("OutEnable",temp.join(" "));
 
-    g_ini->setValue("Number",ui->EditNumber->text());
-    g_ini->setValue("OppositeDir",ui->OppositeDir->isChecked());
-    g_ini->setValue("HideVoltage",ui->HideVoltage->isChecked());
+    ini->setValue("Number",ui->EditNumber->text());
+    ini->setValue("OppositeDir",ui->OppositeDir->isChecked());
+    ini->setValue("HideVoltage",ui->HideVoltage->isChecked());
 }
 
 void WinBack::ClickItem(int r, int c)
@@ -128,11 +118,26 @@ void WinBack::ClickItem(int r, int c)
         ui->TabItems->item(r,c)->setText("N");
 }
 
+void WinBack::ClickOutput(int r, int c)
+{
+    if (c != 1)
+        return;
+    if (ui->TabOutput->item(r,c)->text() == "N")
+        ui->TabOutput->item(r,c)->setText("Y");
+    else
+        ui->TabOutput->item(r,c)->setText("N");
+}
+
 void WinBack::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR)
         return;
     qDebug()<<addr<<cmd<<msg;
+}
+
+void WinBack::SendCanCmdVersion()
+{
+
 }
 
 void WinBack::showEvent(QShowEvent *)
@@ -142,5 +147,5 @@ void WinBack::showEvent(QShowEvent *)
 
 void WinBack::hideEvent(QHideEvent *)
 {
-    DatSave();
+    SaveSettings();
 }
