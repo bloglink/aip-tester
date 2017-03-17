@@ -46,6 +46,7 @@ void WinBack::InitButtons()
 {
     QButtonGroup *BtnGroup = new QButtonGroup;
     BtnGroup->addButton(ui->BtnExit,Qt::Key_0);
+    BtnGroup->addButton(ui->BtnVersion,Qt::Key_1);
     connect(BtnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 
@@ -54,6 +55,18 @@ void WinBack::BtnJudge(int id)
     switch (id) {
     case Qt::Key_0:
         emit SendCommand(ADDR,CMD_JUMP,NULL);
+        break;
+    case Qt::Key_1:
+        SendCanCmdVersion(0x13);
+        SendCanCmdVersion(0x14);
+        SendCanCmdVersion(0x22);
+        SendCanCmdVersion(0x23);
+        SendCanCmdVersion(0x24);
+        SendCanCmdVersion(0x25);
+        SendCanCmdVersion(0x26);
+        SendCanCmdVersion(0x27);
+        break;
+    case Qt::Key_2:
         break;
     default:
         break;
@@ -69,7 +82,7 @@ void WinBack::InitSettings()
     for (int i=0; i<temp.size(); i++) {
         int row = temp.at(i).toInt();
         if (row > 0)
-        ui->TabItems->item(row-1,1)->setText("Y");
+            ui->TabItems->item(row-1,1)->setText("Y");
     }
 
     temp = g_ini->value("OutEnable","0 1").toString().split(" ");
@@ -130,14 +143,108 @@ void WinBack::ClickOutput(int r, int c)
 
 void WinBack::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR)
+    switch (addr) {
+    case ADDR:
+    case CAN_ID_13OUT:
+    case CAN_ID_14OUT:
+    case CAN_ID_15OUT:
+    case CAN_ID_16OUT:
+    case CAN_ID_17OUT:
+    case CAN_ID_DCR:
+    case CAN_ID_INR:
+    case CAN_ID_IMP:
+    case CAN_ID_IND:
+    case CAN_ID_PWR:
+        break;
+    default:
         return;
-    qDebug()<<addr<<cmd<<msg;
+        break;
+    }
+    switch (cmd) {
+    case CMD_CAN:
+        ExcuteCanCmd(addr,msg);
+        break;
+    default:
+        break;
+    }
 }
 
-void WinBack::SendCanCmdVersion()
+void WinBack::ExcuteCanCmd(quint16 addr, QByteArray msg)
 {
+    if (addr==CAN_ID_DCR && msg.size()==8) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(0,2)->setText(v);
+        ui->TabItems->item(1,2)->setText(v);
+    }
+    if (addr==CAN_ID_INR && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(2,2)->setText(v);
+        ui->TabItems->item(3,2)->setText(v);
+        ui->TabItems->item(4,2)->setText(v);
+    }
+    if (addr==CAN_ID_IMP && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(5,2)->setText(v);
+    }
+    if (addr==CAN_ID_IND && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(6,2)->setText(v);
+    }
+    if (addr==CAN_ID_PWR && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(7,2)->setText(v);
+        ui->TabItems->item(8,2)->setText(v);
+        ui->TabItems->item(9,2)->setText(v);
+    }
+    if (addr==CAN_ID_13OUT && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(0,2)->setText(v);
+    }
+    if (addr==CAN_ID_14OUT && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(1,2)->setText(v);
+    }
+    if (addr==CAN_ID_15OUT && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(1,2)->setText(v);
+    }
+    if (addr==CAN_ID_16OUT && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(1,2)->setText(v);
+    }
+    if (addr==CAN_ID_17OUT && msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(1,2)->setText(v);
+    }
+}
 
+void WinBack::SendCanCmdVersion(quint16 id)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(id)<<quint8(0x01)<<quint8(0x08);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void WinBack::showEvent(QShowEvent *)

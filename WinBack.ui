@@ -19,7 +19,7 @@
      <property name="title">
       <string>后台设置:请谨慎操作</string>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,0,0,0">
+     <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,2,1,0">
       <item row="2" column="0" colspan="2">
        <widget class="QTableWidget" name="TabOutput">
         <attribute name="verticalHeaderVisible">

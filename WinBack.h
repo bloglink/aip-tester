@@ -31,7 +31,8 @@ private slots:
     void ClickItem(int r,int c);
     void ClickOutput(int r,int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
-    void SendCanCmdVersion(void);
+    void ExcuteCanCmd(quint16 addr,QByteArray msg);
+    void SendCanCmdVersion(quint16 id);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 };
