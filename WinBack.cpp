@@ -28,6 +28,10 @@ void WinBack::InitWindows()
 #endif
     for (int i=0; i<ui->TabItems->columnCount(); i++) {
         for (int row=0; row<ui->TabItems->rowCount(); row++) {
+            if (i>=2) {
+                ui->TabItems->setItem(row,i,new QTableWidgetItem);
+                ui->TabItems->item(row,i)->setText("---");
+            }
             ui->TabItems->item(row,i)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
             ui->TabItems->item(row,i)->setTextAlignment(Qt::AlignCenter);
         }
@@ -47,6 +51,7 @@ void WinBack::InitButtons()
     QButtonGroup *BtnGroup = new QButtonGroup;
     BtnGroup->addButton(ui->BtnExit,Qt::Key_0);
     BtnGroup->addButton(ui->BtnVersion,Qt::Key_1);
+    BtnGroup->addButton(ui->BtnDcrParam,Qt::Key_2);
     connect(BtnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 
@@ -67,6 +72,7 @@ void WinBack::BtnJudge(int id)
         SendCanCmdVersion(0x27);
         break;
     case Qt::Key_2:
+        SendCanCmdParam(0x22);
         break;
     default:
         break;
@@ -171,70 +177,38 @@ void WinBack::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 
 void WinBack::ExcuteCanCmd(quint16 addr, QByteArray msg)
 {
-    if (addr==CAN_ID_DCR && msg.size()==8) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabItems->item(0,2)->setText(v);
-        ui->TabItems->item(1,2)->setText(v);
-    }
-    if (addr==CAN_ID_INR && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabItems->item(2,2)->setText(v);
-        ui->TabItems->item(3,2)->setText(v);
-        ui->TabItems->item(4,2)->setText(v);
-    }
-    if (addr==CAN_ID_IMP && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabItems->item(5,2)->setText(v);
-    }
-    if (addr==CAN_ID_IND && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabItems->item(6,2)->setText(v);
-    }
-    if (addr==CAN_ID_PWR && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabItems->item(7,2)->setText(v);
-        ui->TabItems->item(8,2)->setText(v);
-        ui->TabItems->item(9,2)->setText(v);
-    }
-    if (addr==CAN_ID_13OUT && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabOutput->item(0,2)->setText(v);
-    }
-    if (addr==CAN_ID_14OUT && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabOutput->item(1,2)->setText(v);
-    }
-    if (addr==CAN_ID_15OUT && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabOutput->item(1,2)->setText(v);
-    }
-    if (addr==CAN_ID_16OUT && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabOutput->item(1,2)->setText(v);
-    }
-    if (addr==CAN_ID_17OUT && msg.size()==0x08) {
-        QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        ui->TabOutput->item(1,2)->setText(v);
+    if (!Testing)
+        return;
+    switch (addr) {
+    case CAN_ID_DCR:
+        ReadCanCmdDcr(msg);
+        break;
+    case CAN_ID_INR:
+        ReadCanCmdInr(msg);
+        break;
+    case CAN_ID_IMP:
+        ReadCanCmdImp(msg);
+        break;
+    case CAN_ID_IND:
+        ReadCanCmdInd(msg);
+        break;
+    case CAN_ID_PWR:
+        ReadCanCmdPwr(msg);
+        break;
+    case CAN_ID_13OUT:
+        ReadCanCmdOut13(msg);
+        break;
+    case CAN_ID_14OUT:
+        ReadCanCmdOut14(msg);
+        break;
+    case CAN_ID_15OUT:
+        break;
+    case CAN_ID_16OUT:
+        break;
+    case CAN_ID_17OUT:
+        break;
+    default:
+        break;
     }
 }
 
@@ -247,12 +221,144 @@ void WinBack::SendCanCmdVersion(quint16 id)
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void WinBack::SendCanCmdParam(quint16 id)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(id)<<quint8(0x02)<<quint8(0x06)<<quint8(0xEE);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void WinBack::ReadCanCmdDcr(QByteArray msg)
+{
+    if (msg.size()==8 && quint8(msg.at(0))==0x08) {
+        QString v;
+        for (int i=1; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        v.insert(1,".");
+        ui->TabItems->item(0,2)->setText(v);
+        ui->TabItems->item(1,2)->setText(v);
+    }
+    if (msg.size()==4 && quint8(msg.at(0))==0x06) {
+        quint8 c = quint8(msg.at(1));
+        quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
+        switch (c) {
+        case 1:
+            ui->EditDcrK1->setText(QString::number(k));
+            break;
+        case 2:
+            ui->EditDcrK2->setText(QString::number(k));
+            break;
+        case 3:
+            ui->EditDcrK3->setText(QString::number(k));
+            break;
+        case 4:
+            ui->EditDcrK4->setText(QString::number(k));
+            break;
+        case 5:
+            ui->EditDcrK5->setText(QString::number(k));
+            break;
+        case 6:
+            ui->EditDcrK6->setText(QString::number(k));
+            break;
+        case 7:
+            ui->EditDcrK7->setText(QString::number(k));
+            break;
+        case 8:
+            ui->EditDcrK8->setText(QString::number(k));
+            break;
+        }
+    }
+}
+
+void WinBack::ReadCanCmdInr(QByteArray msg)
+{
+    emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
+    if (msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(2,2)->setText(v);
+        ui->TabItems->item(3,2)->setText(v);
+        ui->TabItems->item(4,2)->setText(v);
+    }
+    if (msg.size()==6 && quint8(msg.at(0))==0x06) {
+        quint8 c = quint8(msg.at(1));
+        quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
+        quint16 b = quint16(msg.at(4))*256+quint8(msg.at(5));
+        if (c<6) {
+            ui->TabItems->item(2,c*2+3)->setText(QString::number(k));
+            ui->TabItems->item(2,c*2+4)->setText(QString::number(b));
+        } else {
+            ui->TabItems->item(3,(c-6)*2+3)->setText(QString::number(k));
+            ui->TabItems->item(3,(c-6)*2+4)->setText(QString::number(b));
+            ui->TabItems->item(4,(c-6)*2+3)->setText(QString::number(k));
+            ui->TabItems->item(4,(c-6)*2+4)->setText(QString::number(b));
+        }
+    }
+}
+
+void WinBack::ReadCanCmdImp(QByteArray msg)
+{
+    if (msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(5,2)->setText(v);
+    }
+}
+
+void WinBack::ReadCanCmdInd(QByteArray msg)
+{
+    if (msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(6,2)->setText(v);
+    }
+}
+
+void WinBack::ReadCanCmdPwr(QByteArray msg)
+{
+    if (msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabItems->item(7,2)->setText(v);
+        ui->TabItems->item(8,2)->setText(v);
+        ui->TabItems->item(9,2)->setText(v);
+    }
+}
+
+void WinBack::ReadCanCmdOut13(QByteArray msg)
+{
+    if (msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(0,2)->setText(v);
+    }
+}
+
+void WinBack::ReadCanCmdOut14(QByteArray msg)
+{
+    if (msg.size()==0x08) {
+        QString v;
+        for (int i=0; i<msg.size(); i++)
+            v.append(QString::number(msg.mid(i,1).toInt()));
+        ui->TabOutput->item(1,2)->setText(v);
+    }
+}
+
 void WinBack::showEvent(QShowEvent *)
 {
     InitSettings();
+    Testing = true;
 }
 
 void WinBack::hideEvent(QHideEvent *)
 {
     SaveSettings();
+    Testing = false;
 }

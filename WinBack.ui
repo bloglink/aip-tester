@@ -15,691 +15,782 @@
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
-    <widget class="QGroupBox" name="groupBox">
-     <property name="title">
-      <string>后台设置:请谨慎操作</string>
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
      </property>
-     <layout class="QGridLayout" name="gridLayout_2" rowstretch="0,2,1,0">
-      <item row="2" column="0" colspan="2">
-       <widget class="QTableWidget" name="TabOutput">
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <row>
-         <property name="text">
-          <string>输出板</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>选中</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>固件版本</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>K值</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>B值</string>
-         </property>
-        </row>
-        <column>
-         <property name="text">
-          <string>输出板</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>选中</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>固件版本</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>K值</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>B值</string>
-         </property>
-        </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string>输出13</string>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="0" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="0" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="1" column="0">
-         <property name="text">
-          <string>输出14</string>
-         </property>
-        </item>
-        <item row="1" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="1" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="1" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="1" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="2" column="0">
-         <property name="text">
-          <string>输出15</string>
-         </property>
-        </item>
-        <item row="2" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="2" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="2" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="2" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="3" column="0">
-         <property name="text">
-          <string>输出16</string>
-         </property>
-        </item>
-        <item row="3" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="3" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="3" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="3" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="4" column="0">
-         <property name="text">
-          <string>输出17</string>
-         </property>
-        </item>
-        <item row="4" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="4" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="4" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="4" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="1" column="0" colspan="2">
-       <widget class="QTableWidget" name="TabItems">
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <row>
-         <property name="text">
-          <string>新建行</string>
-         </property>
-        </row>
-        <column>
-         <property name="text">
-          <string>测试项目</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>选中</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>固件版本</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>K值</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>B值</string>
-         </property>
-        </column>
-        <item row="0" column="0">
-         <property name="text">
-          <string>电阻</string>
-         </property>
-        </item>
-        <item row="0" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="0" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="0" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="0" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="1" column="0">
-         <property name="text">
-          <string>反嵌</string>
-         </property>
-        </item>
-        <item row="1" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="1" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="1" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="1" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="2" column="0">
-         <property name="text">
-          <string>绝缘</string>
-         </property>
-        </item>
-        <item row="2" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="2" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="2" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="2" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="3" column="0">
-         <property name="text">
-          <string>交耐</string>
-         </property>
-        </item>
-        <item row="3" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="3" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="3" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="3" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="4" column="0">
-         <property name="text">
-          <string>直耐</string>
-         </property>
-        </item>
-        <item row="4" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="4" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="4" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="4" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="5" column="0">
-         <property name="text">
-          <string>匝间</string>
-         </property>
-        </item>
-        <item row="5" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="5" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="5" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="5" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="6" column="0">
-         <property name="text">
-          <string>电感</string>
-         </property>
-        </item>
-        <item row="6" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="6" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="6" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="6" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="7" column="0">
-         <property name="text">
-          <string>功率</string>
-         </property>
-        </item>
-        <item row="7" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="7" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="7" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="7" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="8" column="0">
-         <property name="text">
-          <string>低启</string>
-         </property>
-        </item>
-        <item row="8" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="8" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="8" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="8" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="9" column="0">
-         <property name="text">
-          <string>堵转</string>
-         </property>
-        </item>
-        <item row="9" column="1">
-         <property name="text">
-          <string>N</string>
-         </property>
-        </item>
-        <item row="9" column="2">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="9" column="3">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-        <item row="9" column="4">
-         <property name="text">
-          <string>---</string>
-         </property>
-        </item>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="2">
-       <widget class="QWidget" name="widget" native="true">
-        <layout class="QGridLayout" name="gridLayout_3">
-         <item row="1" column="1">
-          <widget class="QLineEdit" name="lineEdit_2">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>35</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="3">
-          <widget class="QLineEdit" name="EditNumber">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>35</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="label_7">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string>工位数量：</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="3">
-          <widget class="QLineEdit" name="text_station_number">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>35</height>
-            </size>
-           </property>
-          </widget>
-         </item>
-         <item row="1" column="0">
-          <widget class="QLabel" name="label_6">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string>版本：</string>
-           </property>
-          </widget>
+     <widget class="QWidget" name="tab">
+      <attribute name="title">
+       <string>系统</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout" stretch="0,11,6,0">
+       <item>
+        <widget class="QWidget" name="widget" native="true">
+         <layout class="QGridLayout" name="gridLayout_3">
+          <item row="1" column="1">
+           <widget class="QLineEdit" name="lineEdit_2">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>35</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="3">
+           <widget class="QLineEdit" name="EditNumber">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>35</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="2">
+           <widget class="QLabel" name="label_7">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>工位数量：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="3">
+           <widget class="QLineEdit" name="text_station_number">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>35</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="0">
+           <widget class="QLabel" name="label_6">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>版本：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="1">
+           <widget class="QLineEdit" name="lineEdit">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>35</height>
+             </size>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label_5">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>系统型号：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="2">
+           <widget class="QLabel" name="label_Factory_number">
+            <property name="font">
+             <font>
+              <pointsize>11</pointsize>
+             </font>
+            </property>
+            <property name="styleSheet">
+             <string notr="true"/>
+            </property>
+            <property name="text">
+             <string>出厂编号：</string>
+            </property>
+           </widget>
+          </item>
+          <item row="0" column="4">
+           <widget class="QCheckBox" name="HideVoltage">
+            <property name="text">
+             <string>绝缘板不显示实际电压</string>
+            </property>
+           </widget>
+          </item>
+          <item row="1" column="4">
+           <widget class="QCheckBox" name="OppositeDir">
+            <property name="text">
+             <string>电阻板磁旋反转</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="TabItems">
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>新建行</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>测试项目</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>选中</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>固件版本</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>电阻</string>
+          </property>
          </item>
          <item row="0" column="1">
-          <widget class="QLineEdit" name="lineEdit">
-           <property name="minimumSize">
-            <size>
-             <width>0</width>
-             <height>35</height>
-            </size>
-           </property>
-          </widget>
+          <property name="text">
+           <string>N</string>
+          </property>
          </item>
-         <item row="0" column="0">
-          <widget class="QLabel" name="label_5">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string>系统型号：</string>
-           </property>
-          </widget>
+         <item row="0" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>反嵌</string>
+          </property>
+         </item>
+         <item row="1" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
          </item>
          <item row="1" column="2">
-          <widget class="QLabel" name="label_Factory_number">
-           <property name="font">
-            <font>
-             <pointsize>11</pointsize>
-            </font>
-           </property>
-           <property name="styleSheet">
-            <string notr="true"/>
-           </property>
-           <property name="text">
-            <string>出厂编号：</string>
-           </property>
-          </widget>
+          <property name="text">
+           <string>---</string>
+          </property>
          </item>
-         <item row="0" column="4">
-          <widget class="QCheckBox" name="HideVoltage">
-           <property name="text">
-            <string>绝缘板不显示实际电压</string>
-           </property>
-          </widget>
+         <item row="2" column="0">
+          <property name="text">
+           <string>绝缘</string>
+          </property>
          </item>
-         <item row="1" column="4">
-          <widget class="QCheckBox" name="OppositeDir">
-           <property name="text">
-            <string>电阻板磁旋反转</string>
-           </property>
-          </widget>
+         <item row="2" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
          </item>
-        </layout>
-       </widget>
-      </item>
-      <item row="3" column="0" colspan="2">
-       <widget class="QWidget" name="widget_2" native="true">
-        <layout class="QHBoxLayout" name="horizontalLayout">
-         <item>
-          <spacer name="horizontalSpacer">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
+         <item row="2" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
          </item>
-         <item>
-          <widget class="QPushButton" name="BtnVersion">
-           <property name="minimumSize">
-            <size>
-             <width>97</width>
-             <height>44</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>读取固件版本</string>
-           </property>
-          </widget>
+         <item row="3" column="0">
+          <property name="text">
+           <string>交耐</string>
+          </property>
          </item>
-         <item>
-          <widget class="QPushButton" name="BtnExit">
-           <property name="minimumSize">
-            <size>
-             <width>97</width>
-             <height>44</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>保存退出</string>
-           </property>
-          </widget>
+         <item row="3" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
          </item>
-        </layout>
-       </widget>
-      </item>
-     </layout>
+         <item row="3" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>直耐</string>
+          </property>
+         </item>
+         <item row="4" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="4" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="5" column="0">
+          <property name="text">
+           <string>匝间</string>
+          </property>
+         </item>
+         <item row="5" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="5" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="6" column="0">
+          <property name="text">
+           <string>电感</string>
+          </property>
+         </item>
+         <item row="6" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="6" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="7" column="0">
+          <property name="text">
+           <string>功率</string>
+          </property>
+         </item>
+         <item row="7" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="7" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="8" column="0">
+          <property name="text">
+           <string>低启</string>
+          </property>
+         </item>
+         <item row="8" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="8" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="9" column="0">
+          <property name="text">
+           <string>堵转</string>
+          </property>
+         </item>
+         <item row="9" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="9" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QTableWidget" name="TabOutput">
+         <attribute name="verticalHeaderVisible">
+          <bool>false</bool>
+         </attribute>
+         <row>
+          <property name="text">
+           <string>输出板</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>选中</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>固件版本</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>K值</string>
+          </property>
+         </row>
+         <row>
+          <property name="text">
+           <string>B值</string>
+          </property>
+         </row>
+         <column>
+          <property name="text">
+           <string>输出板</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>选中</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>固件版本</string>
+          </property>
+         </column>
+         <item row="0" column="0">
+          <property name="text">
+           <string>输出13</string>
+          </property>
+         </item>
+         <item row="0" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="0" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="1" column="0">
+          <property name="text">
+           <string>输出14</string>
+          </property>
+         </item>
+         <item row="1" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="1" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="2" column="0">
+          <property name="text">
+           <string>输出15</string>
+          </property>
+         </item>
+         <item row="2" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="2" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="3" column="0">
+          <property name="text">
+           <string>输出16</string>
+          </property>
+         </item>
+         <item row="3" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="3" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+         <item row="4" column="0">
+          <property name="text">
+           <string>输出17</string>
+          </property>
+         </item>
+         <item row="4" column="1">
+          <property name="text">
+           <string>N</string>
+          </property>
+         </item>
+         <item row="4" column="2">
+          <property name="text">
+           <string>---</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_2" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout">
+          <item>
+           <spacer name="horizontalSpacer">
+            <property name="orientation">
+             <enum>Qt::Horizontal</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>40</width>
+              <height>20</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="BtnVersion">
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>读取固件版本</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="BtnExit">
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>保存退出</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_2">
+      <attribute name="title">
+       <string>电阻</string>
+      </attribute>
+      <layout class="QGridLayout" name="gridLayout_4">
+       <item row="6" column="2">
+        <widget class="QPushButton" name="BtnVersion_9">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试100kohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="pushButton">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>清零调试参数</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QPushButton" name="BtnDcrParam">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>读取调试参数</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="2">
+        <widget class="QPushButton" name="BtnVersion_6">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试1kohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="2">
+        <widget class="QPushButton" name="BtnVersion_7">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试10kohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="2">
+        <widget class="QPushButton" name="BtnVersion_2">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试100mohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="2">
+        <widget class="QPushButton" name="BtnVersion_8">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试1Mohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="2">
+        <widget class="QPushButton" name="BtnVersion_5">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试100ohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QPushButton" name="BtnVersion333">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>下发调试参数</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1">
+        <widget class="QLineEdit" name="EditDcrK5">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QLineEdit" name="EditDcrK3">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QLineEdit" name="EditDcrK2">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QPushButton" name="BtnVersion_3">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试1ohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QLineEdit" name="EditDcrK1">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QPushButton" name="BtnVersion_4">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试10ohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="0">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="5" column="1">
+        <widget class="QLineEdit" name="EditDcrK6">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QLineEdit" name="EditDcrK7">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QLineEdit" name="EditDcrK8">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="1">
+        <widget class="QLineEdit" name="EditDcrK4">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>35</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="4">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
   </layout>
