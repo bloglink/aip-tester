@@ -51,7 +51,10 @@ void WinBack::InitButtons()
     QButtonGroup *BtnGroup = new QButtonGroup;
     BtnGroup->addButton(ui->BtnExit,Qt::Key_0);
     BtnGroup->addButton(ui->BtnVersion,Qt::Key_1);
-    BtnGroup->addButton(ui->BtnDcrParam,Qt::Key_2);
+    BtnGroup->addButton(ui->BtnDcrParamRead,Qt::Key_2);
+    BtnGroup->addButton(ui->BtnDcrParamSend,Qt::Key_3);
+    BtnGroup->addButton(ui->BtnDcrParamClear,Qt::Key_4);
+
     connect(BtnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 
@@ -64,6 +67,9 @@ void WinBack::BtnJudge(int id)
     case Qt::Key_1:
         SendCanCmdVersion(0x13);
         SendCanCmdVersion(0x14);
+        SendCanCmdVersion(0x15);
+        SendCanCmdVersion(0x16);
+        SendCanCmdVersion(0x17);
         SendCanCmdVersion(0x22);
         SendCanCmdVersion(0x23);
         SendCanCmdVersion(0x24);
@@ -73,6 +79,13 @@ void WinBack::BtnJudge(int id)
         break;
     case Qt::Key_2:
         SendCanCmdParam(0x22);
+        break;
+    case Qt::Key_3:
+        SendCanCmdParamDcr();
+        break;
+    case Qt::Key_4:
+        ClearParamDcr();
+        SendCanCmdParamDcr();
         break;
     default:
         break;
@@ -230,6 +243,27 @@ void WinBack::SendCanCmdParam(quint16 id)
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void WinBack::SendCanCmdParamDcr()
+{
+    QList<int>k;
+    k.append(ui->EditDcrK1->text().toInt());
+    k.append(ui->EditDcrK2->text().toInt());
+    k.append(ui->EditDcrK3->text().toInt());
+    k.append(ui->EditDcrK4->text().toInt());
+    k.append(ui->EditDcrK5->text().toInt());
+    k.append(ui->EditDcrK6->text().toInt());
+    k.append(ui->EditDcrK7->text().toInt());
+    k.append(ui->EditDcrK8->text().toInt());
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    for (int i=0; i<k.size(); i++) {
+        out <<quint16(0x22)<<quint8(0x04)<<quint8(0x06)<<quint8(i+1)
+           <<quint8(k.at(i)/256)<<quint8(k.at(i)%256);
+    }
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
 void WinBack::ReadCanCmdDcr(QByteArray msg)
 {
     if (msg.size()==8 && quint8(msg.at(0))==0x08) {
@@ -349,6 +383,18 @@ void WinBack::ReadCanCmdOut14(QByteArray msg)
             v.append(QString::number(msg.mid(i,1).toInt()));
         ui->TabOutput->item(1,2)->setText(v);
     }
+}
+
+void WinBack::ClearParamDcr()
+{
+    ui->EditDcrK1->setText("16384");
+    ui->EditDcrK2->setText("16384");
+    ui->EditDcrK3->setText("16384");
+    ui->EditDcrK4->setText("16384");
+    ui->EditDcrK5->setText("16384");
+    ui->EditDcrK6->setText("16384");
+    ui->EditDcrK7->setText("16384");
+    ui->EditDcrK8->setText("16384");
 }
 
 void WinBack::showEvent(QShowEvent *)

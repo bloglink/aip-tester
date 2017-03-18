@@ -553,21 +553,8 @@
          </property>
         </widget>
        </item>
-       <item row="2" column="3">
-        <widget class="QPushButton" name="pushButton">
-         <property name="minimumSize">
-          <size>
-           <width>97</width>
-           <height>44</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>清零调试参数</string>
-         </property>
-        </widget>
-       </item>
        <item row="0" column="3">
-        <widget class="QPushButton" name="BtnDcrParam">
+        <widget class="QPushButton" name="BtnDcrParamRead">
          <property name="minimumSize">
           <size>
            <width>97</width>
@@ -641,19 +628,6 @@
          </property>
          <property name="text">
           <string>测试100ohm</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QPushButton" name="BtnVersion333">
-         <property name="minimumSize">
-          <size>
-           <width>97</width>
-           <height>44</height>
-          </size>
-         </property>
-         <property name="text">
-          <string>下发调试参数</string>
          </property>
         </widget>
        </item>
@@ -788,6 +762,32 @@
           </size>
          </property>
         </spacer>
+       </item>
+       <item row="1" column="3">
+        <widget class="QPushButton" name="BtnDcrParamClear">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>清零调试参数</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QPushButton" name="BtnDcrParamSend">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>下发调试参数</string>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
