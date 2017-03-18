@@ -16,10 +16,19 @@
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="0">
     <widget class="QTabWidget" name="tabWidget">
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>44</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
      <property name="currentIndex">
       <number>1</number>
      </property>
-     <widget class="QWidget" name="tab">
+     <widget class="QWidget" name="TabSys">
       <attribute name="title">
        <string>系统</string>
       </attribute>
@@ -535,13 +544,13 @@
        </item>
       </layout>
      </widget>
-     <widget class="QWidget" name="tab_2">
+     <widget class="QWidget" name="TabDcr">
       <attribute name="title">
        <string>电阻</string>
       </attribute>
       <layout class="QGridLayout" name="gridLayout_4">
-       <item row="6" column="2">
-        <widget class="QPushButton" name="BtnVersion_9">
+       <item row="1" column="4">
+        <widget class="QPushButton" name="BtnDcrParamClear">
          <property name="minimumSize">
           <size>
            <width>97</width>
@@ -549,11 +558,11 @@
           </size>
          </property>
          <property name="text">
-          <string>测试100kohm</string>
+          <string>清零调试参数</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="3">
+       <item row="0" column="4">
         <widget class="QPushButton" name="BtnDcrParamRead">
          <property name="minimumSize">
           <size>
@@ -566,21 +575,49 @@
          </property>
         </widget>
        </item>
-       <item row="4" column="2">
-        <widget class="QPushButton" name="BtnVersion_6">
+       <item row="2" column="5">
+        <spacer name="horizontalSpacer_3">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK2">
          <property name="minimumSize">
           <size>
            <width>97</width>
            <height>44</height>
           </size>
          </property>
-         <property name="text">
-          <string>测试1kohm</string>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="5" column="2">
-        <widget class="QPushButton" name="BtnVersion_7">
+       <item row="2" column="4">
+        <widget class="QPushButton" name="BtnDcrParamSend">
          <property name="minimumSize">
           <size>
            <width>97</width>
@@ -588,112 +625,119 @@
           </size>
          </property>
          <property name="text">
-          <string>测试10kohm</string>
+          <string>下发调试参数</string>
          </property>
         </widget>
        </item>
        <item row="0" column="2">
-        <widget class="QPushButton" name="BtnVersion_2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK1">
          <property name="minimumSize">
           <size>
            <width>97</width>
            <height>44</height>
           </size>
          </property>
-         <property name="text">
-          <string>测试100mohm</string>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="7" column="2">
-        <widget class="QPushButton" name="BtnVersion_8">
+       <item row="4" column="2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK5">
          <property name="minimumSize">
           <size>
            <width>97</width>
            <height>44</height>
           </size>
          </property>
-         <property name="text">
-          <string>测试1Mohm</string>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
        <item row="3" column="2">
-        <widget class="QPushButton" name="BtnVersion_5">
+        <widget class="QDoubleSpinBox" name="BoxDcrK4">
          <property name="minimumSize">
           <size>
            <width>97</width>
            <height>44</height>
           </size>
          </property>
-         <property name="text">
-          <string>测试100ohm</string>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="4" column="1">
-        <widget class="QLineEdit" name="EditDcrK5">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="1">
-        <widget class="QLineEdit" name="EditDcrK3">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="1">
-        <widget class="QLineEdit" name="EditDcrK2">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QPushButton" name="BtnVersion_3">
+       <item row="5" column="2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK6">
          <property name="minimumSize">
           <size>
            <width>97</width>
            <height>44</height>
           </size>
          </property>
-         <property name="text">
-          <string>测试1ohm</string>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
          </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLineEdit" name="EditDcrK1">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QPushButton" name="BtnVersion_4">
-         <property name="minimumSize">
-          <size>
-           <width>97</width>
-           <height>44</height>
-          </size>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
          </property>
-         <property name="text">
-          <string>测试10ohm</string>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
@@ -710,61 +754,143 @@
          </property>
         </spacer>
        </item>
-       <item row="5" column="1">
-        <widget class="QLineEdit" name="EditDcrK6">
+       <item row="6" column="2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK7">
          <property name="minimumSize">
           <size>
-           <width>0</width>
-           <height>35</height>
+           <width>97</width>
+           <height>44</height>
           </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="6" column="1">
-        <widget class="QLineEdit" name="EditDcrK7">
+       <item row="2" column="2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK3">
          <property name="minimumSize">
           <size>
-           <width>0</width>
-           <height>35</height>
+           <width>97</width>
+           <height>44</height>
           </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
          </property>
         </widget>
        </item>
-       <item row="7" column="1">
-        <widget class="QLineEdit" name="EditDcrK8">
+       <item row="7" column="2">
+        <widget class="QDoubleSpinBox" name="BoxDcrK8">
          <property name="minimumSize">
           <size>
-           <width>0</width>
-           <height>35</height>
+           <width>97</width>
+           <height>44</height>
           </size>
+         </property>
+         <property name="focusPolicy">
+          <enum>Qt::ClickFocus</enum>
+         </property>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
+         </property>
+         <property name="buttonSymbols">
+          <enum>QAbstractSpinBox::NoButtons</enum>
+         </property>
+         <property name="decimals">
+          <number>0</number>
+         </property>
+         <property name="maximum">
+          <double>65535.000000000000000</double>
+         </property>
+         <property name="value">
+          <double>16384.000000000000000</double>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade1">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试100mohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade2">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试1ohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade3">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试10ohm</string>
          </property>
         </widget>
        </item>
        <item row="3" column="1">
-        <widget class="QLineEdit" name="EditDcrK4">
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>35</height>
-          </size>
+        <widget class="QPushButton" name="BtnDcrGrade4">
+         <property name="enabled">
+          <bool>false</bool>
          </property>
-        </widget>
-       </item>
-       <item row="2" column="4">
-        <spacer name="horizontalSpacer_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item row="1" column="3">
-        <widget class="QPushButton" name="BtnDcrParamClear">
          <property name="minimumSize">
           <size>
            <width>97</width>
@@ -772,12 +898,15 @@
           </size>
          </property>
          <property name="text">
-          <string>清零调试参数</string>
+          <string>测试100ohm</string>
          </property>
         </widget>
        </item>
-       <item row="2" column="3">
-        <widget class="QPushButton" name="BtnDcrParamSend">
+       <item row="4" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade5">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
          <property name="minimumSize">
           <size>
            <width>97</width>
@@ -785,7 +914,55 @@
           </size>
          </property>
          <property name="text">
-          <string>下发调试参数</string>
+          <string>测试1kohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade6">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试10kohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade7">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试100kohm</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="1">
+        <widget class="QPushButton" name="BtnDcrGrade8">
+         <property name="enabled">
+          <bool>false</bool>
+         </property>
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>测试1Mohm</string>
          </property>
         </widget>
        </item>

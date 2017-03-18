@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QWidget>
 #include <QSettings>
+#include <QDoubleSpinBox>
 #include "define.h"
 
 namespace Ui {
@@ -35,6 +36,7 @@ private slots:
     void SendCanCmdVersion(quint16 id);
     void SendCanCmdParam(quint16 id);
     void SendCanCmdParamDcr(void);
+    void SendCanCmdStartDcr(quint8 gear);
     void ReadCanCmdDcr(QByteArray msg);
     void ReadCanCmdInr(QByteArray msg);
     void ReadCanCmdImp(QByteArray msg);
@@ -47,6 +49,7 @@ private slots:
     virtual void hideEvent(QHideEvent *);
 private:
     bool Testing;
+    QList<QDoubleSpinBox*> BoxDcr;
 };
 
 #endif // WINBACK_H

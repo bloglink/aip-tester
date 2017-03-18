@@ -44,6 +44,14 @@ void WinBack::InitWindows()
     }
     connect(ui->TabItems,SIGNAL(cellClicked(int,int)),this,SLOT(ClickItem(int,int)));
     connect(ui->TabOutput,SIGNAL(cellClicked(int,int)),this,SLOT(ClickOutput(int,int)));
+    BoxDcr.append(ui->BoxDcrK1);
+    BoxDcr.append(ui->BoxDcrK2);
+    BoxDcr.append(ui->BoxDcrK3);
+    BoxDcr.append(ui->BoxDcrK4);
+    BoxDcr.append(ui->BoxDcrK5);
+    BoxDcr.append(ui->BoxDcrK6);
+    BoxDcr.append(ui->BoxDcrK7);
+    BoxDcr.append(ui->BoxDcrK8);
 }
 
 void WinBack::InitButtons()
@@ -54,6 +62,7 @@ void WinBack::InitButtons()
     BtnGroup->addButton(ui->BtnDcrParamRead,Qt::Key_2);
     BtnGroup->addButton(ui->BtnDcrParamSend,Qt::Key_3);
     BtnGroup->addButton(ui->BtnDcrParamClear,Qt::Key_4);
+    BtnGroup->addButton(ui->BtnDcrGrade1,Qt::Key_5);
 
     connect(BtnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
@@ -87,6 +96,9 @@ void WinBack::BtnJudge(int id)
         ClearParamDcr();
         SendCanCmdParamDcr();
         break;
+    case Qt::Key_5:
+        SendCanCmdStartDcr(1);
+        break;
     default:
         break;
     }
@@ -94,25 +106,28 @@ void WinBack::BtnJudge(int id)
 
 void WinBack::InitSettings()
 {
-    QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_ini->setIniCodec("GB18030");
-    g_ini->beginGroup("GLOBAL");
-    QStringList temp = g_ini->value("ItemEnable","1 2 3 4 6").toString().split(" ");
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
+    QStringList temp = ini->value("ItemEnable","1 2 3 4 6").toString().split(" ");
     for (int i=0; i<temp.size(); i++) {
         int row = temp.at(i).toInt();
         if (row > 0)
             ui->TabItems->item(row-1,1)->setText("Y");
     }
 
-    temp = g_ini->value("OutEnable","0 1").toString().split(" ");
+    temp = ini->value("OutEnable","0 1").toString().split(" ");
     for (int i=0; i<temp.size(); i++) {
         ui->TabOutput->item(temp.at(i).toInt(),1)->setText("Y");
     }
 
-    QString t = g_ini->value("Number","168912000X").toString();
+    QString t = ini->value("Number","168912000X").toString();
     ui->EditNumber->setText(t);
-    ui->OppositeDir->setChecked(g_ini->value("OppositeDir",false).toBool());
-    ui->HideVoltage->setChecked(g_ini->value("HideVoltage",false).toBool());
+    ui->OppositeDir->setChecked(ini->value("OppositeDir",false).toBool());
+    ui->HideVoltage->setChecked(ini->value("HideVoltage",false).toBool());
+    temp = ini->value("KDCR","16384").toString().split(" ");
+    for (int i=0; i<qMin(temp.size(),BoxDcr.size()); i++)
+        BoxDcr.at(i)->setValue(temp.at(i).toInt());
 }
 
 void WinBack::SaveSettings()
@@ -134,10 +149,14 @@ void WinBack::SaveSettings()
             temp.append(QString::number(i));
     }
     ini->setValue("OutEnable",temp.join(" "));
-
     ini->setValue("Number",ui->EditNumber->text());
     ini->setValue("OppositeDir",ui->OppositeDir->isChecked());
     ini->setValue("HideVoltage",ui->HideVoltage->isChecked());
+
+    temp.clear();
+    for (int i=0; i<BoxDcr.size(); i++)
+        temp.append(QString::number(BoxDcr.at(i)->value()));
+    ini->setValue("KDCR",temp.join(" "));
 }
 
 void WinBack::ClickItem(int r, int c)
@@ -245,22 +264,27 @@ void WinBack::SendCanCmdParam(quint16 id)
 
 void WinBack::SendCanCmdParamDcr()
 {
-    QList<int>k;
-    k.append(ui->EditDcrK1->text().toInt());
-    k.append(ui->EditDcrK2->text().toInt());
-    k.append(ui->EditDcrK3->text().toInt());
-    k.append(ui->EditDcrK4->text().toInt());
-    k.append(ui->EditDcrK5->text().toInt());
-    k.append(ui->EditDcrK6->text().toInt());
-    k.append(ui->EditDcrK7->text().toInt());
-    k.append(ui->EditDcrK8->text().toInt());
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    for (int i=0; i<k.size(); i++) {
+    for (int i=0; i<BoxDcr.size(); i++) {
         out <<quint16(0x22)<<quint8(0x04)<<quint8(0x06)<<quint8(i+1)
-           <<quint8(k.at(i)/256)<<quint8(k.at(i)%256);
+           <<quint8(int(BoxDcr.at(i)->value())/256)
+          <<quint8(int(BoxDcr.at(i)->value())%256);
     }
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void WinBack::SendCanCmdStartDcr(quint8 gear)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x03)<<quint8(0x00)
+      <<quint8(0x01)<<quint8(0x02)
+     <<quint8(gear)<<quint8(5);
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x01)<<quint8(0x00)
+      <<quint8(0x13)<<quint8(0x00)<<quint8(0x01);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
@@ -277,30 +301,19 @@ void WinBack::ReadCanCmdDcr(QByteArray msg)
     if (msg.size()==4 && quint8(msg.at(0))==0x06) {
         quint8 c = quint8(msg.at(1));
         quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
-        switch (c) {
+        if (c>0 && k<=8)
+            BoxDcr.at(c-1)->setValue(k);
+    }
+    if (msg.size()==7 && (quint8)msg.at(0)==0x01) {
+        quint8 grade = quint8(msg.at(2));
+        double temp = (quint16)(msg.at(3)*256)+(quint8)msg.at(4);
+        qDebug()<<temp;
+        switch (grade) {
         case 1:
-            ui->EditDcrK1->setText(QString::number(k));
             break;
         case 2:
-            ui->EditDcrK2->setText(QString::number(k));
             break;
-        case 3:
-            ui->EditDcrK3->setText(QString::number(k));
-            break;
-        case 4:
-            ui->EditDcrK4->setText(QString::number(k));
-            break;
-        case 5:
-            ui->EditDcrK5->setText(QString::number(k));
-            break;
-        case 6:
-            ui->EditDcrK6->setText(QString::number(k));
-            break;
-        case 7:
-            ui->EditDcrK7->setText(QString::number(k));
-            break;
-        case 8:
-            ui->EditDcrK8->setText(QString::number(k));
+        default:
             break;
         }
     }
@@ -387,14 +400,8 @@ void WinBack::ReadCanCmdOut14(QByteArray msg)
 
 void WinBack::ClearParamDcr()
 {
-    ui->EditDcrK1->setText("16384");
-    ui->EditDcrK2->setText("16384");
-    ui->EditDcrK3->setText("16384");
-    ui->EditDcrK4->setText("16384");
-    ui->EditDcrK5->setText("16384");
-    ui->EditDcrK6->setText("16384");
-    ui->EditDcrK7->setText("16384");
-    ui->EditDcrK8->setText("16384");
+    for (int i=0; i<BoxDcr.size(); i++)
+        BoxDcr.at(i)->setValue(0x4000);
 }
 
 void WinBack::showEvent(QShowEvent *)
