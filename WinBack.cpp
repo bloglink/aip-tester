@@ -330,7 +330,17 @@ void WinBack::SendCanCmdParamDcr()
 
 void WinBack::SendCanCmdParamInr()
 {
-
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    for (int i=0; i<BoxInr.size()/2; i++) {
+        out <<quint16(0x23)<<quint8(0x06)<<quint8(0x06)<<quint8(i)
+           <<quint8(int(BoxInr.at(i*2+0)->value())/256)
+          <<quint8(int(BoxInr.at(i*2+0)->value())%256)
+         <<quint8(int(BoxInr.at(i*2+1)->value())/256)
+        <<quint8(int(BoxInr.at(i*2+1)->value())%256);
+    }
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void WinBack::SendCanCmdStartDcr(quint8 gear)
@@ -460,7 +470,10 @@ void WinBack::ClearParamDcr()
 
 void WinBack::ClearParamInr()
 {
-
+    for (int i=0; i<BoxInr.size()/2; i++) {
+        BoxInr.at(i*2+0)->setValue(1024);
+        BoxInr.at(i*2+1)->setValue(500);
+    }
 }
 
 void WinBack::showEvent(QShowEvent *)
