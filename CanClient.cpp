@@ -1,15 +1,19 @@
+/**
+  ******************************************************************************
+  * @file    CanClient.cpp
+  * @author  link
+  * @version 2.1.0.160320
+  * @date    2017-03-20
+  * @brief   Can read and write thread
+  ******************************************************************************
+  */
 #include "CanClient.h"
 
 CanClient::CanClient(QObject *parent) : QObject(parent)
 {
     s = 0;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       打开设备
-*******************************************************************************/
+
 void CanClient::DeviceOpen()
 {
     qDebug()<<QTime::currentTime().toString()<<"打开CAN口";
@@ -51,12 +55,7 @@ void CanClient::DeviceOpen()
 
     qDebug()<<QTime::currentTime().toString()<<"打开CAN口OK";
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       关闭设备
-*******************************************************************************/
+
 void CanClient::DeviceQuit()
 {
     if (s <= 0)
@@ -69,14 +68,7 @@ void CanClient::DeviceQuit()
     CAN_DeviceClose(s);
 #endif
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       发送一帧数据
- * date:        2017.01.06
- * brief:       解决自发自收问题TxMsg
-*******************************************************************************/
+
 bool CanClient::DeviceSend()
 {
     if (s <= 0)
@@ -96,14 +88,11 @@ bool CanClient::DeviceSend()
 #endif
     return true;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       读取一帧数据
-*******************************************************************************/
+
 bool CanClient::DeviceRead()
 {
+    if (s <= 0)
+        return false;
 #ifdef __arm__
     int nbytes;
     int ret;
@@ -122,39 +111,15 @@ bool CanClient::DeviceRead()
         nbytes = read(s, &TxMsg, sizeof(struct can_frame));
         return true;
     }
-    return false;
 #else
-    if (!BytesAvalible())
+    if (CAN_GetReceiveCount(s,0) <= 0)
         return false;
-    CAN_ChannelReceive(s,0,&TxMsg,1,1);
-    return true;
-#endif
-    return true;
-}
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       缓冲区数据
-*******************************************************************************/
-bool CanClient::BytesAvalible()
-{
-#ifndef __arm__
-    if (s <= 0)
-        return false;
-    if (CAN_GetReceiveCount(s,0) > 0)
+    if (CAN_ChannelReceive(s,0,&TxMsg,1,1) == 1)
         return true;
-    else
-        return false;
 #endif
-    return true;
+    return false;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       读取所有数据
-*******************************************************************************/
+
 void CanClient::readAll()
 {
     QByteArray msg;
@@ -172,7 +137,6 @@ void CanClient::readAll()
         for (int i=0; i<TxMsg.nDataLen; i++)
             in << TxMsg.arryData[i];
     }
-    CAN_ClearReceiveBuffer(s,0);
 #endif
     if (!msg.isEmpty())
         emit GetCanData(msg);

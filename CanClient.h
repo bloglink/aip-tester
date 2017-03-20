@@ -182,7 +182,6 @@ private slots:
     void DeviceQuit(void);
     bool DeviceSend(void);
     bool DeviceRead(void);
-    bool BytesAvalible(void);
     void WriteAll(QByteArray msg);
     void readAll(void);
 private:
