@@ -20,6 +20,9 @@ void WinBack::InitWindows()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabItems->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabOutput->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabItems->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->TabOutput->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
     ui->TabItems->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabOutput->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
@@ -75,6 +78,10 @@ void WinBack::InitWindows()
     BoxInr.append(ui->BoxInrB9);
     BoxInr.append(ui->BoxInrKA);
     BoxInr.append(ui->BoxInrBA);
+
+    BoxImp.append(ui->BoxImpK0);
+    BoxImp.append(ui->BoxImpK1);
+    BoxImp.append(ui->BoxImpK2);
 }
 
 void WinBack::InitButtons()
@@ -95,6 +102,12 @@ void WinBack::InitButtons()
     btnGroupInr->addButton(ui->BtnInrParamSend,Qt::Key_2);
     btnGroupInr->addButton(ui->BtnInrParamClear,Qt::Key_3);
     connect(btnGroupInr,SIGNAL(buttonClicked(int)),this,SLOT(JudgeInrBtn(int)));
+
+    QButtonGroup *btnGroupImp = new QButtonGroup;
+    btnGroupImp->addButton(ui->BtnImpParamRead,Qt::Key_1);
+    btnGroupImp->addButton(ui->BtnImpParamSend,Qt::Key_2);
+    btnGroupImp->addButton(ui->BtnImpParamClear,Qt::Key_3);
+    connect(btnGroupImp,SIGNAL(buttonClicked(int)),this,SLOT(JudgeImpBtn(int)));
 }
 
 void WinBack::BtnJudge(int id)
@@ -157,6 +170,24 @@ void WinBack::JudgeInrBtn(int id)
     }
 }
 
+void WinBack::JudgeImpBtn(int id)
+{
+    switch (id) {
+    case Qt::Key_1:
+        SendCanCmdParam(0x24);
+        break;
+    case Qt::Key_2:
+        SendCanCmdParamImp();
+        break;
+    case Qt::Key_3:
+        ClearParamImp();
+        SendCanCmdParamImp();
+        break;
+    default:
+        break;
+    }
+}
+
 void WinBack::InitSettings()
 {
     QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -184,6 +215,9 @@ void WinBack::InitSettings()
     temp = ini->value("KINR","1024").toString().split(" ");
     for (int i=0; i<qMin(temp.size(),BoxInr.size()); i++)
         BoxInr.at(i)->setValue(temp.at(i).toInt());
+    temp = ini->value("KIMP","1024").toString().split(" ");
+    for (int i=0; i<qMin(temp.size(),BoxInr.size()); i++)
+        BoxImp.at(i)->setValue(temp.at(i).toInt());
 }
 
 void WinBack::SaveSettings()
@@ -218,6 +252,11 @@ void WinBack::SaveSettings()
     for (int i=0; i<BoxInr.size(); i++)
         temp.append(QString::number(BoxInr.at(i)->value()));
     ini->setValue("KINR",temp.join(" "));
+
+    temp.clear();
+    for (int i=0; i<BoxImp.size(); i++)
+        temp.append(QString::number(BoxImp.at(i)->value()));
+    ini->setValue("KIMP",temp.join(" "));
 }
 
 void WinBack::ClickItem(int r, int c)
@@ -294,12 +333,6 @@ void WinBack::ExcuteCanCmd(quint16 addr, QByteArray msg)
     case CAN_ID_14OUT:
         ReadCanCmdOut14(msg);
         break;
-    case CAN_ID_15OUT:
-        break;
-    case CAN_ID_16OUT:
-        break;
-    case CAN_ID_17OUT:
-        break;
     default:
         break;
     }
@@ -351,6 +384,19 @@ void WinBack::SendCanCmdParamInr()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void WinBack::SendCanCmdParamImp()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    for (int i=0; i<BoxImp.size()/2; i++) {
+        out <<quint16(0x24)<<quint8(0x06)<<quint8(0x06)<<quint8(i)
+           <<quint8(int(BoxImp.at(i)->value())/256)
+          <<quint8(int(BoxImp.at(i)->value())%256);
+    }
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
 void WinBack::SendCanCmdStartDcr(quint8 gear)
 {
     QByteArray msg;
@@ -397,7 +443,6 @@ void WinBack::ReadCanCmdDcr(QByteArray msg)
 
 void WinBack::ReadCanCmdInr(QByteArray msg)
 {
-    emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
     if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=1; i<msg.size(); i++)
@@ -420,30 +465,41 @@ void WinBack::ReadCanCmdInr(QByteArray msg)
 
 void WinBack::ReadCanCmdImp(QByteArray msg)
 {
-    if (msg.size()==0x08) {
+    emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
+    if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
-        for (int i=0; i<msg.size(); i++)
+        for (int i=1; i<msg.size(); i++)
             v.append(QString::number(msg.mid(i,1).toInt()));
+        v.insert(1,".");
         ui->TabItems->item(5,2)->setText(v);
+    }
+    if (msg.size()==4 && quint8(msg.at(0))==0x06) {
+        int c = quint8(msg.at(1));
+        quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
+        if (c>=0x00 && c<=0x02) {
+            BoxImp.at(c)->setValue(k);
+        }
     }
 }
 
 void WinBack::ReadCanCmdInd(QByteArray msg)
 {
-    if (msg.size()==0x08) {
+    if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=0; i<msg.size(); i++)
             v.append(QString::number(msg.mid(i,1).toInt()));
+        v.insert(1,".");
         ui->TabItems->item(6,2)->setText(v);
     }
 }
 
 void WinBack::ReadCanCmdPwr(QByteArray msg)
 {
-    if (msg.size()==0x08) {
+    if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=0; i<msg.size(); i++)
             v.append(QString::number(msg.mid(i,1).toInt()));
+        v.insert(1,".");
         ui->TabItems->item(7,2)->setText(v);
         ui->TabItems->item(8,2)->setText(v);
         ui->TabItems->item(9,2)->setText(v);
@@ -481,6 +537,13 @@ void WinBack::ClearParamInr()
     for (int i=0; i<BoxInr.size()/2; i++) {
         BoxInr.at(i*2+0)->setValue(1024);
         BoxInr.at(i*2+1)->setValue(500);
+    }
+}
+
+void WinBack::ClearParamImp()
+{
+    for (int i=0; i<BoxImp.size(); i++) {
+        BoxImp.at(i)->setValue(1024);
     }
 }
 
