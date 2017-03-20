@@ -181,6 +181,9 @@ void WinBack::InitSettings()
     temp = ini->value("KDCR","16384").toString().split(" ");
     for (int i=0; i<qMin(temp.size(),BoxDcr.size()); i++)
         BoxDcr.at(i)->setValue(temp.at(i).toInt());
+    temp = ini->value("KINR","1024").toString().split(" ");
+    for (int i=0; i<qMin(temp.size(),BoxInr.size()); i++)
+        BoxInr.at(i)->setValue(temp.at(i).toInt());
 }
 
 void WinBack::SaveSettings()
@@ -210,6 +213,11 @@ void WinBack::SaveSettings()
     for (int i=0; i<BoxDcr.size(); i++)
         temp.append(QString::number(BoxDcr.at(i)->value()));
     ini->setValue("KDCR",temp.join(" "));
+
+    temp.clear();
+    for (int i=0; i<BoxInr.size(); i++)
+        temp.append(QString::number(BoxInr.at(i)->value()));
+    ini->setValue("KINR",temp.join(" "));
 }
 
 void WinBack::ClickItem(int r, int c)
