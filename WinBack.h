@@ -27,6 +27,8 @@ private slots:
     void InitWindows(void);
     void InitButtons(void);
     void BtnJudge(int id);
+    void JudgeDcrBtn(int id);
+    void JudgeInrBtn(int id);
     void InitSettings(void);
     void SaveSettings(void);
     void ClickItem(int r,int c);
@@ -36,6 +38,7 @@ private slots:
     void SendCanCmdVersion(quint16 id);
     void SendCanCmdParam(quint16 id);
     void SendCanCmdParamDcr(void);
+    void SendCanCmdParamInr(void);
     void SendCanCmdStartDcr(quint8 gear);
     void ReadCanCmdDcr(QByteArray msg);
     void ReadCanCmdInr(QByteArray msg);
@@ -45,11 +48,13 @@ private slots:
     void ReadCanCmdOut13(QByteArray msg);
     void ReadCanCmdOut14(QByteArray msg);
     void ClearParamDcr(void);
+    void ClearParamInr(void);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 private:
     bool Testing;
     QList<QDoubleSpinBox*> BoxDcr;
+    QList<QDoubleSpinBox*> BoxInr;
 };
 
 #endif // WINBACK_H

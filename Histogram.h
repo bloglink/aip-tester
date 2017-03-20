@@ -5,6 +5,7 @@
 #include <QLabel>
 #include <QWidget>
 #include <QPainter>
+#include <QHash>
 
 class Histogram : public QLabel
 {

@@ -52,6 +52,29 @@ void WinBack::InitWindows()
     BoxDcr.append(ui->BoxDcrK6);
     BoxDcr.append(ui->BoxDcrK7);
     BoxDcr.append(ui->BoxDcrK8);
+
+    BoxInr.append(ui->BoxInrK0);
+    BoxInr.append(ui->BoxInrB0);
+    BoxInr.append(ui->BoxInrK1);
+    BoxInr.append(ui->BoxInrB1);
+    BoxInr.append(ui->BoxInrK2);
+    BoxInr.append(ui->BoxInrB2);
+    BoxInr.append(ui->BoxInrK3);
+    BoxInr.append(ui->BoxInrB3);
+    BoxInr.append(ui->BoxInrK4);
+    BoxInr.append(ui->BoxInrB4);
+    BoxInr.append(ui->BoxInrK5);
+    BoxInr.append(ui->BoxInrB5);
+    BoxInr.append(ui->BoxInrK6);
+    BoxInr.append(ui->BoxInrB6);
+    BoxInr.append(ui->BoxInrK7);
+    BoxInr.append(ui->BoxInrB7);
+    BoxInr.append(ui->BoxInrK8);
+    BoxInr.append(ui->BoxInrB8);
+    BoxInr.append(ui->BoxInrK9);
+    BoxInr.append(ui->BoxInrB9);
+    BoxInr.append(ui->BoxInrKA);
+    BoxInr.append(ui->BoxInrBA);
 }
 
 void WinBack::InitButtons()
@@ -59,12 +82,19 @@ void WinBack::InitButtons()
     QButtonGroup *BtnGroup = new QButtonGroup;
     BtnGroup->addButton(ui->BtnExit,Qt::Key_0);
     BtnGroup->addButton(ui->BtnVersion,Qt::Key_1);
-    BtnGroup->addButton(ui->BtnDcrParamRead,Qt::Key_2);
-    BtnGroup->addButton(ui->BtnDcrParamSend,Qt::Key_3);
-    BtnGroup->addButton(ui->BtnDcrParamClear,Qt::Key_4);
-    BtnGroup->addButton(ui->BtnDcrGrade1,Qt::Key_5);
-
     connect(BtnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+
+    QButtonGroup *btnGroupDcr = new QButtonGroup;
+    btnGroupDcr->addButton(ui->BtnDcrParamRead,Qt::Key_1);
+    btnGroupDcr->addButton(ui->BtnDcrParamSend,Qt::Key_2);
+    btnGroupDcr->addButton(ui->BtnDcrParamClear,Qt::Key_3);
+    connect(btnGroupDcr,SIGNAL(buttonClicked(int)),this,SLOT(JudgeDcrBtn(int)));
+
+    QButtonGroup *btnGroupInr = new QButtonGroup;
+    btnGroupInr->addButton(ui->BtnInrParamRead,Qt::Key_1);
+    btnGroupInr->addButton(ui->BtnInrParamSend,Qt::Key_2);
+    btnGroupInr->addButton(ui->BtnInrParamClear,Qt::Key_3);
+    connect(btnGroupInr,SIGNAL(buttonClicked(int)),this,SLOT(JudgeInrBtn(int)));
 }
 
 void WinBack::BtnJudge(int id)
@@ -86,18 +116,41 @@ void WinBack::BtnJudge(int id)
         SendCanCmdVersion(0x26);
         SendCanCmdVersion(0x27);
         break;
-    case Qt::Key_2:
+    default:
+        break;
+    }
+}
+
+void WinBack::JudgeDcrBtn(int id)
+{
+    switch (id) {
+    case Qt::Key_1:
         SendCanCmdParam(0x22);
         break;
-    case Qt::Key_3:
+    case Qt::Key_2:
         SendCanCmdParamDcr();
         break;
-    case Qt::Key_4:
+    case Qt::Key_3:
         ClearParamDcr();
         SendCanCmdParamDcr();
         break;
-    case Qt::Key_5:
-        SendCanCmdStartDcr(1);
+    default:
+        break;
+    }
+}
+
+void WinBack::JudgeInrBtn(int id)
+{
+    switch (id) {
+    case Qt::Key_1:
+        SendCanCmdParam(0x23);
+        break;
+    case Qt::Key_2:
+        SendCanCmdParamInr();
+        break;
+    case Qt::Key_3:
+        ClearParamInr();
+        SendCanCmdParamInr();
         break;
     default:
         break;
@@ -275,6 +328,11 @@ void WinBack::SendCanCmdParamDcr()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void WinBack::SendCanCmdParamInr()
+{
+
+}
+
 void WinBack::SendCanCmdStartDcr(quint8 gear)
 {
     QByteArray msg;
@@ -299,9 +357,9 @@ void WinBack::ReadCanCmdDcr(QByteArray msg)
         ui->TabItems->item(1,2)->setText(v);
     }
     if (msg.size()==4 && quint8(msg.at(0))==0x06) {
-        quint8 c = quint8(msg.at(1));
+        int c = quint8(msg.at(1));
         quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
-        if (c>0 && k<=8)
+        if (c>0x00 && c<=0x08)
             BoxDcr.at(c-1)->setValue(k);
     }
     if (msg.size()==7 && (quint8)msg.at(0)==0x01) {
@@ -322,26 +380,22 @@ void WinBack::ReadCanCmdDcr(QByteArray msg)
 void WinBack::ReadCanCmdInr(QByteArray msg)
 {
     emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
-    if (msg.size()==0x08) {
+    if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
-        for (int i=0; i<msg.size(); i++)
+        for (int i=1; i<msg.size(); i++)
             v.append(QString::number(msg.mid(i,1).toInt()));
+        v.insert(1,".");
         ui->TabItems->item(2,2)->setText(v);
         ui->TabItems->item(3,2)->setText(v);
         ui->TabItems->item(4,2)->setText(v);
     }
     if (msg.size()==6 && quint8(msg.at(0))==0x06) {
-        quint8 c = quint8(msg.at(1));
+        int c = quint8(msg.at(1));
         quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
         quint16 b = quint16(msg.at(4))*256+quint8(msg.at(5));
-        if (c<6) {
-            ui->TabItems->item(2,c*2+3)->setText(QString::number(k));
-            ui->TabItems->item(2,c*2+4)->setText(QString::number(b));
-        } else {
-            ui->TabItems->item(3,(c-6)*2+3)->setText(QString::number(k));
-            ui->TabItems->item(3,(c-6)*2+4)->setText(QString::number(b));
-            ui->TabItems->item(4,(c-6)*2+3)->setText(QString::number(k));
-            ui->TabItems->item(4,(c-6)*2+4)->setText(QString::number(b));
+        if (c>=0x00 && c<=0x0A) {
+            BoxInr.at(c*2+0)->setValue(k);
+            BoxInr.at(c*2+1)->setValue(b);
         }
     }
 }
@@ -402,6 +456,11 @@ void WinBack::ClearParamDcr()
 {
     for (int i=0; i<BoxDcr.size(); i++)
         BoxDcr.at(i)->setValue(0x4000);
+}
+
+void WinBack::ClearParamInr()
+{
+
 }
 
 void WinBack::showEvent(QShowEvent *)
