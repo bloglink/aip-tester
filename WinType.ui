@@ -307,7 +307,7 @@
    <item>
     <widget class="QStackedWidget" name="Type">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="WinConfList">
       <layout class="QGridLayout" name="gridLayout" rowstretch="0,1,0,0,0" columnminimumwidth="1,1,1,1,1">
@@ -326,7 +326,7 @@
           </size>
          </property>
          <property name="text">
-          <string>返回</string>
+          <string>保存退出</string>
          </property>
         </widget>
        </item>

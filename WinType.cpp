@@ -10,35 +10,23 @@
 /* Includes ------------------------------------------------------------------*/
 #include "WinType.h"
 #include "ui_WinType.h"
-/**
-  * @brief  Initializes
-  * @param  *parent:parent widget
-  * @retval None
-  */
+
 WinType::WinType(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WinType)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
-    SetInit();
+    InitWindows();
+    InitButtons();
+    InitSettings();
 }
-/**
-  * @brief  Destruct the window
-  * @param  None
-  * @retval None
-  */
+
 WinType::~WinType()
 {
     delete ui;
 }
-/**
-  * @brief  Initializes the window
-  * @param  None
-  * @retval None
-  */
-void WinType::WinInit()
+
+void WinType::InitWindows()
 {
     ItemNames<<"清除"<<"电阻"<<"反嵌"<<"绝缘"<<"交耐"<<"直耐"<<"匝间"<<"电感"<<"功率"<<"低启"<<"堵转"
             <<"转速"<<"泄漏"<<"PG"<<"EMF"<<"DCBL";
@@ -138,12 +126,8 @@ void WinType::WinInit()
     ui->Type->setCurrentIndex(0);
     ui->Other->setCurrentIndex(0);
 }
-/**
-  * @brief  Initializes the buttons
-  * @param  None
-  * @retval None
-  */
-void WinType::BtnInit()
+
+void WinType::InitButtons()
 {
     btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnInsert,Qt::Key_0);
@@ -151,21 +135,17 @@ void WinType::BtnInit()
     btnGroup->addButton(ui->BtnRead,Qt::Key_2);
     btnGroup->addButton(ui->BtnCheck,Qt::Key_3);
     btnGroup->addButton(ui->BtnConfExit,Qt::Key_4);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(judgeButton(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
 
-    connect(ui->BoxType,SIGNAL(currentIndexChanged(int)),this,SLOT(judgeButton(int)));
+    connect(ui->BoxType,SIGNAL(currentIndexChanged(int)),this,SLOT(JudgeButtons(int)));
 
-    connect(ui->TabWire,SIGNAL(cellClicked(int,int)),this,SLOT(showWireColor()));
-    connect(ui->TabColor,SIGNAL(cellClicked(int,int)),this,SLOT(selectWireColor(int,int)));
-    connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(showAvailableItem(int,int)));
-    connect(ui->TabProj,SIGNAL(cellClicked(int,int)),this,SLOT(selectItemToTest(int,int)));
+    connect(ui->TabWire,SIGNAL(cellClicked(int,int)),this,SLOT(ShowWireColorWindow()));
+    connect(ui->TabColor,SIGNAL(cellClicked(int,int)),this,SLOT(SelectWireColor(int,int)));
+    connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(ShowAvailableItem(int,int)));
+    connect(ui->TabProj,SIGNAL(cellClicked(int,int)),this,SLOT(SelectItemToTest(int,int)));
 }
-/**
-  * @brief  Button functions
-  * @param  id:button id
-  * @retval None
-  */
-void WinType::judgeButton(int id)
+
+void WinType::JudgeButtons(int id)
 {
     switch (id) {
     case 0:
@@ -196,16 +176,20 @@ void WinType::judgeButton(int id)
         ui->labelType->setPixmap(QPixmap(":/source/None.png"));
         break;
     case Qt::Key_0:
-        TypeAdd();
+        AddSettings();
+        InitMotorTypes();
         break;
     case Qt::Key_1:
-        TypeDelete();
+        RemoveSettings();
+        InitMotorTypes();
         break;
     case Qt::Key_2:
-        TypeRead();
+        ReadSettings();
+        InitSettings();
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_3:
-        TypeQuery();
+        QuerySettings();
         break;
     case Qt::Key_4:
         emit SendCommand(ADDR,CMD_JUMP,NULL);
@@ -214,12 +198,8 @@ void WinType::judgeButton(int id)
         break;
     }
 }
-/**
-  * @brief  Initializes motor type
-  * @param  None
-  * @retval None
-  */
-void WinType::TypesInit()
+
+void WinType::InitMotorTypes()
 {
     QDir dir("./config");
     dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
@@ -240,19 +220,11 @@ void WinType::TypesInit()
         ui->TabFile->item(i,0)->setText(QString(FileNames.at(i)).remove(".ini"));
     }
 }
-/**
-  * @brief  Initializes items available
-  * @param  None
-  * @retval None
-  */
-void WinType::ItemsInit()
+
+void WinType::InitTestItems()
 {
-    QStringList temp;
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
     //可使用的测试项目
-    temp = (g_settings->value("ItemEnable","0 1 2 3 4 6").toString()).split(" ");
+    QStringList temp = EnableItems();
     if (ui->TabProj->rowCount() < temp.size()) {
         ui->TabProj->setRowCount(temp.size());
         for (int i=0; i<temp.size(); i++) {
@@ -269,31 +241,21 @@ void WinType::ItemsInit()
         }
     }
 }
-/**
-  * @brief  Initializes settings
-  * @param  None
-  * @retval None
-  */
-void WinType::SetInit()
+
+void WinType::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取电机型号";
 
+    ui->TextTypeShow->setText(CurrentSettings());
+
     QStringList temp;
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
+    QString n = QString("./config/%1.ini").arg(CurrentSettings());
+    QSettings *ini = new QSettings(n,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
 
-    //当前使用的测试项目
-    QString n = QString("./config/%1.ini").arg(FileInUse);
-    QSettings *c_settings = new QSettings(n,QSettings::IniFormat);
-    c_settings->setIniCodec("GB18030");
-    c_settings->beginGroup("GLOBAL");
-    ui->TextTypeShow->setText(FileInUse.remove(".ini"));
-
-    temp = (c_settings->value("ProjToTest","1").toString().split(" "));
+    temp = CurrentItems();
     ui->TabTest->setRowCount(temp.size()+1);
     for (int i=0; i<temp.size()+1; i++) {
         ui->TabTest->setItem(i,0,new QTableWidgetItem);
@@ -303,37 +265,26 @@ void WinType::SetInit()
         ui->TabTest->item(i,0)->setText(ItemNames.at(temp.at(i).toInt()));
     }
 
-    temp = c_settings->value("WireColor").toString().split(" ");
+    temp = ini->value("WireColor").toString().split(" ");
     for (int i=0; i<qMin(temp.size(),ui->TabWire->rowCount()*2); i++) {
         ui->TabWire->item(i/2,i%2)->setBackgroundColor(QColor(temp.at(i)));
     }
 
-    ui->BoxTestNG->setCurrentIndex(c_settings->value("TestNG","1").toInt());
-    ui->BoxType->setCurrentIndex(c_settings->value("WinType","0").toInt());
+    ui->BoxTestNG->setCurrentIndex(ini->value("TestNG","1").toInt());
+    ui->BoxType->setCurrentIndex(ini->value("WinType","0").toInt());
     qDebug()<<QTime::currentTime().toString()<<"读取电机型号OK";
 }
-/**
-  * @brief  save settings
-  * @param  None
-  * @retval None
-  */
-void WinType::SetSave()
+
+void WinType::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存电机型号";
 
     QStringList temp;
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
     //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-
-    //当前使用的测试项目
-    QString n = QString("./config/%1.ini").arg(FileInUse);
-    QSettings *c_settings = new QSettings(n,QSettings::IniFormat);
-    c_settings->setIniCodec("GB18030");
-    c_settings->beginGroup("GLOBAL");
+    QString n = QString("./config/%1.ini").arg(CurrentSettings());
+    QSettings *ini = new QSettings(n,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
 
     for (int i=0; i<ui->TabTest->rowCount()-1; i++) {
         if (!ui->TabTest->item(i,0)->text().isEmpty()) {
@@ -343,25 +294,21 @@ void WinType::SetSave()
             }
         }
     }
-    c_settings->setValue("ProjToTest",temp.join(" "));
+    ini->setValue("ProjToTest",temp.join(" "));
 
     temp.clear();
     for (int i=0; i<ui->TabWire->rowCount(); i++) {
         temp.append(ui->TabWire->item(i,0)->backgroundColor().name());
         temp.append(ui->TabWire->item(i,1)->backgroundColor().name());
     }
-    c_settings->setValue("WireColor",temp.join(" "));
+    ini->setValue("WireColor",temp.join(" "));
 
-    c_settings->setValue("TestNG",QString::number(ui->BoxTestNG->currentIndex()));
-    c_settings->setValue("WinType",QString::number(ui->BoxType->currentIndex()));
+    ini->setValue("TestNG",QString::number(ui->BoxTestNG->currentIndex()));
+    ini->setValue("WinType",QString::number(ui->BoxType->currentIndex()));
     qDebug()<<QTime::currentTime().toString()<<"保存电机型号OK";
 }
-/**
-  * @brief  Select wire color
-  * @param  row,column
-  * @retval None
-  */
-void WinType::selectWireColor(int row, int column)
+
+void WinType::SelectWireColor(int row, int column)
 {
     ui->Type->setCurrentIndex(0);
     QColor color = ui->TabColor->item(row,column)->backgroundColor();
@@ -371,30 +318,18 @@ void WinType::selectWireColor(int row, int column)
     ui->TabWire->currentItem()->setSelected(false);
     ui->TabColor->currentItem()->setSelected(false);
 }
-/**
-  * @brief  Show wire color page
-  * @param  None
-  * @retval None
-  */
-void WinType::showWireColor()
+
+void WinType::ShowWireColorWindow()
 {
     ui->Type->setCurrentIndex(1);
 }
-/**
-  * @brief  Show items available
-  * @param  None
-  * @retval None
-  */
-void WinType::showAvailableItem(int, int)
+
+void WinType::ShowAvailableItem(int, int)
 {
     ui->Other->setCurrentIndex(1);
 }
-/**
-  * @brief  Select item to test
-  * @param  None
-  * @retval None
-  */
-void WinType::selectItemToTest(int row, int column)
+
+void WinType::SelectItemToTest(int row, int column)
 {
     if (ui->TabTest->currentRow() < 0)
         return;
@@ -435,49 +370,32 @@ void WinType::selectItemToTest(int row, int column)
     QString t = ui->TabProj->item(row,column)->text();
     ui->TabTest->currentItem()->setText(t);
 }
-/**
-  * @brief  Add motor type
-  * @param  None
-  * @retval None
-  */
-void WinType::TypeAdd()
+
+void WinType::AddSettings()
 {
     QString t = ui->EditTypeName->text();
+    QString c = ui->TextTypeShow->text();
     if (t.isEmpty())
         return;
     for (int i=0; i<ui->TabFile->rowCount(); i++) {
         if (ui->TabFile->item(i,0)->text() == t)
             return;
     }
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
-    //当前使用的测试项目
-    FileInUse = g_settings->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-    QString Source = QString("./config/%1.ini").arg(FileInUse);
+    QString Source = QString("./config/%1.ini").arg(c);
     QString Target = QString("./config/%1.ini").arg(t);
     QFile::copy(Source,Target);
-    SetInit();
 }
-/**
-  * @brief  Delete motor type
-  * @param  None
-  * @retval None
-  */
-void WinType::TypeDelete()
+
+void WinType::RemoveSettings()
 {
     QString t = ui->TabFile->currentItem()->text();
+    if (t == ui->TextTypeShow->text())
+        return;
     QString Target = QString("./config/%1.ini").arg(t);
     QFile::remove(Target);
-    SetInit();
 }
-/**
-  * @brief  Read motor type
-  * @param  None
-  * @retval None
-  */
-void WinType::TypeRead()
+
+void WinType::ReadSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"调入电机型号";
     if (ui->TabFile->currentRow() < 0) {
@@ -486,19 +404,14 @@ void WinType::TypeRead()
     }
     QString t = ui->TabFile->currentItem()->text();
     t.append(".ini");
-    QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
-    g_settings->setIniCodec("GB18030");
-    g_settings->beginGroup("GLOBAL");
-    g_settings->setValue("FileInUse",t);
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
+    ini->setValue("FileInUse",t);
     qDebug()<<QTime::currentTime().toString()<<"调入电机型号OK";
-    SetInit();
 }
-/**
-  * @brief  Query motor type
-  * @param  None
-  * @retval None
-  */
-void WinType::TypeQuery()
+
+void WinType::QuerySettings()
 {
     QString t = ui->EditTypeName->text();
     if (t.isEmpty())
@@ -511,24 +424,38 @@ void WinType::TypeQuery()
         ui->TabFile->item(i,0)->setText(QString(FileNames.at(i)).remove(".ini"));
     }
 }
-/**
-  * @brief  Initialize when show
-  * @param  None
-  * @retval None
-  */
+
+QString WinType::CurrentSettings()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    return n.remove(".ini");
+}
+
+QStringList WinType::CurrentItems()
+{
+    QString n = QString("./config/%1.ini").arg(CurrentSettings());
+    QSettings *ini = new QSettings(n,QSettings::IniFormat);
+    QString s = ini->value("/GLOBAL/ProjToTest","1").toString();
+    return s.split(" ");
+}
+
+QStringList WinType::EnableItems()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/ItemEnable",INI_DEFAULT).toString();
+    return n.split(" ");
+}
+
 void WinType::showEvent(QShowEvent *)
 {
-    TypesInit();
-    ItemsInit();
-    SetInit();
+    InitMotorTypes();
+    InitTestItems();
+    InitSettings();
 }
-/**
-  * @brief  Save settings when hide
-  * @param  None
-  * @retval None
-  */
+
 void WinType::hideEvent(QHideEvent *)
 {
-    SetSave();
+    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

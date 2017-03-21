@@ -18,7 +18,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.160320");
+    InitVersion("V-2.1.0.160321");
     HomeMode = HOME_FREE;
     InitThreadAll();
 }
