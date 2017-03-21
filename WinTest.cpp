@@ -10,38 +10,26 @@
 /* Includes ------------------------------------------------------------------*/
 #include "WinTest.h"
 #include "ui_WinTest.h"
-/**
-  * @brief  Initializes
-  * @param  *parent:parent widget
-  * @retval None
-  */
+
 WinTest::WinTest(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::WinTest)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
+    InitWindows();
+    InitButtons();
 
     QTimer *timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(showTime()));
+    connect(timer,SIGNAL(timeout()),this,SLOT(ShowTime()));
     timer->start(30000);
 }
-/**
-  * @brief  Destruct the window
-  * @param  None
-  * @retval None
-  */
+
 WinTest::~WinTest()
 {
     delete ui;
 }
-/**
-  * @brief  Initializes the window
-  * @param  None
-  * @retval None
-  */
-void WinTest::WinInit()
+
+void WinTest::InitWindows()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabTest->setColumnWidth(1,150);
@@ -59,29 +47,21 @@ void WinTest::WinInit()
         wave.append(new Waveform(this));
         ui->TabWave->setCellWidget(0,i,wave.at(i));
     }
-    ui->LabelState->setStyleSheet("color:green;font:Bold 45pt Ubuntu;");
+    ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
     ui->TextPos->setStyleSheet("color:red;font:Bold 45pt Ubuntu;");
-    connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(ClickItem(int,int)));
 }
-/**
-  * @brief  Initializes the buttons
-  * @param  None
-  * @retval None
-  */
-void WinTest::BtnInit()
+
+void WinTest::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnWinHome,Qt::Key_0);
     btnGroup->addButton(ui->BtnWinType,Qt::Key_1);
     btnGroup->addButton(ui->BtnCmdStart,Qt::Key_3);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
 }
-/**
-  * @brief  Button functions
-  * @param  id:button id
-  * @retval None
-  */
-void WinTest::BtnJudge(int win)
+
+void WinTest::JudgeButtons(int win)
 {
     switch (win) {
     case Qt::Key_0:
@@ -103,12 +83,8 @@ void WinTest::BtnJudge(int win)
         break;
     }
 }
-/**
-  * @brief  Initializes settings
-  * @param  None
-  * @retval None
-  */
-void WinTest::SetInit()
+
+void WinTest::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取测试配置";
 
@@ -148,12 +124,8 @@ void WinTest::SetInit()
     qDebug()<<QTime::currentTime().toString()<<"读取测试配置OK";
     emit SendCommand(ADDR,CMD_INIT,NULL);
 }
-/**
-  * @brief  Save settings
-  * @param  None
-  * @retval None
-  */
-void WinTest::SetSave()
+
+void WinTest::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"保存测试配置";
 
@@ -166,12 +138,8 @@ void WinTest::SetSave()
 
     qDebug()<<QTime::currentTime().toString()<<"保存测试配置OK";
 }
-/**
-  * @brief  Show test item
-  * @param  item:test item
-  * @retval None
-  */
-void WinTest::showItem(QString item)
+
+void WinTest::ShowItem(QString item)
 {
     QStringList s = item.split("@");
     for (int i=0; i<ui->TabTest->rowCount(); i++) {
@@ -190,12 +158,8 @@ void WinTest::showItem(QString item)
         }
     }
 }
-/**
-  * @brief  Show test judge
-  * @param  judge:test judge
-  * @retval None
-  */
-void WinTest::showJudge(QString judge)
+
+void WinTest::ShowJudge(QString judge)
 {
     int sum = ui->LabelSum->text().toInt();
     int qua = ui->LabelQualified->text().toInt();
@@ -215,15 +179,11 @@ void WinTest::showJudge(QString judge)
     ui->LabelUnqualified->setText(QString::number(unq));
     ui->BtnCmdStart->setText("单次测试");
 }
-/**
-  * @brief  Show wave item
-  * @param  msg:wave item
-  * @retval None
-  */
-void WinTest::showWaveItem(QByteArray msg)
+
+void WinTest::ShowWaveItem(QByteArray msg)
 {
     if (!wave.last()->WaveItem.isEmpty()) {
-        WaveClear();
+        ClearWave();
     }
     for (int i=0; i<wave.size(); i++) {
         if (wave.at(i)->WaveItem.isEmpty()) {
@@ -232,12 +192,8 @@ void WinTest::showWaveItem(QByteArray msg)
         }
     }
 }
-/**
-  * @brief  Show wave standard
-  * @param  msg:wave standard
-  * @retval None
-  */
-void WinTest::showWaveByte(QByteArray msg)
+
+void WinTest::ShowWaveByte(QByteArray msg)
 {
     for (int i=0; i<wave.size(); i++) {
         if (wave.at(i)->WaveByte.isEmpty()) {
@@ -246,12 +202,8 @@ void WinTest::showWaveByte(QByteArray msg)
         }
     }
 }
-/**
-  * @brief  Show wave tested
-  * @param  msg:wave tested
-  * @retval None
-  */
-void WinTest::showWaveTest(QByteArray msg)
+
+void WinTest::ShowWaveTest(QByteArray msg)
 {
     for (int i=0; i<wave.size(); i++) {
         if (wave.at(i)->WaveTest.isEmpty()) {
@@ -260,43 +212,27 @@ void WinTest::showWaveTest(QByteArray msg)
         }
     }
 }
-/**
-  * @brief  Show temperature
-  * @param  msg:temperature
-  * @retval None
-  */
-void WinTest::showTemperature(QByteArray msg)
+
+void WinTest::ShowTemperature(QByteArray msg)
 {
     ui->TextTestTemp->setText(msg);
 }
-/**
-  * @brief  Show station
-  * @param  msg:station
-  * @retval None
-  */
-void WinTest::showStation(QByteArray msg)
+
+void WinTest::ShowStation(QByteArray msg)
 {
     if (msg.toInt() == 0x13)
         ui->TextPos->setText(tr("左"));
     if (msg.toInt() == 0x14)
         ui->TextPos->setText(tr("右"));
 }
-/**
-  * @brief  Show current time
-  * @param  None
-  * @retval None
-  */
-void WinTest::showTime()
+
+void WinTest::ShowTime()
 {
     QString t = QTime::currentTime().toString("hh:mm");
     ui->TextTestTime->setText(t);
 }
-/**
-  * @brief  Clear waves
-  * @param  None
-  * @retval None
-  */
-void WinTest::WaveClear()
+
+void WinTest::ClearWave()
 {
     for (int i=0; i<wave.size(); i++) {
         wave.at(i)->WaveByteShow(NULL);
@@ -306,24 +242,16 @@ void WinTest::WaveClear()
         ui->TabWave->horizontalHeaderItem(i)->setText(t);
     }
 }
-/**
-  * @brief  Update wave when click table items
-  * @param  r:row of the test item
-  * @retval None
-  */
-void WinTest::ItemClick(int r, int )
+
+void WinTest::ClickItem(int r, int )
 {
     QString t = ui->TabTest->item(r,0)->text();
     if (t.contains(tr("反嵌")) || t.contains(tr("匝间"))) {
-        WaveClear();
+        ClearWave();
         emit SendCommand(ADDR,CMD_WAVE,t.toUtf8());
     }
 }
-/**
-  * @brief  Excute command
-  * @param  addr:target address;cmd:command to excute;msg:command param
-  * @retval None
-  */
+
 void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr!=ADDR && addr!=WIN_ID_TEST)
@@ -331,45 +259,41 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 
     switch (cmd) {
     case CMD_INIT:
-        WaveClear();
-        ItemInit(msg);
+        ClearWave();
+        InitItem(msg);
         break;
     case CMD_ITEM:
-        showItem(msg);
+        ShowItem(msg);
         break;
     case CMD_TEMP:
-        showTemperature(msg);
+        ShowTemperature(msg);
         break;
     case CMD_WAVE_BYTE:
-        showWaveByte(msg);
+        ShowWaveByte(msg);
         break;
     case CMD_WAVE_TEST:
-        showWaveTest(msg);
+        ShowWaveTest(msg);
         break;
     case CMD_WAVE_ITEM:
-        showWaveItem(msg);
+        ShowWaveItem(msg);
         break;
     case CMD_WAVE_HIDE:
-        WaveClear();
+        ClearWave();
         break;
     case CMD_START:
-        showStation(msg);
+        ShowStation(msg);
         break;
     case CMD_JUDGE:
-        showJudge(msg);
+        ShowJudge(msg);
         break;
     default:
         break;
     }
 }
-/**
-  * @brief  Initializes before test
-  * @param  None
-  * @retval None
-  */
-void WinTest::ItemInit(QByteArray msg)
+
+void WinTest::InitItem(QByteArray msg)
 {
-    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
+    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 45pt Ubuntu;border:none;");
     ui->LabelState->setText("--");
     if (msg.isEmpty()) {
         return;
@@ -399,22 +323,14 @@ void WinTest::ItemInit(QByteArray msg)
         ui->TabTest->item(i,3)->setText(s.at(3));
     }
 }
-/**
-  * @brief  Initializes data when show
-  * @param  None
-  * @retval None
-  */
+
 void WinTest::showEvent(QShowEvent *)
 {
-    SetInit();
+    InitSettings();
 }
-/**
-  * @brief  Save data when hide
-  * @param  None
-  * @retval None
-  */
+
 void WinTest::hideEvent(QHideEvent *)
 {
-    SetSave();
+    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

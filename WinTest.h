@@ -32,22 +32,22 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
-    void BtnJudge(int win);
-    void SetInit(void);
-    void SetSave(void);
-    void ItemInit(QByteArray msg);
-    void showItem(QString item);
-    void showJudge(QString judge);
-    void showWaveItem(QByteArray msg);
-    void showWaveByte(QByteArray msg);
-    void showWaveTest(QByteArray msg);
-    void showTemperature(QByteArray msg);
-    void showStation(QByteArray msg);
-    void showTime(void);
-    void WaveClear(void);
-    void ItemClick(int r, int c);
+    void InitWindows(void);
+    void InitButtons(void);
+    void JudgeButtons(int win);
+    void InitSettings(void);
+    void SaveSettings(void);
+    void InitItem(QByteArray msg);
+    void ShowItem(QString item);
+    void ShowJudge(QString judge);
+    void ShowWaveItem(QByteArray msg);
+    void ShowWaveByte(QByteArray msg);
+    void ShowWaveTest(QByteArray msg);
+    void ShowTemperature(QByteArray msg);
+    void ShowStation(QByteArray msg);
+    void ShowTime(void);
+    void ClearWave(void);
+    void ClickItem(int r, int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray dataA);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
