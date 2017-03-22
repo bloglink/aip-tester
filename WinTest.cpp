@@ -48,7 +48,7 @@ void WinTest::InitWindows()
         ui->TabWave->setCellWidget(0,i,wave.at(i));
     }
     ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
-    ui->TextPos->setStyleSheet("color:red;font:Bold 45pt Ubuntu;");
+    ui->TextPos->setStyleSheet("color:red;font:Bold 42pt Ubuntu;");
     connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(ClickItem(int,int)));
 }
 
@@ -166,11 +166,11 @@ void WinTest::ShowJudge(QString judge)
     int unq = ui->LabelUnqualified->text().toInt();
     sum++;
     if (judge == "NG") {
-        ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold 45pt Ubuntu;border: none;");
+        ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold 42pt Ubuntu;border: none;");
         ui->LabelState->setText("NG");
         unq++;
     } else {
-        ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 45pt Ubuntu;border:none;");
+        ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
         ui->LabelState->setText("OK");
         qua++;
     }
@@ -293,7 +293,7 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 
 void WinTest::InitItem(QByteArray msg)
 {
-    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 45pt Ubuntu;border:none;");
+    ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
     ui->LabelState->setText("--");
     if (msg.isEmpty()) {
         return;

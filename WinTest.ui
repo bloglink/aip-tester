@@ -250,7 +250,7 @@
    </item>
    <item>
     <widget class="QWidget" name="widget" native="true">
-     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,1,0,0,0">
+     <layout class="QVBoxLayout" name="verticalLayout_2" stretch="0,0,0,1,1,0,1,0">
       <property name="leftMargin">
        <number>0</number>
       </property>
@@ -503,6 +503,9 @@ color: rgb(0, 0, 0);</string>
          <string/>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_3">
+         <property name="spacing">
+          <number>0</number>
+         </property>
          <property name="leftMargin">
           <number>0</number>
          </property>
@@ -517,6 +520,9 @@ color: rgb(0, 0, 0);</string>
          </property>
          <item>
           <widget class="QLabel" name="TextPos">
+           <property name="styleSheet">
+            <string notr="true">color:red;font:Bold 42pt Ubuntu;</string>
+           </property>
            <property name="text">
             <string>左</string>
            </property>
@@ -527,8 +533,11 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item>
           <widget class="QLabel" name="LabelState">
+           <property name="styleSheet">
+            <string notr="true">color:green;font:Bold 42pt Ubuntu;</string>
+           </property>
            <property name="text">
-            <string>OK</string>
+            <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:36pt;&quot;&gt;OK&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
            </property>
            <property name="alignment">
             <set>Qt::AlignCenter</set>

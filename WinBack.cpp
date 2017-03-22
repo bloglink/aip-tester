@@ -313,6 +313,7 @@ void WinBack::ExcuteCanCmd(quint16 addr, QByteArray msg)
 {
     if (!Testing)
         return;
+    emit SendCommand(ADDR,CMD_DEBUG,msg.toHex().append("\n"));
     switch (addr) {
     case CAN_ID_DCR:
         ReadCanCmdDcr(msg);
@@ -391,8 +392,8 @@ void WinBack::SendCanCmdParamImp()
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    for (int i=0; i<BoxImp.size()/2; i++) {
-        out <<quint16(0x24)<<quint8(0x06)<<quint8(0x06)<<quint8(i)
+    for (int i=0; i<BoxImp.size(); i++) {
+        out <<quint16(0x24)<<quint8(0x04)<<quint8(0x06)<<quint8(i)
            <<quint8(int(BoxImp.at(i)->value())/256)
           <<quint8(int(BoxImp.at(i)->value())%256);
     }
