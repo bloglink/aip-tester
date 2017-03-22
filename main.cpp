@@ -33,12 +33,8 @@ int main(int argc, char *argv[])
 #endif
 
     WinHome w;
-#ifdef __arm__
     w.showFullScreen();
-#else
-    w.show();
-    w.resize(1024,768);
-#endif
+
     return a.exec();
 }
 /*********************************END OF FILE**********************************/

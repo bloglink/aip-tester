@@ -166,11 +166,11 @@ void WinTest::ShowJudge(QString judge)
     int unq = ui->LabelUnqualified->text().toInt();
     sum++;
     if (judge == "NG") {
-        ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold  42pt Ubuntu;border: none;");
+        ui->LabelState->setStyleSheet("color:rgb(255,0,0);font: Bold 45pt Ubuntu;border: none;");
         ui->LabelState->setText("NG");
         unq++;
     } else {
-        ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
+        ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 45pt Ubuntu;border:none;");
         ui->LabelState->setText("OK");
         qua++;
     }
