@@ -6,9 +6,9 @@ PagePwr::PagePwr(QWidget *parent) :
     ui(new Ui::PagePwr)
 {
     ui->setupUi(this);
-    InitWindow();
-    InitButton();
-    InitSetting();
+    InitWindows();
+    InitButtons();
+    InitSettings();
     Mode = PWR_FREE;
 }
 
@@ -16,13 +16,8 @@ PagePwr::~PagePwr()
 {
     delete ui;
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2017.02.16
- * brief:       初始化界面
-*******************************************************************************/
-void PagePwr::InitWindow()
+
+void PagePwr::InitWindows()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
@@ -95,14 +90,14 @@ void PagePwr::InitWindow()
     }
 }
 
-void PagePwr::InitButton()
+void PagePwr::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExit,Qt::Key_0);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButton(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
-void PagePwr::ReadButton(int id)
+void PagePwr::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -113,7 +108,7 @@ void PagePwr::ReadButton(int id)
     }
 }
 
-void PagePwr::InitSetting()
+void PagePwr::InitSettings()
 {
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
@@ -176,7 +171,7 @@ void PagePwr::InitSetting()
         Grade.at(row)->setText(temp.at(row));
 }
 
-void PagePwr::SaveSetting()
+void PagePwr::SaveSettings()
 {
     QStringList temp;
     temp.append(QString::number(ui->BoxVolt->value()));
@@ -288,7 +283,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = PWR_FREE;
         break;
     case CMD_INIT:
-        InitSetting();
+        InitSettings();
         InitTestItems();
         SendTestItems();
         break;
@@ -302,11 +297,12 @@ void PagePwr::ExcuteCanCmd(QByteArray msg)
     if (Mode == PWR_FREE)
         return;
     TimeOut = 0;
-    qDebug()<<QTime::currentTime().toString()<<msg.toHex();
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x02)
+        ReadCanCmdDir(msg);
 }
 
 void PagePwr::InitTestItems()
@@ -327,6 +323,11 @@ void PagePwr::InitTestItems()
         s.append(" ");
         Items.append(s.join("@"));
     }
+
+    if (TestDir.at(0)->currentIndex() != 0) {
+        QString s = QString(tr("转向@%1@ @ ").arg(TestDir.at(0)->currentText()));
+        Items.append(s);
+    }
 }
 
 void PagePwr::SendTestItems()
@@ -336,6 +337,10 @@ void PagePwr::SendTestItems()
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
         }
+    }
+    if (TestDir.at(0)->currentIndex() != 0) {
+        QString s = QString(tr("转向@%1@ @ ").arg(TestDir.at(0)->currentText()));
+        n.append(s);
     }
     emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
@@ -351,6 +356,10 @@ void PagePwr::SendTestItemsAllError()
                 s[3] = "NG";
             emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
         }
+    }
+    if (TestDir.at(0)->currentIndex() != 0) {
+        QString s = QString(tr("转向@%1@---@NG").arg(TestDir.at(0)->currentText()));
+        emit SendCommand(ADDR,CMD_ITEM,s.toUtf8());
     }
 }
 
@@ -390,11 +399,8 @@ void PagePwr::SendCanCmdStop()
 
 void PagePwr::SendTestJudge()
 {
-    QStringList s;
-    s.append("功率");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    QString s = QString(tr("功率@%1@%2")).arg(FileInUse).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
 }
 
 void PagePwr::SendItemJudge()
@@ -410,6 +416,12 @@ void PagePwr::SendItemJudge()
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    if (TestDir.at(0)->currentIndex() != 0) {
+        QString n = TestDir.at(0)->currentText();
+        QString a = (dir==n)?"OK":"NG";
+        QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
+        emit SendCommand(ADDR,CMD_ITEM,s.toUtf8());
+    }
 }
 
 void PagePwr::ReadCanCmdStatus(QByteArray msg)
@@ -441,6 +453,16 @@ void PagePwr::ReadCanCmdResult(QByteArray msg)
         ClearResults();
         Mode = PWR_FREE;
     }
+}
+
+void PagePwr::ReadCanCmdDir(QByteArray msg)
+{
+    if (quint8(msg.at(5)) == 0x00)
+        dir = tr("不转");
+    if (quint8(msg.at(5)) == 0x01)
+        dir = tr("正转");
+    if (quint8(msg.at(5)) == 0x02)
+        dir = tr("反转");
 }
 
 void PagePwr::CalculateResult()
@@ -490,11 +512,11 @@ void PagePwr::Delay(int ms)
 
 void PagePwr::showEvent(QShowEvent *)
 {
-    InitSetting();
+    InitSettings();
 }
 
 void PagePwr::hideEvent(QHideEvent *)
 {
-    SaveSetting();
+    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

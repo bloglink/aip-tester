@@ -41,11 +41,11 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void InitWindow(void);
-    void InitButton(void);
-    void ReadButton(int id);
-    void InitSetting(void);
-    void SaveSetting(void);
+    void InitWindows(void);
+    void InitButtons(void);
+    void ReadButtons(int id);
+    void InitSettings(void);
+    void SaveSettings(void);
     void ItemClick(int r,int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
@@ -59,6 +59,7 @@ private slots:
     void SendItemJudge(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
+    void ReadCanCmdDir(QByteArray msg);
     void CalculateResult(void);
     void ClearResults(void);
     bool WaitTimeOut(quint16 t);
@@ -91,6 +92,7 @@ private:
     quint8 TestRow;
     quint8 Mode;
     quint8 PowerSupply;
+    QString dir;
 };
 
 #endif // PAGEPWR_H
