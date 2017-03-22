@@ -41,8 +41,9 @@ public:
 
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray msg);
+public slots:
+    void OpenSerial();
 private slots:
-    void OpenSerial(void);
     void CloseSerial(void);
     void ReadSerial(void);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);

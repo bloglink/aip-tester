@@ -46,7 +46,7 @@ void SerialPort::ReadSerial()
     if (cmd.size()==4 && quint8(cmd.at(1)==0x32))
         SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
     if (cmd.size()==4 && quint8(cmd.at(1)==0x31))
-        SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
+        SendCommand(ADDR,CMD_STOP,msg.join(" ").toUtf8());
 }
 
 void SerialPort::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -86,9 +86,9 @@ void SerialPort::StartBeep()
         return;
     }
     conf.freq = 2000;
-    conf.duty = 99;
+    conf.duty = 100;
     conf.polarity = POLARITY;
-    conf.count = 10;
+    conf.count = 0;
     int ret = write(fd, &conf, sizeof(struct pwm_config_info));
     qDebug()<<ret;
 #endif

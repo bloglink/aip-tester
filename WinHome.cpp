@@ -33,8 +33,6 @@ WinHome::~WinHome()
     thread_tcp->wait();
     thread_udp->quit();
     thread_udp->wait();
-    thread_all->quit();
-    thread_all->wait();
     delete ui;
 }
 
@@ -324,15 +322,11 @@ void WinHome::InitUdp()
 
 void WinHome::InitSerial()
 {
-    thread_all = new QThread(this);
-    serial.moveToThread(thread_all);
-    connect(thread_all,SIGNAL(started()),&serial,SLOT(OpenSerial()));
-    connect(thread_all,SIGNAL(finished()),&serial,SLOT(CloseSerial()));
     connect(&serial,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),&serial,
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
-    thread_all->start();
+    serial.OpenSerial();
 }
 
 void WinHome::ReadCanCmd(QByteArray msg)
