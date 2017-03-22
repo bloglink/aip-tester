@@ -26,7 +26,7 @@
       <enum>Qt::ClickFocus</enum>
      </property>
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="TabSys">
       <attribute name="title">
@@ -491,6 +491,19 @@
              </size>
             </property>
            </spacer>
+          </item>
+          <item>
+           <widget class="QPushButton" name="BtnQuit">
+            <property name="minimumSize">
+             <size>
+              <width>97</width>
+              <height>44</height>
+             </size>
+            </property>
+            <property name="text">
+             <string>退出程序</string>
+            </property>
+           </widget>
           </item>
           <item>
            <widget class="QPushButton" name="BtnVersion">

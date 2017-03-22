@@ -89,6 +89,7 @@ void WinBack::InitButtons()
     QButtonGroup *BtnGroup = new QButtonGroup;
     BtnGroup->addButton(ui->BtnExit,Qt::Key_0);
     BtnGroup->addButton(ui->BtnVersion,Qt::Key_1);
+    BtnGroup->addButton(ui->BtnQuit,Qt::Key_2);
     connect(BtnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 
     QButtonGroup *btnGroupDcr = new QButtonGroup;
@@ -130,6 +131,7 @@ void WinBack::BtnJudge(int id)
         SendCanCmdVersion(0x27);
         break;
     default:
+        QApplication::closeAllWindows();
         break;
     }
 }
@@ -465,7 +467,6 @@ void WinBack::ReadCanCmdInr(QByteArray msg)
 
 void WinBack::ReadCanCmdImp(QByteArray msg)
 {
-    emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
     if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=1; i<msg.size(); i++)
