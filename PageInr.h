@@ -1,6 +1,7 @@
 #ifndef PAGEINR_H
 #define PAGEINR_H
 
+#include <qmath.h>
 #include <QDate>
 #include <QDebug>
 #include <QWidget>

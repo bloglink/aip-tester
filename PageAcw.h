@@ -1,6 +1,7 @@
 #ifndef PAGEACW_H
 #define PAGEACW_H
 
+#include <qmath.h>
 #include <QDate>
 #include <QDebug>
 #include <QWidget>
@@ -11,6 +12,10 @@
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include "define.h"
+
+#define ACW_FREE        0
+#define ACW_INIT        4
+#define ACW_TEST        1
 
 namespace Ui {
 class PageAcw;
@@ -30,37 +35,41 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void WinInit(void);
-    void BtnInit(void);
-    void BtnJudge(int id);
-    void DatInit(void);
-    void DatSave(void);
+    void InitWindows(void);
+    void InitButtons(void);
+    void JudgeButtons(int id);
+    void InitSettings(void);
+    void SaveSettings(void);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void TestInit(void);
-    void TestCheck(void);
-    void TestCheckOk(QByteArray msg);
-    void TestStart(quint8 pos);
-    void TestResult(QByteArray msg);
-    void TestStop(void);
-    void TestConfig(void);
+    void InitTestItems(void);
+    void SendTestItemsAllError(void);
+    void SendCanCmdStart(quint8 pos);
+    void SendCanCmdStop(void);
+    void SendCanCmdConfig(void);
+    void SendItemJudge(void);
+    void SendTestJudge(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void ClearResults(void);
 
-    bool WaitTestOver(quint16 t);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
+
     quint16 TimeOut;
     QList<double> Volt;
     QList<double> Curr;
     QStringList Items;
     QString Judge;
     QString FileInUse;
+    quint8 Mode;
+    quint16 TestTime;
 };
 
 #endif // PAGEACW_H

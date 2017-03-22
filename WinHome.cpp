@@ -402,7 +402,10 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_STOP:
         emit SendCommand(ADDR,CMD_STOP,msg);
-        HomeMode = HOME_FREE;
+        if (HomeMode != HOME_FREE)
+            HomeMode = HOME_FREE;
+        else
+            InitTestItems();
         break;
     case CMD_NET:
         ui->IconNet->setPixmap(QPixmap(":/source/wifi.png"));

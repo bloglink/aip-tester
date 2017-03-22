@@ -212,7 +212,9 @@ void PageInr::SendCanCmdConfig()
 void PageInr::SendItemJudge()
 {
     QString vvv = QString::number(Volt.last(),'f',0);
-    QString rrr = QString::number(Res.last()/10,'f',1);
+    QString rrr = QString::number(Res.last(),'f',1);
+    if (Res.last()>500)
+        rrr = ">500";
     QString t = QString("%1V,%2Mohm").arg(vvv).arg(rrr);
 
     QStringList s = QString(Items.at(0)).split("@");
@@ -256,6 +258,7 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    tt *= qPow(10,-quint8(msg.at(5)));
     if (TestTime%2 == 0) {
         Volt.append(v);
         Res.append(tt);
