@@ -141,12 +141,7 @@ void CanClient::readAll()
     if (!msg.isEmpty())
         emit GetCanData(msg);
 }
-/*******************************************************************************
- * version:     1.0
- * author:      link
- * date:        2016.12.09
- * brief:       发送数据
-*******************************************************************************/
+
 void CanClient::WriteAll(QByteArray msg)
 {
     quint16 id;
@@ -156,6 +151,8 @@ void CanClient::WriteAll(QByteArray msg)
     out.setVersion(QDataStream::Qt_4_8);
     while(!out.atEnd()) {
         out >> id >> dlc;
+        if (id > 0x800 || dlc > 8)
+            break;
 #ifdef __arm__
         TxMsg.can_id = id;
         TxMsg.can_dlc = dlc;
