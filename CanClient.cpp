@@ -174,6 +174,10 @@ void CanClient::WriteAll(QByteArray msg)
             TxMsg.arryData[i] = dat;
         }
 #endif
-        DeviceSend();
+        if (!DeviceSend()) {
+            DeviceQuit();
+            DeviceOpen();
+            break;
+        }
     }
 }
