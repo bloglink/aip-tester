@@ -418,8 +418,7 @@ void WinBack::ReadCanCmdDcr(QByteArray msg)
     if (msg.size()==8 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=1; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        v.insert(1,".");
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabItems->item(0,2)->setText(v);
         ui->TabItems->item(1,2)->setText(v);
     }
@@ -449,8 +448,7 @@ void WinBack::ReadCanCmdInr(QByteArray msg)
     if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=1; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        v.insert(1,".");
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabItems->item(2,2)->setText(v);
         ui->TabItems->item(3,2)->setText(v);
         ui->TabItems->item(4,2)->setText(v);
@@ -471,8 +469,7 @@ void WinBack::ReadCanCmdImp(QByteArray msg)
     if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
         for (int i=1; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        v.insert(1,".");
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabItems->item(5,2)->setText(v);
     }
     if (msg.size()==4 && quint8(msg.at(0))==0x06) {
@@ -488,9 +485,8 @@ void WinBack::ReadCanCmdInd(QByteArray msg)
 {
     if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        v.insert(1,".");
+        for (int i=1; i<msg.size(); i++)
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabItems->item(6,2)->setText(v);
     }
 }
@@ -499,9 +495,8 @@ void WinBack::ReadCanCmdPwr(QByteArray msg)
 {
     if (msg.size()==0x08 && quint8(msg.at(0))==0x08) {
         QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
-        v.insert(1,".");
+        for (int i=1; i<msg.size(); i++)
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabItems->item(7,2)->setText(v);
         ui->TabItems->item(8,2)->setText(v);
         ui->TabItems->item(9,2)->setText(v);
@@ -512,8 +507,8 @@ void WinBack::ReadCanCmdOut13(QByteArray msg)
 {
     if (msg.size()==0x08) {
         QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
+        for (int i=1; i<msg.size(); i++)
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabOutput->item(0,2)->setText(v);
     }
 }
@@ -522,8 +517,8 @@ void WinBack::ReadCanCmdOut14(QByteArray msg)
 {
     if (msg.size()==0x08) {
         QString v;
-        for (int i=0; i<msg.size(); i++)
-            v.append(QString::number(msg.mid(i,1).toInt()));
+        for (int i=1; i<msg.size(); i++)
+            v.append(QString::number(quint8(msg.at(i))));
         ui->TabOutput->item(1,2)->setText(v);
     }
 }
