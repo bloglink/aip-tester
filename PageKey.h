@@ -40,15 +40,17 @@ public:
         return _instance;
     }
 private slots:
-    void WinInit();
-    void BtnInit();
-    void BtnJudge(int);
+    void InitWindows();
+    void InitButtons();
+    void JudgeButtons(int);
+    void SwitchInput(void);
     void focusChanged(QWidget *oldWidget, QWidget *nowWidget);
     void showEvent(QShowEvent *);
 private:
     static PageKey *_instance;
     bool upper;
     QWidget *currentWidget;
+    bool num;
 };
 
 #endif // PAGEKEY_H

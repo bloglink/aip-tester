@@ -11,34 +11,22 @@
 #include "PageKey.h"
 #include "ui_PageKey.h"
 PageKey *PageKey::_instance = 0;
-/**
-  * @brief  Initializes
-  * @param  *parent:parent widget
-  * @retval None
-  */
+
 PageKey::PageKey(QWidget *parent) :
     QWidget(parent,Qt::Tool|Qt::WindowStaysOnTopHint|Qt::FramelessWindowHint),
     ui(new Ui::PageKey)
 {
     ui->setupUi(this);
-    WinInit();
-    BtnInit();
+    InitWindows();
+    InitButtons();
 }
-/**
-  * @brief  Destruct the window
-  * @param  None
-  * @retval None
-  */
+
 PageKey::~PageKey()
 {
     delete ui;
 }
-/**
-  * @brief  Initializes the window
-  * @param  None
-  * @retval None
-  */
-void PageKey::WinInit()
+
+void PageKey::InitWindows()
 {
     //绑定全局改变焦点信号槽
     connect(qApp, SIGNAL(focusChanged(QWidget *, QWidget *)),
@@ -48,12 +36,8 @@ void PageKey::WinInit()
     upper = true;
     currentWidget = NULL;
 }
-/**
-  * @brief  Initializes the buttons
-  * @param  None
-  * @retval None
-  */
-void PageKey::BtnInit()
+
+void PageKey::InitButtons()
 {
     QButtonGroup *btn_group = new QButtonGroup;
     btn_group->addButton(ui->Key_0,Qt::Key_0);
@@ -66,6 +50,17 @@ void PageKey::BtnInit()
     btn_group->addButton(ui->Key_7,Qt::Key_7);
     btn_group->addButton(ui->Key_8,Qt::Key_8);
     btn_group->addButton(ui->Key_9,Qt::Key_9);
+
+    btn_group->addButton(ui->Key0,Qt::Key_0);
+    btn_group->addButton(ui->Key1,Qt::Key_1);
+    btn_group->addButton(ui->Key2,Qt::Key_2);
+    btn_group->addButton(ui->Key3,Qt::Key_3);
+    btn_group->addButton(ui->Key4,Qt::Key_4);
+    btn_group->addButton(ui->Key5,Qt::Key_5);
+    btn_group->addButton(ui->Key6,Qt::Key_6);
+    btn_group->addButton(ui->Key7,Qt::Key_7);
+    btn_group->addButton(ui->Key8,Qt::Key_8);
+    btn_group->addButton(ui->Key9,Qt::Key_9);
 
     btn_group->addButton(ui->Key_A,Qt::Key_A);
     btn_group->addButton(ui->Key_B,Qt::Key_B);
@@ -96,20 +91,19 @@ void PageKey::BtnInit()
 
     btn_group->addButton(ui->Key_Space,Qt::Key_Space);
     btn_group->addButton(ui->Key_Enter,Qt::Key_Enter);
-    // this->button_group->addButton(ui->Key_Escape,Qt::Key_Escape);
+    btn_group->addButton(ui->Key_Enter_2,Qt::Key_Enter);
     btn_group->addButton(ui->Key_Period,Qt::Key_Period);
+    btn_group->addButton(ui->Key_Period_2,Qt::Key_Period);
     btn_group->addButton(ui->Key_CapsLock,Qt::Key_CapsLock);
     btn_group->addButton(ui->Key_Backspace,Qt::Key_Backspace);
+    btn_group->addButton(ui->Key_Backspace_2,Qt::Key_Backspace);
     btn_group->addButton(ui->Key_Minus,Qt::Key_Minus);
 
-    connect(btn_group,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    connect(btn_group,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
+    connect(ui->Key_Switch,SIGNAL(clicked(bool)),this,SLOT(SwitchInput()));
 }
-/**
-  * @brief  Button functions
-  * @param  id:button id
-  * @retval None
-  */
-void PageKey::BtnJudge(int id)
+
+void PageKey::JudgeButtons(int id)
 {
     switch (id) {
     case Qt::Key_Enter :
@@ -132,39 +126,49 @@ void PageKey::BtnJudge(int id)
         break;
     }
 }
-/**
-  * @brief  focus change event
-  * @param  nowWidget:focus widget
-  * @retval None
-  */
+
+void PageKey::SwitchInput()
+{
+    ui->stackedWidget->setCurrentIndex(0);
+    this->move(70,this->pos().y());
+    this->resize(660,240);
+}
+
 void PageKey::focusChanged(QWidget *, QWidget *nowWidget)
 {
     if (nowWidget != 0 && !this->isAncestorOf(nowWidget)) {
         bool visible = false;
-        if (nowWidget->inherits("QLineEdit"))
+        if (nowWidget->inherits("QLineEdit")) {
             visible = true;
-        if (nowWidget->inherits("QSpinBox"))
+            num = false;
+        }
+        if (nowWidget->inherits("QSpinBox")
+                || nowWidget->inherits("QDoubleSpinBox")
+                ||nowWidget->inherits("QDateTimeEdit")) {
             visible = true;
-        if (nowWidget->inherits("QDoubleSpinBox"))
-            visible = true;
-        if (nowWidget->inherits("QDateTimeEdit"))
-            visible = true;
+            num = true;
+        }
         this->setVisible(visible);
     }
 }
-/**
-  * @brief  Initializes position when show
-  * @param  None
-  * @retval None
-  */
+
 void PageKey::showEvent(QShowEvent *)
 {
     int mouse_y = QCursor::pos().y();//鼠标点击处纵坐标
-
-    if(mouse_y>300) {
-        this->move(70,0);
+    int x = 0;
+    if (num) {
+        x = 240;
+        this->resize(320,240);
+        ui->stackedWidget->setCurrentIndex(1);
     } else {
-        this->move(70,600-240);
+        x = 70;
+        this->resize(660,240);
+        ui->stackedWidget->setCurrentIndex(0);
+    }
+    if(mouse_y>300) {
+        this->move(x,mouse_y-280);
+    } else {
+        this->move(x,mouse_y+50);
     }
 }
 /*********************************END OF FILE**********************************/
