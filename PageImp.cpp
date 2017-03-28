@@ -557,7 +557,10 @@ void PageImp::SendCanCmdSampleAuto()
         if (Enable.at(row)->text() == "Y")
             tt += 0x0001<<row;
     }
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x01)<<quint8(station)
+    quint8 mode = 0x01;
+    if (ui->BoxOffset->isChecked())
+        mode = 0x04;
+    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(mode)<<quint8(station)
       <<quint8(tt/256)<<quint8(tt%256);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }

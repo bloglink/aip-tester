@@ -138,8 +138,8 @@
         </widget>
        </item>
        <item>
-        <layout class="QGridLayout" name="LayoutCtrl" columnstretch="1,0,0,0,0">
-         <item row="0" column="4">
+        <layout class="QGridLayout" name="LayoutCtrl" columnstretch="1,0,0,0,0,0">
+         <item row="0" column="5">
           <widget class="QPushButton" name="BtnExitImp">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -154,11 +154,11 @@
             </size>
            </property>
            <property name="text">
-            <string>返回</string>
+            <string>保存退出</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="2">
+         <item row="0" column="3">
           <widget class="QPushButton" name="BtnSampleImp">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -177,7 +177,7 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="0">
+         <item row="0" column="1">
           <spacer name="SpacerCtrl">
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
@@ -190,7 +190,7 @@
            </property>
           </spacer>
          </item>
-         <item row="0" column="1">
+         <item row="0" column="2">
           <widget class="QComboBox" name="BoxStation">
            <property name="minimumSize">
             <size>
@@ -210,7 +210,17 @@
            </item>
           </widget>
          </item>
-         <item row="0" column="3">
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="BoxOffset">
+           <property name="enabled">
+            <bool>false</bool>
+           </property>
+           <property name="text">
+            <string>取消电压反馈</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="4">
           <widget class="QPushButton" name="BtnAvarage">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">

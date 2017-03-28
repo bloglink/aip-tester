@@ -1,6 +1,7 @@
 #ifndef PAGEKEY_H
 #define PAGEKEY_H
 
+#include <QTimer>
 #include <QTime>
 #include <QWidget>
 #include <QMutex>
@@ -42,7 +43,7 @@ public:
 private slots:
     void InitWindows();
     void InitButtons();
-    void JudgeButtons(int);
+    void ReadButtons(int);
     void SwitchInput(void);
     void focusChanged(QWidget *oldWidget, QWidget *nowWidget);
     void showEvent(QShowEvent *);

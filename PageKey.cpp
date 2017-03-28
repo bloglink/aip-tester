@@ -2,14 +2,14 @@
   ******************************************************************************
   * @file    PageKey.cpp
   * @author  link
-  * @version 2.0.1.1
-  * @date    2017-03-01
-  * @brief   Keyboard and PageKey method for arm
+  * @version 2.1.0.170324
+  * @brief   Keyboard and input method for arm
   ******************************************************************************
   */
-/* Includes ------------------------------------------------------------------*/
+
 #include "PageKey.h"
 #include "ui_PageKey.h"
+
 PageKey *PageKey::_instance = 0;
 
 PageKey::PageKey(QWidget *parent) :
@@ -99,11 +99,11 @@ void PageKey::InitButtons()
     btn_group->addButton(ui->Key_Backspace_2,Qt::Key_Backspace);
     btn_group->addButton(ui->Key_Minus,Qt::Key_Minus);
 
-    connect(btn_group,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
+    connect(btn_group,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
     connect(ui->Key_Switch,SIGNAL(clicked(bool)),this,SLOT(SwitchInput()));
 }
 
-void PageKey::JudgeButtons(int id)
+void PageKey::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_Enter :
@@ -144,9 +144,12 @@ void PageKey::focusChanged(QWidget *, QWidget *nowWidget)
         }
         if (nowWidget->inherits("QSpinBox")
                 || nowWidget->inherits("QDoubleSpinBox")
-                ||nowWidget->inherits("QDateTimeEdit")) {
+                || nowWidget->inherits("QDateTimeEdit")) {
             visible = true;
             num = true;
+#ifdef __arm__
+            QWSServer::sendKeyEvent(Qt::Key_A,Qt::Key_A,Qt::ControlModifier,true,false);
+#endif
         }
         this->setVisible(visible);
     }
