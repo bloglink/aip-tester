@@ -36,6 +36,7 @@ void WinTest::InitWindows()
     ui->TabTest->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
     ui->TabWave->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabWave->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->BtnCmdStart->hide();
 #else
     ui->WidgetItem->hide();
     ui->TabTest->setColumnWidth(1,180);
