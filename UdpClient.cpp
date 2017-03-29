@@ -48,7 +48,7 @@ void UdpClient::SaveSettings()
     g_ini->setIniCodec("GB18030");
     g_ini->beginGroup("GLOBAL");
     g_ini->setValue("UserNumber",Number);
-    g_ini->setValue("FileInUse",FileInUse);
+    g_ini->setValue("FileInUse",FileInUse.append(".ini"));
 }
 
 void UdpClient::ReadAll()
@@ -90,6 +90,7 @@ void UdpClient::ReadAll()
             if (!Param.isEmpty())
                 FileInUse = Param;
             SaveSettings();
+            emit SendCommand(ADDR,CMD_INIT,NULL);
             TxMsg = "3007 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
@@ -117,7 +118,7 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         default:
-            break;
+           break;
         }
     }
 }

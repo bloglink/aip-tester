@@ -123,7 +123,6 @@ void WinTest::InitSettings()
     }
 
     qDebug()<<QTime::currentTime().toString()<<"读取测试配置OK";
-    emit SendCommand(ADDR,CMD_INIT,NULL);
 }
 
 void WinTest::SaveSettings()
@@ -262,6 +261,7 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_INIT:
         ClearWave();
         InitItem(msg);
+        InitSettings();
         break;
     case CMD_ITEM:
         ShowItem(msg);
@@ -328,6 +328,7 @@ void WinTest::InitItem(QByteArray msg)
 void WinTest::showEvent(QShowEvent *)
 {
     InitSettings();
+    emit SendCommand(ADDR,CMD_INIT,NULL);
 }
 
 void WinTest::hideEvent(QHideEvent *)
