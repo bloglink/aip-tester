@@ -117,7 +117,6 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         default:
-            this->writeDatagram("Error command",sender,senderPort);
             break;
         }
     }

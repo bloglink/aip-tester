@@ -115,6 +115,8 @@ void WinSyst::InitSettings()
     } else {
         ui->EditTime->setDateTime(QDateTime::currentDateTime());
     }
+    if (ui->LocalHostIP->text().isEmpty())
+        ui->LocalHostIP->setText(GetLocalHostIP());
     qDebug()<<QTime::currentTime().toString()<<"读取系统配置OK";
 }
 
@@ -184,6 +186,24 @@ void WinSyst::WriteLog(QByteArray msg)
     out.seek(file->size());
     out<<QDateTime::currentDateTime().toString("yyyyMMdd hh:mm ");
     out<<msg;
+}
+
+QString WinSyst::GetLocalHostIP()
+{
+    QList<QHostAddress> AddressList = QNetworkInterface::allAddresses();
+    QHostAddress result;
+    foreach(QHostAddress address, AddressList){
+        if(address.protocol() == QAbstractSocket::IPv4Protocol &&
+           address != QHostAddress::Null &&
+           address != QHostAddress::LocalHost){
+            if (address.toString().contains("127.0.")){
+              continue;
+            }
+            result = address;
+            break;
+        }
+    }
+    return result.toString();
 }
 
 void WinSyst::showEvent(QShowEvent *)

@@ -11,6 +11,8 @@
 #include <QButtonGroup>
 #include <QTextStream>
 #include <QMessageBox>
+#include <QHostAddress>
+#include <QNetworkInterface>
 
 #include "define.h"
 
@@ -42,6 +44,7 @@ private slots:
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void SendWinCmdStartMode(void);
     void WriteLog(QByteArray msg);
+    QString GetLocalHostIP(void);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 private:
