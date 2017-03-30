@@ -75,7 +75,6 @@ private:
     QStringList Items;
 
     quint8 Mode;
-    quint16 TestTime;
     quint16 TimeOut;
 };
 

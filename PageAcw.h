@@ -69,7 +69,6 @@ private:
     QString Judge;
     QString FileInUse;
     quint8 Mode;
-    quint16 TestTime;
 };
 
 #endif // PAGEACW_H

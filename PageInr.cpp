@@ -10,7 +10,6 @@ PageInr::PageInr(QWidget *parent) :
     InitButtons();
     InitSettings();
     Mode = INR_FREE;
-    TestTime = 0;
 }
 
 PageInr::~PageInr()
@@ -139,15 +138,15 @@ void PageInr::ExcuteCanCmd(QByteArray msg)
 void PageInr::InitTestItems()
 {
     Items.clear();
-    QStringList s;
+    QString s;
     QString U1 = ui->BoxVoltage->currentText();
     QString M1 = ui->BoxMin->text();
     QString M2 = ui->BoxMax->text();
-    s.append(QString(tr("绝缘")));
-    s.append(QString("%1V,%2~%3Mohm").arg(U1).arg(M1).arg(M2));
-    s.append(" ");
-    s.append(" ");
-    Items.append(s.join("@"));
+    if (M2.toInt() == 0)
+        s = QString(tr("绝缘@%1V,%2Mohm@ @ ")).arg(U1).arg(M1);
+    else
+        s = QString(tr("绝缘@%1V,%2~%3Mohm@ @ ")).arg(U1).arg(M1).arg(M2);
+    Items.append(s);
     emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 
@@ -211,6 +210,11 @@ void PageInr::SendCanCmdConfig()
 
 void PageInr::SendItemJudge()
 {
+    if (Volt.isEmpty() || Res.isEmpty()) {
+        Judge = "NG";
+        SendTestItemsAllError();
+        return;
+    }
     QString vvv = QString::number(Volt.last(),'f',0);
     QString rrr = QString::number(Res.last(),'f',1);
     if (Res.last()>500)
@@ -227,11 +231,8 @@ void PageInr::SendItemJudge()
 
 void PageInr::SendTestJudge()
 {
-    QStringList s;
-    s.append("绝缘");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    QString s = QString(tr("绝缘@%1@%2")).arg(FileInUse).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
 }
 
 void PageInr::SendCanCmdAlarm(quint8 port)
@@ -259,20 +260,12 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     tt *= qPow(10,-quint8(msg.at(5)));
-    if (TestTime%2 == 0) {
-        Volt.append(v);
-        Res.append(tt);
-    }
-    if (TestTime%2 == 1 && quint8(msg.at(6)) == 0x00) {
-        Volt[TestTime/2] = (Volt[TestTime/2]+v)/2;
-        Res[TestTime/2] = (Res[TestTime/2]+tt)/2;
-    }
-    TestTime++;
+    Volt.append(v);
+    Res.append(tt);
     if (quint8(msg.at(6)) != 0x00) {
         Judge = "NG";
         SendItemJudge();
         ClearResults();
-        Mode = INR_FREE;
     }
 }
 
@@ -280,7 +273,6 @@ void PageInr::ClearResults()
 {
     Volt.clear();
     Res.clear();
-    TestTime = 0;
 }
 
 bool PageInr::WaitTimeOut(quint16 t)

@@ -10,7 +10,6 @@ PageAcw::PageAcw(QWidget *parent) :
     InitButtons();
     InitSettings();
     Mode = ACW_FREE;
-    TestTime = 0;
 }
 
 PageAcw::~PageAcw()
@@ -196,6 +195,11 @@ void PageAcw::SendCanCmdConfig()
 
 void PageAcw::SendItemJudge()
 {
+    if (Volt.isEmpty() || Curr.isEmpty()) {
+        Judge = "NG";
+        SendTestItemsAllError();
+        return;
+    }
     QString vvv = QString::number(Volt.last(),'f',0);
     QString rrr = QString::number(Curr.last(),'f',2);
     QString t = QString("%1V,%2mA").arg(vvv).arg(rrr);
@@ -226,21 +230,12 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     tt *= qPow(10,-quint8(msg.at(5)));
-
-    if (TestTime%2 == 0) {
-        Volt.append(v);
-        Curr.append(tt);
-    }
-    if (TestTime%2 == 1 && quint8(msg.at(6)) == 0x00) {
-        Volt[TestTime/2] = (Volt[TestTime/2]+v)/2;
-        Curr[TestTime/2] = (Curr[TestTime/2]+tt)/2;
-    }
-    TestTime++;
+    Volt.append(v);
+    Curr.append(tt);
     if (quint8(msg.at(6)) != 0x00) {
         Judge = "NG";
         SendItemJudge();
         ClearResults();
-        Mode = ACW_FREE;
     }
 }
 
@@ -248,7 +243,6 @@ void PageAcw::ClearResults()
 {
     Volt.clear();
     Curr.clear();
-    TestTime = 0;
 }
 
 bool PageAcw::WaitTimeOut(quint16 t)
