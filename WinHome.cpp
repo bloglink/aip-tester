@@ -220,6 +220,8 @@ void WinHome::InitWindowsAll()
 
 void WinHome::JumpToWindow(QByteArray win)
 {
+    if (HomeMode == HOME_TEST)
+        return;
     int WinCurrent = ui->desktop->currentIndex();
     if (win.isNull()) { //空代表返回
         ui->desktop->setCurrentIndex(previous_window.last());
