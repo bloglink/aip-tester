@@ -87,6 +87,12 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3006: //设置测试型号
+            if (Status == "buzy") {
+                TxMsg = "3013 ";
+                TxMsg.append(Status);
+                this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
+                break;
+            }
             if (!Param.isEmpty())
                 FileInUse = Param;
             SaveSettings();
@@ -96,6 +102,12 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3008: //启动测试
+            if (Status == "buzy") {
+                TxMsg = "3013 ";
+                TxMsg.append(Status);
+                this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
+                break;
+            }
             emit SendCommand(ADDR,CMD_START,QString("%1 %2").arg(0x13).arg(0x03).toUtf8());
             TxMsg = "3009 ";
             TxMsg.append(Number);
@@ -113,12 +125,18 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         case 3014:
+            if (Status != "ready") {
+                TxMsg = "3013 ";
+                TxMsg.append(Status);
+                this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
+                break;
+            }
             TxMsg = "3015 ";
             TxMsg.append(Items.join("\n"));
             this->writeDatagram(TxMsg.toUtf8(),sender,senderPort);
             break;
         default:
-           break;
+            break;
         }
     }
 }
