@@ -475,7 +475,6 @@ void WinHome::ReadStatusAll()
 
 void WinHome::StartTest(QByteArray station)
 {
-    WaitTimeOut(100);
     if (HomeMode == HOME_TEST)
         return;
     if (ui->desktop->currentWidget()->objectName() != "WinTest")
