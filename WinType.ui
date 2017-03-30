@@ -533,6 +533,9 @@
            <height>44</height>
           </size>
          </property>
+         <property name="styleSheet">
+          <string notr="true">color:yellow;font:Bold 15pt Ubuntu</string>
+         </property>
          <property name="text">
           <string>TextLabel</string>
          </property>

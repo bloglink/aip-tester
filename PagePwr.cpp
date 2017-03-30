@@ -34,41 +34,41 @@ void PagePwr::InitWindows()
         Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Enable.at(row)->setTextAlignment(Qt::AlignCenter);
 
-        CurrMax.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,1,CurrMax.at(row));
-        CurrMax.at(row)->setMaximum(20);
-        CurrMax.at(row)->setAlignment(Qt::AlignHCenter);
-        CurrMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-
         CurrMin.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,2,CurrMin.at(row));
+        ui->TabParams->setCellWidget(row,1,CurrMin.at(row));
         CurrMin.at(row)->setMaximum(20);
         CurrMin.at(row)->setAlignment(Qt::AlignHCenter);
         CurrMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        PowerMax.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,3,PowerMax.at(row));
-        PowerMax.at(row)->setMaximum(9999);
-        PowerMax.at(row)->setAlignment(Qt::AlignHCenter);
-        PowerMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        CurrMax.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,2,CurrMax.at(row));
+        CurrMax.at(row)->setMaximum(20);
+        CurrMax.at(row)->setAlignment(Qt::AlignHCenter);
+        CurrMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         PowerMin.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,4,PowerMin.at(row));
+        ui->TabParams->setCellWidget(row,3,PowerMin.at(row));
         PowerMin.at(row)->setMaximum(9999);
         PowerMin.at(row)->setAlignment(Qt::AlignHCenter);
         PowerMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        CapMax.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,5,CapMax.at(row));
-        CapMax.at(row)->setMaximum(9999);
-        CapMax.at(row)->setAlignment(Qt::AlignHCenter);
-        CapMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        PowerMax.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,4,PowerMax.at(row));
+        PowerMax.at(row)->setMaximum(9999);
+        PowerMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PowerMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         CapMin.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,6,CapMin.at(row));
+        ui->TabParams->setCellWidget(row,5,CapMin.at(row));
         CapMin.at(row)->setMaximum(9999);
         CapMin.at(row)->setAlignment(Qt::AlignHCenter);
         CapMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        CapMax.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,6,CapMax.at(row));
+        CapMax.at(row)->setMaximum(9999);
+        CapMax.at(row)->setAlignment(Qt::AlignHCenter);
+        CapMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         TestDir.append(new QComboBox(this));
         ui->TabParams->setCellWidget(row,7,TestDir.at(row));
@@ -142,7 +142,7 @@ void PagePwr::InitSettings()
     for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         CurrMax.at(row)->setValue(temp.at(row).toDouble());
     //最小功率
-    temp = (set->value("PowerMin","1 1 1 1 1 1").toString()).split(" ");
+    temp = (set->value("PowerMin","0 0 0 0 0 0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         PowerMin.at(row)->setValue(temp.at(row).toDouble());
     //最大功率
@@ -150,7 +150,7 @@ void PagePwr::InitSettings()
     for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         PowerMax.at(row)->setValue(temp.at(row).toDouble());
     //最小容压
-    temp = (set->value("CapMin","1 1 1 1 1 1").toString()).split(" ");
+    temp = (set->value("CapMin","0 0 0 0 0 0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         CapMin.at(row)->setValue(temp.at(row).toDouble());
     //最大容压

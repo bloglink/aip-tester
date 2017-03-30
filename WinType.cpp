@@ -388,6 +388,8 @@ void WinType::AddSettings()
 
 void WinType::RemoveSettings()
 {
+    if (ui->TabFile->currentRow() < 0)
+        return;
     QString t = ui->TabFile->currentItem()->text();
     if (t == ui->TextTypeShow->text())
         return;
