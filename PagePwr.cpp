@@ -419,6 +419,8 @@ void PagePwr::SendItemJudge()
     if (TestDir.at(0)->currentIndex() != 0) {
         QString n = TestDir.at(0)->currentText();
         QString a = (dir==n)?"OK":"NG";
+        if (a == "NG")
+            Judge = "NG";
         QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
         emit SendCommand(ADDR,CMD_ITEM,s.toUtf8());
     }
