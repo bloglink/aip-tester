@@ -104,6 +104,9 @@ void WinSyst::InitSettings()
 
     password = g_ini->value("Password","").toString();
     ui->EditPassword->clear();
+    ui->EditPwdNew->clear();
+    ui->EditPwdNewR->clear();
+    ui->EditPwdOld->clear();
 
     int t = g_ini->value("AddSeconds","0").toInt();
     if (dateTime.secsTo(QDateTime::currentDateTime()) < t) {
@@ -149,9 +152,11 @@ void WinSyst::SetPassword()
     QString old = ui->EditPwdOld->text();
     QString new1 = ui->EditPwdNew->text();
     QString new2 = ui->EditPwdNewR->text();
-    if ( old == password && new1 == new2)
+    if (old == password && new1 == new2) {
         password = new1;
-    SaveSettings();
+        SaveSettings();
+        ui->StackWinSyst->setCurrentIndex(0);
+    }
 }
 
 void WinSyst::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -194,10 +199,10 @@ QString WinSyst::GetLocalHostIP()
     QHostAddress result;
     foreach(QHostAddress address, AddressList){
         if(address.protocol() == QAbstractSocket::IPv4Protocol &&
-           address != QHostAddress::Null &&
-           address != QHostAddress::LocalHost){
+                address != QHostAddress::Null &&
+                address != QHostAddress::LocalHost){
             if (address.toString().contains("127.0.")){
-              continue;
+                continue;
             }
             result = address;
             break;
