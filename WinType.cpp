@@ -231,6 +231,7 @@ void WinType::InitTestItems()
             ui->TabProj->setItem(i,0,new QTableWidgetItem);
             ui->TabProj->item(i,0)->setTextAlignment(Qt::AlignCenter);
             ui->TabProj->item(i,0)->setText(ItemNames.at(temp.at(i).toInt()));
+            ui->TabProj->item(i,0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
 
             ui->TabProj->setItem(i,1,new QTableWidgetItem);
             ui->TabProj->item(i,1)->setTextAlignment(Qt::AlignCenter);
