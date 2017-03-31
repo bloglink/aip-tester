@@ -149,6 +149,7 @@ void PageImp::InitButtons()
     btnGroup->addButton(ui->BtnFrequcy2,Qt::Key_4);
     btnGroup->addButton(ui->BtnFrequcy3,Qt::Key_5);
     btnGroup->addButton(ui->BtnAvarage,Qt::Key_6);
+    btnGroup->addButton(ui->BtnExit,Qt::Key_7);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 
@@ -172,6 +173,7 @@ void PageImp::BtnJudge(int id)
         ui->WindgetSetImp->setCurrentIndex(0);
         break;
     case Qt::Key_2: //退出
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_3: //减频采样
@@ -206,6 +208,9 @@ void PageImp::BtnJudge(int id)
         SendCanCmdStart(station);
         WaitTimeOut(1000);
         CalculateAvarageWave();
+        break;
+    case Qt::Key_7:
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -871,10 +876,5 @@ void PageImp::AutoChangeVolt()
 void PageImp::showEvent(QShowEvent *)
 {
     InitSettings();
-}
-
-void PageImp::hideEvent(QHideEvent *)
-{
-    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

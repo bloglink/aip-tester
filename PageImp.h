@@ -80,7 +80,6 @@ private slots:
     void AutoChangeVolt(void);
 
     virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
     quint16 AvrCount;
