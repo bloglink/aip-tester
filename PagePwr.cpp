@@ -273,6 +273,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
                     SendTestItemsAllError();
                     break;
                 }
+                Delay(5);
                 Mode = PWR_FREE;
             }
         }
@@ -409,6 +410,10 @@ void PagePwr::SendTestJudge()
 
 void PagePwr::SendItemJudge()
 {
+    if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty()) {
+        SendTestItemsAllError();
+        return;
+    }
     QString vvv = QString::number(Volt.last()/10,'f',1);
     QString rrr = QString::number(Curr.last()/1000,'f',3);
     QString ppp = QString::number(Power.last()/10,'f',1);
@@ -432,9 +437,9 @@ void PagePwr::SendItemJudge()
 
 void PagePwr::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0x00)
+    if (quint8(msg.at(1)) != 0x00) {
         return;
-
+    }
     if (Mode == PWR_INIT)
         emit SendCommand(ADDR,CMD_DEBUG,"Power check ok\n");
     if (Mode == PWR_TEST) {
@@ -457,7 +462,6 @@ void PagePwr::ReadCanCmdResult(QByteArray msg)
         SendCanCmdStop();
         SendItemJudge();
         ClearResults();
-        Mode = PWR_FREE;
     }
 }
 
