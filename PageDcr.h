@@ -44,32 +44,31 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void InitializesWindow(void);
-    void InitializesButton(void);
+    void InitWindows(void);
+    void InitButtons(void);
     void BtnJudge(int id);
-    void InitializesSetting(void);
-    void SaveSetting(void);
-    void CalculateAuto(void);
+    void InitSettings(void);
+    void SaveSettings(void);
+    void AutoCalculateMinAndMax(void);
     bool CheckSetting(void);
     void ItemClick(int r,int c);
     void ItemChange(QString msg);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void InitializesItems(void);
-    void SendStatusCmd(void);
-    void ReadStatus(QByteArray msg);
+    void InitTestItems(void);
+    void SendCanCmdStatus(void);
+    void ReadCanCmdStatus(QByteArray msg);
     void ReadOffset(QByteArray msg);
-    void SendStartCmd(quint8 pos);
+    void SendCanCmdStart(quint8 pos);
     void WaitTestFinished(void);
     void SendTestJudge(void);
-    void ReadResult(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
     double CalculateOffset(double t,quint8 num);
     void CalculateBalance(void);
-    void SendStopCmd(void);
-    void SendConfigCmd(void);
+    void SendCanCmdStop(void);
+    void SendCanCmdConfig(void);
     int CalculateGear(int row);
-    void SendVersionCmd(void);
     void Delay(int ms);
     bool WaitTestTimeOut(quint16 t);
     bool WaitOffset(quint16 t);
@@ -80,7 +79,6 @@ private slots:
     void AutoChangeMax(double x);
     void AutoChangeStd(double x);
     virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
     bool isCheckOk;

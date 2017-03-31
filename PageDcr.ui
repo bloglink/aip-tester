@@ -78,13 +78,68 @@
       <string>其他参数</string>
      </property>
      <layout class="QGridLayout" name="gridLayout" columnstretch="0,2,0,2,1">
-      <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="BoxTime">
+      <item row="1" column="0">
+       <widget class="QLabel" name="TextOffsetTemp">
+        <property name="text">
+         <string>补偿温度°C</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="2">
+       <widget class="QLabel" name="TextUnbalance">
+        <property name="text">
+         <string>不平衡度%</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="1">
+       <widget class="QDoubleSpinBox" name="BoxOffset">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>35</height>
+         </size>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="decimals">
+         <number>1</number>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="TextStdTemp">
+        <property name="text">
+         <string>标准温度°C</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="1">
+       <widget class="QDoubleSpinBox" name="BoxStd">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>35</height>
+         </size>
         </property>
         <property name="buttonSymbols">
          <enum>QAbstractSpinBox::NoButtons</enum>
@@ -102,6 +157,12 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>35</height>
+         </size>
+        </property>
         <property name="buttonSymbols">
          <enum>QAbstractSpinBox::NoButtons</enum>
         </property>
@@ -113,13 +174,25 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="2">
-       <widget class="QLabel" name="TextMin">
-        <property name="text">
-         <string>阻值下限%</string>
+      <item row="2" column="1">
+       <widget class="QDoubleSpinBox" name="BoxTime">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>35</height>
+         </size>
+        </property>
+        <property name="buttonSymbols">
+         <enum>QAbstractSpinBox::NoButtons</enum>
+        </property>
+        <property name="decimals">
+         <number>1</number>
         </property>
        </widget>
       </item>
@@ -131,6 +204,12 @@
           <verstretch>0</verstretch>
          </sizepolicy>
         </property>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>35</height>
+         </size>
+        </property>
         <property name="buttonSymbols">
          <enum>QAbstractSpinBox::NoButtons</enum>
         </property>
@@ -139,10 +218,10 @@
         </property>
        </widget>
       </item>
-      <item row="0" column="0">
-       <widget class="QLabel" name="TextStdTemp">
+      <item row="1" column="2">
+       <widget class="QLabel" name="TextMax">
         <property name="text">
-         <string>标准温度°C</string>
+         <string>阻值上限%</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignCenter</set>
@@ -159,13 +238,29 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="BoxOffset">
+      <item row="0" column="2">
+       <widget class="QLabel" name="TextMin">
+        <property name="text">
+         <string>阻值下限%</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignCenter</set>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="3">
+       <widget class="QDoubleSpinBox" name="BoxUnbalance">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="minimumSize">
+         <size>
+          <width>97</width>
+          <height>35</height>
+         </size>
         </property>
         <property name="buttonSymbols">
          <enum>QAbstractSpinBox::NoButtons</enum>
@@ -175,27 +270,14 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="TextOffsetTemp">
+      <item row="3" column="0">
+       <widget class="QCheckBox" name="BoxOffsetEnable">
         <property name="text">
-         <string>补偿温度°C</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
+         <string>温度补偿</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="2">
-       <widget class="QLabel" name="TextMax">
-        <property name="text">
-         <string>阻值上限%</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignCenter</set>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="4" rowspan="3">
+      <item row="0" column="4" rowspan="4">
        <widget class="QWidget" name="WidgetButton" native="true">
         <layout class="QVBoxLayout" name="verticalLayout_2">
          <property name="leftMargin">
@@ -243,6 +325,19 @@
           </widget>
          </item>
          <item>
+          <widget class="QPushButton" name="BtnExit">
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>退出</string>
+           </property>
+          </widget>
+         </item>
+         <item>
           <widget class="QPushButton" name="BtnSDLRExit">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -261,53 +356,7 @@
            </property>
           </widget>
          </item>
-         <item>
-          <widget class="QCheckBox" name="BoxOffsetEnable">
-           <property name="text">
-            <string>温度补偿</string>
-           </property>
-          </widget>
-         </item>
         </layout>
-       </widget>
-      </item>
-      <item row="2" column="2">
-       <widget class="QLabel" name="TextUnbalance">
-        <property name="text">
-         <string>不平衡度%</string>
-        </property>
-       </widget>
-      </item>
-      <item row="2" column="3">
-       <widget class="QDoubleSpinBox" name="BoxUnbalance">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>1</number>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="BoxStd">
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
-        <property name="buttonSymbols">
-         <enum>QAbstractSpinBox::NoButtons</enum>
-        </property>
-        <property name="decimals">
-         <number>1</number>
-        </property>
        </widget>
       </item>
      </layout>

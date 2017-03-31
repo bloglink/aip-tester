@@ -6,9 +6,9 @@ PageDcr::PageDcr(QWidget *parent) :
     ui(new Ui::PageDcr)
 {
     ui->setupUi(this);
-    InitializesWindow();
-    InitializesButton();
-    InitializesSetting();
+    InitWindows();
+    InitButtons();
+    InitSettings();
     Testing = false;
     isCheckOk = false;
     Offsetting = false;
@@ -19,7 +19,7 @@ PageDcr::~PageDcr()
     delete ui;
 }
 
-void PageDcr::InitializesWindow()
+void PageDcr::InitWindows()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
@@ -106,12 +106,13 @@ void PageDcr::InitializesWindow()
     connect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeStd(double)));
 }
 
-void PageDcr::InitializesButton()
+void PageDcr::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSDLRAuto,Qt::Key_0);
     btnGroup->addButton(ui->BtnOffset,Qt::Key_1);
     btnGroup->addButton(ui->BtnSDLRExit,Qt::Key_2);
+    btnGroup->addButton(ui->BtnExit,Qt::Key_3);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
 
@@ -119,16 +120,21 @@ void PageDcr::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        CalculateAuto();
+        AutoCalculateMinAndMax();
         break;
     case Qt::Key_1:
-        SendConfigCmd();
+        SendCanCmdConfig();
         Offsetting = true;
-        SendStartCmd(WIN_ID_OUT13);
+        SendCanCmdStart(WIN_ID_OUT13);
         if (!WaitOffset(100))
             qDebug()<<"Offset time out";
         break;
     case Qt::Key_2:
+        if(CheckSetting())
+            SaveSettings();
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        break;
+    case Qt::Key_3:
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -136,7 +142,7 @@ void PageDcr::BtnJudge(int id)
     }
 }
 
-void PageDcr::InitializesSetting()
+void PageDcr::InitSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"读取电阻配置";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -200,7 +206,7 @@ void PageDcr::InitializesSetting()
     qDebug()<<QTime::currentTime().toString()<<"读取电阻配置OK";
 }
 
-void PageDcr::SaveSetting()
+void PageDcr::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"电阻保存";
     QStringList temp;
@@ -251,7 +257,7 @@ void PageDcr::SaveSetting()
     qDebug()<<QTime::currentTime().toString()<<"电阻保存OK";
 }
 
-void PageDcr::CalculateAuto()
+void PageDcr::AutoCalculateMinAndMax()
 {
     for (int i=0; i<ui->TabParams->rowCount(); i++) {
         double std = Std.at(i)->value();
@@ -317,21 +323,21 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        SendStatusCmd();
+        SendCanCmdStatus();
         break;
     case CMD_START:
         WaitTestTimeOut(100);
-        SendStartCmd(msg.toInt());
+        SendCanCmdStart(msg.toInt());
         WaitTestFinished();
         SendTestJudge();
         break;
     case CMD_STOP:
-        SendStopCmd();
+        SendCanCmdStop();
         break;
     case CMD_INIT:
-        InitializesSetting();
-        InitializesItems();
-        SendConfigCmd();
+        InitSettings();
+        InitTestItems();
+        SendCanCmdConfig();
         break;
     default:
         break;
@@ -344,17 +350,17 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
         return;
     TimeOut = 0;
     if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
-        ReadStatus(msg);
+        ReadCanCmdStatus(msg);
     }
     if (msg.size()==7 && (quint8)msg.at(0)==0x01) {
         if (Offsetting)
             ReadOffset(msg);
         else
-            ReadResult(msg);
+            ReadCanCmdResult(msg);
     }
 }
 
-void PageDcr::InitializesItems()
+void PageDcr::InitTestItems()
 {
     Items.clear();
     Results.clear();
@@ -389,7 +395,7 @@ void PageDcr::InitializesItems()
     emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
 }
 
-void PageDcr::SendStatusCmd()
+void PageDcr::SendCanCmdStatus()
 {
     qDebug()<<QTime::currentTime().toString()<<"查询电阻状态";
     if (Testing)
@@ -408,7 +414,7 @@ void PageDcr::SendStatusCmd()
     qDebug()<<QTime::currentTime().toString()<<"查询电阻状态OK";
 }
 
-void PageDcr::ReadStatus(QByteArray msg)
+void PageDcr::ReadCanCmdStatus(QByteArray msg)
 {
     if (!isCheckOk) {
         isCheckOk = true;
@@ -441,10 +447,9 @@ void PageDcr::ReadOffset(QByteArray msg)
     if (temp*20 > Max.at(number)->value())
         temp = 0;
     Offset.at(number)->setValue(temp);
-
 }
 
-void PageDcr::SendStartCmd(quint8 pos)
+void PageDcr::SendCanCmdStart(quint8 pos)
 {
     if (Testing)
         return;
@@ -460,11 +465,7 @@ void PageDcr::SendStartCmd(quint8 pos)
       <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
-/**
-  * @brief  Wait for test finish or time out
-  * @param  None
-  * @retval None
-  */
+
 void PageDcr::WaitTestFinished()
 {
     Testing = true;
@@ -503,7 +504,7 @@ void PageDcr::SendTestJudge()
 
 }
 
-void PageDcr::ReadResult(QByteArray msg)
+void PageDcr::ReadCanCmdResult(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
     quint8 grade = quint8(msg.at(2));
@@ -606,7 +607,7 @@ void PageDcr::CalculateBalance()
     }
 }
 
-void PageDcr::SendStopCmd()
+void PageDcr::SendCanCmdStop()
 {
     if (!Testing)
         return;
@@ -618,7 +619,7 @@ void PageDcr::SendStopCmd()
     Testing = false;
 }
 
-void PageDcr::SendConfigCmd()
+void PageDcr::SendCanCmdConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -660,10 +661,6 @@ int PageDcr::CalculateGear(int row)
         return 6;
     else
         return 7;
-}
-
-void PageDcr::SendVersionCmd()
-{
 }
 
 bool PageDcr::WaitTestTimeOut(quint16 t)
@@ -729,13 +726,7 @@ void PageDcr::AutoChangeStd(double x)
 
 void PageDcr::showEvent(QShowEvent*)
 {
-    InitializesSetting();
+    InitSettings();
     CheckSetting();
-}
-
-void PageDcr::hideEvent(QHideEvent *)
-{
-    if(CheckSetting())
-        SaveSetting();
 }
 /*********************************END OF FILE**********************************/
