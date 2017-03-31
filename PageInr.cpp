@@ -197,8 +197,8 @@ void PageInr::SendCanCmdConfig()
     out.setVersion(QDataStream::Qt_4_8);
     int volt = ui->BoxVoltage->currentText().toInt();
     int time = ui->BoxTime->value()*10;
-    int min = ui->BoxMin->value()*10;
-    int max = ui->BoxMax->value()*10;
+    int min = ui->BoxMin->value();
+    int max = ui->BoxMax->value();
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x01)<<quint8(0x04)
       <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(0x00);
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x01)<<quint8(volt/256)
