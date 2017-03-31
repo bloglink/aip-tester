@@ -131,6 +131,7 @@ void WinBack::BtnJudge(int id)
         SendCanCmdVersion(0x27);
         break;
     default:
+        QProcess::execute("./nandflash/aip.sh");
         QApplication::closeAllWindows();
         break;
     }

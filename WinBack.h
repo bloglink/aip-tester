@@ -3,6 +3,7 @@
 
 #include <QDebug>
 #include <QWidget>
+#include <QProcess>
 #include <QSettings>
 #include <QDoubleSpinBox>
 #include "define.h"
