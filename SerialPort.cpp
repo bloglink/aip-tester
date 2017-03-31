@@ -45,8 +45,10 @@ void SerialPort::ReadSerial()
     msg.append(QString::number(0x00));
     if (cmd.size()==4 && quint8(cmd.at(1)==0x32))
         SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
-    if (cmd.size()==4 && quint8(cmd.at(1)==0x31))
+    if (cmd.size()==4 && quint8(cmd.at(1)==0x31)) {
         SendCommand(ADDR,CMD_STOP,msg.join(" ").toUtf8());
+        com->write("LED1");
+    }
 }
 
 void SerialPort::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)

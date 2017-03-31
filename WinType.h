@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QWidget>
 #include <QString>
+#include <QButtonGroup>
 #include <QListView>
 #include <QSettings>
 #include <QHideEvent>
@@ -34,6 +35,8 @@ private slots:
     void InitWindows(void);
     void InitButtons(void);
     void JudgeButtons(int id);
+    void JudgeItemButtons(int id);
+    void AddTestItem(int id);
     void InitMotorTypes(void);
     void InitTestItems(void);
     void InitSettings(void);
@@ -41,11 +44,12 @@ private slots:
     void SelectWireColor(int row,int column);
     void ShowWireColorWindow(void);
     void ShowAvailableItem(int,int);
-    void SelectItemToTest(int row,int column);
+    void JumptoSetWindows(void);
     void AddSettings(void);
     void RemoveSettings(void);
     void ReadSettings(void);
     void QuerySettings(void);
+    void ChangeMotorTypes(int id);
 
     QString CurrentSettings(void);
     QStringList CurrentItems(void);
@@ -55,6 +59,7 @@ private slots:
     virtual void hideEvent(QHideEvent *);
 private:
     QButtonGroup *btnGroup;
+    QButtonGroup *itemButtons;
     QStringList prev;
     QStringList ItemNames;
     QStringList FileNames;

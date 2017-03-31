@@ -35,8 +35,6 @@ void WinType::InitWindows()
     ui->TabColor->verticalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabWire->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabWire->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->TabProj->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->TabProj->verticalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabFile->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabTest->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
@@ -44,8 +42,6 @@ void WinType::InitWindows()
     ui->TabColor->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabWire->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabWire->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->TabProj->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->TabProj->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabFile->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabTest->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
@@ -137,15 +133,87 @@ void WinType::InitButtons()
     btnGroup->addButton(ui->BtnConfExit,Qt::Key_4);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
 
-    connect(ui->BoxType,SIGNAL(currentIndexChanged(int)),this,SLOT(JudgeButtons(int)));
+    connect(ui->BoxType,SIGNAL(currentIndexChanged(int)),this,SLOT(ChangeMotorTypes(int)));
 
     connect(ui->TabWire,SIGNAL(cellClicked(int,int)),this,SLOT(ShowWireColorWindow()));
     connect(ui->TabColor,SIGNAL(cellClicked(int,int)),this,SLOT(SelectWireColor(int,int)));
     connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(ShowAvailableItem(int,int)));
-    connect(ui->TabProj,SIGNAL(cellClicked(int,int)),this,SLOT(SelectItemToTest(int,int)));
+
+    itemButtons = new QButtonGroup;
+    itemButtons->addButton(ui->BtnItemSet,0x00);
+    itemButtons->addButton(ui->BtnItemDcr,0x01);
+    itemButtons->addButton(ui->BtnItemMag,0x02);
+    itemButtons->addButton(ui->BtnItemInr,0x03);
+    itemButtons->addButton(ui->BtnItemAcw,0x04);
+    itemButtons->addButton(ui->BtnItemDcw,0x05);
+    itemButtons->addButton(ui->BtnItemImp,0x06);
+    itemButtons->addButton(ui->BtnItemInd,0x07);
+    itemButtons->addButton(ui->BtnItemPwr,0x08);
+    itemButtons->addButton(ui->BtnItemLvs,0x09);
+    itemButtons->addButton(ui->BtnItemLck,0x0A);
+    itemButtons->addButton(ui->BtnItemDelete,Qt::Key_0);
+    connect(itemButtons,SIGNAL(buttonClicked(int)),this,SLOT(JudgeItemButtons(int)));
+    for (int i=1; i<itemButtons->buttons().size()-1; i++) {
+        itemButtons->buttons().at(i)->hide();
+    }
 }
 
 void WinType::JudgeButtons(int id)
+{
+    switch (id) {
+    case Qt::Key_0:
+        AddSettings();
+        InitMotorTypes();
+        break;
+    case Qt::Key_1:
+        RemoveSettings();
+        InitMotorTypes();
+        break;
+    case Qt::Key_2:
+        ReadSettings();
+        InitSettings();
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        break;
+    case Qt::Key_3:
+        QuerySettings();
+        break;
+    case Qt::Key_4:
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        break;
+    default:
+        break;
+    }
+}
+
+void WinType::JudgeItemButtons(int id)
+{
+    switch (id) {
+    case Qt::Key_0:
+        if (ui->TabTest->currentRow() == ui->TabTest->rowCount()-1) {
+            break;
+        }
+        ui->TabTest->removeRow(ui->TabTest->currentRow());
+        break;
+    case 0x00:
+        JumptoSetWindows();
+        break;
+    default:
+        AddTestItem(id);
+        break;
+    }
+}
+
+void WinType::AddTestItem(int id)
+{
+    if (ui->TabTest->currentRow() == ui->TabTest->rowCount()-1) {
+        ui->TabTest->setItem(ui->TabTest->rowCount()-1,0,new QTableWidgetItem);
+        ui->TabTest->item(ui->TabTest->rowCount()-1,0)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->setRowCount(ui->TabTest->rowCount()+1);
+    }
+    ui->TabTest->currentItem()->setText(itemButtons->buttons().at(id)->text());
+}
+
+void WinType::ChangeMotorTypes(int id)
 {
     switch (id) {
     case 0:
@@ -174,25 +242,6 @@ void WinType::JudgeButtons(int id)
         break;
     case 8:
         ui->labelType->setPixmap(QPixmap(":/source/None.png"));
-        break;
-    case Qt::Key_0:
-        AddSettings();
-        InitMotorTypes();
-        break;
-    case Qt::Key_1:
-        RemoveSettings();
-        InitMotorTypes();
-        break;
-    case Qt::Key_2:
-        ReadSettings();
-        InitSettings();
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
-        break;
-    case Qt::Key_3:
-        QuerySettings();
-        break;
-    case Qt::Key_4:
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
         break;
@@ -225,21 +274,10 @@ void WinType::InitTestItems()
 {
     //可使用的测试项目
     QStringList temp = EnableItems();
-    if (ui->TabProj->rowCount() < temp.size()) {
-        ui->TabProj->setRowCount(temp.size());
-        for (int i=0; i<temp.size(); i++) {
-            ui->TabProj->setItem(i,0,new QTableWidgetItem);
-            ui->TabProj->item(i,0)->setTextAlignment(Qt::AlignCenter);
-            ui->TabProj->item(i,0)->setText(ItemNames.at(temp.at(i).toInt()));
-            ui->TabProj->item(i,0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-
-            ui->TabProj->setItem(i,1,new QTableWidgetItem);
-            ui->TabProj->item(i,1)->setTextAlignment(Qt::AlignCenter);
-            if (ui->TabProj->item(i,0)->text() == "清除")
-                ui->TabProj->item(i,1)->setText("返回");
-            else
-                ui->TabProj->item(i,1)->setText("设置");
-        }
+    for (int i=0; i<temp.size(); i++) {
+        int t = temp.at(i).toInt();
+        if (t < itemButtons->buttons().size())
+            itemButtons->buttons().at(t)->show();
     }
 }
 
@@ -330,46 +368,30 @@ void WinType::ShowAvailableItem(int, int)
     ui->Other->setCurrentIndex(1);
 }
 
-void WinType::SelectItemToTest(int row, int column)
+void WinType::JumptoSetWindows()
 {
     if (ui->TabTest->currentRow() < 0)
         return;
-    if (column > 0) {
-        if (ui->TabProj->item(row,0)->text() == tr("清除"))
-            ui->Other->setCurrentIndex(0);
-        if (ui->TabProj->item(row,0)->text() == tr("电阻"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageDcr");
-        if (ui->TabProj->item(row,0)->text() == tr("反嵌"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageMag");
-        if (ui->TabProj->item(row,0)->text() == tr("绝缘"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageInr");
-        if (ui->TabProj->item(row,0)->text() == tr("交耐"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageAcw");
-        if (ui->TabProj->item(row,0)->text() == tr("直耐"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageDcw");
-        if (ui->TabProj->item(row,0)->text() == tr("匝间"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageImp");
-        if (ui->TabProj->item(row,0)->text() == tr("电感"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageInd");
-        if (ui->TabProj->item(row,0)->text() == tr("功率"))
-            emit SendCommand(ADDR,CMD_JUMP,"PagePwr");
-        if (ui->TabProj->item(row,0)->text() == tr("低启"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageLvs");
-        if (ui->TabProj->item(row,0)->text() == tr("堵转"))
-            emit SendCommand(ADDR,CMD_JUMP,"PageLck");
-        return;
-    }
-    if (ui->TabTest->currentRow() == ui->TabTest->rowCount()-1) {
-        ui->TabTest->setItem(ui->TabTest->rowCount()-1,0,new QTableWidgetItem);
-        ui->TabTest->item(ui->TabTest->rowCount()-1,0)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->setRowCount(ui->TabTest->rowCount()+1);
-    }
-    if (row == 0) {
-        ui->TabTest->removeRow(ui->TabTest->currentRow());
-        return;
-    }
-    QString t = ui->TabProj->item(row,column)->text();
-    ui->TabTest->currentItem()->setText(t);
+    if (ui->TabTest->currentItem()->text() == tr("电阻"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageDcr");
+    if (ui->TabTest->currentItem()->text() == tr("反嵌"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageMag");
+    if (ui->TabTest->currentItem()->text() == tr("绝缘"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageInr");
+    if (ui->TabTest->currentItem()->text() == tr("交耐"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageAcw");
+    if (ui->TabTest->currentItem()->text() == tr("直耐"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageDcw");
+    if (ui->TabTest->currentItem()->text() == tr("匝间"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageImp");
+    if (ui->TabTest->currentItem()->text() == tr("电感"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageInd");
+    if (ui->TabTest->currentItem()->text() == tr("功率"))
+        emit SendCommand(ADDR,CMD_JUMP,"PagePwr");
+    if (ui->TabTest->currentItem()->text() == tr("低启"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageLvs");
+    if (ui->TabTest->currentItem()->text() == tr("堵转"))
+        emit SendCommand(ADDR,CMD_JUMP,"PageLck");
 }
 
 void WinType::AddSettings()
@@ -427,6 +449,7 @@ void WinType::QuerySettings()
         ui->TabFile->item(i,0)->setText(QString(FileNames.at(i)).remove(".ini"));
     }
 }
+
 
 QString WinType::CurrentSettings()
 {
