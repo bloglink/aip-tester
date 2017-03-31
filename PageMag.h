@@ -71,7 +71,6 @@ private slots:
     void Delay(int ms);
 
     virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
 private:
     QSettings *set;
 

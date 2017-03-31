@@ -66,8 +66,8 @@
    </item>
    <item>
     <layout class="QGridLayout" name="LayoutCtrl">
-     <item row="0" column="10">
-      <widget class="QPushButton" name="BtnExitMag">
+     <item row="0" column="9">
+      <widget class="QPushButton" name="BtnSampleMag">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -77,11 +77,47 @@
        <property name="minimumSize">
         <size>
          <width>97</width>
-         <height>44</height>
+         <height>0</height>
         </size>
        </property>
        <property name="text">
-        <string>保存退出</string>
+        <string>采集波形</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="8">
+      <widget class="QComboBox" name="BoxStation">
+       <property name="minimumSize">
+        <size>
+         <width>97</width>
+         <height>44</height>
+        </size>
+       </property>
+       <item>
+        <property name="text">
+         <string>左工位</string>
+        </property>
+       </item>
+       <item>
+        <property name="text">
+         <string>右工位</string>
+        </property>
+       </item>
+      </widget>
+     </item>
+     <item row="0" column="3">
+      <widget class="QSpinBox" name="BoxMain">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimum">
+        <number>1</number>
+       </property>
+       <property name="maximum">
+        <number>12</number>
        </property>
       </widget>
      </item>
@@ -114,8 +150,8 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="9">
-      <widget class="QPushButton" name="BtnSampleMag">
+     <item row="0" column="11">
+      <widget class="QPushButton" name="BtnExitMag">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -125,18 +161,18 @@
        <property name="minimumSize">
         <size>
          <width>97</width>
-         <height>0</height>
+         <height>44</height>
         </size>
        </property>
        <property name="text">
-        <string>采集波形</string>
+        <string>保存退出</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="2">
-      <widget class="QLabel" name="TextMain">
+     <item row="0" column="4">
+      <widget class="QLabel" name="TextAuxiliary">
        <property name="text">
-        <string>主相：</string>
+        <string>副相：</string>
        </property>
       </widget>
      </item>
@@ -172,47 +208,24 @@
        </item>
       </widget>
      </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="TextAuxiliary">
+     <item row="0" column="2">
+      <widget class="QLabel" name="TextMain">
        <property name="text">
-        <string>副相：</string>
+        <string>主相：</string>
        </property>
       </widget>
      </item>
-     <item row="0" column="3">
-      <widget class="QSpinBox" name="BoxMain">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimum">
-        <number>1</number>
-       </property>
-       <property name="maximum">
-        <number>12</number>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="8">
-      <widget class="QComboBox" name="BoxStation">
+     <item row="0" column="10">
+      <widget class="QPushButton" name="BtnExit">
        <property name="minimumSize">
         <size>
          <width>97</width>
          <height>44</height>
         </size>
        </property>
-       <item>
-        <property name="text">
-         <string>左工位</string>
-        </property>
-       </item>
-       <item>
-        <property name="text">
-         <string>右工位</string>
-        </property>
-       </item>
+       <property name="text">
+        <string>退出</string>
+       </property>
       </widget>
      </item>
     </layout>

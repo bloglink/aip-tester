@@ -80,6 +80,7 @@ void PageMag::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSampleMag,Qt::Key_0);
+    btnGroup->addButton(ui->BtnExit,Qt::Key_1);
     btnGroup->addButton(ui->BtnExitMag,Qt::Key_2);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
 }
@@ -99,8 +100,10 @@ void PageMag::BtnJudge(int id)
         }
         break;
     case Qt::Key_1:
+        emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_2:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -612,10 +615,5 @@ void PageMag::Delay(int ms)
 void PageMag::showEvent(QShowEvent *)
 {
     InitSettings();
-}
-
-void PageMag::hideEvent(QHideEvent *)
-{
-    SaveSettings();
 }
 /*********************************END OF FILE**********************************/
