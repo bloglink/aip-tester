@@ -14,16 +14,34 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="2" column="9">
-    <widget class="QPushButton" name="BtnExit">
+   <item row="1" column="5">
+    <widget class="QDoubleSpinBox" name="BoxCap">
      <property name="minimumSize">
       <size>
        <width>97</width>
-       <height>44</height>
+       <height>35</height>
       </size>
      </property>
-     <property name="text">
-      <string>保存退出</string>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <double>380.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>1.000000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
      </property>
     </widget>
    </item>
@@ -68,89 +86,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QDoubleSpinBox" name="BoxVolt">
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::ClickFocus</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <double>380.000000000000000</double>
-     </property>
-     <property name="singleStep">
-      <double>0.100000000000000</double>
-     </property>
-     <property name="value">
-      <double>220.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="0">
-    <widget class="QLabel" name="TextVolt">
-     <property name="text">
-      <string>电压:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="4">
-    <widget class="QLabel" name="TextCap">
-     <property name="text">
-      <string>通道:</string>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="5">
-    <widget class="QDoubleSpinBox" name="BoxCap">
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::ClickFocus</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>0</number>
-     </property>
-     <property name="maximum">
-      <double>380.000000000000000</double>
-     </property>
-     <property name="singleStep">
-      <double>1.000000000000000</double>
-     </property>
-     <property name="value">
-      <double>1.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="10">
+   <item row="0" column="0" colspan="9">
     <widget class="QTableWidget" name="TabParams">
      <property name="focusPolicy">
       <enum>Qt::NoFocus</enum>
@@ -292,6 +228,70 @@
        <set>AlignCenter</set>
       </property>
      </column>
+    </widget>
+   </item>
+   <item row="1" column="1">
+    <widget class="QDoubleSpinBox" name="BoxVolt">
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>0</number>
+     </property>
+     <property name="maximum">
+      <double>380.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="value">
+      <double>220.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QLabel" name="TextVolt">
+     <property name="text">
+      <string>电压:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="4">
+    <widget class="QLabel" name="TextCap">
+     <property name="text">
+      <string>通道:</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="8">
+    <widget class="QPushButton" name="BtnExit">
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>44</height>
+      </size>
+     </property>
+     <property name="text">
+      <string>保存退出</string>
+     </property>
     </widget>
    </item>
   </layout>

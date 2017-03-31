@@ -93,6 +93,7 @@ private:
     quint8 Mode;
     quint8 PowerSupply;
     QString dir;
+    quint8 isTestDir;
 };
 
 #endif // PAGEPWR_H

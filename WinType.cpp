@@ -204,6 +204,7 @@ void WinType::JudgeItemButtons(int id)
         AddTestItem(id);
         break;
     }
+    ui->Other->setCurrentIndex(0);
 }
 
 void WinType::AddTestItem(int id)

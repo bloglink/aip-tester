@@ -10,6 +10,7 @@ PagePwr::PagePwr(QWidget *parent) :
     InitButtons();
     InitSettings();
     Mode = PWR_FREE;
+    isTestDir = 0x00;
 }
 
 PagePwr::~PagePwr()
@@ -327,6 +328,9 @@ void PagePwr::InitTestItems()
     if (TestDir.at(0)->currentIndex() != 0) {
         QString s = QString(tr("转向@%1@ @ ").arg(TestDir.at(0)->currentText()));
         Items.append(s);
+        isTestDir = 0x02;
+    } else {
+        isTestDir = 0x00;
     }
 }
 
@@ -384,7 +388,7 @@ void PagePwr::SendCanCmdStart()
         p += 0x02;
     out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1)
       <<quint8(t/256)<<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256)
-     <<quint8(0x00)<<quint8(0x00);
+     <<quint8(isTestDir)<<quint8(0x00);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
