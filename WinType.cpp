@@ -162,8 +162,11 @@ void WinType::JudgeButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        AddSettings();
+        AddMotorTypes(ui->EditTypeName->text());
+        ReadMotorTypes(ui->EditTypeName->text());
         InitMotorTypes();
+        InitAvailableItems();
+        InitSettings();
         break;
     case Qt::Key_1:
         RemoveSettings();
@@ -270,7 +273,34 @@ void WinType::InitMotorTypes()
     }
 }
 
-void WinType::InitTestItems()
+void WinType::AddMotorTypes(QString name)
+{
+    if (name.isEmpty())
+        return;
+    QString c = ui->TextTypeShow->text();
+    if (name.isEmpty())
+        return;
+    for (int i=0; i<ui->TabFile->rowCount(); i++) {
+        if (ui->TabFile->item(i,0)->text() == name)
+            return;
+    }
+    QString Source = QString("./config/%1.ini").arg(c);
+    QString Target = QString("./config/%1.ini").arg(name);
+    QFile::copy(Source,Target);
+}
+
+void WinType::ReadMotorTypes(QString name)
+{
+    if (name.isEmpty())
+        return;
+    name.append(".ini");
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
+    ini->setValue("FileInUse",name);
+}
+
+void WinType::InitAvailableItems()
 {
     //可使用的测试项目
     QStringList temp = EnableItems();
@@ -394,20 +424,7 @@ void WinType::JumptoSetWindows()
         emit SendCommand(ADDR,CMD_JUMP,"PageLck");
 }
 
-void WinType::AddSettings()
-{
-    QString t = ui->EditTypeName->text();
-    QString c = ui->TextTypeShow->text();
-    if (t.isEmpty())
-        return;
-    for (int i=0; i<ui->TabFile->rowCount(); i++) {
-        if (ui->TabFile->item(i,0)->text() == t)
-            return;
-    }
-    QString Source = QString("./config/%1.ini").arg(c);
-    QString Target = QString("./config/%1.ini").arg(t);
-    QFile::copy(Source,Target);
-}
+
 
 void WinType::RemoveSettings()
 {
@@ -476,7 +493,7 @@ QStringList WinType::EnableItems()
 void WinType::showEvent(QShowEvent *)
 {
     InitMotorTypes();
-    InitTestItems();
+    InitAvailableItems();
     InitSettings();
 }
 

@@ -38,14 +38,16 @@ private slots:
     void JudgeItemButtons(int id);
     void AddTestItem(int id);
     void InitMotorTypes(void);
-    void InitTestItems(void);
+    void AddMotorTypes(QString name);
+    void ReadMotorTypes(QString name);
+    void InitAvailableItems(void);
     void InitSettings(void);
     void SaveSettings(void);
     void SelectWireColor(int row,int column);
     void ShowWireColorWindow(void);
     void ShowAvailableItem(int,int);
     void JumptoSetWindows(void);
-    void AddSettings(void);
+
     void RemoveSettings(void);
     void ReadSettings(void);
     void QuerySettings(void);
