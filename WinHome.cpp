@@ -492,6 +492,7 @@ void WinHome::StartTest(QByteArray station)
         emit SendCommand(n.at(i).toInt(),CMD_START,station);
         if (HomeMode == HOME_FREE)
             break;
+        Delay(10);
     }
     SaveTestJudge();
     if (ItemJudge == "NG") {
