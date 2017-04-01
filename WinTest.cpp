@@ -297,6 +297,7 @@ void WinTest::InitItem(QByteArray msg)
     ui->LabelState->setStyleSheet("color:rgb(0,255,0);font:Bold 42pt Ubuntu;border:none;");
     ui->LabelState->setText("--");
     if (msg.isEmpty()) {
+        ui->TabTest->setRowCount(0);
         return;
     }
     QStringList item = QString(msg).split("\n");

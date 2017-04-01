@@ -332,6 +332,8 @@ void WinType::InitSettings()
         ui->TabTest->item(i,0)->setTextAlignment(Qt::AlignCenter);
     }
     for (int i=0; i<temp.size(); i++) {
+        if (temp.at(i).toInt() == 0)
+            continue;
         ui->TabTest->item(i,0)->setText(ItemNames.at(temp.at(i).toInt()));
     }
 
