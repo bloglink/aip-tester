@@ -209,13 +209,15 @@ void PageAcw::SendItemTemp()
 
 void PageAcw::SendItemJudge()
 {
-    if (Volt.size()<2 || Curr.size()<2) {
+    if (Volt.isEmpty() || Curr.isEmpty()) {
         Judge = "NG";
         SendTestItemsAllError();
         return;
     }
-    Volt.removeLast();
-    Curr.removeLast();
+    if (Volt.size()>1 || Curr.size()>1) {
+        Volt.removeLast();
+        Curr.removeLast();
+    }
     QString rrr = QString::number(Curr.last(),'f',2);
     QString t = QString("%1mA").arg(rrr);
     QStringList s = QString(Items.at(0)).split("@");

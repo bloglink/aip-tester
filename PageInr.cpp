@@ -233,7 +233,7 @@ void PageInr::SendItemJudge()
     QString rrr = QString::number(Res.last(),'f',1);
     if (Res.last()>500)
         rrr = ">500";
-    QString t = QString("%Mohm").arg(rrr);
+    QString t = QString("%1Mohm").arg(rrr);
 
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
@@ -276,6 +276,7 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
     tt *= qPow(10,-quint8(msg.at(5)));
     Volt.append(v);
     Res.append(tt);
+    SendItemTemp();
     if (quint8(msg.at(6)) != 0x00) {
         Judge = "NG";
         SendItemJudge();
