@@ -208,6 +208,21 @@ void PageInr::SendCanCmdConfig()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void PageInr::SendItemTemp()
+{
+    if (Volt.size()<2 || Res.size()<2) {
+        return;
+    }
+    QString rrr = QString::number(Res.last(),'f',1);
+    if (Res.last()>500)
+        rrr = ">500";
+    QString t = QString("%1Mohm").arg(rrr);
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+}
+
 void PageInr::SendItemJudge()
 {
     if (Volt.isEmpty() || Res.isEmpty()) {
@@ -215,11 +230,10 @@ void PageInr::SendItemJudge()
         SendTestItemsAllError();
         return;
     }
-    QString vvv = QString::number(Volt.last(),'f',0);
     QString rrr = QString::number(Res.last(),'f',1);
     if (Res.last()>500)
         rrr = ">500";
-    QString t = QString("%1V,%2Mohm").arg(vvv).arg(rrr);
+    QString t = QString("%Mohm").arg(rrr);
 
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
