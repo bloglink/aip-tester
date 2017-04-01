@@ -179,17 +179,18 @@ void PageAcw::SendCanCmdConfig()
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    int freq = ui->BoxFrequcy->currentText().toInt();
+    int freq = ui->BoxFrequcy->currentText().toInt()%256;
     int volt = ui->BoxVoltage->value();
     int time = ui->BoxTime->value()*10;
     int min = ui->BoxMin->value()*100;
     int max = ui->BoxMax->value()*100;
+    int arc = ui->BoxArc->currentIndex();
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x00)<<quint8(0x05)
       <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(freq);
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x00)<<quint8(volt/256)
       <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
     out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x00)
-      <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);
+      <<quint8(max/256)<<quint8(max%256)<<quint8(arc)<<quint8(0x03)<<quint8(0x0A);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
