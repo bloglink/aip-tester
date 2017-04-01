@@ -470,7 +470,7 @@ void PageDcr::WaitTestFinished()
 {
     Testing = true;
     JudgeAll = "OK";
-    if(!WaitTestTimeOut(100)) {
+    if(!WaitTestTimeOut(ui->BoxTime->value()*100+100)) {
         Testing = false;
         JudgeAll = "NG";
         for (int row = 0; row<Enable.size(); row++) {
