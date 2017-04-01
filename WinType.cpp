@@ -375,6 +375,7 @@ void WinType::SaveSettings()
 
     ini->setValue("TestNG",QString::number(ui->BoxTestNG->currentIndex()));
     ini->setValue("WinType",QString::number(ui->BoxType->currentIndex()));
+    QProcess::execute("sync");
     qDebug()<<QTime::currentTime().toString()<<"保存电机型号OK";
 }
 

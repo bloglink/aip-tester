@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QWidget>
 #include <QString>
+#include <QProcess>
 #include <QButtonGroup>
 #include <QListView>
 #include <QSettings>
