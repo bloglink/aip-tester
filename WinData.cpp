@@ -76,10 +76,15 @@ void WinData::BtnJudge(int id)
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
-        if (ui->WidgetShow->currentIndex() == 0)
+        if (ui->WidgetShow->currentIndex() == 0) {
             ui->WidgetShow->setCurrentIndex(1);
-        else
+        } else {
             ui->WidgetShow->setCurrentIndex(0);
+            model->select();
+            while(model->canFetchMore()) {
+                model->fetchMore();
+            }
+        }
         break;
     case Qt::Key_2:
         SqlRead();
@@ -136,10 +141,6 @@ void WinData::SqlRead()
     qDebug()<<QTime::currentTime().toString()<<"读取数据库";
 
     ui->DateEdit2->setDate(QDate::currentDate());
-    model->select();
-    while(model->canFetchMore()) {
-        model->fetchMore();
-    }
     ui->TabDetail->setRowCount(0);
     SqlQuery(tr("总数"));
     SqlQuery(tr("电阻"));
@@ -149,6 +150,9 @@ void WinData::SqlRead()
     SqlQuery(tr("交耐"));
     SqlQuery(tr("匝间"));
     SqlQuery(tr("电感"));
+    SqlQuery(tr("功率"));
+    SqlQuery(tr("低启"));
+    SqlQuery(tr("堵转"));
     QStringList n;
     for (int i=0; i<ui->TabDetail->rowCount(); i++)
         n.append(ui->TabDetail->item(i,0)->text());
