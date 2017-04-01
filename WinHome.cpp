@@ -18,7 +18,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170331.6");
+    InitVersion("V-2.1.0.170401");
     HomeMode = HOME_FREE;
     InitThreadAll();
 }
@@ -384,6 +384,9 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_ITEM:
         emit WriteSql(msg);
         emit SendCommand(ADDR,cmd,msg);
+        break;
+    case CMD_ITEM_TEMP:
+        emit SendCommand(ADDR,CMD_ITEM,msg);
         break;
     case CMD_TEMP:
     case CMD_WAVE_BYTE:

@@ -194,16 +194,30 @@ void PageAcw::SendCanCmdConfig()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void PageAcw::SendItemTemp()
+{
+    if (Volt.size()<2 || Curr.size()<2) {
+        return;
+    }
+    QString rrr = QString::number(Curr.at(Curr.size()-2),'f',2);
+    QString t = QString("%1mA").arg(rrr);
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+}
+
 void PageAcw::SendItemJudge()
 {
+    Volt.removeLast();
+    Curr.removeLast();
     if (Volt.isEmpty() || Curr.isEmpty()) {
         Judge = "NG";
         SendTestItemsAllError();
         return;
     }
-    QString vvv = QString::number(Volt.last(),'f',0);
     QString rrr = QString::number(Curr.last(),'f',2);
-    QString t = QString("%1V,%2mA").arg(vvv).arg(rrr);
+    QString t = QString("%1mA").arg(rrr);
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
@@ -233,6 +247,7 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
     tt *= qPow(10,-quint8(msg.at(5)));
     Volt.append(v);
     Curr.append(tt);
+    SendItemTemp();
     if (quint8(msg.at(6)) != 0x00) {
         Judge = "NG";
         SendItemJudge();

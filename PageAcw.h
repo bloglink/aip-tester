@@ -48,6 +48,7 @@ private slots:
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
     void SendCanCmdConfig(void);
+    void SendItemTemp(void);
     void SendItemJudge(void);
     void SendTestJudge(void);
     void ReadCanCmdStatus(QByteArray msg);

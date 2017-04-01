@@ -50,6 +50,7 @@
 #define CMD_NET         0x16    //网络已连接
 #define CMD_SQL         0x17    //数据库已连接
 #define CMD_MODE        0x18    //启动方式设置
+#define CMD_ITEM_TEMP   0x19    //临时结果显示
 
 #define WIN_ID_SYS      0x00
 #define WIN_ID_TEST     0x10    //测试界面

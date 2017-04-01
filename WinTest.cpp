@@ -144,7 +144,7 @@ void WinTest::ShowItem(QString item)
     QStringList s = item.split("@");
     for (int i=0; i<ui->TabTest->rowCount(); i++) {
         QString n = ui->TabTest->item(i,0)->text();
-        QString t = ui->TabTest->item(i,2)->text();
+        QString t = ui->TabTest->item(i,3)->text();
         if (t != " ")
             continue;
         if (s.at(0) == n) {
