@@ -473,6 +473,7 @@ void PagePwr::ReadCanCmdResult(QByteArray msg)
     Volt.append(v);
     Curr.append(c);
     Power.append(p);
+    SendItemTemp();
     CalculateResult();
     if (Judge == "NG") {
         SendCanCmdStop();
