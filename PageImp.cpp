@@ -44,7 +44,7 @@ void PageImp::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(3,80);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);

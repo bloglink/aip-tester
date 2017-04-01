@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>600</height>
+    <height>665</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -281,6 +281,22 @@
         </widget>
        </item>
        <item>
+        <widget class="QPushButton" name="BtnItemDelete">
+         <property name="minimumSize">
+          <size>
+           <width>97</width>
+           <height>44</height>
+          </size>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">color:yellow;font:Bold 15pt Ubuntu</string>
+         </property>
+         <property name="text">
+          <string>清除</string>
+         </property>
+        </widget>
+       </item>
+       <item>
         <widget class="QPushButton" name="BtnItemSet">
          <property name="minimumSize">
           <size>
@@ -423,22 +439,6 @@
          </property>
          <property name="text">
           <string>堵转</string>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QPushButton" name="BtnItemDelete">
-         <property name="minimumSize">
-          <size>
-           <width>97</width>
-           <height>44</height>
-          </size>
-         </property>
-         <property name="styleSheet">
-          <string notr="true">color:yellow;font:Bold 15pt Ubuntu</string>
-         </property>
-         <property name="text">
-          <string>清除</string>
          </property>
         </widget>
        </item>
