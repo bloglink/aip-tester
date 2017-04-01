@@ -402,6 +402,22 @@ void PagePwr::SendCanCmdStop()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void PagePwr::SendItemTemp()
+{
+    if (Volt.size()<2 || Curr.size()<2 || Power.size()<2) {
+        return;
+    }
+    QString vvv = QString::number(Volt.last()/10,'f',1);
+    QString rrr = QString::number(Curr.last()/1000,'f',3);
+    QString ppp = QString::number(Power.last()/10,'f',1);
+    QString t = QString("%1A,%2W,%3V").arg(rrr).arg(ppp).arg(vvv);
+
+    QStringList s = QString(Items.at(TestRow)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+}
+
 void PagePwr::SendTestJudge()
 {
     QString s = QString(tr("功率@%1@%2")).arg(FileInUse).arg(Judge);
