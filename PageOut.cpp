@@ -11,6 +11,7 @@ PageOut::PageOut(QWidget *parent) :
     connect(Timer,SIGNAL(timeout()),this,SLOT(SendWinCmdStart()));
 
     Mode = OUT_FREE;
+    StartMode = 2;
 }
 
 PageOut::~PageOut()
@@ -20,7 +21,7 @@ PageOut::~PageOut()
 
 void PageOut::ReadMessage(quint16 addr, quint16 cmd, QByteArray data)
 {
-    if (addr!=WIN_ID_OUT13 && addr!=CAN_ID_13OUT && addr!=CAN_ID_14OUT && addr!=CAN_ID_15OUT)
+    if (addr!=ADDR && addr!=WIN_ID_OUT13 && addr!=CAN_ID_13OUT && addr!=CAN_ID_14OUT && addr!=CAN_ID_15OUT)
         return;
     switch (cmd) {
     case CMD_CAN:
@@ -34,7 +35,11 @@ void PageOut::ReadMessage(quint16 addr, quint16 cmd, QByteArray data)
         qDebug()<<QTime::currentTime().toString()<<"查询输出状态OK";
         break;
     case CMD_INIT:
+        StartMode = data.toInt();
         SendCanCmdConfig();
+        break;
+    case CMD_ALARM:
+        SendAlarm(data);
         break;
     default:
         break;
@@ -56,7 +61,6 @@ void PageOut::ExcuteCanCmd(quint16 id,QByteArray msg)
 
 void PageOut::SendCanCmdStatus(quint16 pos)
 {
-
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -88,7 +92,7 @@ void PageOut::SendWinCmdStart()
 {
     QStringList msg;
     msg.append(QString::number(Pos));
-    msg.append(QString::number(0x02));
+    msg.append(QString::number(StartMode));
     Timer->stop();
     emit SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
 }
@@ -98,8 +102,8 @@ void PageOut::SendCanCmdConfig()
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x13)<<quint8(0x02)<<quint8(0x03)<<quint8(0x02);
-    out<<quint16(0x14)<<quint8(0x02)<<quint8(0x03)<<quint8(0x02);
+    out<<quint16(0x13)<<quint8(0x02)<<quint8(0x03)<<quint8(StartMode);
+    out<<quint16(0x14)<<quint8(0x02)<<quint8(0x03)<<quint8(StartMode);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
@@ -136,6 +140,25 @@ void PageOut::ReadCanCmdStop(quint16 addr)
         Mode = OUT_FREE;
         emit SendCommand(ADDR,CMD_STOP,NULL);
     }
+}
+
+void PageOut::SendAlarm(QByteArray addr)
+{
+    qDebug()<<addr.toHex();
+    quint8 t = 0x00;
+    if (addr.at(0) & 0x02)
+        t = 0x01;
+    if (addr.at(0) & 0x04)
+        t = 0x02;
+    if (addr.at(0) & 0x08)
+        t = 0x03;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x13)<<quint8(0x02)<<quint8(0x02)<<quint8(t);
+    out<<quint16(0x14)<<quint8(0x02)<<quint8(0x02)<<quint8(t);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+    qDebug()<<t;
 }
 
 bool PageOut::WaitTestOver(quint16 t)

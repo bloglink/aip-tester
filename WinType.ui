@@ -17,7 +17,7 @@
    <item>
     <widget class="QStackedWidget" name="Other">
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="WinConfOther">
       <layout class="QGridLayout" name="gridLayout_2">
@@ -148,7 +148,7 @@
        <item row="2" column="0" colspan="2">
         <widget class="QLabel" name="labelType">
          <property name="pixmap">
-          <pixmap resource="image.qrc">:/source/M1S0.png</pixmap>
+          <pixmap resource="image.qrc">:/source/M1S0.jpg</pixmap>
          </property>
          <property name="scaledContents">
           <bool>true</bool>

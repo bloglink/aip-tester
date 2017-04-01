@@ -43,6 +43,7 @@ private slots:
     void ReadCanCmdStatus(quint16 addr,QByteArray msg);
     void ReadCanCmdStart(quint16 addr);
     void ReadCanCmdStop(quint16 addr);
+    void SendAlarm(QByteArray addr);
 
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
@@ -53,6 +54,7 @@ private:
     quint16 Pos;
     QTimer *Timer;
     quint8 Mode;
+    quint8 StartMode;
 };
 
 #endif // PAGEOUT_H

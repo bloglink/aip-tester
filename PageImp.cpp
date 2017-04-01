@@ -28,11 +28,12 @@ PageImp::~PageImp()
 
 void PageImp::InitWindows()
 {
+    ui->BoxOffset->hide();
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(3,50);
     ui->TabParams->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
@@ -44,7 +45,7 @@ void PageImp::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(3,80);
+    ui->TabParams->setColumnWidth(3,50);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);

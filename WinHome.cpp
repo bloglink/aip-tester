@@ -18,7 +18,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170401.3");
+    InitVersion("V-2.1.0.170401.5");
     HomeMode = HOME_FREE;
     InitThreadAll();
 }
@@ -438,8 +438,8 @@ void WinHome::InitTestItems()
     if (n.isEmpty())
         return;
     Items.clear();
-    if (CurrentStartMode() == 2) //滑罩启动
-        emit SendCommand(WIN_ID_OUT13,CMD_INIT,NULL);
+    if (CurrentStartMode() == 1 || CurrentStartMode() == 2) //滑罩启动
+        emit SendCommand(WIN_ID_OUT13,CMD_INIT,QString::number(CurrentStartMode()).toUtf8());
 
     for (int i=0; i<n.size(); i++) {
         emit SendCommand(n.at(i).toInt(),CMD_INIT,NULL);
