@@ -44,7 +44,7 @@ public:
 private slots:
     void InitWindows(void);
     void InitButtons(void);
-    void BtnJudge(int id);
+    void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
     void ItemClick(int r, int c);
@@ -52,7 +52,7 @@ private slots:
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
-    void InitTestItems(void);
+    void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
     void SendCanCmdSample(quint8 s);
     void SendCanCmdStart(quint8 s);
@@ -69,7 +69,7 @@ private slots:
 
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-
+    QString CurrentSettings(void);
     virtual void showEvent(QShowEvent*);
 private:
     QSettings *set;
@@ -79,7 +79,6 @@ private:
     quint8 CurrentWave;
     QStringList Items;
     QString Judge;
-    QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;

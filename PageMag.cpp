@@ -82,10 +82,10 @@ void PageMag::InitButtons()
     btnGroup->addButton(ui->BtnSampleMag,Qt::Key_0);
     btnGroup->addButton(ui->BtnExit,Qt::Key_1);
     btnGroup->addButton(ui->BtnExitMag,Qt::Key_2);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
-void PageMag::BtnJudge(int id)
+void PageMag::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -113,15 +113,8 @@ void PageMag::BtnJudge(int id)
 
 void PageMag::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"反嵌数据";
-    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
-    global->setIniCodec("GB18030");
-    global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-
     //当前使用的测试项目
-    QString t = QString("./config/%1.ini").arg(FileInUse);
+    QString t = QString("./config/%1.ini").arg(CurrentSettings());
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetMag");
@@ -178,12 +171,10 @@ void PageMag::InitSettings()
         QString T2 = Terminal2.at(row)->text();
         WaveMag.at(row)->WaveItem = QString(tr("反嵌%1-%2")).arg(T1).arg(T2).toUtf8();
     }
-    qDebug()<<QTime::currentTime().toString()<<"反嵌数据OK";
 }
 
 void PageMag::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"反嵌保存";
     QStringList temp;
     temp.append(QString::number(ui->BoxDir->currentIndex()));
     temp.append(QString::number(ui->BoxMain->value()));
@@ -228,7 +219,6 @@ void PageMag::SaveSettings()
         set->setValue(ByteL,WaveMag.at(row)->WaveBytes.at(0));
         set->setValue(ByteR,WaveMag.at(row)->WaveBytes.at(1));
     }
-    qDebug()<<QTime::currentTime().toString()<<"反嵌保存OK";
 }
 
 void PageMag::ItemClick(int r, int c)
@@ -282,7 +272,7 @@ void PageMag::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_INIT:
         InitSettings();
-        InitTestItems();
+        SendTestItemsAllEmpty();
         break;
     case CMD_WAVE:
         SendWave(msg);
@@ -316,127 +306,18 @@ void PageMag::ExcuteCanCmd(int id, QByteArray msg)
     }
 }
 
-void PageMag::InitTestItems()
+void PageMag::ReadCanCmdStatus(QByteArray msg)
 {
-    Items.clear();
-    WaveNumber.clear();
-    QStringList n;
-    for (int row = 0; row<Enable.size(); row++) {
-        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-        QString M1 = Max.at(qMin(row,Max.size()))->text();
-        QString s = QString(tr("反嵌%1-%2@%3%@ @ ")).arg(T1).arg(T2).arg(M1);
-        Items.append(s);
-        WaveMag.at(row)->WaveTest.clear();
+    if (quint8(msg.at(1)) != 0) {
+        emit SendCommand(ADDR,CMD_DEBUG,"MAG Error:");
+        emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
+        emit SendCommand(ADDR,CMD_DEBUG,"\n");
+        MagMode = MAG_FREE;
+        return;
     }
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            n.append(Items.at(row));
-            WaveNumber.append(row);
-        }
-    }
-    if (ui->BoxDir->currentIndex() != 0) {
-        QString s = QString(tr("磁旋@%1@ @ ")).arg(ui->BoxDir->currentText());
-        Items.append(s);
-        n.append(s);
-    }
-    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
-}
-
-void PageMag::SendTestItemsAllError()
-{
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s = QString(Items.at(row)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-        }
-    }
-    if (ui->BoxDir->currentIndex() != 0) {
-        QStringList s = QString(Items.last()).split("@");
-        if (s.at(2) == " ")
-            s[2] = "---";
-        if (s.at(3) == " ")
-            s[3] = "NG";
-        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-    }
-}
-
-void PageMag::ReadCanCmdStatus(QByteArray )
-{
     if (MagMode==MAG_TEST && ui->BoxDir->currentIndex()!=0)
         CalculateDir();
     MagMode = MAG_FREE;
-}
-
-void PageMag::SendCanCmdSample(quint8 s)
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
-    }
-    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
-      <<quint8(s)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PageMag::SendCanCmdStart(quint8 s)
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
-    }
-    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
-      <<quint8(s)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PageMag::SendCanCmdStop()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PageMag::SendCanCmdConfig(quint8 s)
-{
-    station = s;
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            quint8 freq = FreqL.at(row);
-            if (s == WIN_ID_OUT13)
-                freq = FreqL.at(row);
-            if (s == WIN_ID_OUT14)
-                freq = FreqR.at(row);
-            out<<quint16(0x22)<<quint8(0x05)<<quint8(0x04)<<quint8(row)
-              <<quint8(Terminal1.at(row)->text().toInt())
-             <<quint8(Terminal2.at(row)->text().toInt())
-            <<quint8(freq);
-        }
-    }
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PageMag::SendTestJudge()
-{
-    QString s = QString(tr("反嵌@%1@%2")).arg(FileInUse).arg(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
 }
 
 void PageMag::ReadCanCmdResult(QByteArray msg)
@@ -506,7 +387,6 @@ void PageMag::ReadCanCmdWave(QByteArray msg)
 void PageMag::ReadCanCmdWaveOk(QByteArray )
 {
     quint8 num = station - WIN_ID_OUT13;
-
     QByteArray w;
     QByteArray i;
     if (MagMode == MAG_SAMPLE) {
@@ -521,6 +401,122 @@ void PageMag::ReadCanCmdWaveOk(QByteArray )
         emit SendCommand(ADDR,CMD_WAVE_ITEM,i);
         emit SendCommand(ADDR,CMD_WAVE_BYTE,w);
     }
+}
+
+void PageMag::SendTestItemsAllEmpty()
+{
+    Items.clear();
+    WaveNumber.clear();
+    QStringList n;
+    for (int row = 0; row<Enable.size(); row++) {
+        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+        QString M1 = Max.at(qMin(row,Max.size()))->text();
+        QString s = QString(tr("反嵌%1-%2@%3%@ @ ")).arg(T1).arg(T2).arg(M1);
+        Items.append(s);
+        WaveMag.at(row)->WaveTest.clear();
+    }
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            n.append(Items.at(row));
+            WaveNumber.append(row);
+        }
+    }
+    if (ui->BoxDir->currentIndex() != 0) {
+        QString s = QString(tr("磁旋@%1@ @ ")).arg(ui->BoxDir->currentText());
+        Items.append(s);
+        n.append(s);
+    }
+    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+}
+
+void PageMag::SendTestItemsAllError()
+{
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s = QString(Items.at(row)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+    if (ui->BoxDir->currentIndex() != 0) {
+        QStringList s = QString(Items.last()).split("@");
+        if (s.at(2) == " ")
+            s[2] = "---";
+        if (s.at(3) == " ")
+            s[3] = "NG";
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    }
+}
+
+void PageMag::SendTestJudge()
+{
+    QString s = QString(tr("反嵌@%1@%2")).arg(CurrentSettings()).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+}
+
+void PageMag::SendCanCmdSample(quint8 s)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x01)
+      <<quint8(s)<<quint8(tt/256)<<quint8(tt%256);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageMag::SendCanCmdStart(quint8 s)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x22)<<quint8(0x06)<<quint8(0x01)<<quint8(0x02)<<quint8(0x00)
+      <<quint8(s)<<quint8(tt/256)<<quint8(tt%256);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageMag::SendCanCmdStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x22)<<quint8(0x01)<<quint8(0x02);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageMag::SendCanCmdConfig(quint8 s)
+{
+    station = s;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            quint8 freq = FreqL.at(row);
+            if (s == WIN_ID_OUT13)
+                freq = FreqL.at(row);
+            if (s == WIN_ID_OUT14)
+                freq = FreqR.at(row);
+            out<<quint16(0x22)<<quint8(0x05)<<quint8(0x04)<<quint8(row)
+              <<quint8(Terminal1.at(row)->text().toInt())
+             <<quint8(Terminal2.at(row)->text().toInt())
+            <<quint8(freq);
+        }
+    }
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PageMag::SendWave(QByteArray msg)
@@ -610,6 +606,13 @@ void PageMag::Delay(int ms)
     t.start();
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
+}
+
+QString PageMag::CurrentSettings()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    return n.remove(".ini");
 }
 
 void PageMag::showEvent(QShowEvent *)

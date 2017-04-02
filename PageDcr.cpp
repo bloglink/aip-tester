@@ -373,7 +373,7 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
 void PageDcr::ReadCanCmdStatus(QByteArray msg)
 {
     if (quint8(msg.at(1)) != 0) {
-        emit SendCommand(ADDR,CMD_DEBUG,"ACW Error:");
+        emit SendCommand(ADDR,CMD_DEBUG,"DCR Error:");
         emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
         emit SendCommand(ADDR,CMD_DEBUG,"\n");
         Mode = DCR_FREE;
