@@ -39,29 +39,28 @@ signals:
 private slots:
     void InitWindows(void);
     void InitButtons(void);
-    void BtnJudge(int id);
+    void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void InitTestItems(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
+    void SendTestItemTemp(void);
+    void SendTestItem(void);
+    void SendTestJudge(void);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
     void SendCanCmdConfig(void);
-    void SendItemTemp(void);
-    void SendItemJudge(void);
-    void SendTestJudge(void);
     void SendCanCmdAlarm(quint8 port);
-    void ReadCanCmdStatus(QByteArray msg);
-    void ReadCanCmdResult(QByteArray msg);
     void ClearResults(void);
-
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-
+    QString CurrentSettings(void);
     virtual void showEvent(QShowEvent*);
     virtual void hideEvent(QHideEvent*);
 

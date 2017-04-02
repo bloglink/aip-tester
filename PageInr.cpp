@@ -26,10 +26,10 @@ void PageInr::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExitIr,Qt::Key_0);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
-void PageInr::BtnJudge(int id)
+void PageInr::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -42,19 +42,11 @@ void PageInr::BtnJudge(int id)
 
 void PageInr::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"绝缘数据";
-    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
-    global->setIniCodec("GB18030");
-    global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-
     //当前使用的测试项目
-    QString t = QString("./config/%1.ini").arg(FileInUse);
+    QString t = QString("./config/%1.ini").arg(CurrentSettings());
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetIr");
-
     QStringList temp = (set->value("Other","0 1 100 3 0").toString()).split(" ");
     if (temp.size() >= 5) {
         ui->BoxVoltage->setCurrentIndex(temp.at(0).toInt());
@@ -63,12 +55,10 @@ void PageInr::InitSettings()
         ui->BoxTime->setValue(temp.at(3).toInt());
         ui->BoxOffset->setValue(temp.at(4).toInt());
     }
-    qDebug()<<QTime::currentTime().toString()<<"绝缘数据OK";
 }
 
 void PageInr::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"绝缘保存";
     QStringList temp;
     temp.append(QString::number(ui->BoxVoltage->currentIndex()));
     temp.append(QString::number(ui->BoxMin->value()));
@@ -76,7 +66,6 @@ void PageInr::SaveSettings()
     temp.append(QString::number(ui->BoxTime->value()));
     temp.append(QString::number(ui->BoxOffset->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
-    qDebug()<<QTime::currentTime().toString()<<"绝缘保存OK";
 }
 
 void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -113,7 +102,7 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_INIT:
         InitSettings();
-        InitTestItems();
+        SendTestItemsAllEmpty();
         SendCanCmdConfig();
         break;
     case CMD_ALARM:
@@ -135,7 +124,40 @@ void PageInr::ExcuteCanCmd(QByteArray msg)
         ReadCanCmdResult(msg);
 }
 
-void PageInr::InitTestItems()
+void PageInr::ReadCanCmdStatus(QByteArray msg)
+{
+    if (quint8(msg.at(1)) != 0) {
+        emit SendCommand(ADDR,CMD_DEBUG,"INR Error:");
+        emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
+        emit SendCommand(ADDR,CMD_DEBUG,"\n");
+        Mode = INR_FREE;
+        return;
+    }
+    if (Mode == INR_INIT)
+        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr OK\n");
+    if (Mode == INR_TEST) {
+        SendTestItem();
+        ClearResults();
+    }
+    Mode = INR_FREE;
+}
+
+void PageInr::ReadCanCmdResult(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    tt *= qPow(10,-quint8(msg.at(5)));
+    Volt.append(v);
+    Res.append(tt);
+    SendTestItemTemp();
+    if (quint8(msg.at(6)) != 0x00) {
+        Judge = "NG";
+        SendTestItem();
+        ClearResults();
+    }
+}
+
+void PageInr::SendTestItemsAllEmpty()
 {
     Items.clear();
     QString s;
@@ -160,6 +182,47 @@ void PageInr::SendTestItemsAllError()
             s[3] = "NG";
         emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
     }
+}
+
+void PageInr::SendTestItemTemp()
+{
+    if (Volt.size()<2 || Res.size()<2) {
+        return;
+    }
+    QString rrr = QString::number(Res.last(),'f',1);
+    if (Res.last()>500)
+        rrr = ">500";
+    QString t = QString("%1Mohm").arg(rrr);
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+}
+
+void PageInr::SendTestItem()
+{
+    if (Volt.isEmpty() || Res.isEmpty()) {
+        Judge = "NG";
+        SendTestItemsAllError();
+        return;
+    }
+    QString rrr = QString::number(Res.last(),'f',1);
+    if (Res.last()>500)
+        rrr = ">500";
+    QString t = QString("%1Mohm").arg(rrr);
+
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = Judge;
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+}
+
+void PageInr::SendTestJudge()
+{
+    QString s = QString(tr("绝缘@%1@%2")).arg(CurrentSettings()).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
 }
 
 void PageInr::SendCanCmdStatus()
@@ -208,46 +271,6 @@ void PageInr::SendCanCmdConfig()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PageInr::SendItemTemp()
-{
-    if (Volt.size()<2 || Res.size()<2) {
-        return;
-    }
-    QString rrr = QString::number(Res.last(),'f',1);
-    if (Res.last()>500)
-        rrr = ">500";
-    QString t = QString("%1Mohm").arg(rrr);
-    QStringList s = QString(Items.at(0)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
-}
-
-void PageInr::SendItemJudge()
-{
-    if (Volt.isEmpty() || Res.isEmpty()) {
-        Judge = "NG";
-        SendTestItemsAllError();
-        return;
-    }
-    QString rrr = QString::number(Res.last(),'f',1);
-    if (Res.last()>500)
-        rrr = ">500";
-    QString t = QString("%1Mohm").arg(rrr);
-
-    QStringList s = QString(Items.at(0)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    if (s.at(3) == " ")
-        s[3] = Judge;
-    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-}
-
-void PageInr::SendTestJudge()
-{
-    QString s = QString(tr("绝缘@%1@%2")).arg(FileInUse).arg(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
-}
 
 void PageInr::SendCanCmdAlarm(quint8 port)
 {
@@ -256,32 +279,6 @@ void PageInr::SendCanCmdAlarm(quint8 port)
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x23)<<quint8(0x02)<<quint8(0x09)<<quint8(port);
     emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PageInr::ReadCanCmdStatus(QByteArray )
-{
-    if (Mode == INR_INIT)
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr OK\n");
-    if (Mode == INR_TEST) {
-        SendItemJudge();
-        ClearResults();
-    }
-    Mode = INR_FREE;
-}
-
-void PageInr::ReadCanCmdResult(QByteArray msg)
-{
-    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
-    tt *= qPow(10,-quint8(msg.at(5)));
-    Volt.append(v);
-    Res.append(tt);
-    SendItemTemp();
-    if (quint8(msg.at(6)) != 0x00) {
-        Judge = "NG";
-        SendItemJudge();
-        ClearResults();
-    }
 }
 
 void PageInr::ClearResults()
@@ -308,6 +305,13 @@ void PageInr::Delay(int ms)
     t.start();
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
+}
+
+QString PageInr::CurrentSettings()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    return n.remove(".ini");
 }
 
 void PageInr::showEvent(QShowEvent *)
