@@ -26,6 +26,11 @@
 
 #define MAX_ROW 8
 
+#define DCR_FREE        0
+#define DCR_INIT        4
+#define DCR_TEST        1
+#define DCR_OFFSET      2
+
 namespace Ui {
 class PageDcr;
 }
@@ -46,33 +51,31 @@ signals:
 private slots:
     void InitWindows(void);
     void InitButtons(void);
-    void BtnJudge(int id);
+    void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
     void AutoCalculateMinAndMax(void);
     bool CheckSetting(void);
     void ItemClick(int r,int c);
     void ItemChange(QString msg);
-
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void InitTestItems(void);
-    void SendCanCmdStatus(void);
     void ReadCanCmdStatus(QByteArray msg);
-    void ReadOffset(QByteArray msg);
-    void SendCanCmdStart(quint8 pos);
-    void WaitTestFinished(void);
-    void SendTestJudge(void);
     void ReadCanCmdResult(QByteArray msg);
-    double CalculateOffset(double t,quint8 num);
-    void CalculateBalance(void);
+    void ReadOffset(QByteArray msg);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendTestJudge(void);
+    void SendCanCmdStatus(void);
+    void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
     void SendCanCmdConfig(void);
+    double CalculateOffset(double t,quint8 num);
+    void CalculateBalance(void);
     int CalculateGear(int row);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-    bool WaitTestTimeOut(quint16 t);
-    bool WaitOffset(quint16 t);
-
+    QString CurrentSettings(void);
     void AutoChangeMetal(int index);
     void AutoChangeUnit(int index);
     void AutoChangeMin(double x);
@@ -80,16 +83,11 @@ private slots:
     void AutoChangeStd(double x);
     virtual void showEvent(QShowEvent*);
 private:
-    QSettings *set;
-    bool isCheckOk;
-    bool Testing;
-    bool Offsetting;
     quint16 TimeOut;
     PageNum *input;
     QStringList Items;
     QList<double> Results;
-    QString JudgeAll;
-    QString FileInUse;
+    QString Judge;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
@@ -100,6 +98,7 @@ private:
     QList<QDoubleSpinBox*> Max;
     QList<QDoubleSpinBox*> Std;
     QList<QDoubleSpinBox*> Offset;
+    quint8 Mode;
 };
 
 #endif // PAGEDCR_H
