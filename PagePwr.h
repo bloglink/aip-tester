@@ -50,14 +50,14 @@ private slots:
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void InitTestItems(void);
-    void SendTestItems(void);
+    void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(void);
     void SendCanCmdStop(void);
-    void SendItemTemp(void);
+    void SendTestItemTemp(void);
     void SendTestJudge(void);
-    void SendItemJudge(void);
+    void SendTestItem(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadCanCmdDir(QByteArray msg);
@@ -65,6 +65,8 @@ private slots:
     void ClearResults(void);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+    QString CurrentSettings(void);
+    QString CurrentPorwer(void);
     virtual void showEvent(QShowEvent *);
     virtual void hideEvent(QHideEvent *);
 private:
@@ -77,10 +79,8 @@ private:
     QList<double> Power;
 
     QString Judge;
-    QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
-
     QList<QDoubleSpinBox*> CurrMax;
     QList<QDoubleSpinBox*> CurrMin;
     QList<QDoubleSpinBox*> PowerMax;
@@ -92,7 +92,6 @@ private:
     QList<QTableWidgetItem*> Grade;
     quint8 TestRow;
     quint8 Mode;
-    quint8 PowerSupply;
     QString dir;
     quint8 isTestDir;
 };

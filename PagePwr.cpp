@@ -111,15 +111,8 @@ void PagePwr::ReadButtons(int id)
 
 void PagePwr::InitSettings()
 {
-    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
-    global->setIniCodec("GB18030");
-    global->beginGroup("GLOBAL");
-    PowerSupply = global->value("PowerSupply","0").toInt();
-    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-
     //当前使用的测试项目
-    QString t = QString("./config/%1.ini").arg(FileInUse);
+    QString t = QString("./config/%1.ini").arg(CurrentSettings());
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("PagePwr");
@@ -287,7 +280,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_INIT:
         InitSettings();
         InitTestItems();
-        SendTestItems();
+        SendTestItemsAllEmpty();
         break;
     default:
         break;
@@ -305,6 +298,53 @@ void PagePwr::ExcuteCanCmd(QByteArray msg)
         ReadCanCmdResult(msg);
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x02)
         ReadCanCmdDir(msg);
+}
+void PagePwr::ReadCanCmdStatus(QByteArray msg)
+{
+    if (quint8(msg.at(1)) != 0x00 && quint8(msg.at(1)) != 0x01) {
+        emit SendCommand(ADDR,CMD_DEBUG,"PWR Error:");
+        emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
+        emit SendCommand(ADDR,CMD_DEBUG,"\n");
+        Mode = PWR_FREE;
+        return;
+    }
+    if (quint8(msg.at(1)) == 0x01) {
+        return;
+    }
+    if (Mode == PWR_INIT)
+        emit SendCommand(ADDR,CMD_DEBUG,"Power check ok\n");
+    if (Mode == PWR_TEST) {
+        SendTestItem();
+        ClearResults();
+    }
+    Mode = PWR_FREE;
+}
+
+void PagePwr::ReadCanCmdResult(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    double p = quint16(msg.at(5)*256)+quint8(msg.at(6));
+    Volt.append(v);
+    Curr.append(c);
+    Power.append(p);
+    SendTestItemTemp();
+    CalculateResult();
+    if (Judge == "NG") {
+        SendCanCmdStop();
+        SendTestItem();
+        ClearResults();
+    }
+}
+
+void PagePwr::ReadCanCmdDir(QByteArray msg)
+{
+    if (quint8(msg.at(5)) == 0x00)
+        dir = tr("不转");
+    if (quint8(msg.at(5)) == 0x01)
+        dir = tr("正转");
+    if (quint8(msg.at(5)) == 0x02)
+        dir = tr("反转");
 }
 
 void PagePwr::InitTestItems()
@@ -335,7 +375,7 @@ void PagePwr::InitTestItems()
     }
 }
 
-void PagePwr::SendTestItems()
+void PagePwr::SendTestItemsAllEmpty()
 {
     QStringList n;
     for (int row = 0; row<Enable.size(); row++) {
@@ -368,41 +408,7 @@ void PagePwr::SendTestItemsAllError()
     }
 }
 
-void PagePwr::SendCanCmdStatus()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x00);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PagePwr::SendCanCmdStart()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 v = ui->BoxVolt->value();
-    quint16 t = TestTime.at(TestRow)->value()*10;
-    quint8 p = PowerSupply<<4;
-    if (ui->BoxFreq->value() == 60)
-        p += 0x02;
-    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1)
-      <<quint8(t/256)<<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256)
-     <<quint8(isTestDir)<<quint8(0x00);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PagePwr::SendCanCmdStop()
-{
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-}
-
-void PagePwr::SendItemTemp()
+void PagePwr::SendTestItemTemp()
 {
     if (Volt.size()<2 || Curr.size()<2 || Power.size()<2) {
         return;
@@ -418,13 +424,7 @@ void PagePwr::SendItemTemp()
     emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
 }
 
-void PagePwr::SendTestJudge()
-{
-    QString s = QString(tr("功率@%1@%2")).arg(FileInUse).arg(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
-}
-
-void PagePwr::SendItemJudge()
+void PagePwr::SendTestItem()
 {
     if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty()) {
         SendTestItemsAllError();
@@ -451,45 +451,44 @@ void PagePwr::SendItemJudge()
     }
 }
 
-void PagePwr::ReadCanCmdStatus(QByteArray msg)
+void PagePwr::SendTestJudge()
 {
-    if (quint8(msg.at(1)) != 0x00) {
-        return;
-    }
-    if (Mode == PWR_INIT)
-        emit SendCommand(ADDR,CMD_DEBUG,"Power check ok\n");
-    if (Mode == PWR_TEST) {
-        SendItemJudge();
-        ClearResults();
-    }
-    Mode = PWR_FREE;
+    QString s = QString(tr("功率@%1@%2")).arg(CurrentSettings()).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
 }
 
-void PagePwr::ReadCanCmdResult(QByteArray msg)
+void PagePwr::SendCanCmdStatus()
 {
-    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-    double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
-    double p = quint16(msg.at(5)*256)+quint8(msg.at(6));
-    Volt.append(v);
-    Curr.append(c);
-    Power.append(p);
-    SendItemTemp();
-    CalculateResult();
-    if (Judge == "NG") {
-        SendCanCmdStop();
-        SendItemJudge();
-        ClearResults();
-    }
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x00);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PagePwr::ReadCanCmdDir(QByteArray msg)
+void PagePwr::SendCanCmdStart()
 {
-    if (quint8(msg.at(5)) == 0x00)
-        dir = tr("不转");
-    if (quint8(msg.at(5)) == 0x01)
-        dir = tr("正转");
-    if (quint8(msg.at(5)) == 0x02)
-        dir = tr("反转");
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 v = ui->BoxVolt->value();
+    quint16 t = TestTime.at(TestRow)->value()*10;
+    quint8 p = CurrentPorwer().toInt()<<4;
+    if (ui->BoxFreq->value() == 60)
+        p += 0x02;
+    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1)
+      <<quint8(t/256)<<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256)
+     <<quint8(isTestDir)<<quint8(0x00);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PagePwr::SendCanCmdStop()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x27)<<quint8(0x01)<<quint8(0x02);
+    emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
 void PagePwr::CalculateResult()
@@ -535,6 +534,20 @@ void PagePwr::Delay(int ms)
     t.start();
     while(t.elapsed()<ms)
         QCoreApplication::processEvents();
+}
+
+QString PagePwr::CurrentSettings()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    return n.remove(".ini");
+}
+
+QString PagePwr::CurrentPorwer()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/PowerSupply","0").toString();
+    return n;
 }
 
 void PagePwr::showEvent(QShowEvent *)
