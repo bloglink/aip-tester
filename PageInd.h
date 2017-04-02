@@ -22,6 +22,11 @@
 
 #define MAX_ROW 8
 
+#define IND_FREE        0
+#define IND_INIT        4
+#define IND_TEST        1
+#define IND_OFFSET      2
+
 union  Resultunion // 接收电感数据
 {
     float   Result;
@@ -46,11 +51,11 @@ private:
 signals:
     void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
 private slots:
-    void InitializesWindow(void);
-    void InitializesButton(void);
-    void BtnJudge(int id);
-    void InitializesSetting(void);
-    void SaveSetting(void);
+    void InitWindows(void);
+    void InitButtons(void);
+    void ReadButtons(int id);
+    void InitSettings(void);
+    void SaveSettings(void);
     void CalculateAuto(void);
     void ItemClick(int r,int c);
     void ItemChange(QString msg);
@@ -59,31 +64,29 @@ private slots:
 
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
-    void InitializesItem(void);
-    void SendStatusCmd(void);
-    void ReadStatus(QByteArray msg);
-    void SendStartCmd(quint8 pos);
-    void ReadResult(QByteArray msg);
-    void ReadOffset(QByteArray msg);
-    void SendStopCmd(void);
-    void SendConfigCmd(void);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendTestJudge(void);
+    void SendCanCmdStatus(void);
+    void ReadCanCmdStatus(QByteArray msg);
+    void SendCanCmdStart(quint8 pos);
+    void ReadCanCmdResult(QByteArray msg);
+    void ReadCanCmdOffset(QByteArray msg);
+    void SendCanCmdStop(void);
+    void SendCanCmdConfig(void);
 
-    bool WaitTestOver(quint16 t);
-    bool WaitOffset(quint16 t);
+    bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+    QString CurrentSettings(void);
     void showEvent(QShowEvent *);
     void hideEvent(QHideEvent *);
 private:
     QSettings *set;
-    bool isCheckOk;
-    bool Testing;
-    bool Offsetting;
     quint16 TimeOut;
     PageNum *input;
     QStringList Items;
     QList<double> Results;
     QString Judge;
-    QString FileInUse;
 
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
@@ -98,6 +101,7 @@ private:
 
     Resultunion  Result1;
     Resultunion  Result2;
+    quint8 Mode;
 };
 
 #endif // PAGEIND_H

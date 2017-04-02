@@ -6,12 +6,10 @@ PageInd::PageInd(QWidget *parent) :
     ui(new Ui::PageInd)
 {
     ui->setupUi(this);
-    InitializesWindow();
-    InitializesButton();
-    InitializesSetting();
-    Testing = false;
-    isCheckOk = false;
-    Offsetting = false;
+    InitWindows();
+    InitButtons();
+    InitSettings();
+    Mode = IND_FREE;
 }
 
 PageInd::~PageInd()
@@ -19,7 +17,7 @@ PageInd::~PageInd()
     delete ui;
 }
 
-void PageInd::InitializesWindow()
+void PageInd::InitWindows()
 {
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
@@ -106,27 +104,27 @@ void PageInd::InitializesWindow()
     }
 }
 
-void PageInd::InitializesButton()
+void PageInd::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSDLRAuto,Qt::Key_0);
     btnGroup->addButton(ui->BtnOffset,Qt::Key_1);
     btnGroup->addButton(ui->BtnSDLRExit,Qt::Key_2);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
-void PageInd::BtnJudge(int id)
+void PageInd::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
         CalculateAuto();
         break;
     case Qt::Key_1:
-        SendConfigCmd();
-        Offsetting = true;
-        SendStartCmd(WIN_ID_OUT13);
-        if (!WaitOffset(100))
-            qDebug()<<"Offset time out";
+        Mode = IND_OFFSET;
+        SendCanCmdConfig();
+        SendCanCmdStart(WIN_ID_OUT13);
+        WaitTimeOut(100);
+        Mode = IND_FREE;
         break;
     case Qt::Key_2:
         emit SendCommand(ADDR,CMD_JUMP,NULL);
@@ -136,17 +134,10 @@ void PageInd::BtnJudge(int id)
     }
 }
 
-void PageInd::InitializesSetting()
+void PageInd::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"电感数据";
-    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
-    global->setIniCodec("GB18030");
-    global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
-    FileInUse.remove(".ini");
-
     //当前使用的测试项目
-    QString t = QString("./config/%1.ini").arg(FileInUse);
+    QString t = QString("./config/%1.ini").arg(CurrentSettings());
     set = new QSettings(t,QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("PageInd");
@@ -200,15 +191,9 @@ void PageInd::InitializesSetting()
     temp = (set->value("Offset","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
-    qDebug()<<QTime::currentTime().toString()<<"电感数据OK";
 }
-/*******************************************************************************
- * version:    1.0
- * author:     link
- * date:       2016.12.19
- * brief:      数据保存
-*******************************************************************************/
-void PageInd::SaveSetting()
+
+void PageInd::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"电感保存";
     QStringList temp;
@@ -301,25 +286,40 @@ void PageInd::ItemChange(QString msg)
 
 void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_IND && addr != CAN_ID_IND)
+    if (addr!=ADDR && addr!=WIN_ID_IND && addr!=CAN_ID_IND)
         return;
     switch (cmd) {
     case CMD_CAN:
         ExcuteCanCmd(msg);
         break;
     case CMD_CHECK:
-        SendStatusCmd();
+        Mode = IND_INIT;
+        SendCanCmdStatus();
+        if (!WaitTimeOut(20)) {
+            QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
+            emit SendCommand(ADDR,CMD_DEBUG,"PageInd Error:Time out\n");
+        }
+        Mode = IND_FREE;
         break;
     case CMD_START:
-        SendStartCmd(msg.toInt());
+        Mode = IND_TEST;
+        Judge = "OK";
+        SendCanCmdStart(msg.toInt());
+        if(!WaitTimeOut(100)) {
+            Judge = "NG";
+            SendTestItemsAllError();
+        }
+        SendTestJudge();
+        Mode = IND_FREE;
         break;
     case CMD_STOP:
-        SendStopCmd();
+        SendCanCmdStop();
+        Mode = IND_FREE;
         break;
     case CMD_INIT:
-        InitializesSetting();
-        InitializesItem();
-        SendConfigCmd();
+        InitSettings();
+        SendTestItemsAllEmpty();
+        SendCanCmdConfig();
         break;
     default:
         break;
@@ -328,130 +328,35 @@ void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 
 void PageInd::ExcuteCanCmd(QByteArray msg)
 {
-    if (!Testing && !Offsetting)
+    if (Mode == IND_FREE)
         return;
     TimeOut = 0;
     if (msg.size()==8 && (quint8)msg.at(0)==0x00) {
-        ReadStatus(msg);
+        ReadCanCmdStatus(msg);
     }
     if (msg.size()==8 && (quint8)msg.at(0)==0x01) {
-        if (Offsetting)
-            ReadOffset(msg);
+        if (Mode == IND_OFFSET)
+            ReadCanCmdOffset(msg);
         else
-            ReadResult(msg);
+            ReadCanCmdResult(msg);
     }
 }
 
-void PageInd::InitializesItem()
+void PageInd::ReadCanCmdStatus(QByteArray msg)
 {
-    Items.clear();
-    Results.clear();
-    QStringList n;
-    for (int row = 0; row<Enable.size(); row++) {
-        QStringList s;
-        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-        QString M1 = Min.at(qMin(row,Min.size()))->text();
-        QString M2 = Max.at(qMin(row,Max.size()))->text();
-        QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
-        QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
-        s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
-        s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-    }
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            n.append(Items.at(row));
-        }
-    }
-    if (ui->BoxUnbalance->value() != 0 && n.size()>=3) {
-        QStringList s;
-        s.append("电感平衡");
-        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-        n.append(Items.last());
-    }
-    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
-}
-
-void PageInd::SendStatusCmd()
-{
-    if (Testing)
+    if (quint8(msg.at(1)) != 0) {
+        emit SendCommand(ADDR,CMD_DEBUG,"IND Error:");
+        emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
+        emit SendCommand(ADDR,CMD_DEBUG,"\n");
+        Mode = IND_FREE;
         return;
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-    Testing = true;
-    if (!WaitTestOver(100)) {
-        Testing = false;
-        QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInd Error:Time out\n");
     }
+    if (Mode == IND_INIT)
+        emit SendCommand(ADDR,CMD_DEBUG,"PageInd OK\n");
+    Mode = IND_FREE;
 }
 
-void PageInd::ReadStatus(QByteArray )
-{
-    if (!isCheckOk) {
-        isCheckOk = true;
-        emit SendCommand(ADDR,CMD_DEBUG,"INDL check ok\n");
-    }
-    if (Testing)
-        Testing = false;
-}
-
-void PageInd::SendStartCmd(quint8 pos)
-{
-    if (Testing)
-        return;
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
-    }
-    out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
-      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
-    Testing = true;
-    Judge = "OK";
-    if(!WaitTestOver(100)) {
-        Testing = false;
-        Judge = "NG";
-        for (int row = 0; row<Enable.size(); row++) {
-            if (Enable.at(row)->text() == "Y") {
-                QStringList s = QString(Items.at(row)).split("@");
-                if (s.at(2) == " ")
-                    s[2] = "---";
-                if (s.at(3) == " ")
-                    s[3] = "NG";
-                emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-            }
-        }
-        if (ui->BoxUnbalance->value() != 0) {
-            QStringList s = QString(Items.last()).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-        }
-    }
-    QStringList s;
-    s.append("电感");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
-}
-
-void PageInd::ReadResult(QByteArray msg)
+void PageInd::ReadCanCmdResult(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
     if (number >0 )
@@ -530,7 +435,7 @@ void PageInd::ReadResult(QByteArray msg)
     }
 }
 
-void PageInd::ReadOffset(QByteArray msg)
+void PageInd::ReadCanCmdOffset(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
     if (number >0 )
@@ -550,19 +455,104 @@ void PageInd::ReadOffset(QByteArray msg)
     }
 }
 
-void PageInd::SendStopCmd()
+void PageInd::SendTestItemsAllEmpty()
 {
-    if (!Testing)
-        return;
+    Items.clear();
+    Results.clear();
+    QStringList n;
+    for (int row = 0; row<Enable.size(); row++) {
+        QStringList s;
+        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
+        QString M1 = Min.at(qMin(row,Min.size()))->text();
+        QString M2 = Max.at(qMin(row,Max.size()))->text();
+        QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
+        QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
+        s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
+        s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+    }
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            n.append(Items.at(row));
+        }
+    }
+    if (ui->BoxUnbalance->value() != 0 && n.size()>=3) {
+        QStringList s;
+        s.append("电感平衡");
+        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
+        s.append(" ");
+        s.append(" ");
+        Items.append(s.join("@"));
+        n.append(Items.last());
+    }
+    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+}
+
+void PageInd::SendTestItemsAllError()
+{
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s = QString(Items.at(row)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        }
+    }
+    if (ui->BoxUnbalance->value() != 0) {
+        QStringList s = QString(Items.last()).split("@");
+        if (s.at(2) == " ")
+            s[2] = "---";
+        if (s.at(3) == " ")
+            s[3] = "NG";
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    }
+}
+
+void PageInd::SendTestJudge()
+{
+    QString s = QString(tr("电感@%1@%2")).arg(CurrentSettings()).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+}
+
+void PageInd::SendCanCmdStatus()
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageInd::SendCanCmdStart(quint8 pos)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint16 tt = 0;
+    for (int row=0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y")
+            tt += 0x0001<<row;
+    }
+    out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
+      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageInd::SendCanCmdStop()
+{
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x26)<<quint8(0x01)<<quint8(0x02);
     emit SendCommand(ADDR,CMD_CAN,msg);
-    Testing = false;
 }
 
-void PageInd::SendConfigCmd()
+void PageInd::SendCanCmdConfig()
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -657,21 +647,10 @@ int PageInd::CalculateMode(int row)
     return t;
 }
 
-bool PageInd::WaitTestOver(quint16 t)
+bool PageInd::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Testing) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > t)
-            return false;
-    }
-    return true;
-}
-bool PageInd::WaitOffset(quint16 t)
-{
-    TimeOut = 0;
-    while (Offsetting) {
+    while (Mode != IND_FREE) {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -688,12 +667,19 @@ void PageInd::Delay(int ms)
         QCoreApplication::processEvents();
 }
 
+QString PageInd::CurrentSettings()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    return n.remove(".ini");
+}
+
 void PageInd::showEvent(QShowEvent *)
 {
-    InitializesSetting();
+    InitSettings();
 }
 
 void PageInd::hideEvent(QHideEvent *)
 {
-    SaveSetting();
+    SaveSettings();
 }
