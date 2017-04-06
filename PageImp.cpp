@@ -28,7 +28,6 @@ PageImp::~PageImp()
 
 void PageImp::InitWindows()
 {
-    ui->BoxOffset->hide();
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
@@ -241,6 +240,7 @@ void PageImp::InitSettings()
     set->setIniCodec("GB18030");
     set->beginGroup("SetImp");
     QStringList temp;
+    ui->BoxOffset->setChecked(set->value("Offset",true).toBool());
     //可用
     temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
@@ -313,6 +313,7 @@ void PageImp::InitSettings()
 void PageImp::SaveSettings()
 {
     qDebug()<<QTime::currentTime().toString()<<"匝间保存";
+    set->setValue("Offset",ui->BoxOffset->isChecked());
     QStringList temp;
     temp.clear();
     for (int i=0; i<Enable.size(); i++)
@@ -739,6 +740,8 @@ void PageImp::CalculateAvarageWave()
 
 void PageImp::ReadCanCmdSample(QByteArray msg)
 {
+    if (ImpMode != IMP_SAMPLE)
+        return;
     quint8 num = quint8(msg.at(1));
     Freq[num] = quint8(msg.at(3));
     VoltTest[num] = quint16(msg.at(4)*256)+quint8(msg.at(5));

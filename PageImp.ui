@@ -245,7 +245,7 @@
          <item row="0" column="0">
           <widget class="QCheckBox" name="BoxOffset">
            <property name="enabled">
-            <bool>false</bool>
+            <bool>true</bool>
            </property>
            <property name="text">
             <string>取消电压反馈</string>
@@ -297,7 +297,7 @@
             </size>
            </property>
            <property name="text">
-            <string>减频采样</string>
+            <string>拉伸波形</string>
            </property>
           </widget>
          </item>
@@ -378,7 +378,7 @@
             </size>
            </property>
            <property name="text">
-            <string>加频采样</string>
+            <string>压缩波形</string>
            </property>
           </widget>
          </item>
@@ -391,7 +391,7 @@
             </size>
            </property>
            <property name="text">
-            <string>定频采样</string>
+            <string>重新采样</string>
            </property>
           </widget>
          </item>
