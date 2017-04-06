@@ -142,6 +142,9 @@
            <property name="decimals">
             <number>0</number>
            </property>
+           <property name="maximum">
+            <double>500.000000000000000</double>
+           </property>
           </widget>
          </item>
          <item row="1" column="0">
