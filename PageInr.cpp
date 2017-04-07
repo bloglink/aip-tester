@@ -210,6 +210,12 @@ void PageInr::SendTestItem()
     if (Res.last()>500)
         rrr = ">500";
     QString t = QString("%1Mohm").arg(rrr);
+    if (Res.last()<1)
+        t = "超量程";
+    if (Res.last()<=ui->BoxMin->value())
+        Judge = "NG";
+    if (ui->BoxMax->value()!=0 && Res.last()>ui->BoxMax->value())
+        Judge = "NG";
 
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
@@ -260,14 +266,12 @@ void PageInr::SendCanCmdConfig()
     out.setVersion(QDataStream::Qt_4_8);
     int volt = ui->BoxVoltage->currentText().toInt();
     int time = ui->BoxTime->value()*10;
-    int min = ui->BoxMin->value();
-    int max = ui->BoxMax->value();
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x01)<<quint8(0x04)
       <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(0x00);
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x01)<<quint8(volt/256)
-      <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(min/256)<<quint8(min%256);
+      <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(1/256)<<quint8(1%256);
     out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x01)
-      <<quint8(max/256)<<quint8(max%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);//上限
+      <<quint8(0/256)<<quint8(0%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);//上限
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
