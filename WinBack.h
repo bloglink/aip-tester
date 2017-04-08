@@ -1,6 +1,7 @@
 #ifndef WINBACK_H
 #define WINBACK_H
 
+#include <QTime>
 #include <QDebug>
 #include <QWidget>
 #include <QProcess>
@@ -54,7 +55,6 @@ private slots:
     void ClearParamInr(void);
     void ClearParamImp(void);
     virtual void showEvent(QShowEvent *);
-    virtual void hideEvent(QHideEvent *);
 private:
     bool Testing;
     QList<QDoubleSpinBox*> BoxDcr;

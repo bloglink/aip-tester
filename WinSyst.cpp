@@ -18,7 +18,6 @@ WinSyst::WinSyst(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitSettings();
 }
 
 WinSyst::~WinSyst()
@@ -76,6 +75,7 @@ void WinSyst::BtnJudge(int id)
         SetPassword();
         break;
     case Qt::Key_4:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_5:
@@ -91,8 +91,6 @@ void WinSyst::BtnJudge(int id)
 
 void WinSyst::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取系统配置";
-
     QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
     g_ini->setIniCodec("GB18030");
     g_ini->beginGroup("GLOBAL");
@@ -122,12 +120,11 @@ void WinSyst::InitSettings()
     }
     if (ui->LocalHostIP->text().isEmpty())
         ui->LocalHostIP->setText(GetLocalHostIP());
-    qDebug()<<QTime::currentTime().toString()<<"读取系统配置OK";
+    qDebug()<<QTime::currentTime().toString()<<"WinSyst read OK";
 }
 
 void WinSyst::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"保存系统配置";
     QSettings *g_ini = new QSettings(INI_PATH,QSettings::IniFormat);
     g_ini->setIniCodec("GB18030");
     g_ini->beginGroup("GLOBAL");
@@ -139,7 +136,8 @@ void WinSyst::SaveSettings()
     g_ini->setValue("TimeNG",ui->BoxTimeNG->value());
     g_ini->setValue("TimeOK",ui->BoxTimeOK->value());
     g_ini->setValue("PowerSupply",ui->BoxPower->currentIndex());
-    qDebug()<<QTime::currentTime().toString()<<"保存系统配置OK";
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"WinSyst save OK";
 }
 
 void WinSyst::SetDateTime()
@@ -219,8 +217,4 @@ void WinSyst::showEvent(QShowEvent *)
     ui->StackWinSyst->setCurrentIndex(1);
 }
 
-void WinSyst::hideEvent(QHideEvent *)
-{
-    SaveSettings();
-}
 /*********************************END OF FILE**********************************/

@@ -46,7 +46,6 @@ private slots:
     void WriteLog(QByteArray msg);
     QString GetLocalHostIP(void);
     virtual void showEvent(QShowEvent *);
-    virtual void hideEvent(QHideEvent *);
 private:
     QString password;
     QFile *file;

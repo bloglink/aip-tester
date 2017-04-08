@@ -41,6 +41,7 @@ void PageAcw::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -50,7 +51,6 @@ void PageAcw::ReadButtons(int id)
 
 void PageAcw::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"交耐数据";
     //当前使用的测试项目
     QString t = QString("./config/%1.ini").arg(CurrentSettings());
     QSettings *ini = new QSettings(t,QSettings::IniFormat);
@@ -67,12 +67,11 @@ void PageAcw::InitSettings()
         ui->BoxFrequcy->setCurrentIndex(temp.at(5).toInt());
         ui->BoxOffset->setValue(temp.at(6).toInt());
     }
-    qDebug()<<QTime::currentTime().toString()<<"交耐数据OK";
+    qDebug()<<QTime::currentTime().toString()<<"PageAcw read OK";
 }
 
 void PageAcw::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"交耐保存";
     QString t = QString("./config/%1.ini").arg(CurrentSettings());
     QSettings *ini = new QSettings(t,QSettings::IniFormat);
     ini->setIniCodec("GB18030");
@@ -86,7 +85,8 @@ void PageAcw::SaveSettings()
     temp.append(QString::number(ui->BoxFrequcy->currentIndex()));
     temp.append(QString::number(ui->BoxOffset->value()));
     ini->setValue("Other",(temp.join(" ").toUtf8()));
-    qDebug()<<QTime::currentTime().toString()<<"交耐保存OK";
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageAcw save OK";
 }
 
 void PageAcw::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -313,11 +313,6 @@ QString PageAcw::CurrentSettings()
 void PageAcw::showEvent(QShowEvent *)
 {
     InitSettings();
-}
-
-void PageAcw::hideEvent(QHideEvent *)
-{
-    SaveSettings();
 }
 /*********************************END OF FILE**********************************/
 

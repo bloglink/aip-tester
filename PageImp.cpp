@@ -227,7 +227,6 @@ void PageImp::InitStation()
 
 void PageImp::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"匝间数据";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
@@ -307,12 +306,11 @@ void PageImp::InitSettings()
         QString T2 = Terminal2.at(row)->text();
         WaveImp.at(row)->WaveItem = QString(tr("匝间%1-%2")).arg(T1).arg(T2).toUtf8();
     }
-    qDebug()<<QTime::currentTime().toString()<<"匝间数据OK";
+    qDebug()<<QTime::currentTime().toString()<<"PageImp read OK";
 }
 
 void PageImp::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"匝间保存";
     set->setValue("Offset",ui->BoxOffset->isChecked());
     QStringList temp;
     temp.clear();
@@ -369,13 +367,13 @@ void PageImp::SaveSettings()
     set->setValue("Block1",(temp.join(" ").toUtf8()));
 
     for (int row=0; row<qMin(WaveImp.size(),ui->TabParams->rowCount()); row++) {
-
         QString ByteL = "WaveImpL"+QString::number(row);
         QString ByteR = "WaveImpR"+QString::number(row);
         set->setValue(ByteL,WaveImp.at(row)->WaveBytes.at(0));
         set->setValue(ByteR,WaveImp.at(row)->WaveBytes.at(1));
     }
-    qDebug()<<QTime::currentTime().toString()<<"匝间保存OK";
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageImp save OK";
 }
 
 void PageImp::ItemClick(int r, int c)
@@ -442,6 +440,10 @@ void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_CHECK:
         ImpMode = IMP_INIT;
         SendCanCmdStatus();
+        if (!WaitTimeOut(100)) {
+            QMessageBox::warning(this,tr("警告"),tr("匝间板异常"),QMessageBox::Ok);
+            emit SendCommand(ADDR,CMD_DEBUG,"Time out error:PageImp\n");
+        }
         ImpMode = IMP_FREE;
         break;
     case CMD_START:
@@ -547,11 +549,6 @@ void PageImp::SendCanCmdStatus()
     out.setVersion(QDataStream::Qt_4_8);
     out<<quint16(0x24)<<quint8(0x01)<<quint8(0x00);
     emit SendCommand(ADDR,CMD_CAN,msg);
-
-    if (!WaitTimeOut(100)) {
-        QMessageBox::warning(this,tr("警告"),tr("匝间板异常"),QMessageBox::Ok);
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageImp Error:Time out\n");
-    }
 }
 
 void PageImp::SendCanCmdSampleAuto()

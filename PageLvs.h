@@ -2,6 +2,7 @@
 #define PAGELVS_H
 
 #include <cmath>
+#include <QTime>
 #include <QDebug>
 #include <QWidget>
 #include <QLineEdit>
@@ -60,7 +61,6 @@ private slots:
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     virtual void showEvent(QShowEvent *);
-    virtual void hideEvent(QHideEvent *);
 private:
     QSettings *set;
     quint16 TimeOut;

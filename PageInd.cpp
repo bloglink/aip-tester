@@ -127,6 +127,7 @@ void PageInd::ReadButtons(int id)
         Mode = IND_FREE;
         break;
     case Qt::Key_2:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -191,11 +192,11 @@ void PageInd::InitSettings()
     temp = (set->value("Offset","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
+    qDebug()<<QTime::currentTime().toString()<<"PageInd read OK";
 }
 
 void PageInd::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"电感保存";
     QStringList temp;
     temp.append(QString::number(ui->BoxTime->value()));
     temp.append(QString::number(ui->BoxUnbalance->value()));
@@ -245,7 +246,8 @@ void PageInd::SaveSettings()
     for (int i=0; i<Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     set->setValue("Offset",(temp.join(" ").toUtf8()));
-    qDebug()<<QTime::currentTime().toString()<<"电感保存OK";
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageInd save OK";
 }
 
 void PageInd::CalculateAuto()
@@ -297,7 +299,7 @@ void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         SendCanCmdStatus();
         if (!WaitTimeOut(20)) {
             QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"PageInd Error:Time out\n");
+            emit SendCommand(ADDR,CMD_DEBUG,"Time out Error:PageInd\n");
         }
         Mode = IND_FREE;
         break;
@@ -677,9 +679,4 @@ QString PageInd::CurrentSettings()
 void PageInd::showEvent(QShowEvent *)
 {
     InitSettings();
-}
-
-void PageInd::hideEvent(QHideEvent *)
-{
-    SaveSettings();
 }

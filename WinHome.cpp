@@ -64,9 +64,6 @@ void WinHome::InitWindows()
 
 void WinHome::InitWindowsAll()
 {
-    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口";
-
-    ShowLogMessage("Initialize WinBack\n");
     WinBack *winBack = new WinBack(this);
     ui->desktop->addWidget(winBack);
     winBack->setObjectName("WinBack");
@@ -76,7 +73,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize WinBack OK\n");
 
-    ShowLogMessage("Initialize WinSyst\n");
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
     winSyst->setObjectName("WinSyst");
@@ -86,7 +82,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize WinSyst OK\n");
 
-    ShowLogMessage("Initialize WinType\n");
     WinType *winType = new WinType(this);
     ui->desktop->addWidget(winType);
     winType->setObjectName("WinType");
@@ -94,7 +89,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize WinType OK\n");
 
-    ShowLogMessage("Initialize WinData\n");
     WinData *winData = new WinData(this);
     ui->desktop->addWidget(winData);
     winData->setObjectName("WinData");
@@ -102,7 +96,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize WinData OK\n");
 
-    ShowLogMessage("Initialize WinTest\n");
     WinTest *winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
@@ -112,7 +105,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize WinTest OK\n");
 
-    ShowLogMessage("Initialize PageDcr\n");
     PageDcr *pageDcr = new PageDcr(this);
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
@@ -122,7 +114,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageDcr OK\n");
 
-    ShowLogMessage("Initialize PageMag\n");
     PageMag *pageMag = new PageMag(this);
     ui->desktop->addWidget(pageMag);
     pageMag->setObjectName("PageMag");
@@ -132,7 +123,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageMag OK\n");
 
-    ShowLogMessage("Initialize PageInr\n");
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
@@ -142,7 +132,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageInr OK\n");
 
-    ShowLogMessage("Initialize PageAcw\n");
     PageAcw *pageAcw = new PageAcw(this);
     ui->desktop->addWidget(pageAcw);
     pageAcw->setObjectName("PageAcw");
@@ -152,7 +141,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageAcw OK\n");
 
-    ShowLogMessage("Initialize PageImp\n");
     PageImp *pageImp = new PageImp(this);
     ui->desktop->addWidget(pageImp);
     pageImp->setObjectName("PageImp");
@@ -162,7 +150,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageImp OK\n");
 
-    ShowLogMessage("Initialize PageInd\n");
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
@@ -172,7 +159,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageInd OK\n");
 
-    ShowLogMessage("Initialize PagePwr\n");
     PagePwr *pagePwr = new PagePwr(this);
     ui->desktop->addWidget(pagePwr);
     pagePwr->setObjectName("PagePwr");
@@ -182,7 +168,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PagePwr OK\n");
 
-    ShowLogMessage("Initialize PageLvs\n");
     PageLvs *pageLvs = new PageLvs(this);
     ui->desktop->addWidget(pageLvs);
     pageLvs->setObjectName("PageLvs");
@@ -192,7 +177,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageLvs OK\n");
 
-    ShowLogMessage("Initialize PageLck\n");
     PageLck *pageLck = new PageLck(this);
     ui->desktop->addWidget(pageLck);
     pageLck->setObjectName("PageLck");
@@ -202,7 +186,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageLck OK\n");
 
-    ShowLogMessage("Initialize PageOut\n");
     PageOut *pageOut = new PageOut(this);
     ui->desktop->addWidget(pageOut);
     pageOut->setObjectName("PageOut");
@@ -212,10 +195,7 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16,quint16,QByteArray)));
     ShowLogMessage("Initialize PageOut OK\n");
 
-    qDebug()<<QTime::currentTime().toString()<<"初始化所有窗口OK";
-
     ReadStatusAll();
-
 }
 
 void WinHome::JumpToWindow(QByteArray win)
@@ -432,8 +412,6 @@ void WinHome::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 
 void WinHome::InitTestItems()
 {
-    qDebug()<<QTime::currentTime().toString()<<"初始化测试";
-
     QStringList n = CurrentItems();
     if (n.isEmpty())
         return;
@@ -445,13 +423,10 @@ void WinHome::InitTestItems()
         emit SendCommand(n.at(i).toInt(),CMD_INIT,NULL);
     }
     emit SendCommand(WIN_ID_TEST,CMD_INIT,Items.join("\n").toUtf8());//初始化测试界面
-
-    qDebug()<<QTime::currentTime().toString()<<"初始化测试OK";
 }
 
 void WinHome::ReadStatusAll()
 {
-    qDebug()<<QTime::currentTime().toString()<<"开机自检";
     if (HomeMode != HOME_FREE)
         return;
     HomeMode = HOME_TEST;
@@ -464,7 +439,7 @@ void WinHome::ReadStatusAll()
     for (int i=0; i<s.size(); i++) {
         emit SendCommand(WIN_ID_OUT13,CMD_CHECK,s.at(i).toUtf8());
     }
-    qDebug()<<QTime::currentTime().toString()<<"开机自检OK";
+    qDebug()<<QTime::currentTime().toString()<<"WinHome read OK";
 
     ui->titleVn->show();
     ui->Text->hide();

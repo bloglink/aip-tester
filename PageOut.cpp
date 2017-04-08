@@ -28,11 +28,9 @@ void PageOut::ReadMessage(quint16 addr, quint16 cmd, QByteArray data)
         ExcuteCanCmd(addr,data);
         break;
     case CMD_CHECK:
-        qDebug()<<QTime::currentTime().toString()<<"查询输出状态";
         Mode = OUT_INIT;
         SendCanCmdStatus(data.toInt());
         Mode = OUT_FREE;
-        qDebug()<<QTime::currentTime().toString()<<"查询输出状态OK";
         break;
     case CMD_INIT:
         StartMode = data.toInt();
@@ -84,7 +82,7 @@ void PageOut::SendCanCmdStatus(quint16 pos)
     emit SendCommand(ADDR,CMD_CAN,msg);
     if (!WaitTestOver(100)) {
         QMessageBox::warning(this,tr("警告"),w,QMessageBox::Ok);
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageOut Error:Time out\n");
+        emit SendCommand(ADDR,CMD_DEBUG,"Time out error:PageOut\n");
     }
 }
 

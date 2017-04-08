@@ -33,6 +33,7 @@ void PageLvs::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -64,7 +65,7 @@ void PageLvs::InitSettings()
         ui->BoxPowerMin->setValue(temp.at(4).toDouble());
         ui->BoxPowerMax->setValue(temp.at(5).toDouble());
     }
-
+    qDebug()<<QTime::currentTime().toString()<<"PageLvs read OK";
 }
 
 void PageLvs::SaveSettings()
@@ -77,6 +78,8 @@ void PageLvs::SaveSettings()
     temp.append(QString::number(ui->BoxPowerMin->value()));
     temp.append(QString::number(ui->BoxPowerMax->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageLvs save OK";
 }
 
 void PageLvs::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -294,8 +297,4 @@ void PageLvs::showEvent(QShowEvent *)
     InitSettings();
 }
 
-void PageLvs::hideEvent(QHideEvent *)
-{
-    SaveSettings();
-}
 /*********************************END OF FILE**********************************/

@@ -103,8 +103,6 @@ void WinData::BtnJudge(int id)
   */
 void WinData::SqlInit()
 {
-    qDebug()<<QTime::currentTime().toString()<<"连接数据库";
-
     QFile file(SQL_PATH);
     if (!file.exists()) {
         file.open(QIODevice::ReadWrite);
@@ -113,7 +111,7 @@ void WinData::SqlInit()
     db = QSqlDatabase::addDatabase("QSQLITE");
     db.setDatabaseName(SQL_PATH);
     if (!db.open()) {
-        qDebug()<<QTime::currentTime().toString()<<"连接数据库Error";
+        qDebug()<<QTime::currentTime().toString()<<"Sql Error";
         return;
     }
 
@@ -128,8 +126,6 @@ void WinData::SqlInit()
     model->setTable("TestData");
     model->setEditStrategy(QSqlTableModel::OnManualSubmit);
     ui->TabTestData->setModel(model);
-
-    qDebug()<<QTime::currentTime().toString()<<"连接数据库OK";
 }
 /**
   * @brief  Initializes the data
@@ -138,8 +134,6 @@ void WinData::SqlInit()
   */
 void WinData::SqlRead()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取数据库";
-
     ui->DateEdit2->setDate(QDate::currentDate());
     ui->TabDetail->setRowCount(0);
     SqlQuery(tr("总数"));
@@ -163,7 +157,7 @@ void WinData::SqlRead()
     ui->TextHistogram->setValues(v);
     ui->TextHistogram->update();
 
-    qDebug()<<QTime::currentTime().toString()<<"读取数据库OK";
+    qDebug()<<QTime::currentTime().toString()<<"WinData read OK";
 }
 /**
   * @brief  Initializes the item data

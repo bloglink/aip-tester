@@ -18,8 +18,6 @@ void UdpClient::Quit()
 
 void UdpClient::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取UDP网络配置";
-
     QDir dir("./config");
     dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
     dir.setSorting(QDir::Size | QDir::Reversed);
@@ -39,7 +37,6 @@ void UdpClient::InitSettings()
     Number = g_ini->value("UserNumber").toString();
     if (Number.isEmpty())
         Number = g_ini->value("Number","168912000X").toString();
-    qDebug()<<QTime::currentTime().toString()<<"读取UDP网络配置OK";
 }
 
 void UdpClient::SaveSettings()

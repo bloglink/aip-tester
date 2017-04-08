@@ -17,7 +17,6 @@ SqlClient::SqlClient(QObject *parent) : QObject(parent)
 
 void SqlClient::DeviceOpen()
 {
-    qDebug()<<QTime::currentTime().toString()<<"打开数据库";
     QFile file(SQL_PATH);
     if (!file.exists()) {
         file.open(QIODevice::ReadWrite);
@@ -26,10 +25,8 @@ void SqlClient::DeviceOpen()
 
     db = QSqlDatabase::addDatabase("QSQLITE","SQL");
     db.setDatabaseName(SQL_PATH);
-    if(db.open())
-        qDebug()<<QTime::currentTime().toString()<<"打开数据库OK";
-    else
-        qDebug()<<QTime::currentTime().toString()<<"打开数据库Error";
+    if(!db.open())
+        qDebug()<<QTime::currentTime().toString()<<"SQL Error";
 
     QSqlQuery query(db);
     query.prepare("select count(*) from sqlite_master where type='table' and name='TestData'");

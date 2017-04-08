@@ -35,11 +35,11 @@ signals:
 private slots:
     void InitWindows(void);
     void InitButtons(void);
-    void JudgeButtons(int id);
-    void JudgeItemButtons(int id);
+    void ReadButtons(int id);
+    void ReadItemButtons(int id);
     void AddTestItem(int id);
     void InitMotorTypes(void);
-    void AddMotorTypes(QString name);
+    void CopySettings(QString name);
     void ReadMotorTypes(QString name);
     void InitAvailableItems(void);
     void InitSettings(void);
@@ -59,7 +59,6 @@ private slots:
     QStringList EnableItems(void);
 
     virtual void showEvent(QShowEvent *);
-    virtual void hideEvent(QHideEvent *);
 private:
     QButtonGroup *btnGroup;
     QButtonGroup *itemButtons;

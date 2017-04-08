@@ -34,7 +34,7 @@ signals:
 private slots:
     void InitWindows(void);
     void InitButtons(void);
-    void JudgeButtons(int win);
+    void ReadButtons(int win);
     void InitSettings(void);
     void SaveSettings(void);
     void InitItem(QByteArray msg);
@@ -50,7 +50,6 @@ private slots:
     void ClickItem(int r, int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray dataA);
     void showEvent(QShowEvent *);
-    void hideEvent(QHideEvent *);
 private:
     QTimer *timer;
     QList<Waveform *>wave;

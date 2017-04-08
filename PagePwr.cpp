@@ -102,6 +102,7 @@ void PagePwr::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -218,7 +219,6 @@ void PagePwr::SaveSettings()
     for (int i=0; i<Grade.size(); i++)
         temp.append(Grade.at(i)->text());
     set->setValue("Grade",(temp.join(" ").toUtf8()));
-
 }
 
 void PagePwr::ItemClick(int r, int c)
@@ -250,7 +250,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         SendCanCmdStatus();
         if (!WaitTimeOut(100)) {
             QMessageBox::warning(this,tr("警告"),tr("功率板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"Check PagePwr Error:Time out\n");
+            emit SendCommand(ADDR,CMD_DEBUG,"Time out Error:PagePwr\n");
         }
         Mode = PWR_FREE;
         break;
@@ -555,8 +555,4 @@ void PagePwr::showEvent(QShowEvent *)
     InitSettings();
 }
 
-void PagePwr::hideEvent(QHideEvent *)
-{
-    SaveSettings();
-}
 /*********************************END OF FILE**********************************/

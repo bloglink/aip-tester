@@ -16,7 +16,6 @@ CanClient::CanClient(QObject *parent) : QObject(parent)
 
 void CanClient::DeviceOpen()
 {
-    qDebug()<<QTime::currentTime().toString()<<"打开CAN口";
 #ifdef __arm__
     struct sockaddr_can     addr;
     struct ifreq            ifr;
@@ -52,8 +51,6 @@ void CanClient::DeviceOpen()
     timer = new QTimer(this);
     connect(timer,SIGNAL(timeout()),this,SLOT(readAll()));
     timer->start(50);
-
-    qDebug()<<QTime::currentTime().toString()<<"打开CAN口OK";
 }
 
 void CanClient::DeviceQuit()

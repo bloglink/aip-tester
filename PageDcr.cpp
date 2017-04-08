@@ -142,7 +142,6 @@ void PageDcr::ReadButtons(int id)
 
 void PageDcr::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取电阻配置";
     //当前使用的测试项目
     QString t = QString("./config/%1.ini").arg(CurrentSettings());
     QSettings *ini = new QSettings(t,QSettings::IniFormat);
@@ -195,12 +194,11 @@ void PageDcr::InitSettings()
     temp = (ini->value("Offset","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
-    qDebug()<<QTime::currentTime().toString()<<"读取电阻配置OK";
+    qDebug()<<QTime::currentTime().toString()<<"PageDcr read OK";
 }
 
 void PageDcr::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"电阻保存";
     //当前使用的测试项目
     QString t = QString("./config/%1.ini").arg(CurrentSettings());
     QSettings *ini = new QSettings(t,QSettings::IniFormat);
@@ -252,7 +250,8 @@ void PageDcr::SaveSettings()
     for (int i=0; i<Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset",(temp.join(" ").toUtf8()));
-    qDebug()<<QTime::currentTime().toString()<<"电阻保存OK";
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageDcr save OK";
 }
 
 void PageDcr::AutoCalculateMinAndMax()
@@ -325,7 +324,7 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         SendCanCmdStatus();
         if (!WaitTimeOut(10)) {
             QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"PageDcr Error:Time out\n");
+            emit SendCommand(ADDR,CMD_DEBUG,"Time out error:PageDcr\n");
         }
         Mode = DCR_FREE;
         break;

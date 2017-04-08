@@ -47,6 +47,7 @@ void PageLck::BtnJudge(int id)
         ui->BtnSample->setText(QString("采样"));
         break;
     case Qt::Key_2:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -81,6 +82,7 @@ void PageLck::InitSettings()
     ui->BoxFreq->setValue(set->value("Freq","1").toDouble());
     ui->BoxCurr->setValue(set->value("Current","0.001").toDouble());
     ui->BoxPower->setValue(set->value("Power","1").toDouble());
+    qDebug()<<QTime::currentTime().toString()<<"PageLck read OK";
 }
 
 void PageLck::SaveSettings()
@@ -97,6 +99,8 @@ void PageLck::SaveSettings()
     set->setValue("Freq",QString::number(ui->BoxFreq->value()));
     set->setValue("Current",QString::number(ui->BoxCurr->value()));
     set->setValue("Power",QString::number(ui->BoxPower->value()));
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageLck save OK";
 }
 
 void PageLck::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -347,10 +351,5 @@ void PageLck::Delay(int ms)
 void PageLck::showEvent(QShowEvent *)
 {
     InitSettings();
-}
-
-void PageLck::hideEvent(QHideEvent *)
-{
-    SaveSettings();
 }
 /*********************************END OF FILE**********************************/

@@ -8,7 +8,6 @@ WinBack::WinBack(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitSettings();
 }
 
 WinBack::~WinBack()
@@ -115,6 +114,8 @@ void WinBack::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        SaveSettings();
+        Testing = false;
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
@@ -221,6 +222,7 @@ void WinBack::InitSettings()
     temp = ini->value("KIMP","1024").toString().split(" ");
     for (int i=0; i<qMin(temp.size(),BoxInr.size()); i++)
         BoxImp.at(i)->setValue(temp.at(i).toInt());
+    qDebug()<<QTime::currentTime().toString()<<"WinBack read OK";
 }
 
 void WinBack::SaveSettings()
@@ -260,6 +262,8 @@ void WinBack::SaveSettings()
     for (int i=0; i<BoxImp.size(); i++)
         temp.append(QString::number(BoxImp.at(i)->value()));
     ini->setValue("KIMP",temp.join(" "));
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"WinBack save OK";
 }
 
 void WinBack::ClickItem(int r, int c)
@@ -549,10 +553,4 @@ void WinBack::showEvent(QShowEvent *)
 {
     InitSettings();
     Testing = true;
-}
-
-void WinBack::hideEvent(QHideEvent *)
-{
-    SaveSettings();
-    Testing = false;
 }

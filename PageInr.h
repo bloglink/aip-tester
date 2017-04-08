@@ -62,8 +62,6 @@ private slots:
     void Delay(int ms);
     QString CurrentSettings(void);
     virtual void showEvent(QShowEvent*);
-    virtual void hideEvent(QHideEvent*);
-
 private:
     QSettings *set;
 

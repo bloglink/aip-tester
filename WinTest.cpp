@@ -59,16 +59,18 @@ void WinTest::InitButtons()
     btnGroup->addButton(ui->BtnWinHome,Qt::Key_0);
     btnGroup->addButton(ui->BtnWinType,Qt::Key_1);
     btnGroup->addButton(ui->BtnCmdStart,Qt::Key_3);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
-void WinTest::JudgeButtons(int win)
+void WinTest::ReadButtons(int win)
 {
     switch (win) {
     case Qt::Key_0:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,"WinType");
         break;
     case Qt::Key_3:
@@ -87,8 +89,6 @@ void WinTest::JudgeButtons(int win)
 
 void WinTest::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取测试配置";
-
     QSettings *g_settings = new QSettings(INI_PATH,QSettings::IniFormat);
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
@@ -122,21 +122,20 @@ void WinTest::InitSettings()
         ui->LabelWireColor8->setStyleSheet(QString("background-color:%1").arg(WireColor.at(7)));
     }
 
-    qDebug()<<QTime::currentTime().toString()<<"读取测试配置OK";
+    qDebug()<<QTime::currentTime().toString()<<"WinTest read OK";
 }
 
 void WinTest::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"保存测试配置";
-
     QSettings *settings_g = new QSettings(INI_PATH,QSettings::IniFormat);
     settings_g->setIniCodec("GB18030");
     settings_g->beginGroup("GLOBAL");
 
     int width = ui->TabTest->columnWidth(1);
     settings_g->setValue("Width",width);
+    system("sync");
 
-    qDebug()<<QTime::currentTime().toString()<<"保存测试配置OK";
+    qDebug()<<QTime::currentTime().toString()<<"WinTest save OK";
 }
 
 void WinTest::ShowItem(QString item)
@@ -332,8 +331,4 @@ void WinTest::showEvent(QShowEvent *)
     emit SendCommand(ADDR,CMD_INIT,NULL);
 }
 
-void WinTest::hideEvent(QHideEvent *)
-{
-    SaveSettings();
-}
 /*********************************END OF FILE**********************************/

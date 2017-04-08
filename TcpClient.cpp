@@ -33,7 +33,6 @@ TcpClient::TcpClient(QObject *parent) : QTcpSocket(parent)
 void TcpClient::TcpInit()
 {
     count = 0;
-    qDebug()<<QTime::currentTime().toString()<<"读取TCP网络配置";
     QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
@@ -47,7 +46,6 @@ void TcpClient::TcpInit()
     InitString.append(getHardwareAddress());
     InitString.append(" ");
     InitString.append(v);
-    qDebug()<<QTime::currentTime().toString()<<"读取TCP网络配置OK";
 
     this->connectToHost(h, 6000);
     timer->start(10000);

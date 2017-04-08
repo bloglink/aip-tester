@@ -10,7 +10,6 @@ SerialPort::SerialPort(QObject *parent) : QObject(parent)
 
 void SerialPort::OpenSerial()
 {
-    qDebug()<<QTime::currentTime().toString()<<"初始化串口";
     if (com == NULL)
         com = new QSerialPort("/dev/ttyS3",this);
     if (com->isOpen())
@@ -25,7 +24,6 @@ void SerialPort::OpenSerial()
         com->setRequestToSend(false);
         timer->start(50);
     }
-    qDebug()<<QTime::currentTime().toString()<<"初始化串口OK";
 }
 
 void SerialPort::CloseSerial()

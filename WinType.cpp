@@ -131,7 +131,7 @@ void WinType::InitButtons()
     btnGroup->addButton(ui->BtnRead,Qt::Key_2);
     btnGroup->addButton(ui->BtnCheck,Qt::Key_3);
     btnGroup->addButton(ui->BtnConfExit,Qt::Key_4);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(JudgeButtons(int)));
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 
     connect(ui->BoxType,SIGNAL(currentIndexChanged(int)),this,SLOT(ChangeMotorTypes(int)));
 
@@ -152,17 +152,17 @@ void WinType::InitButtons()
     itemButtons->addButton(ui->BtnItemLvs,0x09);
     itemButtons->addButton(ui->BtnItemLck,0x0A);
     itemButtons->addButton(ui->BtnItemDelete,Qt::Key_0);
-    connect(itemButtons,SIGNAL(buttonClicked(int)),this,SLOT(JudgeItemButtons(int)));
+    connect(itemButtons,SIGNAL(buttonClicked(int)),this,SLOT(ReadItemButtons(int)));
     for (int i=1; i<itemButtons->buttons().size()-1; i++) {
         itemButtons->buttons().at(i)->hide();
     }
 }
 
-void WinType::JudgeButtons(int id)
+void WinType::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        AddMotorTypes(ui->EditTypeName->text());
+        CopySettings(ui->EditTypeName->text());
         ReadMotorTypes(ui->EditTypeName->text());
         InitMotorTypes();
         InitAvailableItems();
@@ -181,6 +181,7 @@ void WinType::JudgeButtons(int id)
         QuerySettings();
         break;
     case Qt::Key_4:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -188,7 +189,7 @@ void WinType::JudgeButtons(int id)
     }
 }
 
-void WinType::JudgeItemButtons(int id)
+void WinType::ReadItemButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -274,7 +275,7 @@ void WinType::InitMotorTypes()
     }
 }
 
-void WinType::AddMotorTypes(QString name)
+void WinType::CopySettings(QString name)
 {
     if (name.isEmpty())
         return;
@@ -314,8 +315,6 @@ void WinType::InitAvailableItems()
 
 void WinType::InitSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"读取电机型号";
-
     ui->TextTypeShow->setText(CurrentSettings());
 
     QStringList temp;
@@ -344,13 +343,11 @@ void WinType::InitSettings()
 
     ui->BoxTestNG->setCurrentIndex(ini->value("TestNG","1").toInt());
     ui->BoxType->setCurrentIndex(ini->value("WinType","0").toInt());
-    qDebug()<<QTime::currentTime().toString()<<"读取电机型号OK";
+    qDebug()<<QTime::currentTime().toString()<<"WinType read OK";
 }
 
 void WinType::SaveSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"保存电机型号";
-
     QStringList temp;
     //当前使用的测试项目
     QString n = QString("./config/%1.ini").arg(CurrentSettings());
@@ -377,8 +374,10 @@ void WinType::SaveSettings()
 
     ini->setValue("TestNG",QString::number(ui->BoxTestNG->currentIndex()));
     ini->setValue("WinType",QString::number(ui->BoxType->currentIndex()));
-    QProcess::execute("sync");
-    qDebug()<<QTime::currentTime().toString()<<"保存电机型号OK";
+    ini->sync();
+    system("sync");
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"WinType save OK";
 }
 
 void WinType::SelectWireColor(int row, int column)
@@ -471,7 +470,6 @@ void WinType::QuerySettings()
     }
 }
 
-
 QString WinType::CurrentSettings()
 {
     QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
@@ -501,8 +499,4 @@ void WinType::showEvent(QShowEvent *)
     InitSettings();
 }
 
-void WinType::hideEvent(QHideEvent *)
-{
-    SaveSettings();
-}
 /*********************************END OF FILE**********************************/

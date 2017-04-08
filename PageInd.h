@@ -79,7 +79,6 @@ private slots:
     void Delay(int ms);
     QString CurrentSettings(void);
     void showEvent(QShowEvent *);
-    void hideEvent(QHideEvent *);
 private:
     QSettings *set;
     quint16 TimeOut;

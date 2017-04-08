@@ -33,6 +33,7 @@ void PageInr::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        SaveSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     default:
@@ -55,6 +56,7 @@ void PageInr::InitSettings()
         ui->BoxTime->setValue(temp.at(3).toInt());
         ui->BoxOffset->setValue(temp.at(4).toInt());
     }
+    qDebug()<<QTime::currentTime().toString()<<"PageInr read OK";
 }
 
 void PageInr::SaveSettings()
@@ -66,6 +68,8 @@ void PageInr::SaveSettings()
     temp.append(QString::number(ui->BoxTime->value()));
     temp.append(QString::number(ui->BoxOffset->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
+    system("sync");
+    qDebug()<<QTime::currentTime().toString()<<"PageInr save OK";
 }
 
 void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
@@ -81,7 +85,7 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         SendCanCmdStatus();
         if (!WaitTimeOut(10)) {
             QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr Error:Time out\n");
+            emit SendCommand(ADDR,CMD_DEBUG,"Time outPage Error:Inr\n");
         }
         Mode = INR_FREE;
         break;
@@ -321,10 +325,5 @@ QString PageInr::CurrentSettings()
 void PageInr::showEvent(QShowEvent *)
 {
     InitSettings();
-}
-
-void PageInr::hideEvent(QHideEvent *)
-{
-    SaveSettings();
 }
 /*********************************END OF FILE**********************************/
