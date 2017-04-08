@@ -163,17 +163,16 @@ void WinType::ReadButtons(int id)
     switch (id) {
     case Qt::Key_0:
         CopySettings(ui->EditTypeName->text());
-        ReadMotorTypes(ui->EditTypeName->text());
-        InitMotorTypes();
-        InitAvailableItems();
+        ReadAllSettings();
+        ReadAvailableItems();
         InitSettings();
         break;
     case Qt::Key_1:
         RemoveSettings();
-        InitMotorTypes();
+        ReadAllSettings();
         break;
     case Qt::Key_2:
-        ReadSettings();
+        ChangeSettings();
         InitSettings();
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
@@ -253,7 +252,7 @@ void WinType::ChangeMotorTypes(int id)
     }
 }
 
-void WinType::InitMotorTypes()
+void WinType::ReadAllSettings()
 {
     QDir dir("./config");
     dir.setFilter(QDir::Files | QDir::Hidden | QDir::NoSymLinks);
@@ -275,34 +274,9 @@ void WinType::InitMotorTypes()
     }
 }
 
-void WinType::CopySettings(QString name)
-{
-    if (name.isEmpty())
-        return;
-    QString c = ui->TextTypeShow->text();
-    if (name.isEmpty())
-        return;
-    for (int i=0; i<ui->TabFile->rowCount(); i++) {
-        if (ui->TabFile->item(i,0)->text() == name)
-            return;
-    }
-    QString Source = QString("./config/%1.ini").arg(c);
-    QString Target = QString("./config/%1.ini").arg(name);
-    QFile::copy(Source,Target);
-}
 
-void WinType::ReadMotorTypes(QString name)
-{
-    if (name.isEmpty())
-        return;
-    name.append(".ini");
-    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    ini->setIniCodec("GB18030");
-    ini->beginGroup("GLOBAL");
-    ini->setValue("FileInUse",name);
-}
 
-void WinType::InitAvailableItems()
+void WinType::ReadAvailableItems()
 {
     //可使用的测试项目
     QStringList temp = EnableItems();
@@ -427,7 +401,26 @@ void WinType::JumptoSetWindows()
         emit SendCommand(ADDR,CMD_JUMP,"PageLck");
 }
 
-
+void WinType::CopySettings(QString name)
+{
+    if (name.isEmpty())
+        return;
+    QString c = ui->TextTypeShow->text();
+    if (name.isEmpty())
+        return;
+    for (int i=0; i<ui->TabFile->rowCount(); i++) {
+        if (ui->TabFile->item(i,0)->text() == name)
+            return;
+    }
+    QString Source = QString("./config/%1.ini").arg(c);
+    QString Target = QString("./config/%1.ini").arg(name);
+    QFile::copy(Source,Target);
+    name.append(".ini");
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("GLOBAL");
+    ini->setValue("FileInUse",name);
+}
 
 void WinType::RemoveSettings()
 {
@@ -440,9 +433,8 @@ void WinType::RemoveSettings()
     QFile::remove(Target);
 }
 
-void WinType::ReadSettings()
+void WinType::ChangeSettings()
 {
-    qDebug()<<QTime::currentTime().toString()<<"调入电机型号";
     if (ui->TabFile->currentRow() < 0) {
         qDebug()<<QTime::currentTime().toString()<<"调入电机型号Error";
         return;
@@ -453,7 +445,7 @@ void WinType::ReadSettings()
     ini->setIniCodec("GB18030");
     ini->beginGroup("GLOBAL");
     ini->setValue("FileInUse",t);
-    qDebug()<<QTime::currentTime().toString()<<"调入电机型号OK";
+    system("sync");
 }
 
 void WinType::QuerySettings()
@@ -494,8 +486,8 @@ QStringList WinType::EnableItems()
 
 void WinType::showEvent(QShowEvent *)
 {
-    InitMotorTypes();
-    InitAvailableItems();
+    ReadAllSettings();
+    ReadAvailableItems();
     InitSettings();
 }
 

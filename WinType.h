@@ -38,10 +38,9 @@ private slots:
     void ReadButtons(int id);
     void ReadItemButtons(int id);
     void AddTestItem(int id);
-    void InitMotorTypes(void);
+    void ReadAllSettings(void);
     void CopySettings(QString name);
-    void ReadMotorTypes(QString name);
-    void InitAvailableItems(void);
+    void ReadAvailableItems(void);
     void InitSettings(void);
     void SaveSettings(void);
     void SelectWireColor(int row,int column);
@@ -50,7 +49,7 @@ private slots:
     void JumptoSetWindows(void);
 
     void RemoveSettings(void);
-    void ReadSettings(void);
+    void ChangeSettings(void);
     void QuerySettings(void);
     void ChangeMotorTypes(int id);
 
