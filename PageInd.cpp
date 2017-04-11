@@ -443,17 +443,15 @@ void PageInd::ReadCanCmdOffset(QByteArray msg)
     if (number >0 )
         number--;
     Resultunion  Result;
-    double v;
     if (quint8(msg.at(3) == 0x00)) {
         Result.dat[0] = quint8(msg.at(4));
         Result.dat[1] = quint8(msg.at(5));
         Result.dat[2] = quint8(msg.at(6));
         Result.dat[3] = quint8(msg.at(7));
         if (Unit.at(number)->currentText() == "mH")
-            v = Result.Result/1000;
+            Offset.at(number)->setValue(Result.Result/1000);
         else
-            v = Result.Result;
-        Offset.at(number)->setValue(v);
+            Offset.at(number)->setValue(Result.Result);
     }
 }
 

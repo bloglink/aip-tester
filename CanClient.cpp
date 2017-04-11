@@ -12,6 +12,8 @@
 CanClient::CanClient(QObject *parent) : QObject(parent)
 {
     s = 0;
+    timer = new QTimer(this);
+    connect(timer,SIGNAL(timeout()),this,SLOT(readAll()));
 }
 
 void CanClient::DeviceOpen()
@@ -48,8 +50,6 @@ void CanClient::DeviceOpen()
     if (ret <= 0)
         return;
 #endif
-    timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(readAll()));
     timer->start(50);
 }
 
@@ -91,7 +91,6 @@ bool CanClient::DeviceRead()
     if (s <= 0)
         return false;
 #ifdef __arm__
-    int nbytes;
     int ret;
     fd_set rdfds;
     struct timeval tv;
@@ -105,8 +104,10 @@ bool CanClient::DeviceRead()
         return false;
     }
     if (FD_ISSET(s, &rdfds)){
-        nbytes = read(s, &TxMsg, sizeof(struct can_frame));
-        return true;
+        if (read(s, &TxMsg, sizeof(struct can_frame)) != sizeof(struct can_frame))
+            return false;
+        else
+            return true;
     }
 #else
     if (CAN_GetReceiveCount(s,0) <= 0)

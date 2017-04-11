@@ -19,6 +19,10 @@ Waveform::Waveform(QWidget *parent) : QLabel(parent)
     isTest = false;
     isItem = false;
     isBlock = false;
+    WaveLine = 0;
+    WaveGroup = 0;
+    Block0 = 5;
+    Block1 = 395;
     for (int i=0; i<MAX_WAVE; i++) {
         WaveBytes.append("0000");
         WaveTests.append("0000");
