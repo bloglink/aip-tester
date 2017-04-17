@@ -487,7 +487,7 @@ void WinHome::StartTest(QByteArray station)
     emit SendCommand(ADDR,CMD_STATUS,"ready");
     if (CurrentReStartMode() && HomeMode != HOME_FREE) {
         QTimer *timer = new QTimer(this);
-        timer->singleShot(500, this, SLOT(ReStartTest()));
+        timer->singleShot(2000, this, SLOT(ReStartTest()));
     }
     HomeMode = HOME_FREE;
 }

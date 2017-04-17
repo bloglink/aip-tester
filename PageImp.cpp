@@ -1,13 +1,11 @@
-/**
-  ******************************************************************************
-  * @file    PageImp.cpp
-  * @author  link
-  * @version 2.1.0.5
-  * @date    2017-03-06
-  * @brief   匝间测试模块
-  ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170417
+ * author:      zhaonanlin
+ * brief:       匝间测试模块
+*******************************************************************************/
 #include "PageImp.h"
 #include "ui_PageImp.h"
 
@@ -28,98 +26,98 @@ PageImp::~PageImp()
 
 void PageImp::InitWindows()
 {
-#if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
-    ui->TabParams->horizontalHeader()->setResizeMode(0,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(3,50);
-    ui->TabParams->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(9,400);
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+    ui->TabParams->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(3, 50);
+    ui->TabParams->horizontalHeader()->setResizeMode(4, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(5, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(6, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(7, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(9, 400);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(0,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(3,50);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(9,400);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(3, 50);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->setColumnWidth(9, 400);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
     input = new PageNum(this);
     QStringList t;
-    t <<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11"<<"12";
+    t  << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12";
     input->BtnInit(t);
-    connect(input,SIGNAL(ItemChange(QString)),this,SLOT(ItemChange(QString)));
+    connect(input, SIGNAL(ItemChange(QString)), this, SLOT(ItemChange(QString)));
     input->hide();
     ui->WindgetSetImp->setCurrentIndex(0);
 
-    connect(ui->LabelWave,SIGNAL(BlockClick(int)),this,SLOT(BlockClick(int)));
-    connect(ui->BoxStart,SIGNAL(valueChanged(int)),this,SLOT(BlockClick(int)));
-    connect(ui->BoxEnd,SIGNAL(valueChanged(int)),this,SLOT(BlockClick(int)));
+    connect(ui->LabelWave, SIGNAL(BlockClick(int)), this, SLOT(BlockClick(int)));
+    connect(ui->BoxStart, SIGNAL(valueChanged(int)), this, SLOT(BlockClick(int)));
+    connect(ui->BoxEnd, SIGNAL(valueChanged(int)), this, SLOT(BlockClick(int)));
 
     ui->TabParams->setRowCount(MAX_ROW);
-    for (int row=0; row<MAX_ROW; row++) {
+    for (int row = 0; row  <  MAX_ROW; row++) {
         Enable.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row,0,Enable.at(row));
-        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabParams->setItem(row, 0, Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         Enable.at(row)->setTextAlignment(Qt::AlignCenter);
 
         Terminal1.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row,1,Terminal1.at(row));
-        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabParams->setItem(row, 1, Terminal1.at(row));
+        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
 
         Terminal2.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row,2,Terminal2.at(row));
-        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabParams->setItem(row, 2, Terminal2.at(row));
+        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
 
         Volt.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,3,Volt.at(row));
-        Volt.at(row)->setMaximum(3000);
+        ui->TabParams->setCellWidget(row, 3, Volt.at(row));
+        Volt.at(row)->setMaximum(5000);
         Volt.at(row)->setAlignment(Qt::AlignHCenter);
         Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Volt.at(row)->setDecimals(0);
 
         Time.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,4,Time.at(row));
+        ui->TabParams->setCellWidget(row, 4, Time.at(row));
         Time.at(row)->setMaximum(9999);
         Time.at(row)->setAlignment(Qt::AlignHCenter);
         Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Time.at(row)->setDecimals(0);
 
         Flut.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,5,Flut.at(row));
+        ui->TabParams->setCellWidget(row, 5, Flut.at(row));
         Flut.at(row)->setMaximum(9999);
         Flut.at(row)->setAlignment(Qt::AlignHCenter);
         Flut.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Flut.at(row)->setDecimals(0);
 
         Phase.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,6,Phase.at(row));
+        ui->TabParams->setCellWidget(row, 6, Phase.at(row));
         Phase.at(row)->setMaximum(9999);
         Phase.at(row)->setAlignment(Qt::AlignHCenter);
         Phase.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Phase.at(row)->setDecimals(0);
 
         Area.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,7,Area.at(row));
+        ui->TabParams->setCellWidget(row, 7, Area.at(row));
         Area.at(row)->setMaximum(9999);
         Area.at(row)->setAlignment(Qt::AlignHCenter);
         Area.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Area.at(row)->setDecimals(0);
 
         Diff.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,8,Diff.at(row));
+        ui->TabParams->setCellWidget(row, 8, Diff.at(row));
         Diff.at(row)->setMaximum(9999);
         Diff.at(row)->setAlignment(Qt::AlignHCenter);
         Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -131,10 +129,10 @@ void PageImp::InitWindows()
         VoltTest.append(0);
 
         WaveImp.append(new Waveform(this));
-        ui->TabParams->setCellWidget(row,9,WaveImp.at(row));
+        ui->TabParams->setCellWidget(row, 9, WaveImp.at(row));
     }
     station = WIN_ID_OUT13;
-    connect(Volt.at(0),SIGNAL(editingFinished()),this,SLOT(AutoChangeVolt()));
+    connect(Volt.at(0), SIGNAL(editingFinished()), this, SLOT(AutoChangeVolt()));
     AvrCount = 0;
     ImpMode = IMP_FREE;
 }
@@ -142,23 +140,25 @@ void PageImp::InitWindows()
 void PageImp::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->BtnSampleImp,Qt::Key_0);
-    btnGroup->addButton(ui->BtnExitWave,Qt::Key_1);
-    btnGroup->addButton(ui->BtnExitImp,Qt::Key_2);
-    btnGroup->addButton(ui->BtnFrequcy1,Qt::Key_3);
-    btnGroup->addButton(ui->BtnFrequcy2,Qt::Key_4);
-    btnGroup->addButton(ui->BtnFrequcy3,Qt::Key_5);
-    btnGroup->addButton(ui->BtnAvarage,Qt::Key_6);
-    btnGroup->addButton(ui->BtnExit,Qt::Key_7);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    btnGroup->addButton(ui->BtnSampleImp, Qt::Key_0);
+    btnGroup->addButton(ui->BtnExitWave, Qt::Key_1);
+    btnGroup->addButton(ui->BtnExitImp, Qt::Key_2);
+    btnGroup->addButton(ui->BtnFrequcy1, Qt::Key_3);
+    btnGroup->addButton(ui->BtnFrequcy2, Qt::Key_4);
+    btnGroup->addButton(ui->BtnFrequcy3, Qt::Key_5);
+    btnGroup->addButton(ui->BtnAvarage, Qt::Key_6);
+    btnGroup->addButton(ui->BtnExit, Qt::Key_7);
+    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
-void PageImp::BtnJudge(int id)
+void PageImp::ReadButtons(int id)
 {
+    if (ImpMode != IMP_FREE)
+        return;
     switch (id) {
     case Qt::Key_0: //自动采样
         InitStation();
-        if (ui->BoxStation->currentIndex() == 0) {
+        if (ui->BoxStation->currentIndex()  ==  0) {
             ImpMode = IMP_SAMPLE;
             SendCanCmdConfig();
             SendCanCmdSampleAuto();
@@ -174,7 +174,7 @@ void PageImp::BtnJudge(int id)
         break;
     case Qt::Key_2: //退出
         SaveSettings();
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     case Qt::Key_3: //减频采样
         ImpMode = IMP_SAMPLE;
@@ -185,14 +185,14 @@ void PageImp::BtnJudge(int id)
         SendCanCmdSample(ui->TabParams->currentRow());
         AvrCount = 0;
         break;
-    case Qt::Key_4://定频采样
+    case Qt::Key_4: //定频采样
         ImpMode = IMP_SAMPLE;
         InitStation();
         SendCanCmdConfig();
         SendCanCmdSample(ui->TabParams->currentRow());
         AvrCount = 0;
         break;
-    case Qt::Key_5://加频采样
+    case Qt::Key_5: //加频采样
         ImpMode = IMP_SAMPLE;
         InitStation();
         if (Freq[ui->TabParams->currentRow()] != 14)
@@ -210,7 +210,7 @@ void PageImp::BtnJudge(int id)
         CalculateAvarageWave();
         break;
     case Qt::Key_7:
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     default:
         break;
@@ -219,164 +219,164 @@ void PageImp::BtnJudge(int id)
 
 void PageImp::InitStation()
 {
-    if (ui->BoxStation->currentIndex() == 0)
+    if (ui->BoxStation->currentIndex()  ==  0)
         station = WIN_ID_OUT13;
-    if (ui->BoxStation->currentIndex() == 1)
+    if (ui->BoxStation->currentIndex()  ==  1)
         station = WIN_ID_OUT14;
 }
 
 void PageImp::InitSettings()
 {
-    QSettings *global = new QSettings(INI_PATH,QSettings::IniFormat);
+    QSettings *global = new QSettings(INI_PATH, QSettings::IniFormat);
     global->setIniCodec("GB18030");
     global->beginGroup("GLOBAL");
-    FileInUse = global->value("FileInUse",INI_DEFAULT).toString();
+    FileInUse = global->value("FileInUse", INI_DEFAULT).toString();
     FileInUse.remove(".ini");
 
     //当前使用的测试项目
     QString t = QString("./config/%1.ini").arg(FileInUse);
-    set = new QSettings(t,QSettings::IniFormat);
+    set = new QSettings(t, QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("SetImp");
     QStringList temp;
-    ui->BoxOffset->setChecked(set->value("Offset",true).toBool());
+    ui->BoxOffset->setChecked(set->value("Offset", true).toBool());
     //可用
-    temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (QString(set->value("Enable", "Y Y Y N N N N N").toByteArray())).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
     //端一
-    temp = (set->value("Terminal1","1 2 1 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Terminal1", "1 2 1 4 5 6 7 8").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
     //端二
-    temp = (set->value("Terminal2","2 3 3 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Terminal2", "2 3 3 5 6 7 8 1").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
     //电压
-    temp = (set->value("Volt","500 500 500 500 500 500 500 500").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Volt", "500 500 500 500 500 500 500 500").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Volt.at(row)->setValue(temp.at(row).toDouble());
-    temp = (set->value("VoltTest","500 500 500 500 500 500 500 500").toString().split(" "));
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("VoltTest", "500 500 500 500 500 500 500 500").toString().split(" "));
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         VoltTest[row] = temp.at(row).toInt();
     //次数
-    temp = (set->value("Time","1 1 1 1 1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Time", "1 1 1 1 1 1 1 1").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Time.at(row)->setValue(temp.at(row).toDouble());
     //电晕
-    temp = (set->value("Flut","0 0 0 0 0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Flut", "0 0 0 0 0 0 0 0").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Flut.at(row)->setValue(temp.at(row).toDouble());
     //相位
-    temp = (set->value("Phase","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Phase", "10 10 10 10 10 10 10 10").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Phase.at(row)->setValue(temp.at(row).toDouble());
     //面积
-    temp = (set->value("Area","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Area", "10 10 10 10 10 10 10 10").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Area.at(row)->setValue(temp.at(row).toDouble());
     //差积
-    temp = (set->value("Diff","10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Diff", "10 10 10 10 10 10 10 10").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Diff.at(row)->setValue(temp.at(row).toDouble());
     //频率
-    temp = (set->value("Freq","7 7 7 7 7 7 7 7").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Freq", "7 7 7 7 7 7 7 7").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Freq[row] = temp.at(row).toInt();
     //计算起点
-    temp = (set->value("Block0","5 5 5 5 5 5 5 5").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Block0", "5 5 5 5 5 5 5 5").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Block0[row] = temp.at(row).toInt();
     //计算终点
-    temp = (set->value("Block1","395 395 395 395 395 395 395 395").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Block1", "395 395 395 395 395 395 395 395").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Block1[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
-    for (int row=0; row<qMin(WaveImp.size(),MAX_ROW); row++) {
+    for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
-        w = set->value(ByteL,"1000000000000000").toByteArray();
+        w = set->value(ByteL, "1000000000000000").toByteArray();
         WaveImp.at(row)->WaveBytes[0] = w;
 
         QString ByteR = "WaveImpR"+QString::number(row);
-        w = set->value(ByteR,"1000000000000000").toByteArray();
+        w = set->value(ByteR, "1000000000000000").toByteArray();
         WaveImp.at(row)->WaveBytes[1] = w;
 
         QString T1 = Terminal1.at(row)->text();
         QString T2 = Terminal2.at(row)->text();
         WaveImp.at(row)->WaveItem = QString(tr("匝间%1-%2")).arg(T1).arg(T2).toUtf8();
     }
-    qDebug()<<QTime::currentTime().toString()<<"PageImp read OK";
+    qDebug() << QTime::currentTime().toString() << "PageImp read OK";
 }
 
 void PageImp::SaveSettings()
 {
-    set->setValue("Offset",ui->BoxOffset->isChecked());
+    set->setValue("Offset", ui->BoxOffset->isChecked());
     QStringList temp;
     temp.clear();
-    for (int i=0; i<Enable.size(); i++)
+    for (int i=0; i < Enable.size(); i++)
         temp.append(Enable.at(i)->text());
-    set->setValue("Enable",(temp.join(" ").toUtf8()));
+    set->setValue("Enable", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal1.size(); i++)
+    for (int i=0; i < Terminal1.size(); i++)
         temp.append(Terminal1.at(i)->text());
-    set->setValue("Terminal1",(temp.join(" ").toUtf8()));
+    set->setValue("Terminal1", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal2.size(); i++)
+    for (int i=0; i < Terminal2.size(); i++)
         temp.append(Terminal2.at(i)->text());
-    set->setValue("Terminal2",(temp.join(" ").toUtf8()));
+    set->setValue("Terminal2", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Volt.size(); i++)
+    for (int i=0; i < Volt.size(); i++)
         temp.append(Volt.at(i)->text());
-    set->setValue("Volt",(temp.join(" ").toUtf8()));
+    set->setValue("Volt", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<VoltTest.size(); i++)
+    for (int i=0; i < VoltTest.size(); i++)
         temp.append(QString::number(VoltTest.at(i)));
-    set->setValue("VoltTest",(temp.join(" ").toUtf8()));
+    set->setValue("VoltTest", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Time.size(); i++)
+    for (int i=0; i < Time.size(); i++)
         temp.append(Time.at(i)->text());
-    set->setValue("Time",(temp.join(" ").toUtf8()));
+    set->setValue("Time", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Flut.size(); i++)
+    for (int i=0; i < Flut.size(); i++)
         temp.append(Flut.at(i)->text());
-    set->setValue("Flut",(temp.join(" ").toUtf8()));
+    set->setValue("Flut", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Phase.size(); i++)
+    for (int i=0; i < Phase.size(); i++)
         temp.append(Phase.at(i)->text());
-    set->setValue("Phase",(temp.join(" ").toUtf8()));
+    set->setValue("Phase", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Area.size(); i++)
+    for (int i=0; i < Area.size(); i++)
         temp.append(Area.at(i)->text());
-    set->setValue("Area",(temp.join(" ").toUtf8()));
+    set->setValue("Area", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Diff.size(); i++)
+    for (int i=0; i < Diff.size(); i++)
         temp.append(Diff.at(i)->text());
-    set->setValue("Diff",(temp.join(" ").toUtf8()));
+    set->setValue("Diff", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Freq.size(); i++)
+    for (int i=0; i < Freq.size(); i++)
         temp.append(QString::number(Freq.at(i)));
-    set->setValue("Freq",(temp.join(" ").toUtf8()));
+    set->setValue("Freq", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Block0.size(); i++)
+    for (int i=0; i < Block0.size(); i++)
         temp.append(QString::number(Block0.at(i)));
-    set->setValue("Block0",(temp.join(" ").toUtf8()));
+    set->setValue("Block0", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Block1.size(); i++)
+    for (int i=0; i < Block1.size(); i++)
         temp.append(QString::number(Block1.at(i)));
-    set->setValue("Block1",(temp.join(" ").toUtf8()));
+    set->setValue("Block1", (temp.join(" ").toUtf8()));
 
-    for (int row=0; row<qMin(WaveImp.size(),ui->TabParams->rowCount()); row++) {
+    for (int row=0; row < qMin(WaveImp.size(), ui->TabParams->rowCount()); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
         QString ByteR = "WaveImpR"+QString::number(row);
-        set->setValue(ByteL,WaveImp.at(row)->WaveBytes.at(0));
-        set->setValue(ByteR,WaveImp.at(row)->WaveBytes.at(1));
+        set->setValue(ByteL, WaveImp.at(row)->WaveBytes.at(0));
+        set->setValue(ByteR, WaveImp.at(row)->WaveBytes.at(1));
     }
     system("sync");
-    qDebug()<<QTime::currentTime().toString()<<"PageImp save OK";
+    qDebug() << QTime::currentTime().toString() << "PageImp save OK";
 }
 
-void PageImp::ItemClick(int r, int c)
+void PageImp::ItemClick(int r,  int c)
 {
     switch (c) {
     case 0:
@@ -393,7 +393,7 @@ void PageImp::ItemClick(int r, int c)
         ui->WindgetSetImp->setCurrentIndex(1);
         ui->LabelWave->WaveByteShow(WaveImp.at(r)->WaveByte);
         ui->LabelWave->WaveItemShow(WaveImp.at(r)->WaveItem);
-        ui->LabelWave->WaveBlock(Block0.at(r),Block1.at(r));
+        ui->LabelWave->WaveBlock(Block0.at(r), Block1.at(r));
         ui->BoxStart->setValue(Block0.at(r));
         ui->BoxEnd->setValue(Block1.at(r));
         CurrentWave = r;
@@ -411,17 +411,17 @@ void PageImp::ItemChange(QString msg)
 void PageImp::BlockClick(int x)
 {
     if (x >=200) {
-        ui->LabelWave->WaveBlock(ui->LabelWave->Block0,x);
+        ui->LabelWave->WaveBlock(ui->LabelWave->Block0, x);
         ui->BoxEnd->setValue(x);
         Block1[CurrentWave] = x;
     } else {
-        ui->LabelWave->WaveBlock(x,ui->LabelWave->Block1);
+        ui->LabelWave->WaveBlock(x, ui->LabelWave->Block1);
         ui->BoxStart->setValue(x);
         Block0[CurrentWave] = x;
     }
 }
 
-void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+void PageImp::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 {
     switch (addr) {
     case ADDR:
@@ -435,23 +435,23 @@ void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     }
     switch (cmd) {
     case CMD_CAN:
-        ExcuteCanCmd(addr,msg);
+        ExcuteCanCmd(addr, msg);
         break;
     case CMD_CHECK:
         ImpMode = IMP_INIT;
         SendCanCmdStatus();
         if (!WaitTimeOut(100)) {
-            QMessageBox::warning(this,tr("警告"),tr("匝间板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"Time out error:PageImp\n");
+            QMessageBox::warning(this, tr("警告"), tr("匝间板异常"), QMessageBox::Ok);
+            emit SendCommand(ADDR, CMD_DEBUG, "Time out error:PageImp\n");
         }
         ImpMode = IMP_FREE;
         break;
     case CMD_START:
         ImpMode = IMP_TEST;
-        emit SendCommand(ADDR,CMD_WAVE_HIDE,NULL);
+        emit SendCommand(ADDR, CMD_WAVE_HIDE, NULL);
         SendCanCmdStart(msg.toInt());
         JudgeAll = "OK";
-        if(!WaitTimeOut(100)) {
+        if (!WaitTimeOut(100)) {
             JudgeAll = "NG";
             SendTestItemsAllError();
         }
@@ -475,22 +475,22 @@ void PageImp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     }
 }
 
-void PageImp::ExcuteCanCmd(int id,QByteArray msg)
+void PageImp::ExcuteCanCmd(int id, QByteArray msg)
 {
-    if (ImpMode == IMP_FREE)
+    if (ImpMode  ==  IMP_FREE)
         return;
     TimeOut = 0;
-    if (id == CAN_ID_IMP_WAVE) {
+    if (id  ==  CAN_ID_IMP_WAVE) {
         ReadCanCmdWave(msg);
         return;
     }
-    if (msg.size()==4 && (quint8)msg.at(0)==0x00)
+    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size()==7 && (quint8)msg.at(0)==0x02)
+    if (msg.size() == 7 && (quint8)msg.at(0) == 0x02)
         ReadCanCmdSample(msg);
-    if (msg.size()==5 && (quint8)msg.at(0)==0x03)
+    if (msg.size() == 5 && (quint8)msg.at(0) == 0x03)
         ReadCanCmdWaveStart(msg);
-    if (msg.size()==2 && (quint8)msg.at(0)==0x03 && (quint8)msg.at(1)==0xff)
+    if (msg.size() == 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff)
         ReadCanCmdWaveOk(msg);
 }
 
@@ -499,45 +499,45 @@ void PageImp::InitTestItems()
     Items.clear();
     WaveNumber.clear();
     QStringList n;
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         QStringList s;
-        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-        QString V = Volt.at(qMin(row,Volt.size()))->text();
-        QString C = Flut.at(qMin(row,Flut.size()))->text();
-        QString P = Phase.at(qMin(row,Phase.size()))->text();
-        QString A = Area.at(qMin(row,Area.size()))->text();
-        QString D = Diff.at(qMin(row,Diff.size()))->text();
+        QString T1 = Terminal1.at(qMin(row, Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row, Terminal2.size()))->text();
+        QString V = Volt.at(qMin(row, Volt.size()))->text();
+        QString C = Flut.at(qMin(row, Flut.size()))->text();
+        QString P = Phase.at(qMin(row, Phase.size()))->text();
+        QString A = Area.at(qMin(row, Area.size()))->text();
+        QString D = Diff.at(qMin(row, Diff.size()))->text();
 
         s.append(QString(tr("匝间%1-%2")).arg(T1).arg(T2));
-        if (C.toInt() == 0)
-            s.append(QString("%1V,%2,%3,%4").arg(V).arg(P).arg(A).arg(D));
+        if (C.toInt()  ==  0)
+            s.append(QString("%1V, %2, %3, %4").arg(V).arg(P).arg(A).arg(D));
         else
-            s.append(QString("%1V,%2,%3,%4,%5").arg(V).arg(C).arg(P).arg(A).arg(D));
+            s.append(QString("%1V, %2, %3, %4, %5").arg(V).arg(C).arg(P).arg(A).arg(D));
         s.append(" ");
         s.append(" ");
         Items.append(s.join("@"));
         WaveImp.at(row)->WaveTest.clear();
     }
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
+    for (int row = 0; row < Enable.size(); row++) {
+        if (Enable.at(row)->text()  ==  "Y") {
             n.append(Items.at(row));
             WaveNumber.append(row);
         }
     }
-    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+    emit SendCommand(ADDR, CMD_INIT_ITEM, n.join("\n").toUtf8());
 }
 
 void PageImp::SendTestItemsAllError()
 {
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
+    for (int row = 0; row < Enable.size(); row++) {
+        if (Enable.at(row)->text()  ==  "Y") {
             QStringList s = QString(Items.at(row)).split("@");
-            if (s.at(2) == " ")
+            if (s.at(2)  ==  " ")
                 s[2] = "---";
-            if (s.at(3) == " ")
+            if (s.at(3)  ==  " ")
                 s[3] = "NG";
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
         }
     }
 }
@@ -545,72 +545,72 @@ void PageImp::SendTestItemsAllError()
 void PageImp::SendCanCmdStatus()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x24)<<quint8(0x01)<<quint8(0x00);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x24) << quint8(0x01) << quint8(0x00);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageImp::SendCanCmdSampleAuto()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
+    for (int row=0; row < Enable.size(); row++) {
+        if (Enable.at(row)->text()  ==  "Y")
+            tt += 0x0001 << row;
     }
     quint8 mode = 0x01;
     if (ui->BoxOffset->isChecked())
         mode = 0x04;
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(mode)<<quint8(station)
-      <<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(mode) << quint8(station)
+       << quint8(tt/256) << quint8(tt%256);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageImp::SendCanCmdSample(quint16 t)
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    quint16 tt = 0x0001<<t;
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x02)<<quint8(station)
-      <<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    quint16 tt = 0x0001 << t;
+    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x02) << quint8(station)
+       << quint8(tt/256) << quint8(tt%256);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageImp::SendCanCmdStart(quint8 pos)
 {
     station = pos;
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
+    for (int row=0; row < Enable.size(); row++) {
+        if (Enable.at(row)->text()  ==  "Y")
+            tt += 0x0001 << row;
     }
-    out<<quint16(0x24)<<quint8(0x05)<<quint8(0x01)<<quint8(0x00)<<quint8(station)
-      <<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x00) << quint8(station)
+       << quint8(tt/256) << quint8(tt%256);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageImp::SendCanCmdStop()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x24)<<quint8(0x01)<<quint8(0x02);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x24) << quint8(0x01) << quint8(0x02);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageImp::SendCanCmdConfig()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    for (int row=0; row<Enable.size(); row++) {
+    for (int row=0; row < Enable.size(); row++) {
         int v = 0;
         switch (ImpMode) {
         case IMP_FREE:
@@ -626,13 +626,13 @@ void PageImp::SendCanCmdConfig()
         default:
             break;
         }
-        out<<quint16(0x24)<<quint8(0x08)<<quint8(0x03)<<quint8(row)
-          <<quint8(Terminal1.at(row)->text().toInt())
-         <<quint8(Terminal2.at(row)->text().toInt())
-        <<quint8(v/256)<<quint8(v%256)
-        <<quint8(CalculateGear(row))<<quint8(Freq.at(row));
+        out << quint16(0x24) << quint8(0x08) << quint8(0x03) << quint8(row)
+           << quint8(Terminal1.at(row)->text().toInt())
+          << quint8(Terminal2.at(row)->text().toInt())
+         << quint8(v/256) << quint8(v%256)
+         << quint8(CalculateGear(row)) << quint8(Freq.at(row));
     }
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageImp::SendTestJudge()
@@ -641,7 +641,7 @@ void PageImp::SendTestJudge()
     s.append("匝间");
     s.append(FileInUse);
     s.append(JudgeAll);
-    emit SendCommand(ADDR,CMD_JUDGE,s.join("@").toUtf8());
+    emit SendCommand(ADDR, CMD_JUDGE, s.join("@").toUtf8());
 }
 
 void PageImp::ReadCanCmdStatus(QByteArray msg)
@@ -657,9 +657,9 @@ void PageImp::CalculateResult(QByteArray )
     WaveImp.at(CurrentWave)->InitWaveByte(num);
     WaveImp.at(CurrentWave)->InitWaveTest(num);
 
-    qint32 Area1=0;
-    qint32 Area2=0;
-    qint32 Area3=0;
+    qint32 Area1 = 0;
+    qint32 Area2 = 0;
+    qint32 Area3 = 0;
     qint32 Phase1 = 0;
     qint32 Phase2 = 0;
     qint32 F = 0;
@@ -668,11 +668,11 @@ void PageImp::CalculateResult(QByteArray )
     qint32 P = 0;
     quint16 s = Block0.at(CurrentWave);
     quint16 e = Block1.at(CurrentWave);
-    if (s < 1)
+    if (s  <  1)
         s = 1;
     if (e > 398)
         e = 398;
-    for (int i=s; i<e; i++) {
+    for (int i=s; i < e; i++) {
         int a1 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
         int a2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
         Area1 += abs(a1-0x200);
@@ -690,33 +690,34 @@ void PageImp::CalculateResult(QByteArray )
         Phase2 += (a1-0x200)*(a2-0x200);
     }
     A = (Area2-Area1)*100/Area1;
-    D = qMin(Area2,Area3/4)*100/Area1;
+    D = qMin(Area2, Area3/4)*100/Area1;
     P = (Phase1-Phase2)*100/Phase1;
 
     QString n;
     QString judge = "OK";
     int number = CurrentWave;
-    if (Flut.at(qMin(number,Flut.size()-1))->value()!=0)
-        n = QString("面积:%1%,差积:%2%,电晕:%3,相位:%4%").arg(A).arg(D).arg(F).arg(P);
+    if (Flut.at(qMin(number, Flut.size()-1))->value() != 0)
+        n = QString("面积:%1%, 差积:%2%, 电晕:%3, 相位:%4%").arg(A).arg(D).arg(F).arg(P);
     else
-        n = QString("面积:%1%,差积:%2%,相位:%3").arg(A).arg(D).arg(P);
+        n = QString("面积:%1%, 差积:%2%, 相位:%3").arg(A).arg(D).arg(P);
 
-    if (abs(A) >= Area.at(qMin(number,Area.size()-1))->value())
+    if (abs(A) >= Area.at(qMin(number, Area.size()-1))->value())
         judge = "NG";
-    else if (abs(D) >= Diff.at(qMin(number,Diff.size()-1))->value())
+    else if (abs(D) >= Diff.at(qMin(number, Diff.size()-1))->value())
         judge = "NG";
-    else if (abs(F) >= Flut.at(qMin(number,Flut.size()-1))->value() && Flut.at(qMin(number,Flut.size()-1))->value()!=0)
+    else if (abs(F) >= Flut.at(qMin(number, Flut.size()-1))->value() &&
+             Flut.at(qMin(number, Flut.size()-1))->value() != 0)
         judge = "NG";
-    else if (abs(P) >= Phase.at(qMin(number,Phase.size()-1))->value())
+    else if (abs(P) >= Phase.at(qMin(number, Phase.size()-1))->value())
         judge = "NG";
-    if (judge == "NG")
+    if (judge  ==  "NG")
         JudgeAll = "NG";
     QStringList t = QString(Items.at(CurrentWave)).split("@");
-    if (t.at(2) == " ")
+    if (t.at(2)  ==  " ")
         t[2] = n;
-    if (t.at(3) == " ")
+    if (t.at(3)  ==  " ")
         t[3] = judge;
-    emit SendCommand(ADDR,CMD_ITEM,t.join("@").toUtf8());
+    emit SendCommand(ADDR, CMD_ITEM, t.join("@").toUtf8());
 }
 
 void PageImp::CalculateAvarageWave()
@@ -726,9 +727,9 @@ void PageImp::CalculateAvarageWave()
     QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
     QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
     AvrCount++;
-    for (int i=0; i<qMin(byte.size(),test.size()); i++)
+    for (int i=0; i < qMin(byte.size(), test.size()); i++)
         w.append(quint8(test.at(i))+(quint8(test.at(i))-quint8(byte.at(i)))/AvrCount);
-    if (AvrCount == 1)
+    if (AvrCount  ==  1)
         w = WaveImp.at(CurrentWave)->WaveByte;
     WaveImp.at(CurrentWave)->WaveBytes[num] = w;
     WaveImp.at(CurrentWave)->WaveByteShow(w);
@@ -779,7 +780,7 @@ void PageImp::ReadCanCmdWaveOk(QByteArray msg)
     case IMP_TEST:
         w = WaveImp.at(CurrentWave)->WaveTest;
         WaveImp.at(CurrentWave)->WaveTests[num] = w;
-        emit SendCommand(ADDR,CMD_WAVE_TEST,w);
+        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
         CalculateResult(msg);
         break;
     }
@@ -802,8 +803,8 @@ void PageImp::ReadCanCmdWaveStart(QByteArray msg)
         break;
     case IMP_TEST:
         WaveImp.at(CurrentWave)->WaveTest.clear();
-        emit SendCommand(ADDR,CMD_WAVE_ITEM,i);
-        emit SendCommand(ADDR,CMD_WAVE_BYTE,w);
+        emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
         break;
     default:
         break;
@@ -813,20 +814,20 @@ void PageImp::ReadCanCmdWaveStart(QByteArray msg)
 void PageImp::SendWave(QByteArray msg)
 {
     int t = WaveNumber.size();
-    for (int i=0; i<WaveNumber.size(); i++) {
-        if (WaveImp.at(WaveNumber.at(i))->WaveItem == msg)
+    for (int i=0; i < WaveNumber.size(); i++) {
+        if (WaveImp.at(WaveNumber.at(i))->WaveItem  ==  msg)
             t = i;
     }
-    if (t == WaveNumber.size())
+    if (t  ==  WaveNumber.size())
         return;
-    for (int i=0; i<qMin(3,WaveNumber.size()-t); i++) {
+    for (int i=0; i < qMin(3, WaveNumber.size()-t); i++) {
         QByteArray w;
         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
-        emit SendCommand(ADDR,CMD_WAVE_ITEM,w);
+        emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-        emit SendCommand(ADDR,CMD_WAVE_BYTE,w);
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
-        emit SendCommand(ADDR,CMD_WAVE_TEST,w);
+        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
     }
 }
 
@@ -837,13 +838,13 @@ int PageImp::CalculateGear(int row)
     int gear = 0;
     if (Volt.at(row)->value() <= 1000)
         gear = 1;
-    else if (Volt.at(row)->value()<=2000)
+    else if (Volt.at(row)->value() <= 2000)
         gear = 2;
-    else if (Volt.at(row)->value()<=4000)
+    else if (Volt.at(row)->value() <= 4000)
         gear = 3;
-    else if (Volt.at(row)->value()<=5000)
+    else if (Volt.at(row)->value() <= 5000)
         gear = 4;
-    gear <<= 4;
+    gear <<=  4;
     gear += Time.at(row)->value()+1;
     return gear;
 }
@@ -864,13 +865,13 @@ void PageImp::Delay(int ms)
 {
     QElapsedTimer t;
     t.start();
-    while(t.elapsed()<ms)
+    while (t.elapsed() < ms)
         QCoreApplication::processEvents();
 }
 
 void PageImp::AutoChangeVolt()
 {
-    for (int i=1; i<Volt.size(); i++)
+    for (int i=1; i < Volt.size(); i++)
         Volt.at(i)->setValue(Volt.at(0)->value());
 }
 

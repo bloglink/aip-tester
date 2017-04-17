@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]  < 青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170417
+ * author:      zhaonanlin
+ * brief:       匝间测试模块
+*******************************************************************************/
 #ifndef PAGEIMP_H
 #define PAGEIMP_H
 
@@ -35,25 +43,19 @@ public:
     explicit PageImp(QWidget *parent = 0);
     ~PageImp();
 
-private:
-    Ui::PageImp *ui;
-
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
-public:
-    QList<Waveform *> WaveImp;
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
-    void BtnJudge(int id);
+    void ReadButtons(int id);
     void InitSettings(void);
     void InitStation(void);
     void SaveSettings(void);
-    void ItemClick(int r, int c);
+    void ItemClick(int r,  int c);
     void ItemChange(QString msg);
     void BlockClick(int x);
-
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
     void InitTestItems(void);
     void SendTestItemsAllError(void);
@@ -73,14 +75,13 @@ private slots:
     void CalculateAvarageWave(void);
     void SendWave(QByteArray msg);
     int CalculateGear(int row);
-
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-
     void AutoChangeVolt(void);
-
-    virtual void showEvent(QShowEvent*);
+    void showEvent(QShowEvent*);
 private:
+    Ui::PageImp *ui;
+    QList<Waveform *> WaveImp;
     QSettings *set;
     quint16 AvrCount;
     quint16 TimeOut;
@@ -109,8 +110,6 @@ private:
     QList<int> Block1;
     QList<int> VoltTest;
     quint8 ImpMode;
-
-
 };
 
 #endif // PAGEIMP_H
