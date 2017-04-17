@@ -18,7 +18,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170408");
+    InitVersion("V-2.1.0.170411");
     HomeMode = HOME_FREE;
     InitThreadAll();
 }
@@ -483,8 +483,18 @@ void WinHome::StartTest(QByteArray station)
         emit SendCommand(ADDR,CMD_ALARM,QByteArray(1,0x04 | 0x00));
     }
     emit SendCommand(WIN_ID_TEST,CMD_JUDGE,ItemJudge.toUtf8());
-    HomeMode = HOME_FREE;
+
     emit SendCommand(ADDR,CMD_STATUS,"ready");
+    if (CurrentReStartMode() && HomeMode != HOME_FREE) {
+        QTimer *timer = new QTimer(this);
+        timer->singleShot(500, this, SLOT(ReStartTest()));
+    }
+    HomeMode = HOME_FREE;
+}
+
+void WinHome::ReStartTest()
+{
+    StartTest(QString("%1").arg(0x13).toUtf8());
 }
 
 void WinHome::SaveTestJudge()
@@ -591,6 +601,12 @@ int WinHome::CurrentAlarmTime(QString msg)
         return ini->value("/GLOBAL/TimeNG","0.2").toDouble()*1000;
     else
         return ini->value("/GLOBAL/TimeOK","0.1").toDouble()*1000;
+}
+
+bool WinHome::CurrentReStartMode()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    return ini->value("/GLOBAL/RestartMode","0").toBool();
 }
 
 /*********************************END OF FILE**********************************/

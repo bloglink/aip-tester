@@ -142,7 +142,6 @@ void PageOut::ReadCanCmdStop(quint16 addr)
 
 void PageOut::SendAlarm(QByteArray addr)
 {
-    qDebug()<<addr.toHex();
     quint8 t = 0x00;
     if (addr.at(0) & 0x02)
         t = 0x01;
@@ -156,7 +155,6 @@ void PageOut::SendAlarm(QByteArray addr)
     out<<quint16(0x13)<<quint8(0x02)<<quint8(0x02)<<quint8(t);
     out<<quint16(0x14)<<quint8(0x02)<<quint8(0x02)<<quint8(t);
     emit SendCommand(ADDR,CMD_CAN,msg);
-    qDebug()<<t;
 }
 
 bool PageOut::WaitTestOver(quint16 t)

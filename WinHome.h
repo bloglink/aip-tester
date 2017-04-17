@@ -79,6 +79,7 @@ private slots:
     void InitTestItems(void);
     void ReadStatusAll(void);
     void StartTest(QByteArray msg);
+    void ReStartTest(void);
     void SaveTestJudge(void);
     void SaveItemJudge(QByteArray msg);
     void TestPause(void);
@@ -93,6 +94,7 @@ private slots:
     int CurrentStartMode(void);
     int CurrentPauseMode(void);
     int CurrentAlarmTime(QString msg);
+    bool CurrentReStartMode(void);
 
 private:
     QList<int> previous_window;
