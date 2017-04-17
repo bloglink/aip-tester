@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170417
+ * author:      zhaonanlin
+ * brief:       型号管理模块
+*******************************************************************************/
 #ifndef WINTYPE_H
 #define WINTYPE_H
 
@@ -10,8 +18,6 @@
 #include <QButtonGroup>
 #include <QListView>
 #include <QSettings>
-#include <QHideEvent>
-#include <QButtonGroup>
 
 #include "define.h"
 
@@ -31,7 +37,7 @@ private:
     Ui::WinType *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -43,9 +49,9 @@ private slots:
     void ReadAvailableItems(void);
     void InitSettings(void);
     void SaveSettings(void);
-    void SelectWireColor(int row,int column);
+    void SelectWireColor(int row, int column);
     void ShowWireColorWindow(void);
-    void ShowAvailableItem(int,int);
+    void ShowAvailableItem(int, int);
     void JumptoSetWindows(void);
 
     void RemoveSettings(void);
