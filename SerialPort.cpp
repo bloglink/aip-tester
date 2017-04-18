@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170418
+ * author:      zhaonanlin
+ * brief:       串口通信模块
+*******************************************************************************/
 #include "SerialPort.h"
 
 SerialPort::SerialPort(QObject *parent) : QObject(parent)
@@ -5,13 +13,13 @@ SerialPort::SerialPort(QObject *parent) : QObject(parent)
     fd = -1;
     com = NULL;
     timer = new QTimer(this);
-    connect(timer,SIGNAL(timeout()),this,SLOT(ReadSerial()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(ReadSerial()));
 }
 
 void SerialPort::OpenSerial()
 {
-    if (com == NULL)
-        com = new QSerialPort("/dev/ttyS3",this);
+    if (com  ==  NULL)
+        com = new QSerialPort("/dev/ttyS3", this);
     if (com->isOpen())
         com->close();
     if (com->open(QIODevice::ReadWrite)) {
@@ -41,15 +49,15 @@ void SerialPort::ReadSerial()
     QStringList msg;
     msg.append(QString::number(0x13));
     msg.append(QString::number(0x00));
-    if (cmd.size()==4 && quint8(cmd.at(1)==0x32))
-        SendCommand(ADDR,CMD_START,msg.join(" ").toUtf8());
-    if (cmd.size()==4 && quint8(cmd.at(1)==0x31)) {
-        SendCommand(ADDR,CMD_STOP,msg.join(" ").toUtf8());
+    if (cmd.size() == 4 && quint8(cmd.at(1) == 0x32))
+        SendCommand(ADDR, CMD_START, msg.join(" ").toUtf8());
+    if (cmd.size() == 4 && quint8(cmd.at(1) == 0x31)) {
+        SendCommand(ADDR, CMD_STOP, msg.join(" ").toUtf8());
         com->write("LED1");
     }
 }
 
-void SerialPort::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+void SerialPort::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 {
     if (addr != ADDR)
         return;
@@ -79,28 +87,29 @@ void SerialPort::SendAlarm(QByteArray msg)
 void SerialPort::StartBeep()
 {
 #ifdef __arm__
-    struct pwm_config_info	conf;
-    fd = open("/dev/em335x_pwm2",O_RDWR);
+    struct pwm_config_info conf;
+    fd = open("/dev/em335x_pwm2", O_RDWR);
     if (fd < 0) {
-        qDebug()<<"pwm2 open fail";
+        qDebug() << "pwm2 open fail";
         return;
     }
     conf.freq = 2000;
     conf.duty = 100;
     conf.polarity = POLARITY;
     conf.count = 0;
-    int ret = write(fd, &conf, sizeof(struct pwm_config_info));
-    qDebug()<<ret;
+    write(fd,  &conf,  sizeof(struct pwm_config_info));
+    qDebug() << fd;
 #endif
 }
 
 void SerialPort::StopBeep()
 {
 #ifdef __arm__
-    struct pwm_config_info	conf;
-    fd = open("/dev/em335x_pwm2",O_RDWR);
-    memset(&conf, 0, sizeof(struct pwm_config_info));
-    write(fd, &conf, sizeof(struct pwm_config_info));
+    struct pwm_config_info conf;
+    fd = open("/dev/em335x_pwm2", O_RDWR);
+    memset(&conf,  0,  sizeof(struct pwm_config_info));
+    write(fd,  &conf,  sizeof(struct pwm_config_info));
+    close(fd);
 #endif
 }
 

@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170418
+ * author:      zhaonanlin
+ * brief:       串口通信模块
+*******************************************************************************/
 #ifndef SERIALPORT_H
 #define SERIALPORT_H
 
@@ -21,16 +29,15 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include "define.h"
 
-#define	PWM_POLARITY_NORMAL				(0 << 0)
-#define PWM_POLARITY_INVERTED			(1 << 0)
-#define POLARITY			PWM_POLARITY_INVERTED;
+#define PWM_POLARITY_NORMAL (0 << 0)
+#define PWM_POLARITY_INVERTED (1 << 0)
+#define POLARITY PWM_POLARITY_INVERTED;
 
-struct pwm_config_info
-{
-    unsigned int		freq; 			/* in Hz */
-    unsigned int		duty;			/* in % */
-    unsigned int		polarity;
-    unsigned int		count;
+struct pwm_config_info {
+    unsigned int freq; /* in Hz */
+    unsigned int duty; /* in % */
+    unsigned int polarity;
+    unsigned int count;
 };
 
 class SerialPort : public QObject
@@ -40,13 +47,13 @@ public:
     explicit SerialPort(QObject *parent = 0);
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray msg);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray msg);
 public slots:
     void OpenSerial();
 private slots:
     void CloseSerial(void);
     void ReadSerial(void);
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void SendAlarm(QByteArray msg);
     void StartBeep(void);
     void StopBeep(void);
