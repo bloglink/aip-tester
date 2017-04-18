@@ -565,7 +565,7 @@ void PageImp::SendCanCmdSampleAuto()
     if (ui->BoxOffset->isChecked())
         mode = 0x04;
     out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(mode) << quint8(station)
-       << quint8(tt/256) << quint8(tt%256);
+        << quint8(tt/256) << quint8(tt%256);
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
@@ -576,7 +576,7 @@ void PageImp::SendCanCmdSample(quint16 t)
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0x0001 << t;
     out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x02) << quint8(station)
-       << quint8(tt/256) << quint8(tt%256);
+        << quint8(tt/256) << quint8(tt%256);
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
@@ -592,7 +592,7 @@ void PageImp::SendCanCmdStart(quint8 pos)
             tt += 0x0001 << row;
     }
     out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x00) << quint8(station)
-       << quint8(tt/256) << quint8(tt%256);
+        << quint8(tt/256) << quint8(tt%256);
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
@@ -627,10 +627,10 @@ void PageImp::SendCanCmdConfig()
             break;
         }
         out << quint16(0x24) << quint8(0x08) << quint8(0x03) << quint8(row)
-           << quint8(Terminal1.at(row)->text().toInt())
-          << quint8(Terminal2.at(row)->text().toInt())
-         << quint8(v/256) << quint8(v%256)
-         << quint8(CalculateGear(row)) << quint8(Freq.at(row));
+            << quint8(Terminal1.at(row)->text().toInt())
+            << quint8(Terminal2.at(row)->text().toInt())
+            << quint8(v/256) << quint8(v%256)
+            << quint8(CalculateGear(row)) << quint8(Freq.at(row));
     }
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
@@ -853,6 +853,8 @@ bool PageImp::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
     while (ImpMode != IMP_FREE) {
+        if (TimeOut %= 50)
+            SendCanCmdStatus();
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
