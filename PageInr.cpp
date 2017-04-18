@@ -68,7 +68,7 @@ void PageInr::SaveSettings()
     temp.append(QString::number(ui->BoxTime->value()));
     temp.append(QString::number(ui->BoxOffset->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"PageInr save OK";
 }
 

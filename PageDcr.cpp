@@ -250,7 +250,7 @@ void PageDcr::SaveSettings()
     for (int i=0; i<Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset",(temp.join(" ").toUtf8()));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"PageDcr save OK";
 }
 

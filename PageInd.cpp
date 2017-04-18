@@ -246,7 +246,7 @@ void PageInd::SaveSettings()
     for (int i=0; i<Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     set->setValue("Offset",(temp.join(" ").toUtf8()));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"PageInd save OK";
 }
 

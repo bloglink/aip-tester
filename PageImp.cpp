@@ -372,7 +372,7 @@ void PageImp::SaveSettings()
         set->setValue(ByteL, WaveImp.at(row)->WaveBytes.at(0));
         set->setValue(ByteR, WaveImp.at(row)->WaveBytes.at(1));
     }
-    system("sync");
+
     qDebug() << QTime::currentTime().toString() << "PageImp save OK";
 }
 

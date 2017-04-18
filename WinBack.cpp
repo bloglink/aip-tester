@@ -262,7 +262,7 @@ void WinBack::SaveSettings()
     for (int i=0; i<BoxImp.size(); i++)
         temp.append(QString::number(BoxImp.at(i)->value()));
     ini->setValue("KIMP",temp.join(" "));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"WinBack save OK";
 }
 

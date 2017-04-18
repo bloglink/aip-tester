@@ -99,7 +99,7 @@ void PageLck::SaveSettings()
     set->setValue("Freq",QString::number(ui->BoxFreq->value()));
     set->setValue("Current",QString::number(ui->BoxCurr->value()));
     set->setValue("Power",QString::number(ui->BoxPower->value()));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"PageLck save OK";
 }
 

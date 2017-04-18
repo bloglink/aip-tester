@@ -344,8 +344,8 @@ void WinType::SaveSettings()
     ini->setValue("TestNG", QString::number(ui->BoxTestNG->currentIndex()));
     ini->setValue("WinType", QString::number(ui->BoxType->currentIndex()));
     ini->sync();
-    system("sync");
-    system("sync");
+
+
     qDebug() << QTime::currentTime().toString() << "WinType save OK";
 }
 
@@ -441,7 +441,7 @@ void WinType::ChangeSettings()
     ini->setIniCodec("GB18030");
     ini->beginGroup("GLOBAL");
     ini->setValue("FileInUse", t);
-    system("sync");
+
 }
 
 void WinType::QuerySettings()

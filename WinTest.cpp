@@ -133,7 +133,7 @@ void WinTest::SaveSettings()
 
     int width = ui->TabTest->columnWidth(1);
     settings_g->setValue("Width",width);
-    system("sync");
+    
 
     qDebug()<<QTime::currentTime().toString()<<"WinTest save OK";
 }

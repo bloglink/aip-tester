@@ -136,7 +136,7 @@ void WinSyst::SaveSettings()
     g_ini->setValue("TimeNG",ui->BoxTimeNG->value());
     g_ini->setValue("TimeOK",ui->BoxTimeOK->value());
     g_ini->setValue("PowerSupply",ui->BoxPower->currentIndex());
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"WinSyst save OK";
 }
 

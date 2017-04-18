@@ -85,7 +85,7 @@ void PageAcw::SaveSettings()
     temp.append(QString::number(ui->BoxFrequcy->currentIndex()));
     temp.append(QString::number(ui->BoxOffset->value()));
     ini->setValue("Other",(temp.join(" ").toUtf8()));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"PageAcw save OK";
 }
 

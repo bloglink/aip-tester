@@ -78,7 +78,7 @@ void PageLvs::SaveSettings()
     temp.append(QString::number(ui->BoxPowerMin->value()));
     temp.append(QString::number(ui->BoxPowerMax->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
-    system("sync");
+    
     qDebug()<<QTime::currentTime().toString()<<"PageLvs save OK";
 }
 
