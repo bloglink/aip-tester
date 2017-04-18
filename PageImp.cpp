@@ -454,6 +454,8 @@ void PageImp::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         if (!WaitTimeOut(100)) {
             JudgeAll = "NG";
             SendTestItemsAllError();
+            if (TimeOut %= 50)
+                SendCanCmdStatus();
         }
         SendTestJudge();
         ImpMode = IMP_FREE;
@@ -853,8 +855,6 @@ bool PageImp::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
     while (ImpMode != IMP_FREE) {
-        if (TimeOut %= 50)
-            SendCanCmdStatus();
         Delay(10);
         TimeOut++;
         if (TimeOut > t)

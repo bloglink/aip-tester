@@ -401,24 +401,24 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     QString t;
     QString JudgeItem = "OK";
     double offset = Offset.at(number)->value();
-    if (Unit.at(number)->currentText() == "mΩ")
+    if (Unit.at(number)->currentText() == "mohm")
         offset *= 1000;
-    if (Unit.at(number)->currentText() == "kΩ")
+    if (Unit.at(number)->currentText() == "kohm")
         offset /= 1000;
 
     temp *= qPow(10,(grade-6));
     temp -= qMin(temp,offset);
     if (grade==1 || grade==2)
-        t = QString("%1mΩ").arg(temp*1000,0,'r',(3-grade%3));
+        t = QString("%1mohm").arg(temp*1000,0,'r',(3-grade%3));
     if (grade==3 || grade==4 || grade==5)
-        t = QString("%1Ω").arg(temp,0,'r',(3-grade%3));
+        t = QString("%1ohm").arg(temp,0,'r',(3-grade%3));
     if (grade==6 || grade==7)
-        t = QString("%1kΩ").arg(temp/1000,0,'r',(3-grade%3));
+        t = QString("%1kohm").arg(temp/1000,0,'r',(3-grade%3));
 
     Results.append(temp);
-    if (Unit.at(number)->currentText() == "mΩ")
+    if (Unit.at(number)->currentText() == "mohm")
         temp *= 1000;
-    if (Unit.at(number)->currentText() == "kΩ")
+    if (Unit.at(number)->currentText() == "kohm")
         temp /= 1000;
     if (temp<Min.at(number)->value() || temp>Max.at(number)->value()) {
         Judge = "NG";
@@ -441,11 +441,11 @@ void PageDcr::ReadOffset(QByteArray msg)
     quint8 grade = quint8(msg.at(2));
     double temp = (quint16)(msg.at(3)*256)+(quint8)msg.at(4);
 
-    if (Unit.at(number)->currentText() == "mΩ")
+    if (Unit.at(number)->currentText() == "mohm")
         temp *= qPow(10,(grade-3));
-    if (Unit.at(number)->currentText() == "Ω")
+    if (Unit.at(number)->currentText() == "ohm")
         temp *= qPow(10,(grade-6));
-    if (Unit.at(number)->currentText() == "kΩ")
+    if (Unit.at(number)->currentText() == "kohm")
         temp *= qPow(10,(grade-9));
 
     if (temp*20 > Max.at(number)->value())
@@ -620,9 +620,9 @@ int PageDcr::CalculateGear(int row)
     if (row >= Unit.size())
         return 7;
     double r = Max.at(row)->value();
-    if (Unit.at(row)->currentText() == "mΩ")
+    if (Unit.at(row)->currentText() == "mohm")
         r /= 1000;
-    if (Unit.at(row)->currentText() == "kΩ")
+    if (Unit.at(row)->currentText() == "kohm")
         r *= 1000;
     if (r <= 0.2)
         return 1;
