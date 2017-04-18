@@ -32,6 +32,13 @@ void SerialPort::OpenSerial()
         com->setRequestToSend(false);
         timer->start(50);
     }
+#ifdef __arm__
+    fd = open("/dev/em335x_pwm2", O_RDWR);
+    if (fd < 0) {
+        qDebug() << "pwm2 open fail";
+        return;
+    }
+#endif
 }
 
 void SerialPort::CloseSerial()
@@ -57,7 +64,7 @@ void SerialPort::ReadSerial()
     }
 }
 
-void SerialPort::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void SerialPort::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR)
         return;
@@ -88,17 +95,11 @@ void SerialPort::StartBeep()
 {
 #ifdef __arm__
     struct pwm_config_info conf;
-    fd = open("/dev/em335x_pwm2", O_RDWR);
-    if (fd < 0) {
-        qDebug() << "pwm2 open fail";
-        return;
-    }
     conf.freq = 2000;
     conf.duty = 100;
     conf.polarity = POLARITY;
     conf.count = 0;
-    write(fd,  &conf,  sizeof(struct pwm_config_info));
-    qDebug() << fd;
+    write(fd, &conf, sizeof(struct pwm_config_info));
 #endif
 }
 
@@ -106,10 +107,8 @@ void SerialPort::StopBeep()
 {
 #ifdef __arm__
     struct pwm_config_info conf;
-    fd = open("/dev/em335x_pwm2", O_RDWR);
-    memset(&conf,  0,  sizeof(struct pwm_config_info));
-    write(fd,  &conf,  sizeof(struct pwm_config_info));
-    close(fd);
+    memset(&conf, 0, sizeof(struct pwm_config_info));
+    write(fd, &conf, sizeof(struct pwm_config_info));
 #endif
 }
 
