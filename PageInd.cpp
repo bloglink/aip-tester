@@ -386,7 +386,7 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
         else if (Result1.Result <= 10000000)
             t = QString::number(Result1.Result/1000,'f',0) + "mH";
 
-        Results.append(t.toDouble());
+        Results.append(Result1.Result);
 
         t +="," + QString::number(Result2.Result,'f',2);
         double max = Max.at(number)->value();
@@ -420,6 +420,7 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
             judge = "OK";
             for (int i=0; i<Results.size(); i++) {
                 double un = fabs(Results.at(i)-avr)*100/avr;
+                qDebug() << un << avr;
                 u.append(QString::number(un,'f',1));
                 u.append("% ");
                 if (un >= ui->BoxUnbalance->value()) {

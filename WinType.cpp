@@ -214,37 +214,39 @@ void WinType::AddTestItem(int id)
 
 void WinType::ChangeMotorTypes(int id)
 {
-    switch (id) {
-    case 0:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S0.jpg"));
-        break;
-    case 1:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S1.jpg"));
-        break;
-    case 2:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S2.jpg"));
-        break;
-    case 3:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S3.jpg"));
-        break;
-    case 4:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S4.jpg"));
-        break;
-    case 5:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S1L1.jpg"));
-        break;
-    case 6:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S1L2.jpg"));
-        break;
-    case 7:
-        ui->labelType->setPixmap(QPixmap(":/source/M1S1L3.jpg"));
-        break;
-    case 8:
-        ui->labelType->setPixmap(QPixmap(":/source/None.jpg"));
-        break;
-    default:
-        break;
-    }
+    QString jpg = QString(":/source/%1.jpg").arg(ui->BoxType->currentText());
+    ui->labelType->setPixmap(QPixmap(jpg));
+//    switch (id) {
+//    case 0:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S0.jpg"));
+//        break;
+//    case 1:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S1.jpg"));
+//        break;
+//    case 2:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S2.jpg"));
+//        break;
+//    case 3:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S3.jpg"));
+//        break;
+//    case 4:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S4.jpg"));
+//        break;
+//    case 5:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S1L1.jpg"));
+//        break;
+//    case 6:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S1L2.jpg"));
+//        break;
+//    case 7:
+//        ui->labelType->setPixmap(QPixmap(":/source/M1S1L3.jpg"));
+//        break;
+//    case 8:
+//        ui->labelType->setPixmap(QPixmap(":/source/None.jpg"));
+//        break;
+//    default:
+//        break;
+//    }
 }
 
 void WinType::ReadAllSettings()

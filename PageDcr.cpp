@@ -402,9 +402,9 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     QString JudgeItem = "OK";
     double offset = Offset.at(number)->value();
     if (Unit.at(number)->currentText() == "mohm")
-        offset *= 1000;
-    if (Unit.at(number)->currentText() == "kohm")
         offset /= 1000;
+    if (Unit.at(number)->currentText() == "kohm")
+        offset *= 1000;
 
     temp *= qPow(10,(grade-6));
     temp -= qMin(temp,offset);

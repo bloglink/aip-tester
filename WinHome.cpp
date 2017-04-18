@@ -202,7 +202,10 @@ void WinHome::JumpToWindow(QByteArray win)
 {
     if (HomeMode == HOME_TEST)
         return;
-
+#ifdef __arm__
+    system("sync");
+    system("sync");
+#endif
     int WinCurrent = ui->desktop->currentIndex();
     if (win.isNull()) { //空代表返回
         ui->desktop->setCurrentIndex(previous_window.last());
@@ -312,9 +315,9 @@ void WinHome::InitSerial()
     connect(thread_all,SIGNAL(started()),&serial,SLOT(OpenSerial()));
     connect(thread_all,SIGNAL(finished()),&serial,SLOT(CloseSerial()));
     connect(&serial,SIGNAL(SendCommand(quint16,quint16,QByteArray)),this,
-                 SLOT(ReadMessage(quint16,quint16,QByteArray)));
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
     connect(this,SIGNAL(SendCommand(quint16,quint16,QByteArray)),&serial,
-                 SLOT(ReadMessage(quint16,quint16,QByteArray)));
+            SLOT(ReadMessage(quint16,quint16,QByteArray)));
     thread_all->start();
 }
 

@@ -210,6 +210,26 @@
          </item>
          <item>
           <property name="text">
+           <string>ABC</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>ABC-N</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>ABC-0</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>ABC-Y</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
            <string>M1S1L1</string>
           </property>
          </item>
