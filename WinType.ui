@@ -220,7 +220,7 @@
          </item>
          <item>
           <property name="text">
-           <string>ABC-0</string>
+           <string>ABC-O</string>
           </property>
          </item>
          <item>
@@ -245,7 +245,7 @@
          </item>
          <item>
           <property name="text">
-           <string>Other</string>
+           <string>None</string>
           </property>
          </item>
         </widget>
