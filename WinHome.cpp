@@ -18,7 +18,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170418.2");
+    InitVersion("V-2.1.0.170419");
     HomeMode = HOME_FREE;
     InitThreadAll();
 }
@@ -202,10 +202,6 @@ void WinHome::JumpToWindow(QByteArray win)
 {
     if (HomeMode == HOME_TEST)
         return;
-#ifdef __arm__
-    system("sync");
-    system("sync");
-#endif
     int WinCurrent = ui->desktop->currentIndex();
     if (win.isNull()) { //空代表返回
         ui->desktop->setCurrentIndex(previous_window.last());
