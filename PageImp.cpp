@@ -369,7 +369,7 @@ void PageImp::SaveSettings()
     for (int row=0; row < qMin(WaveImp.size(), ui->TabParams->rowCount()); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
         QString ByteR = "WaveImpR"+QString::number(row);
-        set->setValue(ByteL, WaveImp.at(row)->WaveBytes.at(0));
+        set->setValue(ByteL, QByteArray(WaveImp.at(row)->WaveBytes.at(0)));
         set->setValue(ByteR, WaveImp.at(row)->WaveBytes.at(1));
     }
 

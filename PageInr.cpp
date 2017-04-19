@@ -271,7 +271,7 @@ void PageInr::SendCanCmdConfig()
     int volt = ui->BoxVoltage->currentText().toInt();
     int time = ui->BoxTime->value()*10;
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x01)<<quint8(0x04)
-      <<quint8(0x00)<<quint8(0x00)<<quint8(0xff)<<quint8(0xff)<<quint8(0x00);
+      <<quint8(0x80)<<quint8(0x00)<<quint8(0x7f)<<quint8(0xff)<<quint8(0x00);
     out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x01)<<quint8(volt/256)
       <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(1/256)<<quint8(1%256);
     out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x01)
