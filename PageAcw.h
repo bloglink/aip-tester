@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170419
+ * author:      zhaonanlin
+ * brief:       交耐配置与测试流程
+*******************************************************************************/
 #ifndef PAGEACW_H
 #define PAGEACW_H
 
@@ -33,14 +41,14 @@ private:
     Ui::PageAcw *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
     void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
