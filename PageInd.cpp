@@ -307,7 +307,7 @@ void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = IND_TEST;
         Judge = "OK";
         SendCanCmdStart(msg.toInt());
-        if(!WaitTimeOut(100)) {
+        if(!WaitTimeOut(ui->BoxTime->value()*100+100)) {
             Judge = "NG";
             SendTestItemsAllError();
         }
