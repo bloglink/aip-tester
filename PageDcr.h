@@ -99,7 +99,9 @@ private:
     QList<QDoubleSpinBox*> Max;
     QList<QDoubleSpinBox*> Std;
     QList<QDoubleSpinBox*> Offset;
+    QList<QDoubleSpinBox*> OffsetR;
     quint8 Mode;
+    quint8 stat;
 };
 
 #endif // PAGEDCR_H

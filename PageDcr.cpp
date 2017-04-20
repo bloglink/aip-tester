@@ -25,6 +25,7 @@ void PageDcr::InitWindows()
     ui->TabParams->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
     ui->TabParams->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
@@ -32,6 +33,7 @@ void PageDcr::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
@@ -96,6 +98,12 @@ void PageDcr::InitWindows()
         Offset.at(row)->setMaximum(9999);
         Offset.at(row)->setAlignment(Qt::AlignHCenter);
         Offset.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        OffsetR.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row,9,OffsetR.at(row));
+        OffsetR.at(row)->setMaximum(9999);
+        OffsetR.at(row)->setAlignment(Qt::AlignHCenter);
+        OffsetR.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
     connect(Metal.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(AutoChangeMetal(int)));
     connect(Unit.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(AutoChangeUnit(int)));
@@ -110,7 +118,7 @@ void PageDcr::InitButtons()
     btnGroup->addButton(ui->BtnSDLRAuto,Qt::Key_0);
     btnGroup->addButton(ui->BtnOffset,Qt::Key_1);
     btnGroup->addButton(ui->BtnSDLRExit,Qt::Key_2);
-    btnGroup->addButton(ui->BtnExit,Qt::Key_3);
+    btnGroup->addButton(ui->BtnOffsetR,Qt::Key_3);
     connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
@@ -121,9 +129,10 @@ void PageDcr::ReadButtons(int id)
         AutoCalculateMinAndMax();
         break;
     case Qt::Key_1:
+        stat = WIN_ID_OUT13;
         SendCanCmdConfig();
         Mode = DCR_OFFSET;
-        SendCanCmdStart(WIN_ID_OUT13);
+        SendCanCmdStart(stat);
         WaitTimeOut(100);
         Mode = DCR_FREE;
         break;
@@ -133,7 +142,12 @@ void PageDcr::ReadButtons(int id)
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_3:
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        stat = WIN_ID_OUT14;
+        SendCanCmdConfig();
+        Mode = DCR_OFFSET;
+        SendCanCmdStart(stat);
+        WaitTimeOut(100);
+        Mode = DCR_FREE;
         break;
     default:
         break;
@@ -331,7 +345,8 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_START:
         Mode = DCR_TEST;
         Judge = "OK";
-        SendCanCmdStart(msg.toInt());
+        stat = msg.toInt();
+        SendCanCmdStart(stat);
         if(!WaitTimeOut(ui->BoxTime->value()*100+100)) {
             Judge = "NG";
             SendTestItemsAllError();
@@ -407,7 +422,11 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     }
     QString t;
     QString JudgeItem = "OK";
-    double offset = Offset.at(number)->value();
+    double offset = 0;
+    if (stat == WIN_ID_OUT13)
+        offset = Offset.at(number)->value();
+    if (stat == WIN_ID_OUT14)
+        offset = OffsetR.at(number)->value();
     if (Unit.at(number)->currentText() == "mohm")
         offset /= 1000;
     if (Unit.at(number)->currentText() == "kohm")
@@ -457,7 +476,10 @@ void PageDcr::ReadOffset(QByteArray msg)
 
     if (temp*20 > Max.at(number)->value())
         temp = 0;
-    Offset.at(number)->setValue(temp);
+    if (stat == WIN_ID_OUT13)
+        Offset.at(number)->setValue(temp);
+    if (stat == WIN_ID_OUT14)
+        OffsetR.at(number)->setValue(temp);
 }
 
 void PageDcr::SendTestItemsAllEmpty()
