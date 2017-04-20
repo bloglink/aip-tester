@@ -42,6 +42,7 @@ void WinType::InitWindows()
     ui->TabWire->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabFile->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabTest->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->BoxTestNG->setEnabled(false);
 #endif
     for (int i=0; i < ui->TabColor->rowCount(); i++) {
         for (int j=0; j < ui->TabColor->columnCount(); j++) {
