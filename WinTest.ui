@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>800</width>
-    <height>656</height>
+    <height>662</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -531,7 +531,7 @@ color: rgb(0, 0, 0);</string>
          <item>
           <widget class="QLabel" name="TextPos">
            <property name="styleSheet">
-            <string notr="true">color:red;font:Bold 42pt Ubuntu;</string>
+            <string notr="true">color:white;font:Bold 42pt Ubuntu;</string>
            </property>
            <property name="text">
             <string>左</string>

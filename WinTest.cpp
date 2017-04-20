@@ -49,7 +49,7 @@ void WinTest::InitWindows()
         ui->TabWave->setCellWidget(0,i,wave.at(i));
     }
     ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
-    ui->TextPos->setStyleSheet("color:red;font:Bold 42pt Ubuntu;");
+    ui->TextPos->setStyleSheet("color:white;font:Bold 42pt Ubuntu;");
     connect(ui->TabTest,SIGNAL(cellClicked(int,int)),this,SLOT(ClickItem(int,int)));
 }
 
