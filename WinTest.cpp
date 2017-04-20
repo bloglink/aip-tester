@@ -327,6 +327,7 @@ void WinTest::InitItem(QByteArray msg)
 
 void WinTest::showEvent(QShowEvent *)
 {
+    ShowTime();
     InitSettings();
     emit SendCommand(ADDR,CMD_INIT,NULL);
 }
