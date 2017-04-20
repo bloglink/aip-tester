@@ -112,6 +112,7 @@ private:
     UdpClient udp;
     SerialPort serial;
     quint8 HomeMode;
+    QByteArray stat;
 };
 
 #endif // WINHOME_H

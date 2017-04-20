@@ -453,6 +453,7 @@ void WinHome::ReadStatusAll()
 
 void WinHome::StartTest(QByteArray station)
 {
+    stat = station;
     if (HomeMode == HOME_TEST)
         return;
     if (ui->desktop->currentWidget()->objectName() != "WinTest")
@@ -494,7 +495,7 @@ void WinHome::StartTest(QByteArray station)
 
 void WinHome::ReStartTest()
 {
-    StartTest(QString("%1").arg(0x13).toUtf8());
+    StartTest(stat);
 }
 
 void WinHome::SaveTestJudge()
