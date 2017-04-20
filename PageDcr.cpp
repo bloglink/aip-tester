@@ -441,6 +441,10 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     if (grade==6 || grade==7)
         t = QString("%1kohm").arg(temp/1000,0,'r',(3-grade%3));
 
+    double gg = 2 * qPow(10,(grade-2)) * 1.1;
+    if (temp > gg)
+        t = QString(">%1ohm").arg(gg);
+
     Results.append(temp);
     if (Unit.at(number)->currentText() == "mohm")
         temp *= 1000;
