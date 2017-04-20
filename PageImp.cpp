@@ -293,13 +293,18 @@ void PageImp::InitSettings()
         Block1[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
+    QByteArray def;
+    for (int i=0; i<400; i++) {
+        def.append(QChar(0x02));
+        def.append(QChar(0x05));
+    }
     for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
-        w = set->value(ByteL, "1000000000000000").toString().toUtf8();
+        w = set->value(ByteL, def.toBase64()).toString().toUtf8();
         WaveImp.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
 
         QString ByteR = "WaveImpR"+QString::number(row);
-        w = set->value(ByteR, "1000000000000000").toString().toUtf8();
+        w = set->value(ByteR, def.toBase64()).toString().toUtf8();
         WaveImp.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
 
         QString T1 = Terminal1.at(row)->text();
@@ -689,6 +694,7 @@ void PageImp::CalculateResult(QByteArray )
         Phase1 += (a1-0x200)*(a1-0x200);
         Phase2 += (a1-0x200)*(a2-0x200);
     }
+    qDebug() << "imp" << Area2 << Area1;
     A = (Area2-Area1)*100/Area1;
     D = qMin(Area2, Area3/4)*100/Area1;
     P = (Phase1-Phase2)*100/Phase1;
