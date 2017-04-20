@@ -118,6 +118,11 @@ void WinType::InitWindows()
     ui->BoxTestNG->setView(new QListView(this));
     ui->Type->setCurrentIndex(0);
     ui->Other->setCurrentIndex(0);
+
+    QRegExp rx1;
+    rx1.setPattern("^[-|0-9|A-Z|a-z|^\s]{1,16}$"); //限制接受1至16个字符,减号、数字和英文字母
+    QValidator *validator_16c = new QRegExpValidator(rx1,this);
+    ui->EditTypeName->setValidator(validator_16c);
 }
 
 void WinType::InitButtons()
