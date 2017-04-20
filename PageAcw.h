@@ -56,6 +56,7 @@ private slots:
     void SendTestItemsAllError(void);
     void SendTestItemTemp(void);
     void SendTestItem(void);
+    void SendTestItemError(QString s);
     void SendTestJudge(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);

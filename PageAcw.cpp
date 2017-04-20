@@ -162,9 +162,23 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
     Volt.append(v);
     Curr.append(tt);
     SendTestItemTemp();
+
     if (quint8(msg.at(6)) != 0x00) {
         Judge = "NG";
-        SendTestItem();
+        switch (quint8(msg.at(6))) {
+        case 1:
+            SendTestItem();
+            break;
+        case 2:
+            SendTestItemError("STOP");
+            break;
+        case 3:
+            SendTestItemError("ARC");
+            break;
+        default:
+            SendTestItemError(QString("PT+%1").arg(quint8(msg.at(6))));
+            break;
+        }
         ClearResults();
     }
 }
@@ -219,6 +233,16 @@ void PageAcw::SendTestItem()
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
         s[2] = QString("%1mA").arg(Curr.last(), 0, 'g', 2);
+    if (s.at(3) == " ")
+        s[3] = Judge;
+    emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+}
+
+void PageAcw::SendTestItemError(QString e)
+{
+    QStringList s = QString(Items.at(0)).split("@");
+    if (s.at(2) == " ")
+        s[2] = e;
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
