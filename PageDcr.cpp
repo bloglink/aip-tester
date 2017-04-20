@@ -322,7 +322,7 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_CHECK:
         Mode = DCR_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(10)) {
+        if (!WaitTimeOut(100)) {
             QMessageBox::warning(this,tr("警告"),tr("电阻板异常"),QMessageBox::Ok);
             emit SendCommand(ADDR,CMD_DEBUG,"Time out error:PageDcr\n");
         }
@@ -342,11 +342,15 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_STOP:
         SendCanCmdStop();
         Mode = DCR_FREE;
+        SendAlarm(QByteArray(1,0x00));
         break;
     case CMD_INIT:
         InitSettings();
         SendTestItemsAllEmpty();
         SendCanCmdConfig();
+        break;
+    case CMD_ALARM:
+        SendAlarm(msg);
         break;
     default:
         break;
@@ -358,10 +362,11 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
     if (Mode == DCR_FREE)
         return;
     TimeOut = 0;
-    if (msg.size()==4 && (quint8)msg.at(0)==0x00) {
+
+    if (msg.size()>=4 && (quint8)msg.at(0)==0x00) {
         ReadCanCmdStatus(msg);
     }
-    if (msg.size()==7 && (quint8)msg.at(0)==0x01) {
+    if (msg.size()>=7 && (quint8)msg.at(0)==0x01) {
         if (Mode == DCR_OFFSET)
             ReadOffset(msg);
         else
@@ -371,7 +376,9 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
 
 void PageDcr::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0) {
+    if (quint8(msg.at(1)) == 1)
+        return;
+    if (quint8(msg.at(1)) > 1) {
         emit SendCommand(ADDR,CMD_DEBUG,"DCR Error:");
         emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
         emit SendCommand(ADDR,CMD_DEBUG,"\n");
@@ -555,6 +562,24 @@ void PageDcr::SendCanCmdConfig()
             <<quint8(ui->BoxTime->value()*10);
         }
     }
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
+void PageDcr::SendAlarm(QByteArray addr)
+{
+    quint8 t = 0x00;
+    if (addr.at(0) & 0x01)
+        t += 0x08;
+    if (addr.at(0) & 0x02)
+        t += 0x04;
+    if (addr.at(0) & 0x04)
+        t += 0x02;
+    if (addr.at(0) & 0x08)
+        t += 0x01;
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out<<quint16(0x22)<<quint8(0x02)<<quint8(0x09)<<quint8(t);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 

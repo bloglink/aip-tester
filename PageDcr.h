@@ -70,6 +70,7 @@ private slots:
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
     void SendCanCmdConfig(void);
+    void SendAlarm(QByteArray addr);
     double CalculateOffset(double t,quint8 num);
     void CalculateBalance(void);
     int CalculateGear(int row);
