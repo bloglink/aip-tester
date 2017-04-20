@@ -295,12 +295,12 @@ void PageImp::InitSettings()
     QByteArray w;
     for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
-        w = set->value(ByteL, "1000000000000000").toByteArray();
-        WaveImp.at(row)->WaveBytes[0] = w;
+        w = set->value(ByteL, "1000000000000000").toString().toUtf8();
+        WaveImp.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
 
         QString ByteR = "WaveImpR"+QString::number(row);
-        w = set->value(ByteR, "1000000000000000").toByteArray();
-        WaveImp.at(row)->WaveBytes[1] = w;
+        w = set->value(ByteR, "1000000000000000").toString().toUtf8();
+        WaveImp.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
 
         QString T1 = Terminal1.at(row)->text();
         QString T2 = Terminal2.at(row)->text();
@@ -369,8 +369,8 @@ void PageImp::SaveSettings()
     for (int row=0; row < qMin(WaveImp.size(), ui->TabParams->rowCount()); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
         QString ByteR = "WaveImpR"+QString::number(row);
-        set->setValue(ByteL, QByteArray(WaveImp.at(row)->WaveBytes.at(0)));
-        set->setValue(ByteR, WaveImp.at(row)->WaveBytes.at(1));
+        set->setValue(ByteL, WaveImp.at(row)->WaveBytes.at(0).toBase64());
+        set->setValue(ByteR, WaveImp.at(row)->WaveBytes.at(1).toBase64());
     }
 
     qDebug() << QTime::currentTime().toString() << "PageImp save OK";
