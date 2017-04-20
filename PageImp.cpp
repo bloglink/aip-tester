@@ -780,7 +780,7 @@ void PageImp::ReadCanCmdWaveOk(QByteArray msg)
     case IMP_TEST:
         w = WaveImp.at(CurrentWave)->WaveTest;
         WaveImp.at(CurrentWave)->WaveTests[num] = w;
-        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
         CalculateResult(msg);
         break;
     }
@@ -804,7 +804,7 @@ void PageImp::ReadCanCmdWaveStart(QByteArray msg)
     case IMP_TEST:
         WaveImp.at(CurrentWave)->WaveTest.clear();
         emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
+        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
         break;
     default:
         break;
@@ -825,9 +825,9 @@ void PageImp::SendWave(QByteArray msg)
         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
         emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
         emit SendCommand(ADDR, CMD_WAVE_TEST, w);
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
     }
 }
 
