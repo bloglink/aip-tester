@@ -159,13 +159,13 @@ void PageMag::InitSettings()
     QByteArray w;
     for (int row=0; row<qMin(WaveMag.size(),MAX_ROW); row++) {
         QString ByteL = "WaveMagL"+QString::number(row);
-        w = set->value(ByteL,"1000000000000000").toByteArray();
-        WaveMag.at(row)->WaveBytes[0] = w;
-        WaveMag.at(row)->WaveByteShow(w);
+        w = set->value(ByteL,"1000000000000000").toString().toUtf8();
+        WaveMag.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
+        WaveMag.at(row)->WaveByteShow(QByteArray::fromBase64(w));
 
         QString ByteR = "WaveMagR"+QString::number(row);
-        w = set->value(ByteR,"1000000000000000").toByteArray();
-        WaveMag.at(row)->WaveBytes[1] = w;
+        w = set->value(ByteR,"1000000000000000").toString().toUtf8();
+        WaveMag.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
 
         QString T1 = Terminal1.at(row)->text();
         QString T2 = Terminal2.at(row)->text();
@@ -216,8 +216,8 @@ void PageMag::SaveSettings()
     for (int row=0; row<WaveMag.size(); row++) {
         QString ByteL = "WaveMagL"+QString::number(row);
         QString ByteR = "WaveMagR"+QString::number(row);
-        set->setValue(ByteL,WaveMag.at(row)->WaveBytes.at(0));
-        set->setValue(ByteR,WaveMag.at(row)->WaveBytes.at(1));
+        set->setValue(ByteL,WaveMag.at(row)->WaveBytes.at(0).toBase64());
+        set->setValue(ByteR,WaveMag.at(row)->WaveBytes.at(1).toBase64());
     }
 }
 
