@@ -26,6 +26,7 @@ private slots:
     void Write(QByteArray msg);
 private:
     QSqlDatabase db;
+    int count;
 };
 
 #endif // SQLCLIENT_H
