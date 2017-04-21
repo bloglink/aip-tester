@@ -20,6 +20,7 @@
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
+#include <QCheckBox>
 #include "define.h"
 
 #define ACW_FREE        0
@@ -50,6 +51,7 @@ private slots:
     void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
+    void ItemClick(int r, int c);
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
@@ -62,10 +64,13 @@ private slots:
     void SendTestJudge(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
-    void SendCanCmdConfig(void);
+    void SendCanCmdConfig(int row);
     void ClearResults(void);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+    quint16 GetTeminal(int r, int c);
+    void InitInput(int r, int c);
+    void EnsureInput(void);
     QString CurrentSettings(void);
     virtual void showEvent(QShowEvent*);
 private:
@@ -87,6 +92,7 @@ private:
     QList<QComboBox*> Arc;
     QList<QDoubleSpinBox*> Offset;
     quint8 TestRow;
+    QList<QCheckBox*> Check;
 };
 
 #endif // PAGEACW_H

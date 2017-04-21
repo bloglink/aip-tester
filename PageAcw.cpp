@@ -50,6 +50,10 @@ void PageAcw::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
+    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    ui->Input->hide();
+    Check << ui->Box1 << ui->Box2 << ui->Box3 << ui->Box4
+          << ui->Box5 << ui->Box6 << ui->Box7 << ui->Box8;
     ui->TabParams->setRowCount(ACW_ROW);
     for (int row=0; row<ACW_ROW; row++) {
         Enable.append(new QTableWidgetItem);
@@ -113,14 +117,13 @@ void PageAcw::InitWindows()
         Offset.at(row)->setAlignment(Qt::AlignHCenter);
         Offset.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
     }
-    ui->BoxArc->setView(new QListView(this));
-    ui->BoxFrequcy->setView(new QListView(this));
 }
 
 void PageAcw::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExitAcw, Qt::Key_0);
+    btnGroup->addButton(ui->btnInput, Qt::Key_0);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
@@ -130,6 +133,9 @@ void PageAcw::ReadButtons(int id)
     case Qt::Key_0:
         SaveSettings();
         emit SendCommand(ADDR, CMD_JUMP, NULL);
+        break;
+    case Qt::Key_1:
+        EnsureInput();
         break;
     default:
         break;
@@ -146,8 +152,7 @@ void PageAcw::InitSettings()
 
     QStringList temp;
     //可用
-    temp = (QString(ini->value("Enable", "Y N N N").
-                    toByteArray())).split(" ");
+    temp = (QString(ini->value("Enable", "Y Y Y Y"). toByteArray())).split(" ");
     for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
     //端一
@@ -238,6 +243,24 @@ void PageAcw::SaveSettings()
     qDebug() << QTime::currentTime().toString() << "PageAcw save OK";
 }
 
+void PageAcw::ItemClick(int r, int c)
+{
+    switch (c) {
+    case 0:
+        if (Enable.at(r)->text() != "Y")
+            Enable.at(r)->setText("Y");
+        else
+            Enable.at(r)->setText("N");
+        break;
+    case 1:
+    case 2:
+        if (r == 1 || r == 2 || r == 3)
+            InitInput(r, c);
+    default:
+        break;
+    }
+}
+
 void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 {
     if (addr != ADDR && addr != WIN_ID_ACW && addr != CAN_ID_INR)
@@ -252,6 +275,8 @@ void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
                 Mode = ACW_TEST;
                 TestRow = row;
                 Judge = "OK";
+                SendCanCmdConfig(row);
+                Delay(5);
                 SendCanCmdStart(msg.toInt());
                 if(!WaitTimeOut(100)) {
                     Judge = "NG";
@@ -264,6 +289,7 @@ void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         }
         Mode = ACW_FREE;
         SendTestJudge();
+        break;
     case CMD_STOP:
         SendCanCmdStop();
         Mode = ACW_FREE;
@@ -271,7 +297,6 @@ void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_INIT:
         InitSettings();
         SendTestItemsAllEmpty();
-        SendCanCmdConfig();
         break;
     default:
         break;
@@ -361,16 +386,12 @@ void PageAcw::SendTestItemsAllEmpty()
 
 void PageAcw::SendTestItemsAllError()
 {
-    for (int row = 0; row<Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s = QString(Items.at(row)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-        }
-    }
+    QStringList s = QString(Items.at(TestRow)).split("@");
+    if (s.at(2) == " ")
+        s[2] = "---";
+    if (s.at(3) == " ")
+        s[3] = "NG";
+    emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
 }
 void PageAcw::SendTestItemTemp()
 {
@@ -379,7 +400,7 @@ void PageAcw::SendTestItemTemp()
     }
     QString rrr = QString::number(Curr.at(Curr.size()-2), 'f', 2);
     QString t = QString("%1mA").arg(rrr);
-    QStringList s = QString(Items.at(0)).split("@");
+    QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
     emit SendCommand(ADDR, CMD_ITEM_TEMP, s.join("@").toUtf8());
@@ -398,7 +419,7 @@ void PageAcw::SendTestItem()
         Volt.removeLast();
         Curr.removeLast();
     }
-    QStringList s = QString(Items.at(0)).split("@");
+    QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
         s[2] = QString("%1mA").arg(Curr.last(), 0, 'g', 2);
     if (s.at(3) == " ")
@@ -408,7 +429,7 @@ void PageAcw::SendTestItem()
 
 void PageAcw::SendTestItemError(QString e)
 {
-    QStringList s = QString(Items.at(0)).split("@");
+    QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
         s[2] = e;
     if (s.at(3) == " ")
@@ -449,19 +470,22 @@ void PageAcw::SendCanCmdStop()
   * @brief   耐压配置2, ID:0x23;长度:0x08;命令:0x04 0x00 volt volt time time min  min
   * @brief   耐压配置3, ID:0x23;长度:0x07;命令:0x05 0x00 max  max  arc  0x03 0x0A
   */
-void PageAcw::SendCanCmdConfig()
+void PageAcw::SendCanCmdConfig(int row)
 {
     QByteArray msg;
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    int freq = ui->BoxFrequcy->currentText().toInt()%256;
-    int volt = ui->BoxVoltage->value();
-    int time = ui->BoxTime->value()*10;
-    int min = ui->BoxMin->value()*100;
-    int max = ui->BoxMax->value()*100;
-    int arc = ui->BoxArc->currentIndex();
+    int freq = Freq.at(row)->currentText().toInt();
+    int volt = Vol.at(row)->value();
+    int time = Time.at(row)->value()*10;
+    int min = Min.at(row)->value()*100;
+    int max = Max.at(row)->value()*100;
+    int arc = Arc.at(row)->currentIndex();
+    quint16 h = GetTeminal(row, 1);
+    quint16 l = GetTeminal(row, 2);
+    qDebug() << QString::number(h, 16) << QString::number(l, 16);
     out << quint16(0x23) << quint8(0x08) << quint8(0x03) << quint8(0x00) << quint8(0x05)
-        << quint8(0x80) << quint8(0x00) << quint8(0x7f) << quint8(0xff) << quint8(freq);
+        << quint8(h/256) << quint8(h%256) << quint8(l/256) << quint8(l%256) << quint8(freq);
     out << quint16(0x23) << quint8(0x08) << quint8(0x04) << quint8(0x00) << quint8(volt/256)
         << quint8(volt%256) << quint8(time/256) << quint8(time%256)
         << quint8(min/256) << quint8(min%256);
@@ -494,6 +518,79 @@ void PageAcw::Delay(int ms)
     t.start();
     while (t.elapsed() < ms)
         QCoreApplication::processEvents();
+}
+
+quint16 PageAcw::GetTeminal(int r, int c)
+{
+    if (r == 0 && c == 1)
+        return 0x8000;
+    if (r == 0 && c == 2)
+        return 0x7fff;
+    quint16 t = 0;
+    QString s;
+    if (c == 1)
+        s = Terminal1.at(r)->text();
+    if (c == 2)
+        s = Terminal2.at(r)->text();
+    if (s.contains("1"))
+        t += 0x01;
+    if (s.contains("2"))
+        t += 0x02;
+    if (s.contains("3"))
+        t += 0x04;
+    if (s.contains("4"))
+        t += 0x08;
+    if (s.contains("5"))
+        t += 0x10;
+    if (s.contains("6"))
+        t += 0x20;
+    if (s.contains("7"))
+        t += 0x40;
+    if (s.contains("8"))
+        t += 0x80;
+    return t;
+
+}
+
+void PageAcw::InitInput(int r, int c)
+{
+    QString s;
+    QString x;
+    QString s1;
+    for (int i=0; i < Check.size(); i++) {
+        Check.at(i)->setChecked(false);
+        Check.at(i)->hide();
+    }
+    if (c == 1) {
+        s = Terminal1.at(r)->text();
+        x = "147";
+    }
+    if (c == 2) {
+        s = Terminal2.at(r)->text();
+        s1 = Terminal1.at(r)->text();
+        x = "12345678";
+        for (int i=0; i < s1.size(); i++)
+            x.remove(s1.at(i));
+    }
+
+    for (int i = 0; i < x.size(); i++) {
+        Check.at(x.mid(i,0).toInt() - 1)->show();
+    }
+    for (int i = 0; i < s.size(); i++) {
+        Check.at(s.mid(i,1).toInt()-1)->setChecked(true);
+    }
+
+    ui->Input->show();
+}
+
+void PageAcw::EnsureInput()
+{
+    QString s;
+    for (int i = 0; i < Check.size(); i++) {
+        if (Check.at(i)->isChecked())
+            s.append(Check.at(i)->text());
+    }
+    ui->TabParams->currentItem()->setText(s);
 }
 
 QString PageAcw::CurrentSettings()
