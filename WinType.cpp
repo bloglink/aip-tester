@@ -171,11 +171,6 @@ void WinType::ReadButtons(int id)
         RemoveSettings();
         ReadAllSettings();
         break;
-    case Qt::Key_2:
-        ChangeSettings();
-        InitSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
-        break;
     case Qt::Key_3:
         QuerySettings();
         break;
@@ -399,8 +394,13 @@ void WinType::RemoveSettings()
     if (ui->TabFile->currentRow()  <  0)
         return;
     QString t = ui->TabFile->currentItem()->text();
-    if (t == ui->TextTypeShow->text())
+    if (t == "aip9918")
         return;
+    if (t == ui->TextTypeShow->text()) {
+        ui->TextTypeShow->setText("aip9918");
+        ChangeSettings();
+        InitSettings();
+    }
     QString Target = QString("./config/%1.ini").arg(t);
     QFile::remove(Target);
 }
@@ -411,7 +411,7 @@ void WinType::ChangeSettings()
         qDebug() << QTime::currentTime().toString() << "调入电机型号Error";
         return;
     }
-    QString t = ui->TabFile->currentItem()->text();
+    QString t = ui->TextTypeShow->text();
     t.append(".ini");
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
     ini->setIniCodec("GB18030");
