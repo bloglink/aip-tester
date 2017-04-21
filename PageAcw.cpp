@@ -123,7 +123,7 @@ void PageAcw::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExitAcw, Qt::Key_0);
-    btnGroup->addButton(ui->btnInput, Qt::Key_0);
+    btnGroup->addButton(ui->btnInput, Qt::Key_1);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
@@ -557,6 +557,7 @@ void PageAcw::InitInput(int r, int c)
     QString s;
     QString x;
     QString s1;
+    ui->Input->show();
     for (int i=0; i < Check.size(); i++) {
         Check.at(i)->setChecked(false);
         Check.at(i)->hide();
@@ -567,20 +568,20 @@ void PageAcw::InitInput(int r, int c)
     }
     if (c == 2) {
         s = Terminal2.at(r)->text();
-        s1 = Terminal1.at(r)->text();
         x = "12345678";
+        s1 = Terminal1.at(r)->text();
         for (int i=0; i < s1.size(); i++)
-            x.remove(s1.at(i));
+            x.remove(s1.mid(i,1));
     }
 
     for (int i = 0; i < x.size(); i++) {
-        Check.at(x.mid(i,0).toInt() - 1)->show();
+        Check.at(x.mid(i,1).toInt() - 1)->show();
     }
     for (int i = 0; i < s.size(); i++) {
         Check.at(s.mid(i,1).toInt()-1)->setChecked(true);
     }
 
-    ui->Input->show();
+
 }
 
 void PageAcw::EnsureInput()
@@ -591,6 +592,7 @@ void PageAcw::EnsureInput()
             s.append(Check.at(i)->text());
     }
     ui->TabParams->currentItem()->setText(s);
+    ui->Input->hide();
 }
 
 QString PageAcw::CurrentSettings()
