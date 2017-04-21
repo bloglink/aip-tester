@@ -293,18 +293,13 @@ void PageImp::InitSettings()
         Block1[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
-    QByteArray def;
-    for (int i=0; i<400; i++) {
-        def.append(QChar(0x02));
-        def.append(QChar(0x05));
-    }
     for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
-        w = set->value(ByteL, def.toBase64()).toString().toUtf8();
+        w = set->value(ByteL, "1000000000000000").toString().toUtf8();
         WaveImp.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
 
         QString ByteR = "WaveImpR"+QString::number(row);
-        w = set->value(ByteR, def.toBase64()).toString().toUtf8();
+        w = set->value(ByteR, "1000000000000000").toString().toUtf8();
         WaveImp.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
 
         QString T1 = Terminal1.at(row)->text();
@@ -374,8 +369,10 @@ void PageImp::SaveSettings()
     for (int row=0; row < qMin(WaveImp.size(), ui->TabParams->rowCount()); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
         QString ByteR = "WaveImpR"+QString::number(row);
-        set->setValue(ByteL, WaveImp.at(row)->WaveBytes.at(0).toBase64());
-        set->setValue(ByteR, WaveImp.at(row)->WaveBytes.at(1).toBase64());
+        QString L = WaveImp.at(row)->WaveBytes.at(0).toBase64();
+        QString R = WaveImp.at(row)->WaveBytes.at(1).toBase64();
+        set->setValue(ByteL, L);
+        set->setValue(ByteR, R);
     }
 
     qDebug() << QTime::currentTime().toString() << "PageImp save OK";
@@ -694,7 +691,6 @@ void PageImp::CalculateResult(QByteArray )
         Phase1 += (a1-0x200)*(a1-0x200);
         Phase2 += (a1-0x200)*(a2-0x200);
     }
-    qDebug() << "imp" << Area2 << Area1;
     A = (Area2-Area1)*100/Area1;
     D = qMin(Area2, Area3/4)*100/Area1;
     P = (Phase1-Phase2)*100/Phase1;
@@ -786,7 +782,7 @@ void PageImp::ReadCanCmdWaveOk(QByteArray msg)
     case IMP_TEST:
         w = WaveImp.at(CurrentWave)->WaveTest;
         WaveImp.at(CurrentWave)->WaveTests[num] = w;
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
+        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
         CalculateResult(msg);
         break;
     }
@@ -810,7 +806,7 @@ void PageImp::ReadCanCmdWaveStart(QByteArray msg)
     case IMP_TEST:
         WaveImp.at(CurrentWave)->WaveTest.clear();
         emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
-        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
         break;
     default:
         break;
@@ -831,9 +827,9 @@ void PageImp::SendWave(QByteArray msg)
         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
         emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
         emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
+        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
     }
 }
 

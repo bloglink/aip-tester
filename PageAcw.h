@@ -19,11 +19,13 @@
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
+#include <QTableWidgetItem>
 #include "define.h"
 
 #define ACW_FREE        0
 #define ACW_INIT        4
 #define ACW_TEST        1
+#define ACW_ROW         4
 
 namespace Ui {
 class PageAcw;
@@ -73,6 +75,18 @@ private:
     QStringList Items;
     QString Judge;
     quint8 Mode;
+
+    QList<QTableWidgetItem*> Enable;
+    QList<QTableWidgetItem*> Terminal1;
+    QList<QTableWidgetItem*> Terminal2;
+    QList<QDoubleSpinBox*> Vol;
+    QList<QDoubleSpinBox*> Min;
+    QList<QDoubleSpinBox*> Max;
+    QList<QDoubleSpinBox*> Time;
+    QList<QComboBox*> Freq;
+    QList<QComboBox*> Arc;
+    QList<QDoubleSpinBox*> Offset;
+    quint8 TestRow;
 };
 
 #endif // PAGEACW_H

@@ -27,6 +27,92 @@ PageAcw::~PageAcw()
 
 void PageAcw::InitWindows()
 {
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+    ui->TabParams->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(4, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(5, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(6, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(7, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(9, QHeaderView::Stretch);
+    ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#else
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch);
+    ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
+    ui->TabParams->setRowCount(ACW_ROW);
+    for (int row=0; row<ACW_ROW; row++) {
+        Enable.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row, 0, Enable.at(row));
+        Enable.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal1.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row, 1, Terminal1.at(row));
+        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Terminal2.append(new QTableWidgetItem);
+        ui->TabParams->setItem(row, 2, Terminal2.at(row));
+        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
+        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        Vol.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row, 3, Vol.at(row));
+        Vol.at(row)->setMaximum(3000);
+        Vol.at(row)->setDecimals(0);
+        Vol.at(row)->setAlignment(Qt::AlignHCenter);
+        Vol.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Min.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row, 4, Min.at(row));
+        Min.at(row)->setMaximum(25);
+        Min.at(row)->setAlignment(Qt::AlignHCenter);
+        Min.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Max.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row, 5, Max.at(row));
+        Max.at(row)->setMaximum(25);
+        Max.at(row)->setAlignment(Qt::AlignHCenter);
+        Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Time.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row, 6, Time.at(row));
+        Time.at(row)->setMaximum(100);
+        Vol.at(row)->setDecimals(1);
+        Time.at(row)->setAlignment(Qt::AlignHCenter);
+        Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Freq.append(new QComboBox(this));
+        ui->TabParams->setCellWidget(row, 7, Freq.at(row));
+        QStringList t2;
+        t2 << "50" << "60";
+        Freq.at(row)->setView(new QListView(this));
+        Freq.at(row)->addItems(t2);
+
+        Arc.append(new QComboBox(this));
+        ui->TabParams->setCellWidget(row, 8, Arc.at(row));
+        QStringList t3;
+        t3 << "0" << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9";
+        Arc.at(row)->setView(new QListView(this));
+        Arc.at(row)->addItems(t3);
+
+        Offset.append(new QDoubleSpinBox(this));
+        ui->TabParams->setCellWidget(row, 9, Offset.at(row));
+        Offset.at(row)->setMaximum(25);
+        Offset.at(row)->setAlignment(Qt::AlignHCenter);
+        Offset.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+    }
     ui->BoxArc->setView(new QListView(this));
     ui->BoxFrequcy->setView(new QListView(this));
 }
@@ -58,16 +144,48 @@ void PageAcw::InitSettings()
     ini->setIniCodec("GB18030");
     ini->beginGroup("SetAcw");
 
-    QStringList temp = (ini->value("Other", "500 0 5.00 3 0 0 0").toString()).split(" ");
-    if (temp.size()  >= 7) {
-        ui->BoxVoltage->setValue(temp.at(0).toDouble());
-        ui->BoxMin->setValue(temp.at(1).toDouble());
-        ui->BoxMax->setValue(temp.at(2).toDouble());
-        ui->BoxTime->setValue(temp.at(3).toDouble());
-        ui->BoxArc->setCurrentIndex(temp.at(4).toInt());
-        ui->BoxFrequcy->setCurrentIndex(temp.at(5).toInt());
-        ui->BoxOffset->setValue(temp.at(6).toInt());
-    }
+    QStringList temp;
+    //可用
+    temp = (QString(ini->value("Enable", "Y N N N").
+                    toByteArray())).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Enable.at(row)->setText(temp.at(row));
+    //端一
+    temp = (ini->value("Terminal1", "PE 1 4 7").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Terminal1.at(row)->setText(temp.at(row));
+    //端二
+    temp = (ini->value("Terminal2", "ALL 2 3 5").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Terminal2.at(row)->setText(temp.at(row));
+    //电压
+    temp = (ini->value("Voltage", "500 500 500 500").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Vol.at(row)->setValue(temp.at(row).toDouble());
+    //电流下限
+    temp = (ini->value("Min", "0 0 0 0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Min.at(row)->setValue(temp.at(row).toDouble());
+    //电流上限
+    temp = (ini->value("Max", "5 5 5 5").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Max.at(row)->setValue(temp.at(row).toDouble());
+    //测试时间
+    temp = (ini->value("Time", "1 1 1 1").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Time.at(row)->setValue(temp.at(row).toDouble());
+    //频率
+    temp = (QString(ini->value("Freq", "0 0 0 0").toByteArray())).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Freq.at(row)->setCurrentIndex(temp.at(row).toInt());
+    //电弧
+    temp = (QString(ini->value("Arc", "0 0 0 0").toByteArray())).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Arc.at(row)->setCurrentIndex(temp.at(row).toInt());
+    //补偿
+    temp = (ini->value("Offset", "0 0 0 0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+        Offset.at(row)->setValue(temp.at(row).toDouble());
     qDebug() << QTime::currentTime().toString() << "PageAcw read OK";
 }
 
@@ -78,14 +196,45 @@ void PageAcw::SaveSettings()
     ini->setIniCodec("GB18030");
     ini->beginGroup("SetAcw");
     QStringList temp;
-    temp.append(QString::number(ui->BoxVoltage->value()));
-    temp.append(QString::number(ui->BoxMin->value()));
-    temp.append(QString::number(ui->BoxMax->value()));
-    temp.append(QString::number(ui->BoxTime->value()));
-    temp.append(QString::number(ui->BoxArc->currentIndex()));
-    temp.append(QString::number(ui->BoxFrequcy->currentIndex()));
-    temp.append(QString::number(ui->BoxOffset->value()));
-    ini->setValue("Other", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Enable.size(); i++)
+        temp.append(Enable.at(i)->text());
+    ini->setValue("Enable", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Terminal1.size(); i++)
+        temp.append(Terminal1.at(i)->text());
+    ini->setValue("Terminal1", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Terminal2.size(); i++)
+        temp.append(Terminal2.at(i)->text());
+    ini->setValue("Terminal2", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Vol.size(); i++)
+        temp.append(QString::number(Vol.at(i)->value()));
+    ini->setValue("Voltage", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Min.size(); i++)
+        temp.append(QString::number(Min.at(i)->value()));
+    ini->setValue("Min", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Max.size(); i++)
+        temp.append(QString::number(Max.at(i)->value()));
+    ini->setValue("Max", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Time.size(); i++)
+        temp.append(QString::number(Time.at(i)->value()));
+    ini->setValue("Time", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Freq.size(); i++)
+        temp.append(QString::number(Freq.at(i)->currentIndex()));
+    ini->setValue("Freq", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<Arc.size(); i++)
+        temp.append(QString::number(Arc.at(i)->currentIndex()));
+    ini->setValue("Arc", (temp.join(" ").toUtf8()));
+    for (int i=0; i<Offset.size(); i++)
+        temp.append(Offset.at(i)->text());
+    ini->setValue("Offset", (temp.join(" ").toUtf8()));
     qDebug() << QTime::currentTime().toString() << "PageAcw save OK";
 }
 
@@ -98,16 +247,23 @@ void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_START:
-        Mode = ACW_TEST;
-        Judge = "OK";
-        SendCanCmdStart(msg.toInt());
-        if (!WaitTimeOut(100)) {
-            Judge = "NG";
-            SendTestItemsAllError();
+        for (int row = 0; row<Enable.size(); row++) {
+            if (Enable.at(row)->text() == "Y") {
+                Mode = ACW_TEST;
+                TestRow = row;
+                Judge = "OK";
+                SendCanCmdStart(msg.toInt());
+                if(!WaitTimeOut(100)) {
+                    Judge = "NG";
+                    SendTestItemsAllError();
+                    break;
+                }
+                Delay(5);
+                Mode = ACW_FREE;
+            }
         }
-        SendTestJudge();
         Mode = ACW_FREE;
-        break;
+        SendTestJudge();
     case CMD_STOP:
         SendCanCmdStop();
         Mode = ACW_FREE;
@@ -185,23 +341,35 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
 void PageAcw::SendTestItemsAllEmpty()
 {
     Items.clear();
-    QString U1 = QString::number(ui->BoxVoltage->value());
-    QString M1 = ui->BoxMin->text();
-    QString M2 = ui->BoxMax->text();
-    QString s = QString(tr("交耐@%1V, %2~%3mA@ @ ")).arg(U1).arg(M1).arg(M2);
-    Items.append(s);
-    emit SendCommand(ADDR, CMD_INIT_ITEM, Items.join("\n").toUtf8());
+    for (int row = 0; row<Enable.size(); row++) {
+        QString T1 = Terminal1.at(row)->text();
+        QString U1 = Vol.at(qMin(row, Vol.size()))->text();
+        QString M1 = Min.at(qMin(row, Min.size()))->text();
+        QString M2 = Max.at(qMin(row, Max.size()))->text();
+        QString s = QString(tr("交耐%1@高端:%2,%3V,%4~%5mA@ @ ")).
+                arg(row+1).arg(T1).arg(U1).arg(M1).arg(M2);
+        Items.append(s);
+    }
+    QStringList n;
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            n.append(Items.at(row));
+        }
+    }
+    emit SendCommand(ADDR, CMD_INIT_ITEM, n.join("\n").toUtf8());
 }
 
 void PageAcw::SendTestItemsAllError()
 {
-    for (int i=0; i < Items.size(); i++) {
-        QStringList s = QString(Items.at(i)).split("@");
-        if (s.at(2) == " ")
-            s[2] = "---";
-        if (s.at(3) == " ")
-            s[3] = "NG";
-        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+    for (int row = 0; row<Enable.size(); row++) {
+        if (Enable.at(row)->text() == "Y") {
+            QStringList s = QString(Items.at(row)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+        }
     }
 }
 void PageAcw::SendTestItemTemp()
