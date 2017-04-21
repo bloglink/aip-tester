@@ -131,7 +131,6 @@ void WinType::InitButtons()
     btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnInsert, Qt::Key_0);
     btnGroup->addButton(ui->BtnDelete, Qt::Key_1);
-    btnGroup->addButton(ui->BtnRead, Qt::Key_2);
     btnGroup->addButton(ui->BtnCheck, Qt::Key_3);
     btnGroup->addButton(ui->BtnConfExit, Qt::Key_4);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
@@ -464,4 +463,12 @@ void WinType::showEvent(QShowEvent *)
     InitSettings();
 }
 
+void WinType::on_TabFile_cellClicked(int , int )
+{
+    ui->TextTypeShow->setText(ui->TabFile->currentItem()->text());
+    ChangeSettings();
+    InitSettings();
+}
 /*********************************END OF FILE**********************************/
+
+
