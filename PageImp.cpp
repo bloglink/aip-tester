@@ -691,9 +691,9 @@ void PageImp::CalculateResult(QByteArray )
         Phase1 += (a1-0x200)*(a1-0x200);
         Phase2 += (a1-0x200)*(a2-0x200);
     }
-    A = (Area2-Area1)*100/Area1;
-    D = qMin(Area2, Area3/4)*100/Area1;
-    P = (Phase1-Phase2)*100/Phase1;
+    A = qMin(99,abs((Area2-Area1)*100/Area1));
+    D = qMin(99,abs(qMin(Area2, Area3/4)*100/Area1));
+    P = qMin(99,abs((Phase1-Phase2)*100/Phase1));
 
     QString n;
     QString judge = "OK";

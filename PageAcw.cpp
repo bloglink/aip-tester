@@ -420,8 +420,9 @@ void PageAcw::SendTestItem()
         Curr.removeLast();
     }
     QStringList s = QString(Items.at(TestRow)).split("@");
+    QString rrr = QString::number(Curr.last(), 'f', 2);
     if (s.at(2) == " ")
-        s[2] = QString("%1mA").arg(Curr.last(), 0, 'g', 2);
+        s[2] = QString("%1mA").arg(rrr);
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
