@@ -127,9 +127,9 @@ void PageAcw::ExcuteCanCmd(QByteArray msg)
     if (Mode == ACW_FREE)
         return;
     TimeOut = 0;
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+    if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01)
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
 }
 /**
