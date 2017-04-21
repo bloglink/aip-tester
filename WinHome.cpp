@@ -12,7 +12,7 @@
 #include "ui_WinHome.h"
 
 WinHome::WinHome(QWidget *parent) :
-    QWidget(parent,Qt::FramelessWindowHint),
+    QWidget(parent),
     ui(new Ui::WinHome)
 {
     ui->setupUi(this);
@@ -52,6 +52,9 @@ void WinHome::InitThreadAll()
 void WinHome::InitWindows()
 {
     ui->titleVn->hide();
+#ifdef __arm__
+    ui->btnQuit->hide();
+#endif
 
     //设置界面风格
     QFile file;
@@ -227,10 +230,11 @@ void WinHome::InitButtons()
     btnGroup->addButton(ui->btnType,Qt::Key_2);
     btnGroup->addButton(ui->btnData,Qt::Key_3);
     btnGroup->addButton(ui->btnTest,Qt::Key_4);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(BtnJudge(int)));
+    btnGroup->addButton(ui->btnQuit,Qt::Key_5);
+    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
 }
 
-void WinHome::BtnJudge(int id)
+void WinHome::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_1:

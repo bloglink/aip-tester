@@ -64,6 +64,8 @@ private slots:
     QStringList EnableItems(void);
 
     virtual void showEvent(QShowEvent *);
+    void on_TabFile_cellClicked(int row, int column);
+
 private:
     QButtonGroup *btnGroup;
     QButtonGroup *itemButtons;
