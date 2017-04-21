@@ -47,8 +47,8 @@
        </property>
        <item>
         <widget class="QWidget" name="WidgetHome" native="true">
-         <layout class="QGridLayout" name="gridLayout" rowstretch="8,2,0,0,1,0" columnstretch="1,1,1,1,1,1">
-          <item row="2" column="2" colspan="2">
+         <layout class="QGridLayout" name="gridLayout" rowstretch="8,2,0,0,1,0" columnstretch="1,1,1,1,1,1,1,1">
+          <item row="2" column="3" colspan="2">
            <widget class="QLabel" name="titleVn">
             <property name="sizeIncrement">
              <size>
@@ -61,95 +61,7 @@
             </property>
            </widget>
           </item>
-          <item row="4" column="1">
-           <widget class="QPushButton" name="btnSyst">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>97</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>系统设置</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="2">
-           <widget class="QPushButton" name="btnType">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>97</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>型号管理</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="3">
-           <widget class="QPushButton" name="btnData">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>97</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>数据分析</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="4">
-           <widget class="QPushButton" name="btnTest">
-            <property name="enabled">
-             <bool>true</bool>
-            </property>
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>97</width>
-              <height>60</height>
-             </size>
-            </property>
-            <property name="text">
-             <string>进入测试</string>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="5">
+          <item row="4" column="7">
            <widget class="QWidget" name="WidgetBtnRight" native="true">
             <property name="styleSheet">
              <string notr="true">background-color: rgba(0,0,0,0)</string>
@@ -190,7 +102,7 @@
             </layout>
            </widget>
           </item>
-          <item row="3" column="2" colspan="2">
+          <item row="3" column="3" colspan="2">
            <spacer name="verticalSpacer_2">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -203,7 +115,7 @@
             </property>
            </spacer>
           </item>
-          <item row="5" column="2" colspan="2">
+          <item row="5" column="3" colspan="2">
            <spacer name="SpacerBottom">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -216,7 +128,7 @@
             </property>
            </spacer>
           </item>
-          <item row="0" column="2" colspan="2">
+          <item row="0" column="3" colspan="2">
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -229,14 +141,127 @@
             </property>
            </spacer>
           </item>
-          <item row="1" column="1" colspan="4">
-           <widget class="QTextBrowser" name="Text"/>
-          </item>
           <item row="4" column="0">
            <widget class="QWidget" name="WidgetBtnLeft" native="true">
             <property name="styleSheet">
              <string notr="true">background-color: rgba(0,0,0,0)</string>
             </property>
+           </widget>
+          </item>
+          <item row="1" column="1" colspan="6">
+           <widget class="QTextBrowser" name="Text"/>
+          </item>
+          <item row="4" column="1" colspan="6">
+           <widget class="QWidget" name="widget" native="true">
+            <layout class="QHBoxLayout" name="horizontalLayout">
+             <item>
+              <widget class="QPushButton" name="btnSyst">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>97</width>
+                 <height>60</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>系统设置</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnType">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>97</width>
+                 <height>60</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>型号管理</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnData">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>97</width>
+                 <height>60</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>数据分析</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnTest">
+               <property name="enabled">
+                <bool>true</bool>
+               </property>
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>97</width>
+                 <height>60</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>进入测试</string>
+               </property>
+              </widget>
+             </item>
+             <item>
+              <widget class="QPushButton" name="btnQuit">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="minimumSize">
+                <size>
+                 <width>97</width>
+                 <height>44</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>退出程序</string>
+               </property>
+              </widget>
+             </item>
+            </layout>
            </widget>
           </item>
          </layout>

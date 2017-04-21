@@ -66,7 +66,7 @@ private slots:
     void InitWindowsAll(void);
     void JumpToWindow(QByteArray win);
     void InitButtons(void);
-    void BtnJudge(int id);
+    void ReadButtons(int id);
     void InitVersion(QString v);
     void InitCan(void);
     void InitSql(void);
