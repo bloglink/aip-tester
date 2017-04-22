@@ -72,6 +72,7 @@ private slots:
     void InitInput(int r, int c);
     void EnsureInput(void);
     QString CurrentSettings(void);
+    bool EnablePhase(void);
     virtual void showEvent(QShowEvent*);
 private:
     quint16 TimeOut;
