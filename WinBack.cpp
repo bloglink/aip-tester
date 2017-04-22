@@ -211,7 +211,7 @@ void WinBack::InitSettings()
 
     QString t = ini->value("Number","168912000X").toString();
     ui->EditNumber->setText(t);
-    ui->OppositeDir->setChecked(ini->value("OppositeDir",false).toBool());
+    ui->EnablePhase->setChecked(ini->value("EnablePhase",false).toBool());
     ui->TestContinue->setChecked(ini->value("RestartMode",false).toBool());
     temp = ini->value("KDCR","16384").toString().split(" ");
     for (int i=0; i<qMin(temp.size(),BoxDcr.size()); i++)
@@ -245,7 +245,7 @@ void WinBack::SaveSettings()
     }
     ini->setValue("OutEnable",temp.join(" "));
     ini->setValue("Number",ui->EditNumber->text());
-    ini->setValue("OppositeDir",ui->OppositeDir->isChecked());
+    ini->setValue("EnablePhase",ui->EnablePhase->isChecked());
     ini->setValue("RestartMode",ui->TestContinue->isChecked());
 
     temp.clear();

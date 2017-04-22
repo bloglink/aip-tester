@@ -168,9 +168,9 @@
            </widget>
           </item>
           <item row="1" column="4">
-           <widget class="QCheckBox" name="OppositeDir">
+           <widget class="QCheckBox" name="EnablePhase">
             <property name="text">
-             <string>电阻板磁旋反转</string>
+             <string>启用相间测试</string>
             </property>
            </widget>
           </item>
