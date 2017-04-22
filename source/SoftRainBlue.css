@@ -160,7 +160,6 @@ QDialog QPushButton{min-height:25px;min-width:60px;}
 #TextTestUser{border:1px solid #447684;}
 #TextTestNumb{border:1px solid #447684;}
 
-QLabel#titleVn{font:28pt;}
 QWidget#wTitle{background:qlineargradient(x1:0,y1:0,x2:0,y2:1,stop:0 #2F81A6,stop:1.0 #5DABD5);}
 QLabel#lab_Ico,QLabel#lab_Title{background-color:rgba(0,0,0,0);border-style:none;}
 QPushButton#btnMenu_Min,QPushButton#btnMenu_Max,QPushButton#btnMenu_Close{border-radius:0px;border-style:none;

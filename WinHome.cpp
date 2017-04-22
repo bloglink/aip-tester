@@ -51,11 +51,10 @@ void WinHome::InitThreadAll()
 
 void WinHome::InitWindows()
 {
-    ui->titleVn->hide();
 #ifdef __arm__
     ui->btnQuit->hide();
 #endif
-
+    ui->keybord->setCurrentIndex(0);
     //设置界面风格
     QFile file;
     QString qss;
@@ -445,8 +444,8 @@ void WinHome::ReadStatusAll()
     }
     qDebug()<<QTime::currentTime().toString()<<"WinHome read OK";
 
-    ui->titleVn->show();
     ui->Text->hide();
+    ui->keybord->setCurrentIndex(1);
 
     HomeMode = HOME_FREE;
     if (ui->desktop->currentWidget()->objectName() == "MainPage") {
