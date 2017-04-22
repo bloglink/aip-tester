@@ -23,9 +23,13 @@ void PagePwr::InitWindows()
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->PGParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
     ui->TabParams->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->PGParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
     ui->TabParams->setRowCount(PWR_ROW);
@@ -88,6 +92,48 @@ void PagePwr::InitWindows()
         ui->TabParams->setItem(row,9,Grade.at(row));
         Grade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Grade.at(row)->setTextAlignment(Qt::AlignCenter);
+    }
+    ui->TabParams->setRowCount(PG_ROW);
+    for (int row=0; row < PG_ROW; row++) {
+        PGEnable.append(new QTableWidgetItem);
+        ui->PGParams->setItem(row,0,PGEnable.at(row));
+        PGEnable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        PGEnable.at(row)->setTextAlignment(Qt::AlignCenter);
+
+        PGUpper.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,1,PGUpper.at(row));
+        PGUpper.at(row)->setMaximum(9999);
+        PGUpper.at(row)->setAlignment(Qt::AlignHCenter);
+        PGUpper.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGLower.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,2,PGLower.at(row));
+        PGLower.at(row)->setMaximum(9999);
+        PGLower.at(row)->setAlignment(Qt::AlignHCenter);
+        PGLower.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGDuty.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,3,PGDuty.at(row));
+        PGDuty.at(row)->setMaximum(9999);
+        PGDuty.at(row)->setAlignment(Qt::AlignHCenter);
+        PGDuty.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGFreq.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,4,PGFreq.at(row));
+        PGFreq.at(row)->setMaximum(9999);
+        PGFreq.at(row)->setAlignment(Qt::AlignHCenter);
+        PGFreq.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGCurr.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,5,PGCurr.at(row));
+        PGCurr.at(row)->setMaximum(9999);
+        PGCurr.at(row)->setAlignment(Qt::AlignHCenter);
+        PGCurr.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGGrade.append(new QTableWidgetItem);
+        ui->PGParams->setItem(row,6,PGGrade.at(row));
+        PGGrade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        PGGrade.at(row)->setTextAlignment(Qt::AlignCenter);
     }
 }
 
@@ -164,6 +210,36 @@ void PagePwr::InitSettings()
     temp<<"123"<<"124"<<"125"<<"126"<<"127"<<"128";
     for (int row=0; row<qMin(temp.size(),PWR_ROW); row++)
         Grade.at(row)->setText(temp.at(row));
+
+    //可用
+    temp = (QString(set->value("PGEnable","Y Y Y").toByteArray())).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGEnable.at(row)->setText(temp.at(row));
+    //最小电流
+    temp = (set->value("PGUpper","0 0 0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGUpper.at(row)->setValue(temp.at(row).toDouble());
+    //最大电流
+    temp = (set->value("PGLower","5 5 5").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGLower.at(row)->setValue(temp.at(row).toDouble());
+    //最小功率
+    temp = (set->value("PGDuty","50 50 50").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGDuty.at(row)->setValue(temp.at(row).toDouble());
+    //最大功率
+    temp = (set->value("PowerMax","500 500 500").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGFreq.at(row)->setValue(temp.at(row).toDouble());
+    //最小容压
+    temp = (set->value("PGCurr","0 0 0 0 0 0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGCurr.at(row)->setValue(temp.at(row).toDouble());
+    temp.clear();
+    temp<<"123"<<"124"<<"125";
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGGrade.at(row)->setText(temp.at(row));
+
 }
 
 void PagePwr::SaveSettings()

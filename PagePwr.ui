@@ -14,8 +14,8 @@
    <string>Form</string>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="1" column="5">
-    <widget class="QDoubleSpinBox" name="BoxCap">
+   <item row="2" column="1">
+    <widget class="QDoubleSpinBox" name="BoxVolt">
      <property name="minimumSize">
       <size>
        <width>97</width>
@@ -38,48 +38,17 @@
       <double>380.000000000000000</double>
      </property>
      <property name="singleStep">
-      <double>1.000000000000000</double>
-     </property>
-     <property name="value">
-      <double>1.000000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <widget class="QDoubleSpinBox" name="BoxFreq">
-     <property name="minimumSize">
-      <size>
-       <width>97</width>
-       <height>35</height>
-      </size>
-     </property>
-     <property name="focusPolicy">
-      <enum>Qt::ClickFocus</enum>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignCenter</set>
-     </property>
-     <property name="buttonSymbols">
-      <enum>QAbstractSpinBox::NoButtons</enum>
-     </property>
-     <property name="decimals">
-      <number>1</number>
-     </property>
-     <property name="maximum">
-      <double>99.000000000000000</double>
-     </property>
-     <property name="singleStep">
       <double>0.100000000000000</double>
      </property>
      <property name="value">
-      <double>1.000000000000000</double>
+      <double>220.000000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="1" column="2">
-    <widget class="QLabel" name="TextFreq">
+   <item row="2" column="4">
+    <widget class="QLabel" name="TextCap">
      <property name="text">
-      <string>频率：</string>
+      <string>通道:</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -230,8 +199,8 @@
      </column>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QDoubleSpinBox" name="BoxVolt">
+   <item row="2" column="5">
+    <widget class="QDoubleSpinBox" name="BoxCap">
      <property name="minimumSize">
       <size>
        <width>97</width>
@@ -254,14 +223,14 @@
       <double>380.000000000000000</double>
      </property>
      <property name="singleStep">
-      <double>0.100000000000000</double>
+      <double>1.000000000000000</double>
      </property>
      <property name="value">
-      <double>220.000000000000000</double>
+      <double>1.000000000000000</double>
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item row="2" column="0">
     <widget class="QLabel" name="TextVolt">
      <property name="text">
       <string>电压:</string>
@@ -271,17 +240,17 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="4">
-    <widget class="QLabel" name="TextCap">
+   <item row="2" column="2">
+    <widget class="QLabel" name="TextFreq">
      <property name="text">
-      <string>通道:</string>
+      <string>频率：</string>
      </property>
      <property name="alignment">
       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
      </property>
     </widget>
    </item>
-   <item row="2" column="8">
+   <item row="3" column="8">
     <widget class="QPushButton" name="BtnExit">
      <property name="minimumSize">
       <size>
@@ -292,6 +261,76 @@
      <property name="text">
       <string>保存退出</string>
      </property>
+    </widget>
+   </item>
+   <item row="2" column="3">
+    <widget class="QDoubleSpinBox" name="BoxFreq">
+     <property name="minimumSize">
+      <size>
+       <width>97</width>
+       <height>35</height>
+      </size>
+     </property>
+     <property name="focusPolicy">
+      <enum>Qt::ClickFocus</enum>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+     <property name="buttonSymbols">
+      <enum>QAbstractSpinBox::NoButtons</enum>
+     </property>
+     <property name="decimals">
+      <number>1</number>
+     </property>
+     <property name="maximum">
+      <double>99.000000000000000</double>
+     </property>
+     <property name="singleStep">
+      <double>0.100000000000000</double>
+     </property>
+     <property name="value">
+      <double>1.000000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="9">
+    <widget class="QTableWidget" name="PGParams">
+     <column>
+      <property name="text">
+       <string>PG</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>高电平</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>低电平</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>占空比</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>频率</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>电流</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>档位</string>
+      </property>
+     </column>
     </widget>
    </item>
   </layout>

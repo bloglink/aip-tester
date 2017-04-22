@@ -18,6 +18,7 @@
 #include "define.h"
 
 #define PWR_ROW 6
+#define PG_ROW 3
 
 #define PWR_FREE        0
 #define PWR_INIT        4
@@ -93,6 +94,14 @@ private:
     quint8 Mode;
     QString dir;
     quint8 isTestDir;
+
+    QList<QTableWidgetItem*> PGEnable;
+    QList<QDoubleSpinBox*> PGUpper;
+    QList<QDoubleSpinBox*> PGLower;
+    QList<QDoubleSpinBox*> PGDuty;
+    QList<QDoubleSpinBox*> PGFreq;
+    QList<QDoubleSpinBox*> PGCurr;
+    QList<QTableWidgetItem*> PGGrade;
 };
 
 #endif // PAGEPWR_H
