@@ -158,6 +158,25 @@ void PageInr::InitSettings()
     temp = (ini->value("Offset", "0 0 0 0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
+    if (!EnablePhase()) {
+        Enable.at(0)->setText("Y");
+        Enable.at(1)->setText("N");
+        Enable.at(2)->setText("N");
+        Enable.at(3)->setText("N");
+        ui->TabParams->hideColumn(2);
+        ui->TabParams->hideColumn(1);
+        ui->TabParams->hideColumn(0);
+        ui->TabParams->hideRow(3);
+        ui->TabParams->hideRow(2);
+        ui->TabParams->hideRow(1);
+    } else {
+        ui->TabParams->showColumn(0);
+        ui->TabParams->showColumn(1);
+        ui->TabParams->showColumn(2);
+        ui->TabParams->showRow(1);
+        ui->TabParams->showRow(2);
+        ui->TabParams->showRow(3);
+    }
     qDebug()<<QTime::currentTime().toString()<<"PageInr read OK";
 }
 
@@ -575,6 +594,12 @@ QString PageInr::CurrentSettings()
     QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
     QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
     return n.remove(".ini");
+}
+
+bool PageInr::EnablePhase()
+{
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/EnablePhase", false).toBool();
 }
 
 void PageInr::showEvent(QShowEvent *)
