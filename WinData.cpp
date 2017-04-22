@@ -134,7 +134,6 @@ void WinData::SqlInit()
   */
 void WinData::SqlRead()
 {
-    ui->DateEdit2->setDate(QDate::currentDate());
     ui->TabDetail->setRowCount(0);
     SqlQuery(tr("总数"));
     SqlQuery(tr("电阻"));
@@ -222,6 +221,8 @@ void WinData::SqlClear()
   */
 void WinData::showEvent(QShowEvent *)
 {
+    ui->DateEdit1->setDate(QDate::currentDate());
+    ui->DateEdit2->setDate(QDate::currentDate());
     SqlRead();
 }
 /*********************************END OF FILE**********************************/
