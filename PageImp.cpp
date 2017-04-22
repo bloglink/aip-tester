@@ -296,7 +296,7 @@ void PageImp::InitSettings()
     QByteArray def;
     for (int i=0; i < 400; i++) {
         def.append(QByteArray(1,0x02));
-        def.append(QByteArray(1,0x00));
+        def.append(QByteArray(1,0x04));
     }
     for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);

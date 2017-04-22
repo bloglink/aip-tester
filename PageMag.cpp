@@ -157,14 +157,18 @@ void PageMag::InitSettings()
         AreaR[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
+    QByteArray def;
+    for (int i=0; i < 400; i++) {
+        def.append(QByteArray(1,0x80));
+    }
     for (int row=0; row<qMin(WaveMag.size(),MAX_ROW); row++) {
         QString ByteL = "WaveMagL"+QString::number(row);
-        w = set->value(ByteL,"1000000000000000").toString().toUtf8();
+        w = set->value(ByteL,def.toBase64()).toString().toUtf8();
         WaveMag.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
         WaveMag.at(row)->WaveByteShow(QByteArray::fromBase64(w));
 
         QString ByteR = "WaveMagR"+QString::number(row);
-        w = set->value(ByteR,"1000000000000000").toString().toUtf8();
+        w = set->value(ByteR,def.toBase64()).toString().toUtf8();
         WaveMag.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
 
         QString T1 = Terminal1.at(row)->text();
