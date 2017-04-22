@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170422
+ * author:      zhaonanlin
+ * brief:       开机主页
+*******************************************************************************/
 #ifndef WINHOME_H
 #define WINHOME_H
 
@@ -59,7 +67,7 @@ private:
 signals:
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitThreadAll(void);
     void InitWindows(void);
@@ -75,7 +83,7 @@ private slots:
     void InitSerial(void);
     void ReadCanCmd(QByteArray msg);
 
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray data);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void InitTestItems(void);
     void ReadStatusAll(void);
     void StartTest(QByteArray msg);
