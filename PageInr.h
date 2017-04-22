@@ -12,12 +12,16 @@
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
+#include <QTableWidgetItem>
+#include <QCheckBox>
 #include "define.h"
 
 
 #define INR_FREE        0
 #define INR_INIT        4
 #define INR_TEST        1
+#define INR_ROW         4
+
 
 namespace Ui {
 class PageInr;
@@ -42,7 +46,7 @@ private slots:
     void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
-
+    void ItemClick(int r, int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
@@ -51,19 +55,22 @@ private slots:
     void SendTestItemsAllError(void);
     void SendTestItemTemp(void);
     void SendTestItem(void);
+    void SendTestItemError(QString s);
     void SendTestJudge(void);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
-    void SendCanCmdConfig(void);
-    void SendCanCmdAlarm(quint8 port);
+    void SendCanCmdConfig(int row);
     void ClearResults(void);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+    quint16 GetTeminal(int r, int c);
+    void InitInput(int r, int c);
+    void EnsureInput(void);
     QString CurrentSettings(void);
     virtual void showEvent(QShowEvent*);
 private:
-    QSettings *set;
+    QSettings *ini;
 
     QList<double> Volt;
     QList<double> Res;
@@ -74,6 +81,16 @@ private:
 
     quint8 Mode;
     quint16 TimeOut;
+    QList<QTableWidgetItem*> Enable;
+    QList<QTableWidgetItem*> Terminal1;
+    QList<QTableWidgetItem*> Terminal2;
+    QList<QDoubleSpinBox*> Vol;
+    QList<QDoubleSpinBox*> Min;
+    QList<QDoubleSpinBox*> Max;
+    QList<QDoubleSpinBox*> Time;
+    QList<QDoubleSpinBox*> Offset;
+    quint8 TestRow;
+    QList<QCheckBox*> Check;
 };
 
 #endif // PAGEINR_H

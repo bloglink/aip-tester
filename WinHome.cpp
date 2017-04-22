@@ -12,7 +12,7 @@
 #include "ui_WinHome.h"
 
 WinHome::WinHome(QWidget *parent) :
-    QWidget(parent),
+    QWidget(parent,Qt::FramelessWindowHint),
     ui(new Ui::WinHome)
 {
     ui->setupUi(this);
