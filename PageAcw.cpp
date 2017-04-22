@@ -245,6 +245,7 @@ void PageAcw::SaveSettings()
 
 void PageAcw::ItemClick(int r, int c)
 {
+    ui->Input->hide();
     switch (c) {
     case 0:
         if (Enable.at(r)->text() != "Y")
@@ -566,6 +567,9 @@ void PageAcw::InitInput(int r, int c)
     if (c == 1) {
         s = Terminal1.at(r)->text();
         x = "147";
+        s1 = Terminal2.at(r)->text();
+        for (int i=0; i < s1.size(); i++)
+            x.remove(s1.mid(i,1));
     }
     if (c == 2) {
         s = Terminal2.at(r)->text();
@@ -581,8 +585,6 @@ void PageAcw::InitInput(int r, int c)
     for (int i = 0; i < s.size(); i++) {
         Check.at(s.mid(i,1).toInt()-1)->setChecked(true);
     }
-
-
 }
 
 void PageAcw::EnsureInput()
@@ -592,7 +594,10 @@ void PageAcw::EnsureInput()
         if (Check.at(i)->isChecked())
             s.append(Check.at(i)->text());
     }
-    ui->TabParams->currentItem()->setText(s);
+    int r = ui->TabParams->currentRow();
+    int c = ui->TabParams->currentColumn();
+    if ( r != 0 && (c == 1 || c == 2))
+        ui->TabParams->currentItem()->setText(s);
     ui->Input->hide();
 }
 
