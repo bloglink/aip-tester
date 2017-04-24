@@ -1,6 +1,9 @@
 #ifndef WINDATA_H
 #define WINDATA_H
 
+#include <QDir>
+#include <QFileInfo>
+#include <QMessageBox>
 #include <QTime>
 #include <QFile>
 #include <QDebug>
@@ -35,6 +38,8 @@ private slots:
     void SqlRead(void);
     void SqlQuery(QString item);
     void SqlClear(void);
+    void SqlExport(void);
+    QString ReadUsb(void);
     virtual void showEvent(QShowEvent *);
 
 private:

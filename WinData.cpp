@@ -1,13 +1,11 @@
-/**
-  ******************************************************************************
-  * @file    WinData.cpp
-  * @author  link
-  * @version 2.0.3.0
-  * @date    2017-02-28
-  * @brief   Show sql data
-  ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170424
+ * author:      zhaonanlin
+ * brief:
+*******************************************************************************/
 #include "WinData.h"
 #include "ui_WinData.h"
 /**
@@ -76,15 +74,7 @@ void WinData::BtnJudge(int id)
         emit SendCommand(ADDR,CMD_JUMP,NULL);
         break;
     case Qt::Key_1:
-        if (ui->WidgetShow->currentIndex() == 0) {
-            ui->WidgetShow->setCurrentIndex(1);
-        } else {
-            ui->WidgetShow->setCurrentIndex(0);
-            model->select();
-            while(model->canFetchMore()) {
-                model->fetchMore();
-            }
-        }
+        SqlExport();
         break;
     case Qt::Key_2:
         SqlRead();
@@ -213,6 +203,52 @@ void WinData::SqlClear()
     query.prepare("delete from TestData");
     query.exec();
     SqlRead();
+}
+
+void WinData::SqlExport()
+{
+    QString path = ReadUsb();
+    if (path.isEmpty()) {
+        QMessageBox::warning(this, "",  "请插入U盘", QMessageBox::Ok);
+        return;
+    }
+    QFile file(QString("%1/%2.csv").arg(path).arg(QDate::currentDate().toString("yy-MM-dd")));
+    if (!file.open(QFile::WriteOnly)) {
+        QMessageBox::warning(this, "",  "创建失败", QMessageBox::Ok);
+        return;
+    }
+    QSqlQuery query(db);
+    query.prepare("select item,para,result,judge from TestData");
+    query.exec();
+    int i=0;
+    while (query.next()) {
+        file.write(query.value(0).toString().replace(","," ").toUtf8());
+        file.write(",");
+        file.write(query.value(1).toString().replace(","," ").toUtf8());
+        file.write(",");
+        file.write(query.value(2).toString().replace(","," ").toUtf8());
+        file.write(",");
+        file.write(query.value(3).toString().replace(","," ").toUtf8());
+        file.write("\n");
+        i++;
+        if (i%10 == 1)
+            ui->label_2->setText(QString::number(i));
+    }
+    file.close();
+    QMessageBox::information(this, "",  "导出成功", QMessageBox::Ok);
+}
+
+QString WinData::ReadUsb()
+{
+    QDir *dir = new QDir;
+    dir->setPath("/mnt/usb1");
+    if (dir->count() > 2)
+        return "/mnt/usb1";
+    dir->setPath("/mnt/usb2");
+    if (dir->count() > 2)
+        return "/mnt/usb2";
+    return NULL;
+
 }
 /**
   * @brief  Initializes data when show
