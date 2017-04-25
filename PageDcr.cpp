@@ -109,7 +109,7 @@ void PageDcr::InitWindows()
     connect(Unit.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(AutoChangeUnit(int)));
     connect(Min.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeMin(double)));
     connect(Max.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeMax(double)));
-    connect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeStd(double)));
+//    connect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeStd(double)));
 }
 
 void PageDcr::InitButtons()

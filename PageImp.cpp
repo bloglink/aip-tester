@@ -90,7 +90,7 @@ void PageImp::InitWindows()
 
         Time.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 4, Time.at(row));
-        Time.at(row)->setMaximum(9999);
+        Time.at(row)->setMaximum(10);
         Time.at(row)->setAlignment(Qt::AlignHCenter);
         Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Time.at(row)->setDecimals(0);
@@ -458,7 +458,7 @@ void PageImp::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         emit SendCommand(ADDR, CMD_WAVE_HIDE, NULL);
         SendCanCmdStart(msg.toInt());
         JudgeAll = "OK";
-        if (!WaitTimeOut(500)) {
+        if (!WaitTimeOut(1000)) {
             JudgeAll = "NG";
             SendTestItemsAllError();
         }

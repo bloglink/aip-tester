@@ -63,7 +63,7 @@ void WinSyst::BtnJudge(int id)
         else if (ui->EditPassword->text() == "aip9918")
             ui->StackWinSyst->setCurrentIndex(0);
         else
-            emit SendCommand(ADDR,CMD_JUMP,NULL);
+            ui->EditPassword->clear();
         break;
     case Qt::Key_1:
         emit SendCommand(ADDR,CMD_JUMP,NULL);
