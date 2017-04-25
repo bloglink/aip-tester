@@ -77,6 +77,7 @@
 #define CAN_ID_IMP_WAVE 0x481   // 匝间板波形
 #define CAN_ID_IND      0xC1    // 电感板
 #define CAN_ID_PWR      0xE1    // 功率板
+#define CAN_ID_PG_WAVE  0x4E1   // PG波形
 #define CAN_ID_13OUT    0x261   // 输出板13
 #define CAN_ID_14OUT    0x281   // 输出板14
 #define CAN_ID_15OUT    0x2A1   // 输出板15

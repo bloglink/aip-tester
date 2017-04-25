@@ -93,7 +93,7 @@ void PagePwr::InitWindows()
         Grade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Grade.at(row)->setTextAlignment(Qt::AlignCenter);
     }
-    ui->TabParams->setRowCount(PG_ROW);
+    ui->PGParams->setRowCount(PG_ROW);
     for (int row=0; row < PG_ROW; row++) {
         PGEnable.append(new QTableWidgetItem);
         ui->PGParams->setItem(row,0,PGEnable.at(row));
@@ -295,6 +295,38 @@ void PagePwr::SaveSettings()
     for (int i=0; i<Grade.size(); i++)
         temp.append(Grade.at(i)->text());
     set->setValue("Grade",(temp.join(" ").toUtf8()));
+
+    temp.clear();
+    for (int i=0; i<PGEnable.size(); i++)
+        temp.append(PGEnable.at(i)->text());
+    set->setValue("PGEnable",(temp.join(" ").toUtf8()));
+
+    temp.clear();
+    for (int i=0; i<PGUpper.size(); i++)
+        temp.append(QString::number(PGUpper.at(i)->value()));
+    set->setValue("PGUpper",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGLower.size(); i++)
+        temp.append(QString::number(PGLower.at(i)->value()));
+    set->setValue("PGLower",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGDuty.size(); i++)
+        temp.append(QString::number(PGDuty.at(i)->value()));
+    set->setValue("PGDuty",(temp.join(" ").toUtf8()));
+
+    temp.clear();
+    for (int i=0; i<PGFreq.size(); i++)
+        temp.append(QString::number(PGFreq.at(i)->value()));
+    set->setValue("PGFreq",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGCurr.size(); i++)
+        temp.append(QString::number(PGCurr.at(i)->value()));
+    set->setValue("PGCurr",(temp.join(" ").toUtf8()));
+
+    temp.clear();
+    for (int i=0; i<PGGrade.size(); i++)
+        temp.append(PGGrade.at(i)->text());
+    set->setValue("PGGrade",(temp.join(" ").toUtf8()));
 }
 
 void PagePwr::ItemClick(int r, int c)
@@ -315,11 +347,11 @@ void PagePwr::ItemClick(int r, int c)
 
 void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_PWR && addr != CAN_ID_PWR)
+    if (addr != ADDR && addr != WIN_ID_PWR && addr != CAN_ID_PWR && addr != CAN_ID_PG_WAVE)
         return;
     switch (cmd) {
     case CMD_CAN:
-        ExcuteCanCmd(msg);
+        ExcuteCanCmd(addr, msg);
         break;
     case CMD_CHECK:
         Mode = PWR_INIT;
@@ -358,22 +390,39 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         InitTestItems();
         SendTestItemsAllEmpty();
         break;
+    case CAN_ID_PG_WAVE:
+        qDebug() << "pg wave" << msg.toHex();
+        break;
     default:
         break;
     }
 }
 
-void PagePwr::ExcuteCanCmd(QByteArray msg)
+void PagePwr::ExcuteCanCmd(quint16 addr, QByteArray msg)
 {
     if (Mode == PWR_FREE)
         return;
     TimeOut = 0;
+    if (addr == CAN_ID_PG_WAVE) {
+        ReadCanCmdPGWave(msg);
+        return;
+    }
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x02)
         ReadCanCmdDir(msg);
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x0A)
+        ReadCanCmdPGCurrs(msg);
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x0B)
+        ReadCanCmdPGFreqs(msg);
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x0C)
+        ReadCanCmdPGDutys(msg);
+    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x0D && (quint8)msg.at(1) == 0x00)
+        ReadCanCmdPGWaveStart();
+    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x0D && (quint8)msg.at(1) != 0x00)
+        ReadCanCmdPGWaveStop();
 }
 void PagePwr::ReadCanCmdStatus(QByteArray msg)
 {
@@ -394,6 +443,7 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
         ClearResults();
     }
     Mode = PWR_FREE;
+    emit SendCommand(ADDR,CMD_WAVE_BYTE,wave);
 }
 
 void PagePwr::ReadCanCmdResult(QByteArray msg)
@@ -423,9 +473,45 @@ void PagePwr::ReadCanCmdDir(QByteArray msg)
         dir = tr("反转");
 }
 
+void PagePwr::ReadCanCmdPGCurrs(QByteArray msg)
+{
+    PGCurrs.append(quint16(msg.at(1)+quint8(msg.at(2))));
+    PGLowers.append(quint16(msg.at(3)+quint8(msg.at(4))));
+    PGUppers.append(quint16(msg.at(5)+quint8(msg.at(6))));
+}
+
+void PagePwr::ReadCanCmdPGFreqs(QByteArray msg)
+{
+    PGFreqMin.append(quint16(msg.at(1)+quint8(msg.at(2))));
+    PGFreqAvr.append(quint16(msg.at(3)+quint8(msg.at(4))));
+    PGFreqMax.append(quint16(msg.at(5)+quint8(msg.at(6))));
+}
+
+void PagePwr::ReadCanCmdPGDutys(QByteArray msg)
+{
+    PGDutyMin.append(quint16(msg.at(1)+quint8(msg.at(2))));
+    PGDutyAvr.append(quint16(msg.at(3)+quint8(msg.at(4))));
+    PGDutyMax.append(quint16(msg.at(5)+quint8(msg.at(6))));
+}
+
+void PagePwr::ReadCanCmdPGWaveStart()
+{
+    wave.clear();
+}
+
+void PagePwr::ReadCanCmdPGWaveStop()
+{
+}
+
+void PagePwr::ReadCanCmdPGWave(QByteArray msg)
+{
+    wave.append(msg);
+}
+
 void PagePwr::InitTestItems()
 {
     Items.clear();
+    PGItems.clear();
     for (int row = 0; row<Enable.size(); row++) {
         QStringList s;
         QString G1 = Grade.at(qMin(row,Grade.size()))->text();
@@ -449,6 +535,21 @@ void PagePwr::InitTestItems()
     } else {
         isTestDir = 0x00;
     }
+
+    for (int row = 0; row<PGEnable.size(); row++) {
+        QStringList s;
+        QString G1 = PGGrade.at(qMin(row,PGGrade.size()))->text();
+        double H = PGUpper.at(qMin(row,PGUpper.size()))->value();
+        double L = PGLower.at(qMin(row,PGLower.size()))->value();
+        double F = PGFreq.at(qMin(row,PGFreq.size()))->value();
+        double C = PGCurr.at(qMin(row,PGCurr.size()))->value();
+        double D = PGDuty.at(qMin(row,PGDuty.size()))->value();
+        s.append(QString(tr("PG%1")).arg(G1));
+        s.append(QString("H:%1,L:%2,D:%3F:%4,%5A").arg(H).arg(L).arg(D).arg(F).arg(C));
+        s.append(" ");
+        s.append(" ");
+        PGItems.append(s.join("@"));
+    }
 }
 
 void PagePwr::SendTestItemsAllEmpty()
@@ -457,6 +558,7 @@ void PagePwr::SendTestItemsAllEmpty()
     for (int row = 0; row<Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
+            n.append(PGItems.at(row));
         }
     }
     if (TestDir.at(0)->currentIndex() != 0) {
@@ -471,6 +573,12 @@ void PagePwr::SendTestItemsAllError()
     for (int row = 0; row<Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             QStringList s = QString(Items.at(row)).split("@");
+            if (s.at(2) == " ")
+                s[2] = "---";
+            if (s.at(3) == " ")
+                s[3] = "NG";
+            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            s = QString(PGItems.at(row)).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
@@ -498,6 +606,19 @@ void PagePwr::SendTestItemTemp()
     if (s.at(2) == " ")
         s[2] = t;
     emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+
+    QString hhh = QString::number(PGUppers.last()/100,'f',2);
+    QString lll = QString::number(PGLowers.last()/100,'f',2);
+    QString ddd = QString::number(PGDutyAvr.last()/100,'f',2);
+    QString fff = QString::number(PGFreqAvr.last()/100,'f',0);
+    QString ccc = QString::number(PGCurrs.last()/100,'f',2);
+    t = QString("H:%1,L:%2,F:%3Hz").arg(hhh).arg(lll).arg(fff);
+
+    s = QString(PGItems.at(TestRow)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+    Delay(5);
 }
 
 void PagePwr::SendTestItem()
@@ -525,6 +646,20 @@ void PagePwr::SendTestItem()
         QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
         emit SendCommand(ADDR,CMD_ITEM,s.toUtf8());
     }
+
+    QString hhh = QString::number(PGUppers.last()/100,'f',2);
+    QString lll = QString::number(PGLowers.last()/100,'f',2);
+    QString ddd = QString::number(PGDutyAvr.last(),'f',2);
+    QString fff = QString::number(PGFreqAvr.last(),'f',0);
+    QString ccc = QString::number(PGCurrs.last()/100,'f',2);
+    t = QString("H:%1,L:%2,F:%3Hz").arg(hhh).arg(lll).arg(fff);
+
+    s = QString(PGItems.at(TestRow)).split("@");
+    if (s.at(2) == " ")
+        s[2] = t;
+    if (s.at(3) == " ")
+        s[3] = Judge;
+    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
 }
 
 void PagePwr::SendTestJudge()
@@ -550,11 +685,12 @@ void PagePwr::SendCanCmdStart()
     quint16 v = ui->BoxVolt->value();
     quint16 t = TestTime.at(TestRow)->value()*10;
     quint8 p = CurrentPorwer().toInt()<<4;
+    quint8 vv = ui->BoxPGVolt->value()*10;
     if (ui->BoxFreq->value() == 60)
         p += 0x02;
-    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1)
+    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1+0x08)
       <<quint8(t/256)<<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256)
-     <<quint8(isTestDir)<<quint8(0x00);
+     <<quint8(isTestDir)<<quint8(vv);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
@@ -590,6 +726,15 @@ void PagePwr::ClearResults()
     Volt.clear();
     Curr.clear();
     Power.clear();
+    PGCurrs.clear();
+    PGUppers.clear();
+    PGLowers.clear();
+    PGFreqMin.clear();
+    PGFreqAvr.clear();
+    PGFreqMax.clear();
+    PGDutyMin.clear();
+    PGDutyAvr.clear();
+    PGDutyMax.clear();
 }
 
 bool PagePwr::WaitTimeOut(quint16 t)
