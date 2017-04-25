@@ -62,6 +62,7 @@ private slots:
     QString CurrentSettings(void);
     QStringList CurrentItems(void);
     QStringList EnableItems(void);
+    int CurrentUser(void);
 
     virtual void showEvent(QShowEvent *);
     void on_TabFile_cellClicked(int row, int column);

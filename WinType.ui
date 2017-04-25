@@ -70,7 +70,7 @@
            <string>1</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="0" column="1">
@@ -78,7 +78,7 @@
            <string>2</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="1" column="0">
@@ -86,7 +86,7 @@
            <string>3</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="1" column="1">
@@ -94,7 +94,7 @@
            <string>4</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="2" column="0">
@@ -102,7 +102,7 @@
            <string>5</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="2" column="1">
@@ -110,7 +110,7 @@
            <string>6</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="3" column="0">
@@ -118,7 +118,7 @@
            <string>7</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
          <item row="3" column="1">
@@ -126,7 +126,7 @@
            <string>8</string>
           </property>
           <property name="textAlignment">
-           <set>AlignCenter</set>
+           <set>AlignHCenter|AlignVCenter|AlignCenter</set>
           </property>
          </item>
         </widget>

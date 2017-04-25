@@ -162,12 +162,16 @@ void WinType::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        if (CurrentUser() == 0)
+            return;
         CopySettings(ui->EditTypeName->text());
         ReadAllSettings();
         ReadAvailableItems();
         InitSettings();
         break;
     case Qt::Key_1:
+        if (CurrentUser() == 0)
+            return;
         RemoveSettings();
         ReadAllSettings();
         break;
@@ -175,7 +179,8 @@ void WinType::ReadButtons(int id)
         QuerySettings();
         break;
     case Qt::Key_4:
-        SaveSettings();
+        if (CurrentUser() == 1)
+            SaveSettings();
         emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     default:
@@ -456,8 +461,16 @@ QStringList WinType::EnableItems()
     return n.split(" ");
 }
 
+int WinType::CurrentUser()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    return ini->value("/GLOBAL/User","0").toInt();
+}
+
 void WinType::showEvent(QShowEvent *)
 {
+    ui->Other->setCurrentIndex(0);
+    ui->Type->setCurrentIndex(0);
     ReadAllSettings();
     ReadAvailableItems();
     InitSettings();

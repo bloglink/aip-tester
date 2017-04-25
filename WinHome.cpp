@@ -16,7 +16,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170422");
+    InitVersion("V-2.1.0.170424");
     HomeMode = HOME_FREE;
     InitThreadAll();
 }
@@ -414,6 +414,7 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 
 void WinHome::InitTestItems()
 {
+    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x00));
     QStringList n = CurrentItems();
     if (n.isEmpty())
         return;
