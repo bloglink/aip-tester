@@ -19,6 +19,7 @@ WinHome::WinHome(QWidget *parent) :
     InitVersion("V-2.1.0.170424");
     HomeMode = HOME_FREE;
     InitThreadAll();
+    isPause = false;
 }
 
 WinHome::~WinHome()
@@ -357,6 +358,10 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         ReadStatusAll();
         break;
     case CMD_INIT_ITEM:
+        if (isPause) {
+            TempItems.append(QString(msg).split("\n"));
+            break;
+        }
         Items.append(QString(msg).split("\n"));
         break;
     case CMD_JUDGE:
@@ -471,6 +476,7 @@ void WinHome::StartTest(QByteArray station)
 
     QStringList n = CurrentItems();
     for (int i=0; i < n.size(); i++) {
+        Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
         if (HomeMode == HOME_FREE)
             break;
@@ -521,9 +527,25 @@ void WinHome::SaveItemJudge(QByteArray msg)
 
 void WinHome::TestPause()
 {
-    if (QMessageBox::warning(this, "此项目不合格",  "是否继续",
-                            QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
-        HomeMode = HOME_FREE;
+    isPause = true;
+    TempItems.clear();
+    msgBox = new MessageBox(this,"此项目不合格", "是否继续",QMessageBox::Yes,QMessageBox::Cancel);
+    msgBox->setIcon(":/source/link.png");
+    connect(this,SIGNAL(message(QByteArray)),msgBox,SLOT(readcnd(QByteArray)));
+    int ret = msgBox->exec();
+    if (ret== QMessageBox::Yes)
+    {
+        emit SendCommand(Current_Test_Item,CMD_INIT,stat);
+        emit SendCommand(WIN_ID_TEST,CMD_ITEM_REPLACE,TempItems.join("\n").toUtf8());
+        emit SendCommand(Current_Test_Item,CMD_START,stat);
+        Delay(10);
+    }
+    else if(ret == QMessageBox::Cancel)
+    {
+//        HomeMode = HOME_FREE;
+    }
+    isPause = false;
+    TempItems.clear();
 }
 
 void WinHome::ShowLogMessage(QByteArray msg)

@@ -158,6 +158,22 @@ void WinTest::ShowItem(QString item)
     }
 }
 
+void WinTest::ReplaceItem(QString item)
+{
+    QStringList t = item.split("\n");
+    for (int i=0; i<t.size(); i++) {
+        QStringList s = t.at(i).split("@");
+        for (int i=0; i<ui->TabTest->rowCount(); i++) {
+            QString n = ui->TabTest->item(i,0)->text();
+            if (s.at(0) == n) {
+                ui->TabTest->item(i,2)->setText(" ");
+                ui->TabTest->item(i,3)->setText(" ");
+                break;
+            }
+        }
+    }
+}
+
 void WinTest::ShowJudge(QString judge)
 {
     int sum = ui->LabelSum->text().toInt();
@@ -285,6 +301,9 @@ void WinTest::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_JUDGE:
         ShowJudge(msg);
+        break;
+    case CMD_ITEM_REPLACE:
+        ReplaceItem(msg);
         break;
     default:
         break;

@@ -363,6 +363,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = PWR_FREE;
         break;
     case CMD_START:
+        emit SendCommand(ADDR, CMD_WAVE_HIDE, NULL);
         for (int row = 0; row<Enable.size(); row++) {
             if (Enable.at(row)->text() == "Y") {
                 Mode = PWR_TEST;
@@ -531,7 +532,7 @@ void PagePwr::InitTestItems()
     if (TestDir.at(0)->currentIndex() != 0) {
         QString s = QString(tr("转向@%1@ @ ").arg(TestDir.at(0)->currentText()));
         Items.append(s);
-        isTestDir = 0x02;
+        isTestDir = 0x01;
     } else {
         isTestDir = 0x00;
     }
@@ -612,7 +613,7 @@ void PagePwr::SendTestItemTemp()
     QString ddd = QString::number(PGDutyAvr.last()/100,'f',2);
     QString fff = QString::number(PGFreqAvr.last()/100,'f',0);
     QString ccc = QString::number(PGCurrs.last()/100,'f',2);
-    t = QString("H:%1,L:%2,F:%3Hz").arg(hhh).arg(lll).arg(fff);
+    t = QString("H:%1V,L:%2V,F:%3Hz").arg(hhh).arg(lll).arg(fff);
 
     s = QString(PGItems.at(TestRow)).split("@");
     if (s.at(2) == " ")
@@ -649,10 +650,10 @@ void PagePwr::SendTestItem()
 
     QString hhh = QString::number(PGUppers.last()/100,'f',2);
     QString lll = QString::number(PGLowers.last()/100,'f',2);
-    QString ddd = QString::number(PGDutyAvr.last(),'f',2);
-    QString fff = QString::number(PGFreqAvr.last(),'f',0);
+    QString ddd = QString::number(PGDutyAvr.last()/10,'f',1);
+    QString fff = QString::number(PGFreqAvr.last()/10,'f',1);
     QString ccc = QString::number(PGCurrs.last()/100,'f',2);
-    t = QString("H:%1,L:%2,F:%3Hz").arg(hhh).arg(lll).arg(fff);
+    t = QString("H:%1V,L:%2V,F:%3Hz").arg(hhh).arg(lll).arg(fff);
 
     s = QString(PGItems.at(TestRow)).split("@");
     if (s.at(2) == " ")

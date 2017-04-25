@@ -44,6 +44,7 @@
 #include "TcpClient.h"
 #include "UdpClient.h"
 #include "SerialPort.h"
+#include "message_box.h"
 
 #define HOME_UNKOWN 0xff
 #define HOME_FREE 0x00
@@ -121,6 +122,10 @@ private:
     SerialPort serial;
     quint8 HomeMode;
     QByteArray stat;
+    MessageBox *msgBox;
+    quint16 Current_Test_Item;
+    QStringList TempItems;
+    bool isPause;
 };
 
 #endif // WINHOME_H

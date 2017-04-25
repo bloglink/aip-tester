@@ -39,6 +39,7 @@ private slots:
     void SaveSettings(void);
     void InitItem(QByteArray msg);
     void ShowItem(QString item);
+    void ReplaceItem(QString item);
     void ShowJudge(QString judge);
     void ShowWaveItem(QByteArray msg);
     void ShowWaveByte(QByteArray msg);
