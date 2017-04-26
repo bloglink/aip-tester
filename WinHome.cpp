@@ -407,7 +407,7 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         emit message(QByteArray::fromHex("100001"));
         emit SendCommand(ADDR, CMD_STOP, msg);
         if (HomeMode != HOME_FREE)
-            HomeMode = HOME_FREE;
+            HomeMode = HOME_STOP;
         else
             InitTestItems();
         break;
@@ -484,7 +484,7 @@ void WinHome::StartTest(QByteArray station)
     for (int i=0; i < n.size(); i++) {
         Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
-        if (HomeMode == HOME_FREE)
+        if (HomeMode == HOME_STOP)
             break;
         Delay(10);
     }
@@ -501,7 +501,7 @@ void WinHome::StartTest(QByteArray station)
     emit SendCommand(WIN_ID_TEST, CMD_JUDGE, ItemJudge.toUtf8());
 
     emit SendCommand(ADDR, CMD_STATUS, "ready");
-    if (CurrentReStartMode() && HomeMode != HOME_FREE) {
+    if (CurrentReStartMode() && HomeMode != HOME_STOP) {
         QTimer *timer = new QTimer(this);
         timer->singleShot(500,  this,  SLOT(ReStartTest()));
     }

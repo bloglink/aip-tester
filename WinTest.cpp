@@ -261,7 +261,7 @@ void WinTest::ClearWave()
 void WinTest::ClickItem(int r, int )
 {
     QString t = ui->TabTest->item(r,0)->text();
-    if (t.contains(tr("反嵌")) || t.contains(tr("匝间"))) {
+    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")) || t.contains(tr("PG"))) {
         ClearWave();
         emit SendCommand(ADDR,CMD_WAVE,t.toUtf8());
     }

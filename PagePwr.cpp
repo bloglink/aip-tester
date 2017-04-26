@@ -482,6 +482,9 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         InitTestItems();
         SendTestItemsAllEmpty();
         break;
+    case CMD_WAVE:
+        SendWave(msg);
+        break;
     default:
         break;
     }
@@ -533,6 +536,19 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
     }
     Mode = PWR_FREE;
     emit SendCommand(ADDR,CMD_WAVE_BYTE,wave);
+    switch (TestRow) {
+    case 0:
+        wave1 = wave;
+        break;
+    case 1:
+        wave2 = wave;
+        break;
+    case 2:
+        wave3 = wave;
+        break;
+    default:
+        break;
+    }
 }
 
 void PagePwr::ReadCanCmdResult(QByteArray msg)
@@ -597,6 +613,7 @@ void PagePwr::InitTestItems()
 {
     Items.clear();
     PGItems.clear();
+    PGWaveItem.clear();
     for (int row = 0; row<Enable.size(); row++) {
         QStringList s;
         QString G1 = Grade.at(qMin(row,Grade.size()))->text();
@@ -634,6 +651,7 @@ void PagePwr::InitTestItems()
         s.append(" ");
         s.append(" ");
         PGItems.append(s.join("@"));
+        PGWaveItem.append(QString(tr("PG%1")).arg(G1));
     }
 }
 
@@ -874,6 +892,32 @@ void PagePwr::ClearResults()
     PGLowers.clear();
     PGFreqAvr.clear();
     PGDutyAvr.clear();
+}
+
+void PagePwr::SendWave(QByteArray msg)
+{
+    qDebug() << msg << PGWaveItem;
+    int t = PGWaveItem.size();
+    for (int i=0; i<PGWaveItem.size(); i++) {
+        if (PGWaveItem.at(i) == msg) {
+            t = i;
+            break;
+        }
+    }
+    if (t == PGWaveItem.size())
+        return;
+    if (t <= 0 && !wave1.isEmpty()) {
+        emit SendCommand(ADDR,CMD_WAVE_ITEM,PGWaveItem.at(0).toUtf8());
+        emit SendCommand(ADDR,CMD_WAVE_BYTE,wave1);
+    }
+    if (t <= 1 && !wave2.isEmpty()) {
+        emit SendCommand(ADDR,CMD_WAVE_ITEM,PGWaveItem.at(1).toUtf8());
+        emit SendCommand(ADDR,CMD_WAVE_BYTE,wave2);
+    }
+    if (t <= 2 && !wave3.isEmpty()) {
+        emit SendCommand(ADDR,CMD_WAVE_ITEM,PGWaveItem.at(2).toUtf8());
+        emit SendCommand(ADDR,CMD_WAVE_BYTE,wave3);
+    }
 }
 
 bool PagePwr::WaitTimeOut(quint16 t)

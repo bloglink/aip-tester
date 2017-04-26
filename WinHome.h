@@ -49,6 +49,7 @@
 #define HOME_UNKOWN 0xff
 #define HOME_FREE 0x00
 #define HOME_TEST 0x01
+#define HOME_STOP 0x02
 
 namespace Ui {
 class WinHome;

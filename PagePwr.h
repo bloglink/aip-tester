@@ -71,6 +71,7 @@ private slots:
     void ReadCanCmdPGWave(QByteArray msg);
     void CalculateResult(void);
     void ClearResults(void);
+    void SendWave(QByteArray msg);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     QString CurrentSettings(void);
@@ -123,6 +124,11 @@ private:
     QList<double> PGDutyAvr;
     QByteArray wave;
     QString PGJudge;
+
+    QStringList PGWaveItem;
+    QByteArray wave1;
+    QByteArray wave2;
+    QByteArray wave3;
 };
 
 #endif // PAGEPWR_H
