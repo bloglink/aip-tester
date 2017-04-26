@@ -114,14 +114,13 @@ int MessageBox::execReturnCode(QAbstractButton *button)
     int nResult = m_pButtonBox->standardButton(button);
     return nResult;
 }
-void MessageBox::readcnd(QByteArray mag)
+void MessageBox::readcnd(QByteArray msg)
 {
-    QString str; str=mag.at(1);
-    if(str=="3")
+    if(quint8(msg.at(1)) != 0)
     {
         onButtonClicked(m_pButtonBox->buttons().at(0));
     }
-    else if(str=="4")
+    if(quint8(msg.at(2)) != 0)
     {
         onButtonClicked(m_pButtonBox->buttons().at(1));
     }

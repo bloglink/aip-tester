@@ -66,6 +66,7 @@ private:
     Ui::WinHome *ui;
 
 signals:
+    void message(QByteArray msg);
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);

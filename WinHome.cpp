@@ -336,6 +336,9 @@ void WinHome::ReadCanCmd(QByteArray msg)
                 in >> dat;
                 cmd.append(dat);
             }
+            if (id == CAN_ID_DCR && quint8(cmd.at(0)) != 0)
+                emit message(cmd);
+
             emit SendCommand(id, CMD_CAN, cmd);
         }
     }
