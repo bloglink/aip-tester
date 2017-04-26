@@ -660,7 +660,7 @@
       </size>
      </property>
      <property name="text">
-      <string>采样</string>
+      <string>左工位采样</string>
      </property>
     </widget>
    </item>

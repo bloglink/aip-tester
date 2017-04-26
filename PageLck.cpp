@@ -34,6 +34,7 @@ void PageLck::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        ui->BtnExit->setEnabled(false);
         for (int i=0; i<ui->BoxSampleTimes->value(); i++) {
             ui->BtnSample->setText(QString("采样中%1").arg(i+1));
             Mode = LCK_SAMPLE;
@@ -44,7 +45,8 @@ void PageLck::BtnJudge(int id)
         }
         CalculateSample();
         ClearResults();
-        ui->BtnSample->setText(QString("采样"));
+        ui->BtnSample->setText(QString("左工位采样"));
+        ui->BtnExit->setEnabled(true);
         break;
     case Qt::Key_2:
         SaveSettings();
