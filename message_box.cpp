@@ -16,9 +16,6 @@ MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &te
     setWindowIcon(QIcon(":/source/link.png"));
     setWindowTitle(title);
     setMinimumSize(300, 130);
-//    setMinimizeVisible(false);
-//    setMaximizeVisible(false);
-//    setWidgetResizable(false);
 
     m_pButtonBox = new QDialogButtonBox(this);
     m_pButtonBox->setStandardButtons(QDialogButtonBox::StandardButtons(int(buttons))|QDialogButtonBox::StandardButtons(int(defaultButton)));
@@ -84,7 +81,7 @@ void MessageBox::translateUI()
 {
     QPushButton *pYesButton = m_pButtonBox->button(QDialogButtonBox::Yes);
     if (pYesButton != NULL)
-        pYesButton->setText(tr("Yes"));
+        pYesButton->setText(tr("重测"));
 
     QPushButton *pNoButton = m_pButtonBox->button(QDialogButtonBox::No);
     if (pNoButton != NULL)
@@ -96,7 +93,7 @@ void MessageBox::translateUI()
 
     QPushButton *pCancelButton = m_pButtonBox->button(QDialogButtonBox::Cancel);
     if (pCancelButton != NULL)
-        pCancelButton->setText(tr("Cancel"));
+        pCancelButton->setText(tr("继续"));
 }
 
 QMessageBox::StandardButton MessageBox::standardButton(QAbstractButton *button) const
@@ -116,11 +113,11 @@ int MessageBox::execReturnCode(QAbstractButton *button)
 }
 void MessageBox::readcnd(QByteArray msg)
 {
-    if(quint8(msg.at(1)) != 0)
+    if(quint8(msg.at(2)) != 0)
     {
         onButtonClicked(m_pButtonBox->buttons().at(0));
     }
-    if(quint8(msg.at(2)) != 0)
+    if(quint8(msg.at(1)) != 0)
     {
         onButtonClicked(m_pButtonBox->buttons().at(1));
     }

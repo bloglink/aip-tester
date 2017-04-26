@@ -394,6 +394,8 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         emit PutCanData(msg);
         break;
     case CMD_START:
+        if (HomeMode != HOME_FREE)
+            break;
         if (QString(msg).split(" ").size() < 2)
             return;
         if (QString(msg).split(" ").at(1).toInt() != CurrentStartMode())
@@ -402,6 +404,7 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         break;
     case CMD_STOP:
         ItemJudge = "NG";
+        emit message(QByteArray::fromHex("100001"));
         emit SendCommand(ADDR, CMD_STOP, msg);
         if (HomeMode != HOME_FREE)
             HomeMode = HOME_FREE;
@@ -532,9 +535,12 @@ void WinHome::TestPause()
 {
     isPause = true;
     TempItems.clear();
-    msgBox = new MessageBox(this,"此项目不合格", "是否继续",QMessageBox::Yes,QMessageBox::Cancel);
+    msgBox = new MessageBox(this,"", "此项目不合格,是否重测",QMessageBox::Yes,QMessageBox::Cancel);
     msgBox->setIcon(":/source/link.png");
     connect(this,SIGNAL(message(QByteArray)),msgBox,SLOT(readcnd(QByteArray)));
+    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x01));
+    Delay(CurrentAlarmTime("NG"));
+    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
     int ret = msgBox->exec();
     if (ret== QMessageBox::Yes)
     {
