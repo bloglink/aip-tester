@@ -8,6 +8,7 @@ WinBack::WinBack(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
+    Testing = false;
 }
 
 WinBack::~WinBack()

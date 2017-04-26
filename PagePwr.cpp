@@ -100,38 +100,68 @@ void PagePwr::InitWindows()
         PGEnable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         PGEnable.at(row)->setTextAlignment(Qt::AlignCenter);
 
-        PGUpper.append(new QDoubleSpinBox(this));
-        ui->PGParams->setCellWidget(row,1,PGUpper.at(row));
-        PGUpper.at(row)->setMaximum(9999);
-        PGUpper.at(row)->setAlignment(Qt::AlignHCenter);
-        PGUpper.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        PGUpperMin.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,1,PGUpperMin.at(row));
+        PGUpperMin.at(row)->setMaximum(9999);
+        PGUpperMin.at(row)->setAlignment(Qt::AlignHCenter);
+        PGUpperMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        PGLower.append(new QDoubleSpinBox(this));
-        ui->PGParams->setCellWidget(row,2,PGLower.at(row));
-        PGLower.at(row)->setMaximum(9999);
-        PGLower.at(row)->setAlignment(Qt::AlignHCenter);
-        PGLower.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        PGUpperMax.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,2,PGUpperMax.at(row));
+        PGUpperMax.at(row)->setMaximum(9999);
+        PGUpperMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PGUpperMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        PGDuty.append(new QDoubleSpinBox(this));
-        ui->PGParams->setCellWidget(row,3,PGDuty.at(row));
-        PGDuty.at(row)->setMaximum(9999);
-        PGDuty.at(row)->setAlignment(Qt::AlignHCenter);
-        PGDuty.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        PGLowerMin.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,3,PGLowerMin.at(row));
+        PGLowerMin.at(row)->setMaximum(9999);
+        PGLowerMin.at(row)->setAlignment(Qt::AlignHCenter);
+        PGLowerMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        PGFreq.append(new QDoubleSpinBox(this));
-        ui->PGParams->setCellWidget(row,4,PGFreq.at(row));
-        PGFreq.at(row)->setMaximum(9999);
-        PGFreq.at(row)->setAlignment(Qt::AlignHCenter);
-        PGFreq.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        PGLowerMax.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,4,PGLowerMax.at(row));
+        PGLowerMax.at(row)->setMaximum(9999);
+        PGLowerMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PGLowerMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        PGCurr.append(new QDoubleSpinBox(this));
-        ui->PGParams->setCellWidget(row,5,PGCurr.at(row));
-        PGCurr.at(row)->setMaximum(9999);
-        PGCurr.at(row)->setAlignment(Qt::AlignHCenter);
-        PGCurr.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        PGDutyMin.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,5,PGDutyMin.at(row));
+        PGDutyMin.at(row)->setMaximum(9999);
+        PGDutyMin.at(row)->setAlignment(Qt::AlignHCenter);
+        PGDutyMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGDutyMax.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,6,PGDutyMax.at(row));
+        PGDutyMax.at(row)->setMaximum(9999);
+        PGDutyMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PGDutyMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGFreqMin.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,7,PGFreqMin.at(row));
+        PGFreqMin.at(row)->setMaximum(9999);
+        PGFreqMin.at(row)->setAlignment(Qt::AlignHCenter);
+        PGFreqMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGFreqMax.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,8,PGFreqMax.at(row));
+        PGFreqMax.at(row)->setMaximum(9999);
+        PGFreqMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PGFreqMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGCurrMin.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,9,PGCurrMin.at(row));
+        PGCurrMin.at(row)->setMaximum(9999);
+        PGCurrMin.at(row)->setAlignment(Qt::AlignHCenter);
+        PGCurrMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        PGCurrMax.append(new QDoubleSpinBox(this));
+        ui->PGParams->setCellWidget(row,10,PGCurrMax.at(row));
+        PGCurrMax.at(row)->setMaximum(9999);
+        PGCurrMax.at(row)->setAlignment(Qt::AlignHCenter);
+        PGCurrMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         PGGrade.append(new QTableWidgetItem);
-        ui->PGParams->setItem(row,6,PGGrade.at(row));
+        ui->PGParams->setItem(row,11,PGGrade.at(row));
         PGGrade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         PGGrade.at(row)->setTextAlignment(Qt::AlignCenter);
     }
@@ -164,11 +194,12 @@ void PagePwr::InitSettings()
     set->setIniCodec("GB18030");
     set->beginGroup("PagePwr");
 
-    QStringList temp = (set->value("Other","220 50 1").toString()).split(" ");
+    QStringList temp = (set->value("Other","220 50 1 5").toString()).split(" ");
     if (temp.size() >= 3) {
         ui->BoxVolt->setValue(temp.at(0).toDouble());
         ui->BoxFreq->setValue(temp.at(1).toDouble());
         ui->BoxCap->setValue(temp.at(2).toDouble());
+        ui->BoxPGVolt->setValue(temp.at(3).toDouble());
     }
     //可用
     temp = (QString(set->value("Enable","Y Y Y N N N").toByteArray())).split(" ");
@@ -215,26 +246,45 @@ void PagePwr::InitSettings()
     temp = (QString(set->value("PGEnable","Y Y Y").toByteArray())).split(" ");
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
         PGEnable.at(row)->setText(temp.at(row));
-    //最小电流
-    temp = (set->value("PGUpper","0 0 0").toString()).split(" ");
+
+    temp = (set->value("PGUpperMin","4 4 4").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
-        PGUpper.at(row)->setValue(temp.at(row).toDouble());
-    //最大电流
-    temp = (set->value("PGLower","5 5 5").toString()).split(" ");
+        PGUpperMin.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGUpperMax","6 6 6").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
-        PGLower.at(row)->setValue(temp.at(row).toDouble());
-    //最小功率
-    temp = (set->value("PGDuty","50 50 50").toString()).split(" ");
+        PGUpperMax.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGLowerMin","0 0 0").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
-        PGDuty.at(row)->setValue(temp.at(row).toDouble());
-    //最大功率
-    temp = (set->value("PowerMax","500 500 500").toString()).split(" ");
+        PGLowerMin.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGLowerMax","1 1 1").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
-        PGFreq.at(row)->setValue(temp.at(row).toDouble());
-    //最小容压
-    temp = (set->value("PGCurr","0 0 0 0 0 0").toString()).split(" ");
+        PGLowerMax.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGDutyMin","40 40 40").toString()).split(" ");
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
-        PGCurr.at(row)->setValue(temp.at(row).toDouble());
+        PGDutyMin.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGDutyMax","60 60 60").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGDutyMax.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGFreqMin","40 40 40").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGFreqMin.at(row)->setValue(temp.at(row).toDouble());
+    temp = (set->value("PGFreqMax","60 60 60").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGFreqMax.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGCurrMin","0 0 0").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGCurrMin.at(row)->setValue(temp.at(row).toDouble());
+
+    temp = (set->value("PGCurrMax","1 1 1").toString()).split(" ");
+    for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
+        PGCurrMax.at(row)->setValue(temp.at(row).toDouble());
     temp.clear();
     temp<<"123"<<"124"<<"125";
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
@@ -248,6 +298,7 @@ void PagePwr::SaveSettings()
     temp.append(QString::number(ui->BoxVolt->value()));
     temp.append(QString::number(ui->BoxFreq->value()));
     temp.append(QString::number(ui->BoxCap->value()));
+    temp.append(QString::number(ui->BoxPGVolt->value()));
     set->setValue("Other",(temp.join(" ").toUtf8()));
 
     temp.clear();
@@ -302,26 +353,46 @@ void PagePwr::SaveSettings()
     set->setValue("PGEnable",(temp.join(" ").toUtf8()));
 
     temp.clear();
-    for (int i=0; i<PGUpper.size(); i++)
-        temp.append(QString::number(PGUpper.at(i)->value()));
-    set->setValue("PGUpper",(temp.join(" ").toUtf8()));
+    for (int i=0; i<PGUpperMin.size(); i++)
+        temp.append(QString::number(PGUpperMin.at(i)->value()));
+    set->setValue("PGUpperMin",(temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<PGLower.size(); i++)
-        temp.append(QString::number(PGLower.at(i)->value()));
-    set->setValue("PGLower",(temp.join(" ").toUtf8()));
+    for (int i=0; i<PGUpperMax.size(); i++)
+        temp.append(QString::number(PGUpperMax.at(i)->value()));
+    set->setValue("PGUpperMax",(temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<PGDuty.size(); i++)
-        temp.append(QString::number(PGDuty.at(i)->value()));
-    set->setValue("PGDuty",(temp.join(" ").toUtf8()));
+    for (int i=0; i<PGLowerMin.size(); i++)
+        temp.append(QString::number(PGLowerMin.at(i)->value()));
+    set->setValue("PGLowerMin",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGLowerMax.size(); i++)
+        temp.append(QString::number(PGLowerMax.at(i)->value()));
+    set->setValue("PGLowerMax",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGDutyMin.size(); i++)
+        temp.append(QString::number(PGDutyMin.at(i)->value()));
+    set->setValue("PGDutyMin",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGDutyMax.size(); i++)
+        temp.append(QString::number(PGDutyMax.at(i)->value()));
+    set->setValue("PGDutyMax",(temp.join(" ").toUtf8()));
 
     temp.clear();
-    for (int i=0; i<PGFreq.size(); i++)
-        temp.append(QString::number(PGFreq.at(i)->value()));
-    set->setValue("PGFreq",(temp.join(" ").toUtf8()));
+    for (int i=0; i<PGFreqMin.size(); i++)
+        temp.append(QString::number(PGFreqMin.at(i)->value()));
+    set->setValue("PGFreqMin",(temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<PGCurr.size(); i++)
-        temp.append(QString::number(PGCurr.at(i)->value()));
-    set->setValue("PGCurr",(temp.join(" ").toUtf8()));
+    for (int i=0; i<PGFreqMax.size(); i++)
+        temp.append(QString::number(PGFreqMax.at(i)->value()));
+    set->setValue("PGFreqMax",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGCurrMin.size(); i++)
+        temp.append(QString::number(PGCurrMin.at(i)->value()));
+    set->setValue("PGCurrMin",(temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i<PGCurrMax.size(); i++)
+        temp.append(QString::number(PGCurrMax.at(i)->value()));
+    set->setValue("PGCurrMax",(temp.join(" ").toUtf8()));
 
     temp.clear();
     for (int i=0; i<PGGrade.size(); i++)
@@ -369,6 +440,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
                 Mode = PWR_TEST;
                 TestRow = row;
                 Judge = "OK";
+                PGJudge = "OK";
                 SendCanCmdStart();
                 if(!WaitTimeOut(100)) {
                     Judge = "NG";
@@ -390,9 +462,6 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         InitSettings();
         InitTestItems();
         SendTestItemsAllEmpty();
-        break;
-    case CAN_ID_PG_WAVE:
-        qDebug() << "pg wave" << msg.toHex();
         break;
     default:
         break;
@@ -476,23 +545,19 @@ void PagePwr::ReadCanCmdDir(QByteArray msg)
 
 void PagePwr::ReadCanCmdPGCurrs(QByteArray msg)
 {
-    PGCurrs.append(quint16(msg.at(1)+quint8(msg.at(2))));
-    PGLowers.append(quint16(msg.at(3)+quint8(msg.at(4))));
-    PGUppers.append(quint16(msg.at(5)+quint8(msg.at(6))));
+    PGCurrs.append(quint16(msg.at(1)*256+quint8(msg.at(2))));
+    PGLowers.append(quint16(msg.at(3)*256+quint8(msg.at(4))));
+    PGUppers.append(quint16(msg.at(5)*256+quint8(msg.at(6))));
 }
 
 void PagePwr::ReadCanCmdPGFreqs(QByteArray msg)
 {
-    PGFreqMin.append(quint16(msg.at(1)+quint8(msg.at(2))));
-    PGFreqAvr.append(quint16(msg.at(3)+quint8(msg.at(4))));
-    PGFreqMax.append(quint16(msg.at(5)+quint8(msg.at(6))));
+    PGFreqAvr.append(quint16(msg.at(3)*256+quint8(msg.at(4))));
 }
 
 void PagePwr::ReadCanCmdPGDutys(QByteArray msg)
 {
-    PGDutyMin.append(quint16(msg.at(1)+quint8(msg.at(2))));
-    PGDutyAvr.append(quint16(msg.at(3)+quint8(msg.at(4))));
-    PGDutyMax.append(quint16(msg.at(5)+quint8(msg.at(6))));
+    PGDutyAvr.append(quint16(msg.at(3)*256+quint8(msg.at(4))));
 }
 
 void PagePwr::ReadCanCmdPGWaveStart()
@@ -540,13 +605,13 @@ void PagePwr::InitTestItems()
     for (int row = 0; row<PGEnable.size(); row++) {
         QStringList s;
         QString G1 = PGGrade.at(qMin(row,PGGrade.size()))->text();
-        double H = PGUpper.at(qMin(row,PGUpper.size()))->value();
-        double L = PGLower.at(qMin(row,PGLower.size()))->value();
-        double F = PGFreq.at(qMin(row,PGFreq.size()))->value();
-        double C = PGCurr.at(qMin(row,PGCurr.size()))->value();
-        double D = PGDuty.at(qMin(row,PGDuty.size()))->value();
+        double H = PGUpperMin.at(qMin(row,PGUpperMin.size()))->value();
+        double L = PGLowerMin.at(qMin(row,PGLowerMin.size()))->value();
+        double F = PGFreqMin.at(qMin(row,PGFreqMin.size()))->value();
+        double C = PGCurrMin.at(qMin(row,PGCurrMin.size()))->value();
+        double D = PGDutyMin.at(qMin(row,PGDutyMin.size()))->value();
         s.append(QString(tr("PG%1")).arg(G1));
-        s.append(QString("H:%1,L:%2,D:%3F:%4,%5A").arg(H).arg(L).arg(D).arg(F).arg(C));
+        s.append(QString("H:%1,L:%2,D:%3F:%4,%5mA").arg(H).arg(L).arg(D).arg(F).arg(C));
         s.append(" ");
         s.append(" ");
         PGItems.append(s.join("@"));
@@ -613,7 +678,7 @@ void PagePwr::SendTestItemTemp()
     QString ddd = QString::number(PGDutyAvr.last()/100,'f',2);
     QString fff = QString::number(PGFreqAvr.last()/100,'f',0);
     QString ccc = QString::number(PGCurrs.last()/100,'f',2);
-    t = QString("H:%1V,L:%2V,F:%3Hz").arg(hhh).arg(lll).arg(fff);
+    t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
 
     s = QString(PGItems.at(TestRow)).split("@");
     if (s.at(2) == " ")
@@ -653,19 +718,42 @@ void PagePwr::SendTestItem()
     QString ddd = QString::number(PGDutyAvr.last()/10,'f',1);
     QString fff = QString::number(PGFreqAvr.last()/10,'f',1);
     QString ccc = QString::number(PGCurrs.last()/100,'f',2);
-    t = QString("H:%1V,L:%2V,F:%3Hz").arg(hhh).arg(lll).arg(fff);
+    t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
+
+    if (PGUppers.last()/100 > PGUpperMax.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGUppers.last()/100 < PGUpperMin.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGLowers.last()/100 > PGLowerMax.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGLowers.last()/100 < PGLowerMin.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGDutyAvr.last()/10 > PGDutyMax.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGDutyAvr.last()/10 < PGDutyMin.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGFreqAvr.last()/10 > PGFreqMax.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGFreqAvr.last()/10 > PGFreqMin.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGCurrs.last()/100 > PGCurrMax.at(TestRow)->value())
+        PGJudge = "NG";
+    if (PGCurrs.last()/100 < PGCurrMin.at(TestRow)->value())
+        PGJudge = "NG";
 
     s = QString(PGItems.at(TestRow)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
     if (s.at(3) == " ")
-        s[3] = Judge;
-    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+        s[3] = PGJudge;
+    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
 }
 
 void PagePwr::SendTestJudge()
 {
     QString s = QString(tr("功率@%1@%2")).arg(CurrentSettings()).arg(Judge);
+    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+    s = QString(tr("PG@%1@%2")).arg(CurrentSettings()).arg(PGJudge);
     emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
 }
 
@@ -727,15 +815,12 @@ void PagePwr::ClearResults()
     Volt.clear();
     Curr.clear();
     Power.clear();
+
     PGCurrs.clear();
     PGUppers.clear();
     PGLowers.clear();
-    PGFreqMin.clear();
     PGFreqAvr.clear();
-    PGFreqMax.clear();
-    PGDutyMin.clear();
     PGDutyAvr.clear();
-    PGDutyMax.clear();
 }
 
 bool PagePwr::WaitTimeOut(quint16 t)

@@ -77,25 +77,29 @@ void PageAcw::InitWindows()
         Vol.at(row)->setDecimals(0);
         Vol.at(row)->setAlignment(Qt::AlignHCenter);
         Vol.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Vol.at(row)->setFocusPolicy(Qt::ClickFocus);
 
         Min.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 4, Min.at(row));
         Min.at(row)->setMaximum(25);
         Min.at(row)->setAlignment(Qt::AlignHCenter);
         Min.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Min.at(row)->setFocusPolicy(Qt::ClickFocus);
 
         Max.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 5, Max.at(row));
         Max.at(row)->setMaximum(25);
         Max.at(row)->setAlignment(Qt::AlignHCenter);
         Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Max.at(row)->setFocusPolicy(Qt::ClickFocus);
 
         Time.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 6, Time.at(row));
         Time.at(row)->setMaximum(100);
-        Vol.at(row)->setDecimals(1);
+        Time.at(row)->setDecimals(1);
         Time.at(row)->setAlignment(Qt::AlignHCenter);
         Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Time.at(row)->setFocusPolicy(Qt::ClickFocus);
 
         Freq.append(new QComboBox(this));
         ui->TabParams->setCellWidget(row, 7, Freq.at(row));
@@ -116,6 +120,7 @@ void PageAcw::InitWindows()
         Offset.at(row)->setMaximum(25);
         Offset.at(row)->setAlignment(Qt::AlignHCenter);
         Offset.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        Offset.at(row)->setFocusPolicy(Qt::ClickFocus);
     }
 }
 

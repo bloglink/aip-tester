@@ -103,22 +103,24 @@ private:
     quint8 isTestDir;
 
     QList<QTableWidgetItem*> PGEnable;
-    QList<QDoubleSpinBox*> PGUpper;
-    QList<QDoubleSpinBox*> PGLower;
-    QList<QDoubleSpinBox*> PGDuty;
-    QList<QDoubleSpinBox*> PGFreq;
-    QList<QDoubleSpinBox*> PGCurr;
+    QList<QDoubleSpinBox*> PGUpperMin;
+    QList<QDoubleSpinBox*> PGUpperMax;
+    QList<QDoubleSpinBox*> PGLowerMin;
+    QList<QDoubleSpinBox*> PGLowerMax;
+    QList<QDoubleSpinBox*> PGDutyMin;
+    QList<QDoubleSpinBox*> PGDutyMax;
+    QList<QDoubleSpinBox*> PGFreqMin;
+    QList<QDoubleSpinBox*> PGFreqMax;
+    QList<QDoubleSpinBox*> PGCurrMin;
+    QList<QDoubleSpinBox*> PGCurrMax;
     QList<QTableWidgetItem*> PGGrade;
     QList<double> PGCurrs;
     QList<double> PGUppers;
     QList<double> PGLowers;
-    QList<double> PGFreqMin;
     QList<double> PGFreqAvr;
-    QList<double> PGFreqMax;
-    QList<double> PGDutyMin;
     QList<double> PGDutyAvr;
-    QList<double> PGDutyMax;
     QByteArray wave;
+    QString PGJudge;
 };
 
 #endif // PAGEPWR_H
