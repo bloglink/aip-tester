@@ -535,6 +535,9 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
         ClearResults();
     }
     Mode = PWR_FREE;
+    if (wave.isEmpty())
+        return;
+    emit SendCommand(ADDR,CMD_WAVE_ITEM,PGWaveItem.at(TestRow).toUtf8());
     emit SendCommand(ADDR,CMD_WAVE_BYTE,wave);
     switch (TestRow) {
     case 0:
@@ -549,6 +552,7 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
     default:
         break;
     }
+    wave.clear();
 }
 
 void PagePwr::ReadCanCmdResult(QByteArray msg)
@@ -896,7 +900,6 @@ void PagePwr::ClearResults()
 
 void PagePwr::SendWave(QByteArray msg)
 {
-    qDebug() << msg << PGWaveItem;
     int t = PGWaveItem.size();
     for (int i=0; i<PGWaveItem.size(); i++) {
         if (PGWaveItem.at(i) == msg) {
