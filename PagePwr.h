@@ -48,13 +48,14 @@ private slots:
     void InitSettings(void);
     void SaveSettings(void);
     void ItemClick(int r,int c);
+    void ItemClickPG(int r,int c);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(quint16 addr, QByteArray msg);
     void InitTestItems(void);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
     void SendCanCmdStatus(void);
-    void SendCanCmdStart(void);
+    void SendCanCmdStart(quint8 s);
     void SendCanCmdStop(void);
     void SendTestItemTemp(void);
     void SendTestJudge(void);
@@ -74,6 +75,7 @@ private slots:
     void Delay(int ms);
     QString CurrentSettings(void);
     QString CurrentPorwer(void);
+    bool IsPGEnable(void);
     virtual void showEvent(QShowEvent *);
 private:
     QSettings *set;

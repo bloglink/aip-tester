@@ -46,13 +46,14 @@ private slots:
     void InitTestItems(void);
     void SendTestItemsAllError(void);
     void ReadCanCmdStatus(QByteArray msg);
-    void SendCanCmdStart(void);
+    void SendCanCmdStart(quint8 s);
     void ReadCanCmdResult(QByteArray msg);
     void SendCanCmdStop(void);
     void SendItemJudge(void);
     void SendTestJudge(void);
     void CalculateSample(void);
     void ClearResults(void);
+    QString CurrentPorwer(void);
 
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);

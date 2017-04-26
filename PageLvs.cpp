@@ -93,7 +93,7 @@ void PageLvs::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_START:
         Mode = LVS_TEST;
         Judge = "OK";
-        SendCanCmdStart();
+        SendCanCmdStart(msg.toInt());
         if(!WaitTimeOut(100)) {
             Judge = "NG";
             SendTestItemsAllError();
@@ -155,7 +155,7 @@ void PageLvs::SendTestItemsAllError()
     }
 }
 
-void PageLvs::SendCanCmdStart()
+void PageLvs::SendCanCmdStart(quint8 s)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -163,9 +163,12 @@ void PageLvs::SendCanCmdStart()
     quint16 t = ui->BoxTime->value()*10;
     quint16 v = ui->BoxVolt->value();
     quint8 p = PowerSupply<<4;
+    quint8 g = 0x01;
     if (ui->BoxFreq->value() == 60)
         p += 0x02;
-    out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
+    if (s == WIN_ID_OUT14)
+        g <<= 4;
+    out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(g)
       <<quint8(t/256)<<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256)
      <<quint8(0x00)<<quint8(0x00);
     emit SendCommand(ADDR,CMD_CAN,msg);

@@ -37,7 +37,7 @@ void PageLck::BtnJudge(int id)
         for (int i=0; i<ui->BoxSampleTimes->value(); i++) {
             ui->BtnSample->setText(QString("采样中%1").arg(i+1));
             Mode = LCK_SAMPLE;
-            SendCanCmdStart();
+            SendCanCmdStart(WIN_ID_OUT13);
             WaitTimeOut(1000);
             Mode = LCK_FREE;
             Delay(ui->BoxSampleDelay->value()*1000);
@@ -114,8 +114,8 @@ void PageLck::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_START:
         Mode = LCK_TEST;
         Judge = "OK";
-        SendCanCmdStart();
-        if(!WaitTimeOut(100)) {
+        SendCanCmdStart(msg.toInt());
+        if(!WaitTimeOut(500)) {
             Judge = "NG";
             SendTestItemsAllError();
             break;
@@ -166,19 +166,21 @@ void PageLck::InitTestItems()
     emit SendCommand(ADDR,CMD_INIT_ITEM,Items.join("\n").toUtf8());
 }
 
-void PageLck::SendCanCmdStart()
+void PageLck::SendCanCmdStart(quint8 s)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    quint16 t = ui->BoxTime->value()*10;
+    quint16 t = ui->BoxTime->value()*100;
     quint16 v = ui->BoxVolt->value();
     quint8 p = PowerSupply<<4;
+    quint8 g = 0x01;
     if (ui->BoxFreq->value() == 60)
         p += 0x02;
-    out<<quint16(0x27)<<quint8(0x07)<<quint8(0x01)<<quint8(0x01)
-      <<quint8(t/256)<<quint8(t%256)<<quint8(0x10+v/256)<<quint8(v%256)
-     <<quint8(0x00)<<quint8(0x00);
+    if (s == WIN_ID_OUT14)
+        g <<= 4;
+    out<<quint16(0x27)<<quint8(0x05)<<quint8(0x03)<<quint8(g)
+      <<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256);
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
@@ -326,6 +328,13 @@ void PageLck::ClearResults()
     Volt.clear();
     Curr.clear();
     Power.clear();
+}
+
+QString PageLck::CurrentPorwer()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/PowerSupply","0").toString();
+    return n;
 }
 
 bool PageLck::WaitTimeOut(quint16 t)

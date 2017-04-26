@@ -93,6 +93,7 @@ void PagePwr::InitWindows()
         Grade.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Grade.at(row)->setTextAlignment(Qt::AlignCenter);
     }
+    connect(ui->PGParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClickPG(int,int)));
     ui->PGParams->setRowCount(PG_ROW);
     for (int row=0; row < PG_ROW; row++) {
         PGEnable.append(new QTableWidgetItem);
@@ -290,6 +291,8 @@ void PagePwr::InitSettings()
     for (int row=0; row<qMin(temp.size(),PG_ROW); row++)
         PGGrade.at(row)->setText(temp.at(row));
 
+    if (!IsPGEnable())
+        ui->BoxPG->hide();
 }
 
 void PagePwr::SaveSettings()
@@ -416,6 +419,22 @@ void PagePwr::ItemClick(int r, int c)
     }
 }
 
+void PagePwr::ItemClickPG(int r, int c)
+{
+    switch (c) {
+    case 0:
+        if (PGEnable.at(r)->text() != "Y")
+            PGEnable.at(r)->setText("Y");
+        else
+            PGEnable.at(r)->setText("N");
+        break;
+    case 1:
+    case 2:
+    default:
+        break;
+    }
+}
+
 void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR && addr != WIN_ID_PWR && addr != CAN_ID_PWR && addr != CAN_ID_PG_WAVE)
@@ -441,7 +460,7 @@ void PagePwr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
                 TestRow = row;
                 Judge = "OK";
                 PGJudge = "OK";
-                SendCanCmdStart();
+                SendCanCmdStart(msg.toInt());
                 if(!WaitTimeOut(100)) {
                     Judge = "NG";
                     SendTestItemsAllError();
@@ -624,7 +643,8 @@ void PagePwr::SendTestItemsAllEmpty()
     for (int row = 0; row<Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
-            n.append(PGItems.at(row));
+            if (IsPGEnable() && PGEnable.at(row)->text() == "Y")
+                n.append(PGItems.at(row));
         }
     }
     if (TestDir.at(0)->currentIndex() != 0) {
@@ -644,12 +664,14 @@ void PagePwr::SendTestItemsAllError()
             if (s.at(3) == " ")
                 s[3] = "NG";
             emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-            s = QString(PGItems.at(row)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            if (IsPGEnable()) {
+                s = QString(PGItems.at(row)).split("@");
+                if (s.at(2) == " ")
+                    s[2] = "---";
+                if (s.at(3) == " ")
+                    s[3] = "NG";
+                emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            }
         }
     }
     if (TestDir.at(0)->currentIndex() != 0) {
@@ -672,18 +694,21 @@ void PagePwr::SendTestItemTemp()
     if (s.at(2) == " ")
         s[2] = t;
     emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+    Delay(5);
+    if (IsPGEnable()) {
 
-    QString hhh = QString::number(PGUppers.last()/100,'f',2);
-    QString lll = QString::number(PGLowers.last()/100,'f',2);
-    QString ddd = QString::number(PGDutyAvr.last()/100,'f',2);
-    QString fff = QString::number(PGFreqAvr.last()/100,'f',0);
-    QString ccc = QString::number(PGCurrs.last()/100,'f',2);
-    t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
+        QString hhh = QString::number(PGUppers.last()/100,'f',2);
+        QString lll = QString::number(PGLowers.last()/100,'f',2);
+        QString ddd = QString::number(PGDutyAvr.last()/10,'f',2);
+        QString fff = QString::number(PGFreqAvr.last()/10,'f',0);
+        QString ccc = QString::number(PGCurrs.last()/100,'f',2);
+        t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
 
-    s = QString(PGItems.at(TestRow)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+        s = QString(PGItems.at(TestRow)).split("@");
+        if (s.at(2) == " ")
+            s[2] = t;
+        emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+    }
     Delay(5);
 }
 
@@ -712,49 +737,72 @@ void PagePwr::SendTestItem()
         QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
         emit SendCommand(ADDR,CMD_ITEM,s.toUtf8());
     }
+    if (IsPGEnable()) {
+        QString hhh = QString::number(PGUppers.last()/100,'f',2);
+        QString lll = QString::number(PGLowers.last()/100,'f',2);
+        QString ddd = QString::number(PGDutyAvr.last()/10,'f',1);
+        QString fff = QString::number(PGFreqAvr.last()/10,'f',1);
+        QString ccc = QString::number(PGCurrs.last()/100,'f',2);
+        t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
 
-    QString hhh = QString::number(PGUppers.last()/100,'f',2);
-    QString lll = QString::number(PGLowers.last()/100,'f',2);
-    QString ddd = QString::number(PGDutyAvr.last()/10,'f',1);
-    QString fff = QString::number(PGFreqAvr.last()/10,'f',1);
-    QString ccc = QString::number(PGCurrs.last()/100,'f',2);
-    t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
+        if (PGUppers.last()/100 > PGUpperMax.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGUppers:%1").arg(PGUppers.last()/100).toUtf8());
+        }
+        if (PGUppers.last()/100 < PGUpperMin.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGUppers1:%1").arg(PGUppers.last()/100).toUtf8());
+        }
+        if (PGLowers.last()/100 > PGLowerMax.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGLowers:%1").arg(PGLowers.last()/100).toUtf8());
+        }
+        if (PGLowers.last()/100 < PGLowerMin.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGLowers1:%1").arg(PGLowers.last()/100).toUtf8());
+        }
+        if (PGDutyAvr.last()/10 > PGDutyMax.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGDutyAvr:%1").arg(PGDutyAvr.last()/100).toUtf8());
+        }
+        if (PGDutyAvr.last()/10 < PGDutyMin.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGDutyAvr1:%1").arg(PGDutyAvr.last()/100).toUtf8());
+        }
+        if (PGFreqAvr.last()/10 > PGFreqMax.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGFreqAvr:%1\n").arg(PGFreqAvr.last()/100).toUtf8());
+        }
+        if (PGFreqAvr.last()/10 < PGFreqMin.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGFreqAvr1:%1\n").arg(PGFreqAvr.last()/100).toUtf8());
+        }
+        if (PGCurrs.last()/100 > PGCurrMax.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGCurrs:%1").arg(PGCurrs.last()/100).toUtf8());
+        }
+        if (PGCurrs.last()/100 < PGCurrMin.at(TestRow)->value()) {
+            PGJudge = "NG";
+            emit SendCommand(ADDR,CMD_DEBUG,QString("PGCurrs1:%1").arg(PGCurrs.last()/100).toUtf8());
+        }
 
-    if (PGUppers.last()/100 > PGUpperMax.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGUppers.last()/100 < PGUpperMin.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGLowers.last()/100 > PGLowerMax.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGLowers.last()/100 < PGLowerMin.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGDutyAvr.last()/10 > PGDutyMax.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGDutyAvr.last()/10 < PGDutyMin.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGFreqAvr.last()/10 > PGFreqMax.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGFreqAvr.last()/10 > PGFreqMin.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGCurrs.last()/100 > PGCurrMax.at(TestRow)->value())
-        PGJudge = "NG";
-    if (PGCurrs.last()/100 < PGCurrMin.at(TestRow)->value())
-        PGJudge = "NG";
-
-    s = QString(PGItems.at(TestRow)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    if (s.at(3) == " ")
-        s[3] = PGJudge;
-    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        s = QString(PGItems.at(TestRow)).split("@");
+        if (s.at(2) == " ")
+            s[2] = t;
+        if (s.at(3) == " ")
+            s[3] = PGJudge;
+        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    }
 }
 
 void PagePwr::SendTestJudge()
 {
     QString s = QString(tr("功率@%1@%2")).arg(CurrentSettings()).arg(Judge);
     emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
-    s = QString(tr("PG@%1@%2")).arg(CurrentSettings()).arg(PGJudge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+    if (IsPGEnable()) {
+        s = QString(tr("PG@%1@%2")).arg(CurrentSettings()).arg(PGJudge);
+        emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+    }
 }
 
 void PagePwr::SendCanCmdStatus()
@@ -766,7 +814,7 @@ void PagePwr::SendCanCmdStatus()
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
-void PagePwr::SendCanCmdStart()
+void PagePwr::SendCanCmdStart(quint8 s)
 {
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
@@ -775,9 +823,14 @@ void PagePwr::SendCanCmdStart()
     quint16 t = TestTime.at(TestRow)->value()*10;
     quint8 p = CurrentPorwer().toInt()<<4;
     quint8 vv = ui->BoxPGVolt->value()*10;
+    quint8 g = TestRow+1;
     if (ui->BoxFreq->value() == 60)
         p += 0x02;
-    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(TestRow+1+0x08)
+    if (IsPGEnable())
+        g += 0x08;
+    if (s == WIN_ID_OUT14)
+        g <<= 4;
+    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(g)
       <<quint8(t/256)<<quint8(t%256)<<quint8(p+v/256)<<quint8(v%256)
      <<quint8(isTestDir)<<quint8(vv);
     emit SendCommand(ADDR,CMD_CAN,msg);
@@ -855,6 +908,12 @@ QString PagePwr::CurrentPorwer()
     QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
     QString n = ini->value("/GLOBAL/PowerSupply","0").toString();
     return n;
+}
+
+bool PagePwr::IsPGEnable()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    return ini->value("/GLOBAL/EnablePG",false).toBool();
 }
 
 void PagePwr::showEvent(QShowEvent *)
