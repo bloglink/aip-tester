@@ -225,12 +225,11 @@ QByteArray WinData::ToGbk(const QString &inStr)
     return gbk->fromUnicode(inStr);
 }
 
-void WinData::showEvent(QShowEvent *)
+void WinData::showEvent(QShowEvent *e)
 {
     ui->DateEdit1->setDate(QDate::currentDate());
     ui->DateEdit2->setDate(QDate::currentDate());
     ReadSqliteAll();
+    e->accept();
 }
-
-
 /*********************************END OF FILE**********************************/

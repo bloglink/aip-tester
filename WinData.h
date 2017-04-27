@@ -12,6 +12,7 @@
 #include <QDir>
 #include <QFileInfo>
 #include <QMessageBox>
+#include <QShowEvent>
 #include <QTime>
 #include <QFile>
 #include <QDebug>
