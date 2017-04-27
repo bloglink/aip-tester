@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       绝缘模块
+*******************************************************************************/
 #ifndef PAGEINR_H
 #define PAGEINR_H
 
@@ -8,6 +16,7 @@
 #include <QListView>
 #include <QSettings>
 #include <QComboBox>
+#include <QShowEvent>
 #include <QMessageBox>
 #include <QButtonGroup>
 #include <QElapsedTimer>
@@ -39,15 +48,15 @@ private:
     Ui::PageInr *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
     void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
-    void ItemClick(int r, int c);
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ItemClick(int r,  int c);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
@@ -64,8 +73,8 @@ private slots:
     void ClearResults(void);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-    quint16 GetTeminal(int r, int c);
-    void InitInput(int r, int c);
+    quint16 GetTeminal(int r,  int c);
+    void InitInput(int r,  int c);
     void EnsureInput(void);
     QString CurrentSettings(void);
     bool EnablePhase(void);

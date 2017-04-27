@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       绝缘模块
+*******************************************************************************/
 #include "PageInr.h"
 #include "ui_PageInr.h"
 
@@ -38,12 +46,12 @@ void PageInr::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
     ui->Input->hide();
     Check << ui->Box1 << ui->Box2 << ui->Box3 << ui->Box4
           << ui->Box5 << ui->Box6 << ui->Box7 << ui->Box8;
     ui->TabParams->setRowCount(INR_ROW);
-    for (int row=0; row<INR_ROW; row++) {
+    for (int row=0; row < INR_ROW; row++) {
         Enable.append(new QTableWidgetItem);
         ui->TabParams->setItem(row, 0, Enable.at(row));
         Enable.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -98,9 +106,9 @@ void PageInr::InitWindows()
 void PageInr::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->BtnExitIr,Qt::Key_0);
+    btnGroup->addButton(ui->BtnExitIr, Qt::Key_0);
     btnGroup->addButton(ui->btnInput, Qt::Key_1);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
+    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
 void PageInr::ReadButtons(int id)
@@ -108,7 +116,7 @@ void PageInr::ReadButtons(int id)
     switch (id) {
     case Qt::Key_0:
         SaveSettings();
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     case Qt::Key_1:
         EnsureInput();
@@ -122,41 +130,41 @@ void PageInr::InitSettings()
 {
     //当前使用的测试项目
     QString t = QString("./config/%1.ini").arg(CurrentSettings());
-    ini = new QSettings(t,QSettings::IniFormat);
+    ini = new QSettings(t, QSettings::IniFormat);
     ini->setIniCodec("GB18030");
     ini->beginGroup("SetIr");
     QStringList temp;
     //可用
     temp = (QString(ini->value("Enable", "Y Y Y Y"). toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
     //端一
     temp = (ini->value("Terminal1", "PE 1 4 7").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
     //端二
     temp = (ini->value("Terminal2", "ALL 2 3 5").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
     //电压
     temp = (ini->value("Voltage", "500 500 500 500").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Vol.at(row)->setValue(temp.at(row).toDouble());
     //电流下限
     temp = (ini->value("Min", "100 100 100 100").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Min.at(row)->setValue(temp.at(row).toDouble());
     //电流上限
     temp = (ini->value("Max", "0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Max.at(row)->setValue(temp.at(row).toDouble());
     //测试时间
     temp = (ini->value("Time", "1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Time.at(row)->setValue(temp.at(row).toDouble());
     //补偿
     temp = (ini->value("Offset", "0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), INR_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
     if (!EnablePhase()) {
         Enable.at(0)->setText("Y");
@@ -177,45 +185,44 @@ void PageInr::InitSettings()
         ui->TabParams->showRow(2);
         ui->TabParams->showRow(3);
     }
-    qDebug()<<QTime::currentTime().toString()<<"PageInr read OK";
+    qDebug() << QTime::currentTime().toString() << "PageInr read OK";
 }
 
 void PageInr::SaveSettings()
 {
     QStringList temp;
     temp.clear();
-    for (int i=0; i<Enable.size(); i++)
+    for (int i=0; i < Enable.size(); i++)
         temp.append(Enable.at(i)->text());
     ini->setValue("Enable", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal1.size(); i++)
+    for (int i=0; i < Terminal1.size(); i++)
         temp.append(Terminal1.at(i)->text());
     ini->setValue("Terminal1", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal2.size(); i++)
+    for (int i=0; i < Terminal2.size(); i++)
         temp.append(Terminal2.at(i)->text());
     ini->setValue("Terminal2", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Vol.size(); i++)
+    for (int i=0; i < Vol.size(); i++)
         temp.append(QString::number(Vol.at(i)->value()));
     ini->setValue("Voltage", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Min.size(); i++)
+    for (int i=0; i < Min.size(); i++)
         temp.append(QString::number(Min.at(i)->value()));
     ini->setValue("Min", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Max.size(); i++)
+    for (int i=0; i < Max.size(); i++)
         temp.append(QString::number(Max.at(i)->value()));
     ini->setValue("Max", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Time.size(); i++)
+    for (int i=0; i < Time.size(); i++)
         temp.append(QString::number(Time.at(i)->value()));
     ini->setValue("Time", (temp.join(" ").toUtf8()));
-    for (int i=0; i<Offset.size(); i++)
+    for (int i=0; i < Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset", (temp.join(" ").toUtf8()));
-    
-    qDebug()<<QTime::currentTime().toString()<<"PageInr save OK";
+    qDebug() << QTime::currentTime().toString() << "PageInr save OK";
 }
 
 void PageInr::ItemClick(int r, int c)
@@ -249,13 +256,13 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = INR_INIT;
         SendCanCmdStatus();
         if (!WaitTimeOut(10)) {
-            QMessageBox::warning(this,tr("警告"),tr("绝缘板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"Time out Error:PageInr\n");
+            QMessageBox::warning(this, tr("警告"), tr("绝缘板异常"), QMessageBox::Ok);
+            emit SendCommand(ADDR, CMD_DEBUG, "Time out Error:PageInr\n");
         }
         Mode = INR_FREE;
         break;
     case CMD_START:
-        for (int row = 0; row<Enable.size(); row++) {
+        for (int row = 0; row < Enable.size(); row++) {
             if (Enable.at(row)->text() == "Y") {
                 Mode = INR_TEST;
                 TestRow = row;
@@ -263,7 +270,7 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
                 SendCanCmdConfig(row);
                 Delay(5);
                 SendCanCmdStart(msg.toInt());
-                if(!WaitTimeOut(100)) {
+                if (!WaitTimeOut(100)) {
                     Judge = "NG";
                     SendTestItemsAllError();
                     break;
@@ -301,14 +308,14 @@ void PageInr::ExcuteCanCmd(QByteArray msg)
 void PageInr::ReadCanCmdStatus(QByteArray msg)
 {
     if (quint8(msg.at(1)) != 0) {
-        emit SendCommand(ADDR,CMD_DEBUG,"INR Error:");
-        emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
-        emit SendCommand(ADDR,CMD_DEBUG,"\n");
+        emit SendCommand(ADDR, CMD_DEBUG, "INR Error:");
+        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+        emit SendCommand(ADDR, CMD_DEBUG, "\n");
         Mode = INR_FREE;
         return;
     }
     if (Mode == INR_INIT)
-        emit SendCommand(ADDR,CMD_DEBUG,"Check PageInr OK\n");
+        emit SendCommand(ADDR, CMD_DEBUG, "Check PageInr OK\n");
     if (Mode == INR_TEST) {
         SendTestItem();
         ClearResults();
@@ -320,7 +327,7 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
 {
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
-    tt *= qPow(10,-quint8(msg.at(5)));
+    tt *= qPow(10, -quint8(msg.at(5)));
     Volt.append(v);
     Res.append(tt);
     SendTestItemTemp();
@@ -347,22 +354,22 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
 void PageInr::SendTestItemsAllEmpty()
 {
     Items.clear();
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         QString s;
         QString T1 = Terminal1.at(row)->text();
         QString U1 = Vol.at(qMin(row, Vol.size()))->text();
         QString M1 = Min.at(qMin(row, Min.size()))->text();
         QString M2 = Max.at(qMin(row, Max.size()))->text();
         if (M2.toInt() == 0)
-            s = QString(tr("绝缘%1@高端:%2,%3V,%4Mohm@ @ ")).
+            s = QString(tr("绝缘%1@高端:%2, %3V, %4Mohm@ @ ")).
                     arg(row+1).arg(T1).arg(U1).arg(M1);
         else
-            s = QString(tr("绝缘%1@高端:%2,%3V,%4~%5Mohm@ @ ")).
+            s = QString(tr("绝缘%1@高端:%2, %3V, %4~%5Mohm@ @ ")).
                     arg(row+1).arg(T1).arg(U1).arg(M1).arg(M2);
         Items.append(s);
     }
     QStringList n;
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
         }
@@ -372,29 +379,29 @@ void PageInr::SendTestItemsAllEmpty()
 
 void PageInr::SendTestItemsAllError()
 {
-    for (int i=0; i<Items.size(); i++) {
+    for (int i=0; i < Items.size(); i++) {
         QStringList s = QString(Items.at(i)).split("@");
         if (s.at(2) == " ")
             s[2] = "---";
         if (s.at(3) == " ")
             s[3] = "NG";
-        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
     }
 }
 
 void PageInr::SendTestItemTemp()
 {
-    if (Volt.size()<2 || Res.size()<2) {
+    if (Volt.size() < 2 || Res.size() < 2) {
         return;
     }
-    QString rrr = QString::number(Res.last(),'f',1);
-    if (Res.last()>500)
+    QString rrr = QString::number(Res.last(), 'f', 1);
+    if (Res.last() > 500)
         rrr = ">500";
     QString t = QString("%1Mohm").arg(rrr);
     QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
-    emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
+    emit SendCommand(ADDR, CMD_ITEM_TEMP, s.join("@").toUtf8());
 }
 
 void PageInr::SendTestItem()
@@ -404,15 +411,15 @@ void PageInr::SendTestItem()
         SendTestItemsAllError();
         return;
     }
-    QString rrr = QString::number(Res.last(),'f',1);
-    if (Res.last()>500)
+    QString rrr = QString::number(Res.last(), 'f', 1);
+    if (Res.last() > 500)
         rrr = ">500";
     QString t = QString("%1Mohm").arg(rrr);
-    if (Res.last()<1)
+    if (Res.last() < 1)
         t = "超量程";
     if (Res.last()<= Min.at(TestRow)->value())
         Judge = "NG";
-    if (Max.at(TestRow)->value()!=0 && Res.last()>Max.at(TestRow)->value())
+    if (Max.at(TestRow)->value() != 0 && Res.last() > Max.at(TestRow)->value())
         Judge = "NG";
 
     QStringList s = QString(Items.at(TestRow)).split("@");
@@ -420,7 +427,7 @@ void PageInr::SendTestItem()
         s[2] = t;
     if (s.at(3) == " ")
         s[3] = Judge;
-    emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+    emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
 }
 
 void PageInr::SendTestItemError(QString e)
@@ -436,7 +443,7 @@ void PageInr::SendTestItemError(QString e)
 void PageInr::SendTestJudge()
 {
     QString s = QString(tr("绝缘@%1@%2")).arg(CurrentSettings()).arg(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+    emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
 }
 
 void PageInr::SendCanCmdStatus()
@@ -444,8 +451,8 @@ void PageInr::SendCanCmdStatus()
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x00);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x23) << quint8(0x01) << quint8(0x00);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInr::SendCanCmdStart(quint8 pos)
@@ -453,9 +460,9 @@ void PageInr::SendCanCmdStart(quint8 pos)
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x05)<<quint8(0x01)<<quint8(0x04)<<quint8(0x00)
-      <<quint8(pos)<<quint8(0x01);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x23) << quint8(0x05) << quint8(0x01) << quint8(0x04) << quint8(0x00)
+        << quint8(pos) << quint8(0x01);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInr::SendCanCmdStop()
@@ -463,8 +470,8 @@ void PageInr::SendCanCmdStop()
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x23)<<quint8(0x01)<<quint8(0x02);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x23) << quint8(0x01) << quint8(0x02);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInr::SendCanCmdConfig(int row)
@@ -476,13 +483,13 @@ void PageInr::SendCanCmdConfig(int row)
     int time = Time.at(row)->value()*10;
     quint16 h = GetTeminal(row, 1);
     quint16 l = GetTeminal(row, 2);
-    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x03)<<quint8(0x01)<<quint8(0x04)
-      << quint8(h/256) << quint8(h%256) << quint8(l/256) << quint8(l%256)<<quint8(0x00);
-    out<<quint16(0x23)<<quint8(0x08)<<quint8(0x04)<<quint8(0x01)<<quint8(volt/256)
-      <<quint8(volt%256)<<quint8(time/256)<<quint8(time%256)<<quint8(1/256)<<quint8(1%256);
-    out<<quint16(0x23)<<quint8(0x07)<<quint8(0x05)<<quint8(0x01)
-      <<quint8(0/256)<<quint8(0%256)<<quint8(0x00)<<quint8(0x03)<<quint8(0x0A);//上限
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x23) << quint8(0x08) << quint8(0x03) << quint8(0x01) << quint8(0x04)
+        << quint8(h/256) << quint8(h%256) << quint8(l/256) << quint8(l%256) << quint8(0x00);
+    out << quint16(0x23) << quint8(0x08) << quint8(0x04) << quint8(0x01) << quint8(volt/256)
+        << quint8(volt%256) << quint8(time/256) << quint8(time%256) << quint8(0x00) << quint8(1);
+    out << quint16(0x23) << quint8(0x07) << quint8(0x05) << quint8(0x01)
+        << quint8(0/256) << quint8(0%256) << quint8(0x00) << quint8(0x03) << quint8(0x0A); // 上限
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInr::ClearResults()
@@ -507,7 +514,7 @@ void PageInr::Delay(int ms)
 {
     QElapsedTimer t;
     t.start();
-    while(t.elapsed()<ms)
+    while (t.elapsed() < ms)
         QCoreApplication::processEvents();
 }
 
@@ -557,21 +564,21 @@ void PageInr::InitInput(int r, int c)
         x = "147";
         s1 = Terminal2.at(r)->text();
         for (int i=0; i < s1.size(); i++)
-            x.remove(s1.mid(i,1));
+            x.remove(s1.mid(i, 1));
     }
     if (c == 2) {
         s = Terminal2.at(r)->text();
         x = "12345678";
         s1 = Terminal1.at(r)->text();
         for (int i=0; i < s1.size(); i++)
-            x.remove(s1.mid(i,1));
+            x.remove(s1.mid(i, 1));
     }
 
     for (int i = 0; i < x.size(); i++) {
-        Check.at(x.mid(i,1).toInt() - 1)->show();
+        Check.at(x.mid(i, 1).toInt() - 1)->show();
     }
     for (int i = 0; i < s.size(); i++) {
-        Check.at(s.mid(i,1).toInt()-1)->setChecked(true);
+        Check.at(s.mid(i, 1).toInt()-1)->setChecked(true);
     }
 }
 
@@ -591,8 +598,8 @@ void PageInr::EnsureInput()
 
 QString PageInr::CurrentSettings()
 {
-    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse", INI_DEFAULT).toString();
     return n.remove(".ini");
 }
 
@@ -602,9 +609,10 @@ bool PageInr::EnablePhase()
     return ini->value("/GLOBAL/EnablePhase", false).toBool();
 }
 
-void PageInr::showEvent(QShowEvent *)
+void PageInr::showEvent(QShowEvent *e)
 {
     ui->BtnExitIr->setFocus();
     InitSettings();
+    e->accept();
 }
 /*********************************END OF FILE**********************************/
