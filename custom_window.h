@@ -1,5 +1,13 @@
-#ifndef CUSTOMWINDOW_H
-#define CUSTOMWINDOW_H
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       MessageBox定位
+*******************************************************************************/
+#ifndef CUSTOM_WINDOW_H
+#define CUSTOM_WINDOW_H
 
 #include <QtGui/QDialog>
 
@@ -9,7 +17,7 @@ class CustomWindow : public QDialog
     Q_OBJECT
 
 public:
-    CustomWindow(QWidget *parent = 0);
+    explicit CustomWindow(QWidget *parent = 0);
     ~CustomWindow();
 protected:
     virtual void mousePressEvent(QMouseEvent *event);
@@ -21,4 +29,4 @@ private:
     QPoint      mMovePosition;
 };
 
-#endif // CUSTOMWINDOW_H
+#endif // CUSTOM_WINDOW_H
