@@ -563,7 +563,7 @@ void WinHome::TestPause()
     Delay(CurrentAlarmTime("NG"));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
     int ret = msgBox->exec();
-    if (ret== QMessageBox::Yes)
+    if (ret== QMessageBox::Cancel)
     {
         ItemJudge = "OK";
         if (HomeMode != HOME_STOP)
@@ -572,7 +572,7 @@ void WinHome::TestPause()
         emit SendCommand(WIN_ID_TEST, CMD_ITEM_REPLACE, TempItems.join("\n").toUtf8());
         emit SendCommand(Current_Test_Item, CMD_START, stat);
         Delay(10);
-    } else if (ret == QMessageBox::Cancel) {
+    } else if (ret == QMessageBox::Yes) {
         if (HomeMode != HOME_STOP)
             emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
     }
