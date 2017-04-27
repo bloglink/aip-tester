@@ -16,6 +16,7 @@
 #include <QListView>
 #include <QSettings>
 #include <QComboBox>
+#include <QShowEvent>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>

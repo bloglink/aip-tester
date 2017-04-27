@@ -50,12 +50,12 @@ void PageAcw::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
     ui->Input->hide();
     Check << ui->Box1 << ui->Box2 << ui->Box3 << ui->Box4
           << ui->Box5 << ui->Box6 << ui->Box7 << ui->Box8;
     ui->TabParams->setRowCount(ACW_ROW);
-    for (int row=0; row<ACW_ROW; row++) {
+    for (int row=0; row < ACW_ROW; row++) {
         Enable.append(new QTableWidgetItem);
         ui->TabParams->setItem(row, 0, Enable.at(row));
         Enable.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
@@ -158,43 +158,43 @@ void PageAcw::InitSettings()
     QStringList temp;
     //可用
     temp = (QString(ini->value("Enable", "Y Y Y Y"). toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
     //端一
     temp = (ini->value("Terminal1", "PE 1 4 7").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
     //端二
     temp = (ini->value("Terminal2", "ALL 2 3 5").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
     //电压
     temp = (ini->value("Voltage", "500 500 500 500").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Vol.at(row)->setValue(temp.at(row).toDouble());
     //电流下限
     temp = (ini->value("Min", "0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Min.at(row)->setValue(temp.at(row).toDouble());
     //电流上限
     temp = (ini->value("Max", "5 5 5 5").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Max.at(row)->setValue(temp.at(row).toDouble());
     //测试时间
     temp = (ini->value("Time", "1 1 1 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Time.at(row)->setValue(temp.at(row).toDouble());
     //频率
     temp = (QString(ini->value("Freq", "0 0 0 0").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Freq.at(row)->setCurrentIndex(temp.at(row).toInt());
     //电弧
     temp = (QString(ini->value("Arc", "0 0 0 0").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Arc.at(row)->setCurrentIndex(temp.at(row).toInt());
     //补偿
     temp = (ini->value("Offset", "0 0 0 0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(), ACW_ROW); row++)
+    for (int row=0; row < qMin(temp.size(), ACW_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
     if (!EnablePhase()) {
         Enable.at(0)->setText("Y");
@@ -226,42 +226,42 @@ void PageAcw::SaveSettings()
     ini->beginGroup("SetAcw");
     QStringList temp;
     temp.clear();
-    for (int i=0; i<Enable.size(); i++)
+    for (int i=0; i < Enable.size(); i++)
         temp.append(Enable.at(i)->text());
     ini->setValue("Enable", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal1.size(); i++)
+    for (int i=0; i < Terminal1.size(); i++)
         temp.append(Terminal1.at(i)->text());
     ini->setValue("Terminal1", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal2.size(); i++)
+    for (int i=0; i < Terminal2.size(); i++)
         temp.append(Terminal2.at(i)->text());
     ini->setValue("Terminal2", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Vol.size(); i++)
+    for (int i=0; i < Vol.size(); i++)
         temp.append(QString::number(Vol.at(i)->value()));
     ini->setValue("Voltage", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Min.size(); i++)
+    for (int i=0; i < Min.size(); i++)
         temp.append(QString::number(Min.at(i)->value()));
     ini->setValue("Min", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Max.size(); i++)
+    for (int i=0; i < Max.size(); i++)
         temp.append(QString::number(Max.at(i)->value()));
     ini->setValue("Max", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Time.size(); i++)
+    for (int i=0; i < Time.size(); i++)
         temp.append(QString::number(Time.at(i)->value()));
     ini->setValue("Time", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Freq.size(); i++)
+    for (int i=0; i < Freq.size(); i++)
         temp.append(QString::number(Freq.at(i)->currentIndex()));
     ini->setValue("Freq", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Arc.size(); i++)
+    for (int i=0; i < Arc.size(); i++)
         temp.append(QString::number(Arc.at(i)->currentIndex()));
     ini->setValue("Arc", (temp.join(" ").toUtf8()));
-    for (int i=0; i<Offset.size(); i++)
+    for (int i=0; i < Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset", (temp.join(" ").toUtf8()));
     qDebug() << QTime::currentTime().toString() << "PageAcw save OK";
@@ -286,7 +286,7 @@ void PageAcw::ItemClick(int r, int c)
     }
 }
 
-void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void PageAcw::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
     if (addr != ADDR && addr != WIN_ID_ACW && addr != CAN_ID_INR)
         return;
@@ -295,7 +295,7 @@ void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         ExcuteCanCmd(msg);
         break;
     case CMD_START:
-        for (int row = 0; row<Enable.size(); row++) {
+        for (int row = 0; row < Enable.size(); row++) {
             if (Enable.at(row)->text() == "Y") {
                 Mode = ACW_TEST;
                 TestRow = row;
@@ -303,7 +303,7 @@ void PageAcw::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
                 SendCanCmdConfig(row);
                 Delay(5);
                 SendCanCmdStart(msg.toInt());
-                if(!WaitTimeOut(100)) {
+                if (!WaitTimeOut(100)) {
                     Judge = "NG";
                     SendTestItemsAllError();
                     break;
@@ -391,17 +391,17 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
 void PageAcw::SendTestItemsAllEmpty()
 {
     Items.clear();
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         QString T1 = Terminal1.at(row)->text();
         QString U1 = Vol.at(qMin(row, Vol.size()))->text();
         QString M1 = Min.at(qMin(row, Min.size()))->text();
         QString M2 = Max.at(qMin(row, Max.size()))->text();
-        QString s = QString(tr("交耐%1@高端:%2,%3V,%4~%5mA@ @ ")).
+        QString s = QString(tr("交耐%1@高端:%2, %3V, %4~%5mA@ @ ")).
                 arg(row+1).arg(T1).arg(U1).arg(M1).arg(M2);
         Items.append(s);
     }
     QStringList n;
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
         }
@@ -474,7 +474,7 @@ void PageAcw::SendTestJudge()
 void PageAcw::SendCanCmdStart(quint8 pos)
 {
     QByteArray msg;
-    QDataStream out(&msg,  QIODevice::ReadWrite);
+    QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x23) << quint8(0x05) << quint8(0x01) << quint8(0x05) << quint8(0x00)
         << quint8(pos) << quint8(0x00);
@@ -486,7 +486,7 @@ void PageAcw::SendCanCmdStart(quint8 pos)
 void PageAcw::SendCanCmdStop()
 {
     QByteArray msg;
-    QDataStream out(&msg,  QIODevice::ReadWrite);
+    QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x23) << quint8(0x01) << quint8(0x02);
     emit SendCommand(ADDR, CMD_CAN, msg);
@@ -499,7 +499,7 @@ void PageAcw::SendCanCmdStop()
 void PageAcw::SendCanCmdConfig(int row)
 {
     QByteArray msg;
-    QDataStream out(&msg,  QIODevice::ReadWrite);
+    QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     int freq = Freq.at(row)->currentText().toInt();
     int volt = Vol.at(row)->value();
@@ -575,7 +575,6 @@ quint16 PageAcw::GetTeminal(int r, int c)
     if (s.contains("8"))
         t += 0x80;
     return t;
-
 }
 
 void PageAcw::InitInput(int r, int c)
@@ -593,21 +592,21 @@ void PageAcw::InitInput(int r, int c)
         x = "147";
         s1 = Terminal2.at(r)->text();
         for (int i=0; i < s1.size(); i++)
-            x.remove(s1.mid(i,1));
+            x.remove(s1.mid(i, 1));
     }
     if (c == 2) {
         s = Terminal2.at(r)->text();
         x = "12345678";
         s1 = Terminal1.at(r)->text();
         for (int i=0; i < s1.size(); i++)
-            x.remove(s1.mid(i,1));
+            x.remove(s1.mid(i, 1));
     }
 
     for (int i = 0; i < x.size(); i++) {
-        Check.at(x.mid(i,1).toInt() - 1)->show();
+        Check.at(x.mid(i, 1).toInt() - 1)->show();
     }
     for (int i = 0; i < s.size(); i++) {
-        Check.at(s.mid(i,1).toInt()-1)->setChecked(true);
+        Check.at(s.mid(i, 1).toInt()-1)->setChecked(true);
     }
 }
 
@@ -638,10 +637,11 @@ bool PageAcw::EnablePhase()
     return ini->value("/GLOBAL/EnablePhase", false).toBool();
 }
 
-void PageAcw::showEvent(QShowEvent *)
+void PageAcw::showEvent(QShowEvent *e)
 {
     ui->BtnExitAcw->setFocus();
     InitSettings();
+    e->accept();
 }
 /*********************************END OF FILE**********************************/
 
