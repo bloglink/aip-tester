@@ -39,7 +39,7 @@ void PageMag::InitWindows()
     input = new PageNum(this);
     QStringList t;
     t <<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11"<<"12";
-    input->BtnInit(t);
+    input->InitButtons(t);
     connect(input,SIGNAL(ItemChange(QString)),this,SLOT(ItemChange(QString)));
     input->hide();
 

@@ -1,9 +1,18 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       端口输入模块
+*******************************************************************************/
 #ifndef PAGENUM_H
 #define PAGENUM_H
 
 #include <QDebug>
 #include <QLayout>
 #include <QWidget>
+#include <QShowEvent>
 #include <QPushButton>
 #include <QButtonGroup>
 
@@ -25,12 +34,12 @@ private:
 signals:
     void ItemChange(QString msg);
 public slots:
-    void BtnInit(QStringList t);
+    void InitButtons(QStringList t);
 public:
     QString Output;
     QButtonGroup *btnGroup;
 private slots:
-    void BtnJudge(int id);
+    void ReadButtons(int id);
     virtual void showEvent(QShowEvent *);
 };
 
