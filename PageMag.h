@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       反嵌模块
+*******************************************************************************/
 #ifndef PAGEMAG_H
 #define PAGEMAG_H
 
@@ -7,6 +15,7 @@
 #include <QListView>
 #include <QSettings>
 #include <QComboBox>
+#include <QShowEvent>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
@@ -38,7 +47,7 @@ private:
     Ui::PageMag *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 public:
     QList<Waveform *> WaveMag;
 private slots:
@@ -47,10 +56,10 @@ private slots:
     void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
-    void ItemClick(int r, int c);
+    void ItemClick(int r,  int c);
     void ItemChange(QString msg);
 
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(int id, QByteArray msg);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
