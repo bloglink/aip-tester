@@ -1,25 +1,18 @@
-/**
-  ******************************************************************************
-  * @file    main.cpp
-  * @author  link
-  * @version 2.0.0.0
-  * @date    2017-02-24
-  * @brief   Motor comprehensive tester
-  ******************************************************************************
-  */
-/* Includes ------------------------------------------------------------------*/
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       电机综合测试仪
+*******************************************************************************/
 #include "PageKey.h"
 #include "WinHome.h"
 #include <QApplication>
 #include <QTextCodec>
-/**
-  * @brief  Initializes the software
-  * @param  argc,*argv[]
-  * @retval int
-  */
-int main(int argc, char *argv[])
-{
-#if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
+
+int main(int argc, char *argv[]) {
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
     QTextCodec *codec = QTextCodec::codecForName("UTF-8");
     QTextCodec::setCodecForLocale(codec);
     QTextCodec::setCodecForCStrings(codec);
