@@ -163,6 +163,4 @@ void UdpClient::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         break;
     }
 }
-
-
-
+/*********************************END OF FILE**********************************/
