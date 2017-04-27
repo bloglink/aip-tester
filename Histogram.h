@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       柱状图
+*******************************************************************************/
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
@@ -6,6 +14,7 @@
 #include <QWidget>
 #include <QPainter>
 #include <QHash>
+#include <QPaintEvent>
 
 class Histogram : public QLabel
 {
