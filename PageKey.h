@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       按钮模块
+*******************************************************************************/
 #ifndef PAGEKEY_H
 #define PAGEKEY_H
 
@@ -45,7 +53,7 @@ private slots:
     void InitButtons();
     void ReadButtons(int);
     void SwitchInput(void);
-    void focusChanged(QWidget *oldWidget, QWidget *nowWidget);
+    void focusChanged(QWidget *oldWidget,  QWidget *nowWidget);
     void showEvent(QShowEvent *);
 private:
     static PageKey *_instance;
