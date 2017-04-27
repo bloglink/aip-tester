@@ -16,7 +16,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170425");
+    InitVersion("V-2.1.0.170426");
     HomeMode = HOME_FREE;
     InitThreadAll();
     isPause = false;
@@ -404,6 +404,8 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         break;
     case CMD_STOP:
         ItemJudge = "NG";
+        if (msg.contains("DCR"))
+            ShowLogMessage(msg);
         emit message(QByteArray::fromHex("100001"));
         emit SendCommand(ADDR, CMD_STOP, msg);
         if (HomeMode != HOME_FREE)
@@ -433,6 +435,15 @@ void WinHome::InitTestItems()
     if (CurrentStartMode() == 1 || CurrentStartMode() == 2) //滑罩启动
         emit SendCommand(WIN_ID_OUT13, CMD_INIT, QString::number(CurrentStartMode()).toUtf8());
 
+    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
+        n.insert(0,QString::number(WIN_ID_DCR));
+    }
+    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
+        n.insert(0,QString::number(WIN_ID_DCR));
+    }
+    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
+        n.insert(0,QString::number(WIN_ID_DCR));
+    }
     for (int i=0; i < n.size(); i++) {
         emit SendCommand(n.at(i).toInt(), CMD_INIT, NULL);
     }
@@ -481,6 +492,15 @@ void WinHome::StartTest(QByteArray station)
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
 
     QStringList n = CurrentItems();
+    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
+        n.insert(0,QString::number(WIN_ID_DCR));
+    }
+    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
+        n.insert(0,QString::number(WIN_ID_DCR));
+    }
+    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
+        n.insert(0,QString::number(WIN_ID_DCR));
+    }
     for (int i=0; i < n.size(); i++) {
         Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
@@ -544,6 +564,9 @@ void WinHome::TestPause()
     int ret = msgBox->exec();
     if (ret== QMessageBox::Yes)
     {
+        ItemJudge = "OK";
+        if (HomeMode != HOME_STOP)
+            emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
         emit SendCommand(Current_Test_Item,CMD_INIT,stat);
         emit SendCommand(WIN_ID_TEST,CMD_ITEM_REPLACE,TempItems.join("\n").toUtf8());
         emit SendCommand(Current_Test_Item,CMD_START,stat);
@@ -551,7 +574,8 @@ void WinHome::TestPause()
     }
     else if(ret == QMessageBox::Cancel)
     {
-//        HomeMode = HOME_FREE;
+        if (HomeMode != HOME_STOP)
+            emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
     }
     isPause = false;
     TempItems.clear();

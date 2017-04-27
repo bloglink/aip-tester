@@ -108,6 +108,7 @@ void WinData::ReadSqliteAll()
     ReadSqlite(tr("匝间"));
     ReadSqlite(tr("电感"));
     ReadSqlite(tr("功率"));
+    ReadSqlite(tr("PG"));
     ReadSqlite(tr("低启"));
     ReadSqlite(tr("堵转"));
     QStringList n;

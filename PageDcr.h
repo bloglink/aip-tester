@@ -60,6 +60,7 @@ private slots:
     void ItemChange(QString msg);
     void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
+    void ExcuteCanCmdPwr(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadOffset(QByteArray msg);
@@ -71,12 +72,15 @@ private slots:
     void SendCanCmdStop(void);
     void SendCanCmdConfig(void);
     void SendAlarm(QByteArray addr);
+    void SendCanCmdPwr(quint8 pos);
     double CalculateOffset(double t,quint8 num);
     void CalculateBalance(void);
     int CalculateGear(int row);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     QString CurrentSettings(void);
+    QString CurrentPorwer(void);
+    bool IsPowerOn(void);
     void AutoChangeMetal(int index);
     void AutoChangeUnit(int index);
     void AutoChangeMin(double x);

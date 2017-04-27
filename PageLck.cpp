@@ -145,9 +145,8 @@ void PageLck::ExcuteCanCmd(QByteArray msg)
     TimeOut = 0;
     if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
-    }
 }
 
 void PageLck::InitTestItems()
@@ -220,7 +219,7 @@ void PageLck::SendItemJudge()
     double rr = Curr.at(num)/1000;
     double pp = Power.at(num)/10;
 
-    QString t = QString("%1A,%2W,%3V").arg(rr).arg(pp).arg(vv);
+    QString t = QString("%1V,%2A,%3W").arg(vv).arg(rr).arg(pp);
 
     if (rr>ui->BoxCurrMax->value() || rr<ui->BoxCurrMin->value() )
         Judge = "NG";
@@ -361,6 +360,7 @@ void PageLck::Delay(int ms)
 
 void PageLck::showEvent(QShowEvent *)
 {
+    ui->BtnExit->setFocus();
     InitSettings();
 }
 /*********************************END OF FILE**********************************/

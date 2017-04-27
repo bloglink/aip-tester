@@ -188,10 +188,9 @@ void PageLvs::SendItemTemp()
     if (Volt.size()<2 || Curr.size()<2 || Power.size()<2) {
         return;
     }
-    QString vvv = QString::number(Volt.last()/10,'f',1);
     QString rrr = QString::number(Curr.last()/1000,'f',3);
     QString ppp = QString::number(Power.last()/10,'f',1);
-    QString t = QString("%1A,%2W,%3V").arg(rrr).arg(ppp).arg(vvv);
+    QString t = QString("%1A,%2W").arg(rrr).arg(ppp);
 
     QStringList s = QString(Items.at(0)).split("@");
     if (s.at(2) == " ")
@@ -297,6 +296,7 @@ void PageLvs::Delay(int ms)
 
 void PageLvs::showEvent(QShowEvent *)
 {
+    ui->BtnExit->setFocus();
     InitSettings();
 }
 

@@ -604,6 +604,7 @@ bool PageInr::EnablePhase()
 
 void PageInr::showEvent(QShowEvent *)
 {
+    ui->BtnExitIr->setFocus();
     InitSettings();
 }
 /*********************************END OF FILE**********************************/

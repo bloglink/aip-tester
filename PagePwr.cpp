@@ -23,12 +23,30 @@ void PagePwr::InitWindows()
 #if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
     ui->TabParams->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->PGParams->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(1,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(2,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(3,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(9,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setResizeMode(10,QHeaderView::Stretch);
     ui->PGParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
     ui->TabParams->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->PGParams->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(1,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(2,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(3,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(9,QHeaderView::Stretch);
+    ui->PGParams->horizontalHeader()->setSectionResizeMode(10,QHeaderView::Stretch);
     ui->PGParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
@@ -84,6 +102,7 @@ void PagePwr::InitWindows()
 
         TestTime.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row,8,TestTime.at(row));
+        TestTime.at(row)->setMinimum(0.6);
         TestTime.at(row)->setMaximum(9999);
         TestTime.at(row)->setAlignment(Qt::AlignHCenter);
         TestTime.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -423,10 +442,12 @@ void PagePwr::ItemClickPG(int r, int c)
 {
     switch (c) {
     case 0:
-        if (PGEnable.at(r)->text() != "Y")
+        if (PGEnable.at(r)->text() != "Y") {
+            Enable.at(r)->setText("Y");
             PGEnable.at(r)->setText("Y");
-        else
+        } else {
             PGEnable.at(r)->setText("N");
+        }
         break;
     case 1:
     case 2:
@@ -505,6 +526,8 @@ void PagePwr::ExcuteCanCmd(quint16 addr, QByteArray msg)
         ReadCanCmdResult(msg);
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x02)
         ReadCanCmdDir(msg);
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x03)
+        ReadCanCmdVolt(msg);
     if (msg.size() >= 7 && (quint8)msg.at(0) == 0x0A)
         ReadCanCmdPGCurrs(msg);
     if (msg.size() >= 7 && (quint8)msg.at(0) == 0x0B)
@@ -537,22 +560,24 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
     Mode = PWR_FREE;
     if (wave.isEmpty())
         return;
-    emit SendCommand(ADDR,CMD_WAVE_ITEM,PGWaveItem.at(TestRow).toUtf8());
-    emit SendCommand(ADDR,CMD_WAVE_BYTE,wave);
-    switch (TestRow) {
-    case 0:
-        wave1 = wave;
-        break;
-    case 1:
-        wave2 = wave;
-        break;
-    case 2:
-        wave3 = wave;
-        break;
-    default:
-        break;
+    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y") {
+        emit SendCommand(ADDR,CMD_WAVE_ITEM,PGWaveItem.at(TestRow).toUtf8());
+        emit SendCommand(ADDR,CMD_WAVE_BYTE,wave);
+        switch (TestRow) {
+        case 0:
+            wave1 = wave;
+            break;
+        case 1:
+            wave2 = wave;
+            break;
+        case 2:
+            wave3 = wave;
+            break;
+        default:
+            break;
+        }
+        wave.clear();
     }
-    wave.clear();
 }
 
 void PagePwr::ReadCanCmdResult(QByteArray msg)
@@ -563,13 +588,6 @@ void PagePwr::ReadCanCmdResult(QByteArray msg)
     Volt.append(v);
     Curr.append(c);
     Power.append(p);
-    SendTestItemTemp();
-    CalculateResult();
-    if (Judge == "NG") {
-        SendCanCmdStop();
-        SendTestItem();
-        ClearResults();
-    }
 }
 
 void PagePwr::ReadCanCmdDir(QByteArray msg)
@@ -580,6 +598,19 @@ void PagePwr::ReadCanCmdDir(QByteArray msg)
         dir = tr("正转");
     if (quint8(msg.at(5)) == 0x02)
         dir = tr("反转");
+}
+
+void PagePwr::ReadCanCmdVolt(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    CVolt.append(v);
+    SendTestItemTemp();
+    CalculateResult();
+    if (Judge == "NG") {
+        SendCanCmdStop();
+        SendTestItem();
+        ClearResults();
+    }
 }
 
 void PagePwr::ReadCanCmdPGCurrs(QByteArray msg)
@@ -686,7 +717,7 @@ void PagePwr::SendTestItemsAllError()
             if (s.at(3) == " ")
                 s[3] = "NG";
             emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
-            if (IsPGEnable()) {
+            if (IsPGEnable() && PGEnable.at(row)->text() == "Y") {
                 s = QString(PGItems.at(row)).split("@");
                 if (s.at(2) == " ")
                     s[2] = "---";
@@ -704,28 +735,27 @@ void PagePwr::SendTestItemsAllError()
 
 void PagePwr::SendTestItemTemp()
 {
-    if (Volt.size()<2 || Curr.size()<2 || Power.size()<2) {
+    if (Volt.size()<2 || Curr.size()<2 || Power.size()<2 || CVolt.size()<2) {
         return;
     }
     QString vvv = QString::number(Volt.last()/10,'f',1);
     QString rrr = QString::number(Curr.last()/1000,'f',3);
     QString ppp = QString::number(Power.last()/10,'f',1);
-    QString t = QString("%1A,%2W,%3V").arg(rrr).arg(ppp).arg(vvv);
+    QString ccc = QString::number(CVolt.last()/10,'f',1);
+    QString t = QString("%1V,%2A,%3W,%4V").arg(vvv).arg(rrr).arg(ppp).arg(ccc);
 
     QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
         s[2] = t;
     emit SendCommand(ADDR,CMD_ITEM_TEMP,s.join("@").toUtf8());
     Delay(5);
-    if (IsPGEnable()) {
-
+    if (IsPGEnable() || PGEnable.at(TestRow)->text() == "Y") {
         QString hhh = QString::number(PGUppers.last()/100,'f',2);
         QString lll = QString::number(PGLowers.last()/100,'f',2);
         QString ddd = QString::number(PGDutyAvr.last()/10,'f',2);
         QString fff = QString::number(PGFreqAvr.last()/10,'f',0);
         QString ccc = QString::number(PGCurrs.last()/100,'f',2);
         t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
-
         s = QString(PGItems.at(TestRow)).split("@");
         if (s.at(2) == " ")
             s[2] = t;
@@ -736,14 +766,15 @@ void PagePwr::SendTestItemTemp()
 
 void PagePwr::SendTestItem()
 {
-    if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty()) {
+    if (Volt.isEmpty() || Curr.isEmpty() || Power.isEmpty() || CVolt.isEmpty()) {
         SendTestItemsAllError();
         return;
     }
     QString vvv = QString::number(Volt.last()/10,'f',1);
     QString rrr = QString::number(Curr.last()/1000,'f',3);
     QString ppp = QString::number(Power.last()/10,'f',1);
-    QString t = QString("%1A,%2W,%3V").arg(rrr).arg(ppp).arg(vvv);
+    QString ccc = QString::number(CVolt.last()/10,'f',1);
+    QString t = QString("%1V,%2A,%3W,%4V").arg(vvv).arg(rrr).arg(ppp).arg(ccc);
 
     QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
@@ -759,7 +790,7 @@ void PagePwr::SendTestItem()
         QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
         emit SendCommand(ADDR,CMD_ITEM,s.toUtf8());
     }
-    if (IsPGEnable()) {
+    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y") {
         QString hhh = QString::number(PGUppers.last()/100,'f',2);
         QString lll = QString::number(PGLowers.last()/100,'f',2);
         QString ddd = QString::number(PGDutyAvr.last()/10,'f',1);
@@ -821,7 +852,7 @@ void PagePwr::SendTestJudge()
 {
     QString s = QString(tr("功率@%1@%2")).arg(CurrentSettings()).arg(Judge);
     emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
-    if (IsPGEnable()) {
+    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y") {
         s = QString(tr("PG@%1@%2")).arg(CurrentSettings()).arg(PGJudge);
         emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
     }
@@ -844,11 +875,13 @@ void PagePwr::SendCanCmdStart(quint8 s)
     quint16 v = ui->BoxVolt->value();
     quint16 t = TestTime.at(TestRow)->value()*10;
     quint8 p = CurrentPorwer().toInt()<<4;
-    quint8 vv = ui->BoxPGVolt->value()*10;
+    quint8 vv = 0;
+    if (IsPGEnable() || PGEnable.at(TestRow)->text() == "Y")
+        vv = ui->BoxPGVolt->value()*10;
     quint8 g = TestRow+1;
     if (ui->BoxFreq->value() == 60)
         p += 0x02;
-    if (IsPGEnable())
+    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y")
         g += 0x08;
     if (s == WIN_ID_OUT14)
         g <<= 4;
@@ -869,18 +902,18 @@ void PagePwr::SendCanCmdStop()
 
 void PagePwr::CalculateResult()
 {
-    if (Volt.size()<5 || Curr.size()<5 || Power.size()<5)
+    if (Volt.size()<5 || Curr.size()<5 || Power.size()<5 || CVolt.size()<5)
         return;
-    double vv = Volt.last()/10;
     double rr = Curr.last()/1000;
     double pp = Power.last()/10;
+    double cc = CVolt.last()/10;
 
     if (rr>CurrMax.at(TestRow)->value() ||
             rr<CurrMin.at(TestRow)->value() ||
             pp>PowerMax.at(TestRow)->value() ||
             pp<PowerMin.at(TestRow)->value() ||
-            vv>CapMax.at(TestRow)->value() ||
-            vv<CapMin.at(TestRow)->value()) {
+            cc>CapMax.at(TestRow)->value() ||
+            cc<CapMin.at(TestRow)->value()) {
         Judge = "NG";
     }
 }
@@ -890,6 +923,7 @@ void PagePwr::ClearResults()
     Volt.clear();
     Curr.clear();
     Power.clear();
+    CVolt.clear();
 
     PGCurrs.clear();
     PGUppers.clear();

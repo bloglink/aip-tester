@@ -63,6 +63,7 @@ private slots:
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadCanCmdDir(QByteArray msg);
+    void ReadCanCmdVolt(QByteArray msg);
     void ReadCanCmdPGCurrs(QByteArray msg);
     void ReadCanCmdPGFreqs(QByteArray msg);
     void ReadCanCmdPGDutys(QByteArray msg);
@@ -87,6 +88,7 @@ private:
     QList<double> Volt;
     QList<double> Curr;
     QList<double> Power;
+    QList<double> CVolt;
 
     QString Judge;
 

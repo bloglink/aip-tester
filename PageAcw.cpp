@@ -640,6 +640,7 @@ bool PageAcw::EnablePhase()
 
 void PageAcw::showEvent(QShowEvent *)
 {
+    ui->BtnExitAcw->setFocus();
     InitSettings();
 }
 /*********************************END OF FILE**********************************/

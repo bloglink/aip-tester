@@ -704,9 +704,9 @@ void PageImp::CalculateResult(QByteArray )
     QString judge = "OK";
     int number = CurrentWave;
     if (Flut.at(qMin(number, Flut.size()-1))->value() != 0)
-        n = QString("面积:%1%, 差积:%2%, 电晕:%3, 相位:%4%").arg(A).arg(D).arg(F).arg(P);
+        n = QString("电晕:%3,相位:%4%,面积:%1%,差积:%2%").arg(F).arg(P).arg(A).arg(D);
     else
-        n = QString("面积:%1%, 差积:%2%, 相位:%3").arg(A).arg(D).arg(P);
+        n = QString("相位:%3,面积:%1%,差积:%2%").arg(P).arg(A).arg(D);
 
     if (abs(A) >= Area.at(qMin(number, Area.size()-1))->value())
         judge = "NG";
@@ -787,7 +787,7 @@ void PageImp::ReadCanCmdWaveOk(QByteArray msg)
     case IMP_TEST:
         w = WaveImp.at(CurrentWave)->WaveTest;
         WaveImp.at(CurrentWave)->WaveTests[num] = w;
-        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
         CalculateResult(msg);
         break;
     }
@@ -811,7 +811,7 @@ void PageImp::ReadCanCmdWaveStart(QByteArray msg)
     case IMP_TEST:
         WaveImp.at(CurrentWave)->WaveTest.clear();
         emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
+        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
         break;
     default:
         break;
@@ -832,13 +832,11 @@ void PageImp::SendWave(QByteArray msg)
         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
         emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
         emit SendCommand(ADDR, CMD_WAVE_TEST, w);
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
     }
 }
-
-
 
 int PageImp::CalculateGear(int row)
 {

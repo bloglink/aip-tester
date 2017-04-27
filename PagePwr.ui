@@ -33,6 +33,12 @@
       <string>功率</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_3">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item row="0" column="0" colspan="6">
        <widget class="QTableWidget" name="TabParams">
         <property name="focusPolicy">
@@ -309,6 +315,12 @@
       <string>PG</string>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
       <item row="1" column="0">
        <widget class="QLabel" name="label">
         <property name="text">
@@ -360,7 +372,7 @@
       <item row="0" column="0" colspan="3">
        <widget class="QTableWidget" name="PGParams">
         <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>60</number>
+         <number>40</number>
         </attribute>
         <column>
          <property name="text">

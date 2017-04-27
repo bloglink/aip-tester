@@ -109,7 +109,7 @@ void PageDcr::InitWindows()
     connect(Unit.at(0),SIGNAL(currentIndexChanged(int)),this,SLOT(AutoChangeUnit(int)));
     connect(Min.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeMin(double)));
     connect(Max.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeMax(double)));
-//    connect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeStd(double)));
+    //    connect(Std.at(0),SIGNAL(valueChanged(double)),this,SLOT(AutoChangeStd(double)));
 }
 
 void PageDcr::InitButtons()
@@ -327,11 +327,14 @@ void PageDcr::ItemChange(QString msg)
 
 void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR)
+    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR && addr != CAN_ID_PWR)
         return;
     switch (cmd) {
     case CMD_CAN:
-        ExcuteCanCmd(msg);
+        if (addr == CAN_ID_DCR)
+            ExcuteCanCmd(msg);
+        if (addr == CAN_ID_PWR)
+            ExcuteCanCmdPwr(msg);
         break;
     case CMD_CHECK:
         Mode = DCR_INIT;
@@ -346,6 +349,13 @@ void PageDcr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = DCR_TEST;
         Judge = "OK";
         stat = msg.toInt();
+        if (IsPowerOn()) {
+            qDebug() << "start pwr";
+            SendCanCmdPwr(stat);
+            WaitTimeOut(50);
+        }
+        if (Mode == DCR_FREE)
+            break;
         SendCanCmdStart(stat);
         if(!WaitTimeOut(ui->BoxTime->value()*100+100)) {
             Judge = "NG";
@@ -386,6 +396,20 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
             ReadOffset(msg);
         else
             ReadCanCmdResult(msg);
+    }
+}
+
+void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
+{
+    if (Mode == DCR_FREE)
+        return;
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
+        double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+        if (v > 50) {
+            emit SendCommand(ADDR,CMD_STOP,"DCR PWR");
+            emit SendCommand(ADDR,CMD_DEBUG,QString("DCR PWR %1").arg(v).toUtf8());
+            QMessageBox::information(this,"","请等待电机转动停止再测试",QMessageBox::Ok);
+        }
     }
 }
 
@@ -453,6 +477,10 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     if (temp<Min.at(number)->value() || temp>Max.at(number)->value()) {
         Judge = "NG";
         JudgeItem = "NG";
+    }
+    if (temp < (Max.at(number)->value()/10)) {
+        emit SendCommand(ADDR,CMD_STOP,"DCR LOW");
+        QMessageBox::information(this,"","电阻值小于10%，请检查线路连接",QMessageBox::Ok);
     }
 
     QStringList s = QString(Items.at(number)).split("@");
@@ -609,6 +637,21 @@ void PageDcr::SendAlarm(QByteArray addr)
     emit SendCommand(ADDR,CMD_CAN,msg);
 }
 
+void PageDcr::SendCanCmdPwr(quint8 s)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    quint8 p = CurrentPorwer().toInt()<<4;
+    quint8 g = 0x01;
+    if (s == WIN_ID_OUT14)
+        g <<= 4;
+    out<<quint16(0x27)<<quint8(0x08)<<quint8(0x01)<<quint8(g)
+      <<quint8(0x00)<<quint8(0x05)<<quint8(p)<<quint8(0x00)
+     <<quint8(0x00)<<quint8(0x00);
+    emit SendCommand(ADDR,CMD_CAN,msg);
+}
+
 double PageDcr::CalculateOffset(double t, quint8 num)
 {
     double temp;
@@ -716,6 +759,27 @@ QString PageDcr::CurrentSettings()
     QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
     QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
     return n.remove(".ini");
+}
+
+QString PageDcr::CurrentPorwer()
+{
+    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/PowerSupply","0").toString();
+    return n;
+}
+
+bool PageDcr::IsPowerOn()
+{
+    QString s = QString("./config/%1.ini").arg(CurrentSettings());
+    QSettings *ini = new QSettings(s, QSettings::IniFormat);
+    QStringList n = ini->value("/GLOBAL/ProjToTest", "1").toString().split(" ");
+    if (n.contains(QString::number(WIN_ID_PWR)))
+        return true;
+    if (n.contains(QString::number(WIN_ID_LVS)))
+        return true;
+    if (n.contains(QString::number(WIN_ID_LCK)))
+        return true;
+    return false;
 }
 
 void PageDcr::AutoChangeMetal(int index)
