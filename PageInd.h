@@ -1,7 +1,15 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       电感模块
+*******************************************************************************/
 #ifndef PAGEIND_H
 #define PAGEIND_H
 
-#include <cmath>
+#include <qmath.h>
 #include <QDate>
 #include <QDebug>
 #include <QWidget>
@@ -9,6 +17,7 @@
 #include <QComboBox>
 #include <QSettings>
 #include <QListView>
+#include <QShowEvent>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QButtonGroup>
@@ -27,8 +36,7 @@
 #define IND_TEST        1
 #define IND_OFFSET      2
 
-union  Resultunion // 接收电感数据
-{
+union  Resultunion { // 接收电感数据
     float   Result;
     uint8_t dat[4];
 };
@@ -49,7 +57,7 @@ private:
     Ui::PageInd *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -57,12 +65,12 @@ private slots:
     void InitSettings(void);
     void SaveSettings(void);
     void CalculateAuto(void);
-    void ItemClick(int r,int c);
+    void ItemClick(int r, int c);
     void ItemChange(QString msg);
     int CalculateGear(int row);
     int CalculateMode(int row);
 
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);

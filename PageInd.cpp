@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       电感模块
+*******************************************************************************/
 #include "PageInd.h"
 #include "ui_PageInd.h"
 
@@ -19,85 +27,85 @@ PageInd::~PageInd()
 
 void PageInd::InitWindows()
 {
-#if (QT_VERSION <= QT_VERSION_CHECK(5,0,0))
-    ui->TabParams->horizontalHeader()->setResizeMode(4,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(5,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(6,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(7,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(8,QHeaderView::Stretch);
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+    ui->TabParams->horizontalHeader()->setResizeMode(4, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(5, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(6, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(7, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(8, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(4,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(5,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(6,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(7,QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(8,QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(4, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(5, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(8, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
-    connect(ui->TabParams,SIGNAL(cellClicked(int,int)),this,SLOT(ItemClick(int,int)));
+    connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
     input = new PageNum(this);
     QStringList t;
-    t <<"1"<<"2"<<"3"<<"4"<<"5"<<"6"<<"7"<<"8"<<"9"<<"10"<<"11"<<"12";
+    t  << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12";
     input->InitButtons(t);
-    connect(input,SIGNAL(ItemChange(QString)),this,SLOT(ItemChange(QString)));
+    connect(input, SIGNAL(ItemChange(QString)), this, SLOT(ItemChange(QString)));
     input->hide();
 
     ui->TabParams->setRowCount(MAX_ROW);
-    for (int row=0; row<MAX_ROW; row++) {
+    for (int row=0; row < MAX_ROW; row++) {
         Enable.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row,0,Enable.at(row));
+        ui->TabParams->setItem(row, 0, Enable.at(row));
         Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Enable.at(row)->setTextAlignment(Qt::AlignCenter);
 
         Terminal1.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row,1,Terminal1.at(row));
+        ui->TabParams->setItem(row, 1, Terminal1.at(row));
         Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
 
         Terminal2.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row,2,Terminal2.at(row));
+        ui->TabParams->setItem(row, 2, Terminal2.at(row));
         Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
         Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
 
         Unit.append(new QComboBox(this));
-        ui->TabParams->setCellWidget(row,3,Unit.at(row));
+        ui->TabParams->setCellWidget(row, 3, Unit.at(row));
         QStringList t2;
-        t2 <<"uH"<<"mH";
+        t2  << "uH" << "mH";
         Unit.at(row)->setView(new QListView(this));
         Unit.at(row)->addItems(t2);
 
         Min.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,4,Min.at(row));
+        ui->TabParams->setCellWidget(row, 4, Min.at(row));
         Min.at(row)->setMaximum(2000);
         Min.at(row)->setAlignment(Qt::AlignHCenter);
         Min.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         Max.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,5,Max.at(row));
+        ui->TabParams->setCellWidget(row, 5, Max.at(row));
         Max.at(row)->setMaximum(2000);
         Max.at(row)->setAlignment(Qt::AlignHCenter);
         Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         QMin.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,6,QMin.at(row));
+        ui->TabParams->setCellWidget(row, 6, QMin.at(row));
         QMin.at(row)->setMaximum(100);
         QMin.at(row)->setAlignment(Qt::AlignHCenter);
         QMin.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         QMax.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,7,QMax.at(row));
+        ui->TabParams->setCellWidget(row, 7, QMax.at(row));
         QMax.at(row)->setMaximum(100);
         QMax.at(row)->setAlignment(Qt::AlignHCenter);
         QMax.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         Std.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,8,Std.at(row));
+        ui->TabParams->setCellWidget(row, 8, Std.at(row));
         Std.at(row)->setMaximum(2000);
         Std.at(row)->setAlignment(Qt::AlignHCenter);
         Std.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
         Offset.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row,9,Offset.at(row));
+        ui->TabParams->setCellWidget(row, 9, Offset.at(row));
         Offset.at(row)->setMaximum(100);
         Offset.at(row)->setAlignment(Qt::AlignHCenter);
         Offset.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
@@ -107,10 +115,10 @@ void PageInd::InitWindows()
 void PageInd::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->BtnSDLRAuto,Qt::Key_0);
-    btnGroup->addButton(ui->BtnOffset,Qt::Key_1);
-    btnGroup->addButton(ui->BtnSDLRExit,Qt::Key_2);
-    connect(btnGroup,SIGNAL(buttonClicked(int)),this,SLOT(ReadButtons(int)));
+    btnGroup->addButton(ui->BtnSDLRAuto, Qt::Key_0);
+    btnGroup->addButton(ui->BtnOffset, Qt::Key_1);
+    btnGroup->addButton(ui->BtnSDLRExit, Qt::Key_2);
+    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
 void PageInd::ReadButtons(int id)
@@ -128,7 +136,7 @@ void PageInd::ReadButtons(int id)
         break;
     case Qt::Key_2:
         SaveSettings();
-        emit SendCommand(ADDR,CMD_JUMP,NULL);
+        emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     default:
         break;
@@ -139,11 +147,11 @@ void PageInd::InitSettings()
 {
     //当前使用的测试项目
     QString t = QString("./config/%1.ini").arg(CurrentSettings());
-    set = new QSettings(t,QSettings::IniFormat);
+    set = new QSettings(t, QSettings::IniFormat);
     set->setIniCodec("GB18030");
     set->beginGroup("PageInd");
 
-    QStringList temp = (set->value("Other","1 0 20 20 0 0").toString()).split(" ");
+    QStringList temp = (set->value("Other", "1 0 20 20 0 0").toString()).split(" ");
     if (temp.size() >= 6) {
         ui->BoxTime->setValue(temp.at(0).toDouble());
         ui->BoxUnbalance->setValue(temp.at(1).toDouble());
@@ -153,46 +161,46 @@ void PageInd::InitSettings()
         ui->BoxMode->setCurrentIndex(temp.at(5).toInt());
     }
     //可用
-    temp = (QString(set->value("Enable","Y Y Y N N N N N").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (QString(set->value("Enable", "Y Y Y N N N N N").toByteArray())).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Enable.at(row)->setText(temp.at(row));
     //端一
-    temp = (set->value("Terminal1","1 2 1 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Terminal1", "1 2 1 4 5 6 7 8").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Terminal1.at(row)->setText(temp.at(row));
     //端二
-    temp = (set->value("Terminal2","2 3 3 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Terminal2", "2 3 3 5 6 7 8 1").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
     //单位
-    temp = (QString(set->value("Unit","1 1 1 1 1 1 1 1").toByteArray())).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (QString(set->value("Unit", "1 1 1 1 1 1 1 1").toByteArray())).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Unit.at(row)->setCurrentIndex(temp.at(row).toInt());
     //最小值
-    temp = (set->value("Min","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Min", "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Min.at(row)->setValue(temp.at(row).toDouble());
     //最大值
-    temp = (set->value("Max","200 200 200 200 200 200 200 200").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Max", "200 200 200 200 200 200 200 200").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Max.at(row)->setValue(temp.at(row).toDouble());
     //最小值
-    temp = (set->value("QMin","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("QMin", "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         QMin.at(row)->setValue(temp.at(row).toDouble());
     //最大值
-    temp = (set->value("QMax","200 200 200 200 200 200 200 200").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("QMax", "200 200 200 200 200 200 200 200").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         QMax.at(row)->setValue(temp.at(row).toDouble());
     //标准值
-    temp = (set->value("Std","100 100 100 100 100 100 100 100").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Std", "100 100 100 100 100 100 100 100").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Std.at(row)->setValue(temp.at(row).toDouble());
     //补偿
-    temp = (set->value("Offset","0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
-    for (int row=0; row<qMin(temp.size(),MAX_ROW); row++)
+    temp = (set->value("Offset", "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
-    qDebug()<<QTime::currentTime().toString()<<"PageInd read OK";
+    qDebug() << QTime::currentTime().toString() << "PageInd read OK";
 }
 
 void PageInd::SaveSettings()
@@ -204,55 +212,54 @@ void PageInd::SaveSettings()
     temp.append(QString::number(ui->BoxMax->value()));
     temp.append(QString::number(ui->BoxFreq->currentIndex()));
     temp.append(QString::number(ui->BoxMode->currentIndex()));
-    set->setValue("Other",(temp.join(" ").toUtf8()));
+    set->setValue("Other", (temp.join(" ").toUtf8()));
 
     temp.clear();
-    for (int i=0; i<Enable.size(); i++)
+    for (int i=0; i < Enable.size(); i++)
         temp.append(Enable.at(i)->text());
-    set->setValue("Enable",(temp.join(" ").toUtf8()));
+    set->setValue("Enable", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal1.size(); i++)
+    for (int i=0; i < Terminal1.size(); i++)
         temp.append(Terminal1.at(i)->text());
-    set->setValue("Terminal1",(temp.join(" ").toUtf8()));
+    set->setValue("Terminal1", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Terminal2.size(); i++)
+    for (int i=0; i < Terminal2.size(); i++)
         temp.append(Terminal2.at(i)->text());
-    set->setValue("Terminal2",(temp.join(" ").toUtf8()));
+    set->setValue("Terminal2", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Unit.size(); i++)
+    for (int i=0; i < Unit.size(); i++)
         temp.append(QString::number(Unit.at(i)->currentIndex()));
-    set->setValue("Unit",(temp.join(" ").toUtf8()));
+    set->setValue("Unit", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Min.size(); i++)
+    for (int i=0; i < Min.size(); i++)
         temp.append(QString::number(Min.at(i)->value()));
-    set->setValue("Min",(temp.join(" ").toUtf8()));
+    set->setValue("Min", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Max.size(); i++)
+    for (int i=0; i < Max.size(); i++)
         temp.append(QString::number(Max.at(i)->value()));
-    set->setValue("Max",(temp.join(" ").toUtf8()));
+    set->setValue("Max", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<QMin.size(); i++)
+    for (int i=0; i < QMin.size(); i++)
         temp.append(QString::number(QMin.at(i)->value()));
-    set->setValue("QMin",(temp.join(" ").toUtf8()));
+    set->setValue("QMin", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<QMax.size(); i++)
+    for (int i=0; i < QMax.size(); i++)
         temp.append(QString::number(QMax.at(i)->value()));
-    set->setValue("QMax",(temp.join(" ").toUtf8()));
+    set->setValue("QMax", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Std.size(); i++)
+    for (int i=0; i < Std.size(); i++)
         temp.append(QString::number(Std.at(i)->value()));
-    set->setValue("Std",(temp.join(" ").toUtf8()));
+    set->setValue("Std", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i<Offset.size(); i++)
+    for (int i=0; i < Offset.size(); i++)
         temp.append(Offset.at(i)->text());
-    set->setValue("Offset",(temp.join(" ").toUtf8()));
-    
-    qDebug()<<QTime::currentTime().toString()<<"PageInd save OK";
+    set->setValue("Offset", (temp.join(" ").toUtf8()));
+    qDebug() << QTime::currentTime().toString() << "PageInd save OK";
 }
 
 void PageInd::CalculateAuto()
 {
-    for (int i=0; i<ui->TabParams->rowCount(); i++) {
+    for (int i=0; i < ui->TabParams->rowCount(); i++) {
         double std = Std.at(i)->value();
         double min = std*(100-ui->BoxMin->value())/100;
         double max = std*(100+ui->BoxMax->value())/100;
@@ -261,7 +268,7 @@ void PageInd::CalculateAuto()
     }
 }
 
-void PageInd::ItemClick(int r, int c)
+void PageInd::ItemClick(int r,  int c)
 {
     switch (c) {
     case 0:
@@ -282,13 +289,13 @@ void PageInd::ItemClick(int r, int c)
 void PageInd::ItemChange(QString msg)
 {
     int t = ui->TabParams->currentColumn();
-    if (t==1 || t==2)
+    if (t == 1 || t == 2)
         ui->TabParams->currentItem()->setText(msg);
 }
 
-void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
+void PageInd::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 {
-    if (addr!=ADDR && addr!=WIN_ID_IND && addr!=CAN_ID_IND)
+    if (addr != ADDR && addr != WIN_ID_IND && addr != CAN_ID_IND)
         return;
     switch (cmd) {
     case CMD_CAN:
@@ -298,8 +305,8 @@ void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = IND_INIT;
         SendCanCmdStatus();
         if (!WaitTimeOut(20)) {
-            QMessageBox::warning(this,tr("警告"),tr("电感板异常"),QMessageBox::Ok);
-            emit SendCommand(ADDR,CMD_DEBUG,"Time out Error:PageInd\n");
+            QMessageBox::warning(this, tr("警告"), tr("电感板异常"), QMessageBox::Ok);
+            emit SendCommand(ADDR, CMD_DEBUG, "Time out Error:PageInd\n");
         }
         Mode = IND_FREE;
         break;
@@ -307,7 +314,7 @@ void PageInd::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         Mode = IND_TEST;
         Judge = "OK";
         SendCanCmdStart(msg.toInt());
-        if(!WaitTimeOut(ui->BoxTime->value()*100+100)) {
+        if (!WaitTimeOut(ui->BoxTime->value()*100+100)) {
             Judge = "NG";
             SendTestItemsAllError();
         }
@@ -333,10 +340,10 @@ void PageInd::ExcuteCanCmd(QByteArray msg)
     if (Mode == IND_FREE)
         return;
     TimeOut = 0;
-    if (msg.size()==8 && (quint8)msg.at(0)==0x00) {
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x00) {
         ReadCanCmdStatus(msg);
     }
-    if (msg.size()==8 && (quint8)msg.at(0)==0x01) {
+    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
         if (Mode == IND_OFFSET)
             ReadCanCmdOffset(msg);
         else
@@ -347,14 +354,14 @@ void PageInd::ExcuteCanCmd(QByteArray msg)
 void PageInd::ReadCanCmdStatus(QByteArray msg)
 {
     if (quint8(msg.at(1)) != 0) {
-        emit SendCommand(ADDR,CMD_DEBUG,"IND Error:");
-        emit SendCommand(ADDR,CMD_DEBUG,msg.toHex());
-        emit SendCommand(ADDR,CMD_DEBUG,"\n");
+        emit SendCommand(ADDR, CMD_DEBUG, "IND Error:");
+        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+        emit SendCommand(ADDR, CMD_DEBUG, "\n");
         Mode = IND_FREE;
         return;
     }
     if (Mode == IND_INIT)
-        emit SendCommand(ADDR,CMD_DEBUG,"PageInd OK\n");
+        emit SendCommand(ADDR, CMD_DEBUG, "PageInd OK\n");
     Mode = IND_FREE;
 }
 
@@ -376,19 +383,19 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
         Result2.dat[3] = quint8(msg.at(7));
         QString t = "---";
         if (Result1.Result <= 1000)
-            t = QString::number(Result1.Result,'f',1) + "uH";
+            t = QString::number(Result1.Result, 'f', 1) + "uH";
         else if (Result1.Result <= 10000)
-            t = QString::number(Result1.Result/1000,'f',3) + "mH";
+            t = QString::number(Result1.Result/1000, 'f', 3) + "mH";
         else if (Result1.Result <= 100000)
-            t = QString::number(Result1.Result/1000,'f',2) + "mH";
+            t = QString::number(Result1.Result/1000, 'f', 2) + "mH";
         else if (Result1.Result <= 1000000)
-            t = QString::number(Result1.Result/1000,'f',1) + "mH";
+            t = QString::number(Result1.Result/1000, 'f', 1) + "mH";
         else if (Result1.Result <= 10000000)
-            t = QString::number(Result1.Result/1000,'f',0) + "mH";
+            t = QString::number(Result1.Result/1000, 'f', 0) + "mH";
 
         Results.append(Result1.Result);
 
-        t +="," + QString::number(Result2.Result,'f',2);
+        t +=", " + QString::number(Result2.Result, 'f', 2);
         double max = Max.at(number)->value();
         double min = Min.at(number)->value();
         double qmax = QMax.at(number)->value();
@@ -398,7 +405,8 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
             min *= 1000;
         }
         QString judge = "OK";
-        if (Result1.Result<min || Result1.Result>max || Result2.Result<qmin || Result2.Result>qmax){
+        if (Result1.Result < min || Result1.Result > max
+                || Result2.Result < qmin || Result2.Result > qmax) {
             Judge = "NG";
             judge = "NG";
         }
@@ -407,21 +415,21 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
             s[2] = t;
         if (s.at(3) == " ")
             s[3] = judge;
-        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
 
         if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
             double sum = 0;
             double avr = 0;
             QString u;
-            for (int i=0; i<Results.size(); i++) {
+            for (int i=0; i < Results.size(); i++) {
                 sum += Results.at(i);
             }
             avr = sum/Results.size();
             judge = "OK";
-            for (int i=0; i<Results.size(); i++) {
+            for (int i=0; i < Results.size(); i++) {
                 double un = fabs(Results.at(i)-avr)*100/avr;
-                qDebug() << un << avr;
-                u.append(QString::number(un,'f',1));
+                qDebug()  <<  un  <<  avr;
+                u.append(QString::number(un, 'f', 1));
                 u.append("% ");
                 if (un >= ui->BoxUnbalance->value()) {
                     Judge = "NG";
@@ -433,7 +441,7 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
                 s[2] = u;
             if (s.at(3) == " ")
                 s[3] = judge;
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
         }
     }
 }
@@ -461,26 +469,26 @@ void PageInd::SendTestItemsAllEmpty()
     Items.clear();
     Results.clear();
     QStringList n;
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         QStringList s;
-        QString T1 = Terminal1.at(qMin(row,Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row,Terminal2.size()))->text();
-        QString M1 = Min.at(qMin(row,Min.size()))->text();
-        QString M2 = Max.at(qMin(row,Max.size()))->text();
-        QString Q1 = QMin.at(qMin(row,QMin.size()))->text();
-        QString Q2 = QMax.at(qMin(row,QMax.size()))->text();
+        QString T1 = Terminal1.at(qMin(row, Terminal1.size()))->text();
+        QString T2 = Terminal2.at(qMin(row, Terminal2.size()))->text();
+        QString M1 = Min.at(qMin(row, Min.size()))->text();
+        QString M2 = Max.at(qMin(row, Max.size()))->text();
+        QString Q1 = QMin.at(qMin(row, QMin.size()))->text();
+        QString Q2 = QMax.at(qMin(row, QMax.size()))->text();
         s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
-        s.append(QString("%1~%2,%3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
+        s.append(QString("%1~%2, %3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
         s.append(" ");
         s.append(" ");
         Items.append(s.join("@"));
     }
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
         }
     }
-    if (ui->BoxUnbalance->value() != 0 && n.size()>=3) {
+    if (ui->BoxUnbalance->value() != 0 && n.size() >= 3) {
         QStringList s;
         s.append("电感平衡");
         s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
@@ -489,19 +497,19 @@ void PageInd::SendTestItemsAllEmpty()
         Items.append(s.join("@"));
         n.append(Items.last());
     }
-    emit SendCommand(ADDR,CMD_INIT_ITEM,n.join("\n").toUtf8());
+    emit SendCommand(ADDR, CMD_INIT_ITEM, n.join("\n").toUtf8());
 }
 
 void PageInd::SendTestItemsAllError()
 {
-    for (int row = 0; row<Enable.size(); row++) {
+    for (int row = 0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             QStringList s = QString(Items.at(row)).split("@");
             if (s.at(2) == " ")
                 s[2] = "---";
             if (s.at(3) == " ")
                 s[3] = "NG";
-            emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
         }
     }
     if (ui->BoxUnbalance->value() != 0) {
@@ -510,64 +518,64 @@ void PageInd::SendTestItemsAllError()
             s[2] = "---";
         if (s.at(3) == " ")
             s[3] = "NG";
-        emit SendCommand(ADDR,CMD_ITEM,s.join("@").toUtf8());
+        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
     }
 }
 
 void PageInd::SendTestJudge()
 {
     QString s = QString(tr("电感@%1@%2")).arg(CurrentSettings()).arg(Judge);
-    emit SendCommand(ADDR,CMD_JUDGE,s.toUtf8());
+    emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
 }
 
 void PageInd::SendCanCmdStatus()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x00);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x26) << quint8(0x01) << quint8(0x00);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInd::SendCanCmdStart(quint8 pos)
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
-    for (int row=0; row<Enable.size(); row++) {
+    for (int row=0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y")
-            tt += 0x0001<<row;
+            tt += 0x0001 << row;
     }
-    out<<quint16(0x26)<<quint8(0x06)<<quint8(0x01)<<quint8(0x00)<<quint8(0x00)
-      <<quint8(pos)<<quint8(tt/256)<<quint8(tt%256);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x26) << quint8(0x06) << quint8(0x01) << quint8(0x00) << quint8(0x00)
+        << quint8(pos) << quint8(tt/256) << quint8(tt%256);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInd::SendCanCmdStop()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out<<quint16(0x26)<<quint8(0x01)<<quint8(0x02);
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    out << quint16(0x26) << quint8(0x01) << quint8(0x02);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 void PageInd::SendCanCmdConfig()
 {
     QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
+    QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    for (int i=0; i<Enable.size(); i++) {
+    for (int i=0; i < Enable.size(); i++) {
         if (Enable.at(i)->text() == "Y") {
-            out<<quint16(0x26)<<quint8(0x07)<<quint8(0x03)<<quint8(i)
-              <<quint8(Terminal1.at(i)->text().toInt())
-             <<quint8(Terminal2.at(i)->text().toInt())
-            <<quint8(ui->BoxTime->value())
-            <<quint8(CalculateGear(i))<<quint8(CalculateMode(i));
+            out << quint16(0x26) << quint8(0x07) << quint8(0x03) << quint8(i)
+                << quint8(Terminal1.at(i)->text().toInt())
+                << quint8(Terminal2.at(i)->text().toInt())
+                << quint8(ui->BoxTime->value())
+                << quint8(CalculateGear(i)) << quint8(CalculateMode(i));
         }
     }
-    emit SendCommand(ADDR,CMD_CAN,msg);
+    emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
 int PageInd::CalculateGear(int row)
@@ -641,7 +649,7 @@ int PageInd::CalculateMode(int row)
     else
         s = 0x40;
 
-    if (Unit.at(row)->currentText()=="uH" && Max.at(row)->text().toInt()<500)
+    if (Unit.at(row)->currentText() == "uH" && Max.at(row)->text().toInt() < 500)
         t = s | 0x0F;
     else
         t = s | 0x09;
@@ -664,18 +672,19 @@ void PageInd::Delay(int ms)
 {
     QElapsedTimer t;
     t.start();
-    while(t.elapsed()<ms)
+    while (t.elapsed() < ms)
         QCoreApplication::processEvents();
 }
 
 QString PageInd::CurrentSettings()
 {
-    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    QString n = ini->value("/GLOBAL/FileInUse",INI_DEFAULT).toString();
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    QString n = ini->value("/GLOBAL/FileInUse", INI_DEFAULT).toString();
     return n.remove(".ini");
 }
 
-void PageInd::showEvent(QShowEvent *)
+void PageInd::showEvent(QShowEvent *e)
 {
     InitSettings();
+    e->accept();
 }
