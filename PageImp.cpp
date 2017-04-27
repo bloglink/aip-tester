@@ -295,8 +295,8 @@ void PageImp::InitSettings()
     QByteArray w;
     QByteArray def;
     for (int i=0; i < 400; i++) {
-        def.append(QByteArray(1,0x02));
-        def.append(QByteArray(1,0x04));
+        def.append(QByteArray(1, 0x02));
+        def.append(QByteArray(1, 0x04));
     }
     for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
         QString ByteL = "WaveImpL"+QString::number(row);
@@ -696,9 +696,9 @@ void PageImp::CalculateResult(QByteArray )
         Phase1 += (a1-0x200)*(a1-0x200);
         Phase2 += (a1-0x200)*(a2-0x200);
     }
-    A = qMin(99,abs((Area2-Area1)*100/Area1));
-    D = qMin(99,abs(qMin(Area2, Area3/4)*100/Area1));
-    P = qMin(99,abs((Phase1-Phase2)*100/Phase1));
+    A = qMin(99, abs((Area2-Area1)*100/Area1));
+    D = qMin(99, abs(qMin(Area2, Area3/4)*100/Area1));
+    P = qMin(99, abs((Phase1-Phase2)*100/Phase1));
 
     QString n;
     QString judge = "OK";
@@ -882,8 +882,9 @@ void PageImp::AutoChangeVolt()
         Volt.at(i)->setValue(Volt.at(0)->value());
 }
 
-void PageImp::showEvent(QShowEvent *)
+void PageImp::showEvent(QShowEvent *e)
 {
     InitSettings();
+    e->accept();
 }
 /*********************************END OF FILE**********************************/
