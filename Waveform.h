@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       波形处理模块
+*******************************************************************************/
 #ifndef WAVEFORM_H
 #define WAVEFORM_H
 
@@ -22,7 +30,7 @@ public slots:
     void WaveByteShow(QByteArray msg);
     void WaveTestShow(QByteArray msg);
     void WaveItemShow(QByteArray msg);
-    void WaveBlock(int o,int t);
+    void WaveBlock(int o, int t);
     void InitWaveByte(quint8 s);
     void InitWaveTest(quint8 s);
 public:
