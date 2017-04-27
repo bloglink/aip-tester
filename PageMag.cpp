@@ -571,7 +571,7 @@ void PageMag::CalculateDir()
     QString n;
     QString judge = "OK";
 
-    if (((diff*3 < area1) & &(diff*3 < area2)) || (area1 < (area2 >> 4)) || (area2 < (area1 >> 4)))
+    if (((diff*3 < area1) &&(diff*3 < area2)) || (area1 < (area2 >> 4)) || (area2 < (area1 >> 4)))
         n = tr("不转"); // 偏移不超过1/3, 或面积差大于3/4, 判定为不转
     else if (diff1 < diff2) // 副相在前
         n = tr("正转");
