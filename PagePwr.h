@@ -1,14 +1,22 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       功率模块
+*******************************************************************************/
 #ifndef PAGEPWR_H
 #define PAGEPWR_H
 
 #include <QTime>
-#include <cmath>
 #include <QDebug>
 #include <QWidget>
 #include <QLineEdit>
 #include <QComboBox>
 #include <QSettings>
 #include <QListView>
+#include <QShowEvent>
 #include <QMessageBox>
 #include <QHeaderView>
 #include <QButtonGroup>
@@ -16,6 +24,7 @@
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
 #include "define.h"
+#include "qmath.h"
 
 #define PWR_ROW 3
 #define PG_ROW 3
@@ -40,17 +49,17 @@ private:
     Ui::PagePwr *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
     void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
-    void ItemClick(int r,int c);
-    void ItemClickPG(int r,int c);
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
-    void ExcuteCanCmd(quint16 addr, QByteArray msg);
+    void ItemClick(int r, int c);
+    void ItemClickPG(int r, int c);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
+    void ExcuteCanCmd(quint16 addr,  QByteArray msg);
     void InitTestItems(void);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
