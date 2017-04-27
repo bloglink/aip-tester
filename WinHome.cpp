@@ -436,13 +436,13 @@ void WinHome::InitTestItems()
         emit SendCommand(WIN_ID_OUT13, CMD_INIT, QString::number(CurrentStartMode()).toUtf8());
 
     if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
-        n.insert(0,QString::number(WIN_ID_DCR));
+        n.insert(0, QString::number(WIN_ID_DCR));
     }
     if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
-        n.insert(0,QString::number(WIN_ID_DCR));
+        n.insert(0, QString::number(WIN_ID_DCR));
     }
     if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
-        n.insert(0,QString::number(WIN_ID_DCR));
+        n.insert(0, QString::number(WIN_ID_DCR));
     }
     for (int i=0; i < n.size(); i++) {
         emit SendCommand(n.at(i).toInt(), CMD_INIT, NULL);
@@ -493,13 +493,13 @@ void WinHome::StartTest(QByteArray station)
 
     QStringList n = CurrentItems();
     if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
-        n.insert(0,QString::number(WIN_ID_DCR));
+        n.insert(0, QString::number(WIN_ID_DCR));
     }
     if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
-        n.insert(0,QString::number(WIN_ID_DCR));
+        n.insert(0, QString::number(WIN_ID_DCR));
     }
     if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
-        n.insert(0,QString::number(WIN_ID_DCR));
+        n.insert(0, QString::number(WIN_ID_DCR));
     }
     for (int i=0; i < n.size(); i++) {
         Current_Test_Item = n.at(i).toInt();
@@ -555,9 +555,10 @@ void WinHome::TestPause()
 {
     isPause = true;
     TempItems.clear();
-    msgBox = new MessageBox(this,"", "此项目不合格,是否重测",QMessageBox::Yes,QMessageBox::Cancel);
+    QString warn = tr("此项目不合格,是否重测");
+    msgBox = new MessageBox(this, "", warn, QMessageBox::Yes, QMessageBox::Cancel);
     msgBox->setIcon(":/source/link.png");
-    connect(this,SIGNAL(message(QByteArray)),msgBox,SLOT(readcnd(QByteArray)));
+    connect(this, SIGNAL(message(QByteArray)), msgBox, SLOT(readcnd(QByteArray)));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x01));
     Delay(CurrentAlarmTime("NG"));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
@@ -567,13 +568,11 @@ void WinHome::TestPause()
         ItemJudge = "OK";
         if (HomeMode != HOME_STOP)
             emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
-        emit SendCommand(Current_Test_Item,CMD_INIT,stat);
-        emit SendCommand(WIN_ID_TEST,CMD_ITEM_REPLACE,TempItems.join("\n").toUtf8());
-        emit SendCommand(Current_Test_Item,CMD_START,stat);
+        emit SendCommand(Current_Test_Item, CMD_INIT, stat);
+        emit SendCommand(WIN_ID_TEST, CMD_ITEM_REPLACE, TempItems.join("\n").toUtf8());
+        emit SendCommand(Current_Test_Item, CMD_START, stat);
         Delay(10);
-    }
-    else if(ret == QMessageBox::Cancel)
-    {
+    } else if (ret == QMessageBox::Cancel) {
         if (HomeMode != HOME_STOP)
             emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
     }
