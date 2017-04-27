@@ -1,8 +1,15 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       电阻模块
+*******************************************************************************/
 #ifndef PAGEDCR_H
 #define PAGEDCR_H
 
 #include <qmath.h>
-#include <cmath>
 #include <QDate>
 #include <QTimer>
 #include <QDebug>
@@ -11,6 +18,7 @@
 #include <QSettings>
 #include <QListView>
 #include <QMessageBox>
+#include <QShowEvent>
 #include <QHeaderView>
 #include <QButtonGroup>
 #include <QElapsedTimer>
@@ -47,7 +55,7 @@ private:
     Ui::PageDcr *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -56,9 +64,9 @@ private slots:
     void SaveSettings(void);
     void AutoCalculateMinAndMax(void);
     bool CheckSetting(void);
-    void ItemClick(int r,int c);
+    void ItemClick(int r, int c);
     void ItemChange(QString msg);
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void ExcuteCanCmdPwr(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
@@ -73,7 +81,7 @@ private slots:
     void SendCanCmdConfig(void);
     void SendAlarm(QByteArray addr);
     void SendCanCmdPwr(quint8 pos);
-    double CalculateOffset(double t,quint8 num);
+    double CalculateOffset(double t, quint8 num);
     void CalculateBalance(void);
     int CalculateGear(int row);
     bool WaitTimeOut(quint16 t);
