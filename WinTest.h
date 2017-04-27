@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       测试显示模块
+*******************************************************************************/
 #ifndef WINTEST_H
 #define WINTEST_H
 
@@ -30,7 +38,7 @@ private:
     Ui::WinTest *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -48,8 +56,8 @@ private slots:
     void ShowStation(QByteArray msg);
     void ShowTime(void);
     void ClearWave(void);
-    void ClickItem(int r, int c);
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray dataA);
+    void ClickItem(int r,  int c);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray dataA);
     void showEvent(QShowEvent *);
 private:
     QTimer *timer;
