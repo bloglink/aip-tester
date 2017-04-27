@@ -15,6 +15,7 @@
 #include <QWidget>
 #include <QString>
 #include <QProcess>
+#include <QShowEvent>
 #include <QButtonGroup>
 #include <QListView>
 #include <QSettings>
@@ -57,7 +58,7 @@ private slots:
     void RemoveSettings(void);
     void ChangeSettings(void);
     void QuerySettings(void);
-    void ChangeMotorTypes(int id);
+    void ChangeMotorTypes();
 
     QString CurrentSettings(void);
     QStringList CurrentItems(void);

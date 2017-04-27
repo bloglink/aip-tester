@@ -563,7 +563,7 @@ void WinHome::TestPause()
     Delay(CurrentAlarmTime("NG"));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
     int ret = msgBox->exec();
-    if (ret== QMessageBox::Cancel)
+    if (ret == QMessageBox::Cancel)
     {
         ItemJudge = "OK";
         if (HomeMode != HOME_STOP)

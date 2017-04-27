@@ -121,8 +121,8 @@ void WinType::InitWindows()
     ui->Other->setCurrentIndex(0);
 
     QRegExp rx1;
-    rx1.setPattern("^[-|0-9|A-Z|a-z|^\s]{1,16}$"); //限制接受1至16个字符,减号、数字和英文字母
-    QValidator *validator_16c = new QRegExpValidator(rx1,this);
+    rx1.setPattern("^[-|0-9|A-Z|a-z|^\s]{1,16}$"); // 限制接受1至16个字符,减号、数字和英文字母
+    QValidator *validator_16c = new QRegExpValidator(rx1, this);
     ui->EditTypeName->setValidator(validator_16c);
 }
 
@@ -134,7 +134,7 @@ void WinType::InitButtons()
     btnGroup->addButton(ui->BtnCheck, Qt::Key_3);
     btnGroup->addButton(ui->BtnConfExit, Qt::Key_4);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
-    connect(ui->BoxType, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeMotorTypes(int)));
+    connect(ui->BoxType, SIGNAL(currentIndexChanged(int)), this, SLOT(ChangeMotorTypes()));
     connect(ui->TabWire, SIGNAL(cellClicked(int, int)), this, SLOT(ShowWireColorWindow()));
     connect(ui->TabColor, SIGNAL(cellClicked(int, int)), this, SLOT(SelectWireColor(int, int)));
     connect(ui->TabTest, SIGNAL(cellClicked(int, int)), this, SLOT(ShowAvailableItem(int, int)));
@@ -217,7 +217,7 @@ void WinType::AddTestItem(int id)
     ui->TabTest->currentItem()->setText(itemButtons->buttons().at(id)->text());
 }
 
-void WinType::ChangeMotorTypes(int)
+void WinType::ChangeMotorTypes()
 {
     QString jpg = QString(":/source/%1.jpg").arg(ui->BoxType->currentText());
     ui->labelType->setPixmap(QPixmap(jpg));
@@ -386,7 +386,8 @@ void WinType::CopySettings(QString name)
     }
     QString Source = QString("./config/%1.ini").arg(c);
     QString Target = QString("./config/%1.ini").arg(name);
-    QFile::copy(Source, Target);
+    QFile *s = new QFile(Source);
+    s->copy(Target);
     name.append(".ini");
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
     ini->setIniCodec("GB18030");
@@ -422,7 +423,6 @@ void WinType::ChangeSettings()
     ini->setIniCodec("GB18030");
     ini->beginGroup("GLOBAL");
     ini->setValue("FileInUse", t);
-
 }
 
 void WinType::QuerySettings()
@@ -463,17 +463,18 @@ QStringList WinType::EnableItems()
 
 int WinType::CurrentUser()
 {
-    QSettings *ini = new QSettings(INI_PATH,QSettings::IniFormat);
-    return ini->value("/GLOBAL/User","0").toInt();
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/User", "0").toInt();
 }
 
-void WinType::showEvent(QShowEvent *)
+void WinType::showEvent(QShowEvent *e)
 {
     ui->Other->setCurrentIndex(0);
     ui->Type->setCurrentIndex(0);
     ReadAllSettings();
     ReadAvailableItems();
     InitSettings();
+    e->accept();
 }
 
 void WinType::on_TabFile_cellClicked(int , int )
