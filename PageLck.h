@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       堵转模块
+*******************************************************************************/
 #ifndef PAGELCK_H
 #define PAGELCK_H
 
@@ -7,6 +15,7 @@
 #include <QListView>
 #include <QSettings>
 #include <QComboBox>
+#include <QShowEvent>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
@@ -33,7 +42,7 @@ private:
     Ui::PageLck *ui;
 
 signals:
-    void SendCommand(quint16 addr,quint16 cmd,QByteArray data);
+    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -41,7 +50,7 @@ private slots:
     void InitSettings(void);
     void SaveSettings(void);
 
-    void ReadMessage(quint16 addr,quint16 cmd,QByteArray msg);
+    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
     void ExcuteCanCmd(QByteArray msg);
     void InitTestItems(void);
     void SendTestItemsAllError(void);
