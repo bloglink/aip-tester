@@ -1,11 +1,19 @@
-#ifndef MESSAGE_BOX
-#define MESSAGE_BOX
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       暂停询问模块
+*******************************************************************************/
+#ifndef MESSAGE_BOX_H
+#define MESSAGE_BOX_H
 
 #include <QMessageBox>
 #include <QDialogButtonBox>
 #include <QGridLayout>
 #include "custom_window.h"
-#endif
+
 
 class QLabel;
 
@@ -14,8 +22,10 @@ class MessageBox :  public CustomWindow
     Q_OBJECT
 
 public:
-    explicit MessageBox(QWidget  *parent = 0, const QString &title = tr("Tip"), const QString &text = "",
-                        QMessageBox::StandardButtons buttons = QMessageBox::Ok, QMessageBox::StandardButton defaultButton = QMessageBox::Ok);
+    explicit MessageBox(QWidget  *parent = 0, const QString &title = tr("Tip"),
+                        const QString &text = "",
+                        QMessageBox::StandardButtons buttons = QMessageBox::Ok,
+                        QMessageBox::StandardButton defaultButton = QMessageBox::Ok);
     ~MessageBox();
     QAbstractButton *clickedButton() const;
     QMessageBox::StandardButton standardButton(QAbstractButton *button) const;
@@ -51,5 +61,5 @@ private:
     QDialogButtonBox *m_pButtonBox;
     QAbstractButton *m_pClickedButton;
     QAbstractButton *m_pDefaultButton;
-
 };
+#endif // MESSAGE_BOX_H

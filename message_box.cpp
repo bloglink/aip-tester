@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       暂停询问模块
+*******************************************************************************/
 #include <QLabel>
 #include <QPushButton>
 #include <QMessageBox>
@@ -9,8 +17,8 @@
 #include "message_box.h"
 
 MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &text,
-                       QMessageBox::StandardButtons buttons, QMessageBox::StandardButton defaultButton)
-    : CustomWindow (parent)
+                       QMessageBox::StandardButtons buttons,
+                       QMessageBox::StandardButton defaultButton) : CustomWindow(parent)
 {
     m_pLayout = new QVBoxLayout(this);
     setWindowIcon(QIcon(":/source/link.png"));
@@ -18,13 +26,13 @@ MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &te
     setMinimumSize(300, 130);
 
     m_pButtonBox = new QDialogButtonBox(this);
-    m_pButtonBox->setStandardButtons(QDialogButtonBox::StandardButtons(int(buttons))|QDialogButtonBox::StandardButtons(int(defaultButton)));
+    m_pButtonBox->setStandardButtons(QDialogButtonBox::StandardButtons(int(buttons))
+                                     | QDialogButtonBox::StandardButtons(int(defaultButton)));
 
     setDefaultButton(defaultButton);
 
     QPushButton *pYesButton = m_pButtonBox->button(QDialogButtonBox::Yes);
-    if (pYesButton != NULL)
-    {
+    if (pYesButton != NULL) {
         pYesButton->setObjectName("blueButton");
         pYesButton->setStyle(QApplication::style());
     }
@@ -46,7 +54,8 @@ MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &te
     m_pGridLayout = new QGridLayout(this);
     m_pGridLayout->addWidget(m_pIconLabel, 0, 0, 2, 1, Qt::AlignTop);
     m_pGridLayout->addWidget(m_pLabel, 0, 1, 2, 1);
-    m_pGridLayout->addWidget(m_pButtonBox, m_pGridLayout->rowCount(), 0, 1, m_pGridLayout->columnCount());
+    m_pGridLayout->addWidget(m_pButtonBox, m_pGridLayout->rowCount(),
+                             0, 1, m_pGridLayout->columnCount());
 
     m_pGridLayout->setSizeConstraint(QLayout::SetNoConstraint);
     m_pGridLayout->setHorizontalSpacing(10);
@@ -56,18 +65,17 @@ MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &te
 
     translateUI();
 
-    connect(m_pButtonBox, SIGNAL(clicked(QAbstractButton*)), this, SLOT(onButtonClicked(QAbstractButton*)));
+    connect(m_pButtonBox, SIGNAL(clicked(QAbstractButton*)), this,
+            SLOT(onButtonClicked(QAbstractButton*)));
 }
 
 MessageBox::~MessageBox()
 {
-
 }
 
 void MessageBox::changeEvent(QEvent *event)
 {
-    switch (event->type())
-    {
+    switch (event->type()) {
     case QEvent::LanguageChange:
         translateUI();
         break;
@@ -81,7 +89,7 @@ void MessageBox::translateUI()
 {
     QPushButton *pYesButton = m_pButtonBox->button(QDialogButtonBox::Yes);
     if (pYesButton != NULL)
-        pYesButton->setText(tr("重测"));
+        pYesButton->setText(tr("继续"));
 
     QPushButton *pNoButton = m_pButtonBox->button(QDialogButtonBox::No);
     if (pNoButton != NULL)
@@ -93,7 +101,7 @@ void MessageBox::translateUI()
 
     QPushButton *pCancelButton = m_pButtonBox->button(QDialogButtonBox::Cancel);
     if (pCancelButton != NULL)
-        pCancelButton->setText(tr("继续"));
+        pCancelButton->setText(tr("重测"));
 }
 
 QMessageBox::StandardButton MessageBox::standardButton(QAbstractButton *button) const
@@ -113,14 +121,10 @@ int MessageBox::execReturnCode(QAbstractButton *button)
 }
 void MessageBox::readcnd(QByteArray msg)
 {
-    if(quint8(msg.at(2)) != 0)
-    {
-        onButtonClicked(m_pButtonBox->buttons().at(0));
-    }
-    if(quint8(msg.at(1)) != 0)
-    {
+    if (quint8(msg.at(2)) != 0)
         onButtonClicked(m_pButtonBox->buttons().at(1));
-    }
+    if (quint8(msg.at(1)) != 0)
+        onButtonClicked(m_pButtonBox->buttons().at(0));
 }
 void MessageBox::onButtonClicked(QAbstractButton *button)
 {
