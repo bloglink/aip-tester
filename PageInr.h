@@ -94,7 +94,7 @@ private:
     QList<QTableWidgetItem*> Enable;
     QList<QTableWidgetItem*> Terminal1;
     QList<QTableWidgetItem*> Terminal2;
-    QList<QDoubleSpinBox*> Vol;
+    QList<QComboBox*> Vol;
     QList<QDoubleSpinBox*> Min;
     QList<QDoubleSpinBox*> Max;
     QList<QDoubleSpinBox*> Time;

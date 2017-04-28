@@ -67,12 +67,19 @@ void PageInr::InitWindows()
         Terminal2.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
 
-        Vol.append(new QDoubleSpinBox(this));
+        //        Vol.append(new QDoubleSpinBox(this));
+        //        ui->TabParams->setCellWidget(row, 3, Vol.at(row));
+        //        Vol.at(row)->setMaximum(3000);
+        //        Vol.at(row)->setDecimals(0);
+        //        Vol.at(row)->setAlignment(Qt::AlignHCenter);
+        //        Vol.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+
+        Vol.append(new QComboBox(this));
         ui->TabParams->setCellWidget(row, 3, Vol.at(row));
-        Vol.at(row)->setMaximum(3000);
-        Vol.at(row)->setDecimals(0);
-        Vol.at(row)->setAlignment(Qt::AlignHCenter);
-        Vol.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
+        QStringList t1;
+        t1  << tr("500") << tr("1000");
+        Vol.at(row)->setView(new QListView(this));
+        Vol.at(row)->addItems(t1);
 
         Min.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 4, Min.at(row));
@@ -91,7 +98,7 @@ void PageInr::InitWindows()
         Time.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 6, Time.at(row));
         Time.at(row)->setMaximum(100);
-        Vol.at(row)->setDecimals(1);
+        Time.at(row)->setDecimals(1);
         Time.at(row)->setAlignment(Qt::AlignHCenter);
         Time.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
@@ -147,9 +154,9 @@ void PageInr::InitSettings()
     for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
         Terminal2.at(row)->setText(temp.at(row));
     //电压
-    temp = (ini->value("Voltage", "500 500 500 500").toString()).split(" ");
+    temp = (ini->value("Voltage", "0 0 0 0").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
-        Vol.at(row)->setValue(temp.at(row).toDouble());
+        Vol.at(row)->setCurrentIndex(temp.at(row).toDouble());
     //电流下限
     temp = (ini->value("Min", "100 100 100 100").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), INR_ROW); row++)
@@ -205,7 +212,7 @@ void PageInr::SaveSettings()
     ini->setValue("Terminal2", (temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i < Vol.size(); i++)
-        temp.append(QString::number(Vol.at(i)->value()));
+        temp.append(QString::number(Vol.at(i)->currentIndex()));
     ini->setValue("Voltage", (temp.join(" ").toUtf8()));
     temp.clear();
     for (int i=0; i < Min.size(); i++)
@@ -357,15 +364,18 @@ void PageInr::SendTestItemsAllEmpty()
     for (int row = 0; row < Enable.size(); row++) {
         QString s;
         QString T1 = Terminal1.at(row)->text();
-        QString U1 = Vol.at(qMin(row, Vol.size()))->text();
+        QString U1 = Vol.at(qMin(row, Vol.size()))->currentText();
         QString M1 = Min.at(qMin(row, Min.size()))->text();
         QString M2 = Max.at(qMin(row, Max.size()))->text();
-        if (M2.toInt() == 0)
-            s = QString(tr("绝缘%1@高端:%2, %3V, %4Mohm@ @ ")).
-                    arg(row+1).arg(T1).arg(U1).arg(M1);
+        s.append(tr("绝缘"));
+        if (EnablePhase())
+            s.append(tr("%1@高端:%2,").arg(row+1).arg(T1));
         else
-            s = QString(tr("绝缘%1@高端:%2, %3V, %4~%5Mohm@ @ ")).
-                    arg(row+1).arg(T1).arg(U1).arg(M1).arg(M2);
+            s.append(tr("@"));
+        s.append(tr(" %1V, %2").arg(U1).arg(M1));
+        if (M2.toInt() != 0)
+            s.append(tr("~%1").arg(M2));
+        s.append("Mohm@ @ ");
         Items.append(s);
     }
     QStringList n;
@@ -479,7 +489,7 @@ void PageInr::SendCanCmdConfig(int row)
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    int volt = Vol.at(row)->value();
+    int volt = Vol.at(row)->currentText().toInt();
     int time = Time.at(row)->value()*10;
     quint16 h = GetTeminal(row, 1);
     quint16 l = GetTeminal(row, 2);
