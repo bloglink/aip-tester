@@ -396,8 +396,13 @@ void PageAcw::SendTestItemsAllEmpty()
         QString U1 = Vol.at(qMin(row, Vol.size()))->text();
         QString M1 = Min.at(qMin(row, Min.size()))->text();
         QString M2 = Max.at(qMin(row, Max.size()))->text();
-        QString s = QString(tr("交耐%1@高端:%2, %3V, %4~%5mA@ @ ")).
-                arg(row+1).arg(T1).arg(U1).arg(M1).arg(M2);
+        QString s;
+        s.append(tr("交耐"));
+        if (EnablePhase())
+            s.append(tr("%1@高端:%2,").arg(row+1).arg(T1));
+        else
+            s.append(tr("@"));
+        s.append(tr(" %1V, %2-%3mA@ @ ").arg(U1).arg(M1).arg(M2));
         Items.append(s);
     }
     QStringList n;
