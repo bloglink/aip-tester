@@ -20,6 +20,8 @@ WinTest::WinTest(QWidget *parent) :
     QTimer *timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(ShowTime()));
     timer->start(30000);
+    codeTimer = new QTimer(this);
+    connect(codeTimer, SIGNAL(timeout()), this, SLOT(ShowCode()));
 }
 
 WinTest::~WinTest()
@@ -242,6 +244,14 @@ void WinTest::ShowTime()
     ui->TextTestTime->setText(t);
 }
 
+void WinTest::ShowCode()
+{
+    codeTimer->stop();
+    QString s = "code" + code;
+    emit SendCommand(ADDR, CMD_CODE, s.toUtf8());
+    ui->TextTestNumb->setText(QString("%1").arg(code));
+}
+
 void WinTest::ClearWave()
 {
     for (int i=0; i < wave.size(); i++) {
@@ -340,9 +350,23 @@ void WinTest::InitItem(QByteArray msg)
 
 void WinTest::showEvent(QShowEvent *e)
 {
+    this->setFocus();
     ShowTime();
     InitSettings();
     emit SendCommand(ADDR, CMD_INIT, NULL);
+    e->accept();
+}
+
+void WinTest::keyPressEvent(QKeyEvent *e)
+{
+    codeTimer->stop();
+    code.append(e->text());
+    e->accept();
+}
+
+void WinTest::keyReleaseEvent(QKeyEvent *e)
+{
+    codeTimer->start(10);
     e->accept();
 }
 

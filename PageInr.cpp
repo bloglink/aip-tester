@@ -67,13 +67,6 @@ void PageInr::InitWindows()
         Terminal2.at(row)->setFlags(Qt::ItemIsSelectable | Qt::ItemIsEnabled);
         Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
 
-        //        Vol.append(new QDoubleSpinBox(this));
-        //        ui->TabParams->setCellWidget(row, 3, Vol.at(row));
-        //        Vol.at(row)->setMaximum(3000);
-        //        Vol.at(row)->setDecimals(0);
-        //        Vol.at(row)->setAlignment(Qt::AlignHCenter);
-        //        Vol.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-
         Vol.append(new QComboBox(this));
         ui->TabParams->setCellWidget(row, 3, Vol.at(row));
         QStringList t1;

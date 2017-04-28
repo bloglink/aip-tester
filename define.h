@@ -60,6 +60,8 @@
 #define CMD_MODE 0x18 // 启动方式设置
 #define CMD_ITEM_TEMP 0x19 // 临时结果显示
 #define CMD_ITEM_REPLACE 0x1A
+#define CMD_CODE 0x1B //
+
 #define WIN_ID_SYS 0x00
 #define WIN_ID_TEST 0x10 // 测试界面
 #define WIN_ID_DCR 0x01 // 电阻界面

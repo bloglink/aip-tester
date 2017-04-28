@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QWidget>
 #include <QSettings>
+#include <QKeyEvent>
 #include <QHeaderView>
 #include <QButtonGroup>
 #include <QDataStream>
@@ -55,15 +56,20 @@ private slots:
     void ShowTemperature(QByteArray msg);
     void ShowStation(QByteArray msg);
     void ShowTime(void);
+    void ShowCode(void);
     void ClearWave(void);
     void ClickItem(int r,  int c);
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray dataA);
     void showEvent(QShowEvent *);
+    void keyPressEvent(QKeyEvent *e);
+    void keyReleaseEvent(QKeyEvent *e);
 private:
     QTimer *timer;
     QList<Waveform *>wave;
     QString motor_type;
     QStringList Items;
+    QString code;
+    QTimer *codeTimer;
 };
 
 #endif // WINTEST_H

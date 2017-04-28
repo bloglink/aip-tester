@@ -35,6 +35,7 @@ private slots:
 private:
     QSqlDatabase db;
     int count;
+    QString code;
 };
 
 #endif // SQLCLIENT_H

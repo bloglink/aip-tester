@@ -419,6 +419,9 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_SQL:
         ui->IconNet->setPixmap(QPixmap(":/source/radio_1.png"));
         break;
+    case CMD_CODE:
+        emit WriteSql(msg);
+        break;
     default:
         qDebug() << addr << cmd << msg;
         break;
