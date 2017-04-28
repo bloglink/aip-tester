@@ -354,9 +354,11 @@ void PageInd::ExcuteCanCmd(QByteArray msg)
 void PageInd::ReadCanCmdStatus(QByteArray msg)
 {
     if (quint8(msg.at(1)) != 0) {
-        emit SendCommand(ADDR, CMD_DEBUG, "IND Error:");
-        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-        emit SendCommand(ADDR, CMD_DEBUG, "\n");
+        if (quint8(msg.at(1)) > 3) {
+            QString e = QString("IND Error %1\n").arg(QString(msg.toHex()));
+            emit SendCommand(ADDR, CMD_DEBUG, e.toUtf8());
+            QMessageBox::information(this, "", e, QMessageBox::Ok);
+        }
         Mode = IND_FREE;
         return;
     }
