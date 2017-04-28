@@ -247,9 +247,13 @@ void WinTest::ShowTime()
 void WinTest::ShowCode()
 {
     codeTimer->stop();
+    code = code.mid(BarCode1().toInt(), BarCode2().toInt()-BarCode1().toInt());
+    if (code.size() < 2)
+        return;
     QString s = "code" + code;
     emit SendCommand(ADDR, CMD_CODE, s.toUtf8());
-    ui->TextTestNumb->setText(QString("%1").arg(code));
+    ui->TextTestNumb->setText(QString("编码:%1").arg(code));
+    code.clear();
 }
 
 void WinTest::ClearWave()
@@ -270,6 +274,18 @@ void WinTest::ClickItem(int r,  int )
         ClearWave();
         emit SendCommand(ADDR, CMD_WAVE, t.toUtf8());
     }
+}
+
+QString WinTest::BarCode1()
+{
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/Barcode1", "0").toString();
+}
+
+QString WinTest::BarCode2()
+{
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/Barcode2", "9").toString();
 }
 
 void WinTest::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)

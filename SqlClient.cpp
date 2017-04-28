@@ -51,6 +51,7 @@ void SqlClient::Write(QByteArray msg)
 {
     if (msg.startsWith("code")) {
         code = msg.remove(0, 4);
+        qDebug() << code;
         return;
     }
     QStringList dat = QString(msg).split("@");
@@ -84,7 +85,10 @@ void SqlClient::Write(QByteArray msg)
         query.bindValue(":t3", dat.at(2));
         query.bindValue(":t4", dat.at(3));
         query.bindValue(":t5", count);
-        query.bindValue(":t6", " ");
+        if (code.isEmpty())
+            query.bindValue(":t6", " ");
+        else
+            query.bindValue(":t6", code);
         query.bindValue(":t7", " ");
     }
     query.exec();

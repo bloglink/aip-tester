@@ -59,6 +59,8 @@ private slots:
     void ShowCode(void);
     void ClearWave(void);
     void ClickItem(int r,  int c);
+    QString BarCode1(void);
+    QString BarCode2(void);
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray dataA);
     void showEvent(QShowEvent *);
     void keyPressEvent(QKeyEvent *e);
