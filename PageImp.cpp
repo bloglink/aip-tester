@@ -653,9 +653,26 @@ void PageImp::SendTestJudge()
 
 void PageImp::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0x00)
-        return;
-    ImpMode = IMP_FREE;
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        ImpMode = IMP_FREE;
+        break;
+    case 0x01:
+        break;
+    case 0x02:
+        QMessageBox::information(this, "", "IMP FLASH_ERROR", QMessageBox::Ok);
+        break;
+    case 0x03:
+        QMessageBox::information(this, "", "IMP HV_ERROR", QMessageBox::Ok);
+        break;
+    case 0x04:
+        QMessageBox::information(this, "", "IMP WAVE_ERROR", QMessageBox::Ok);
+        break;
+    default:
+        QMessageBox::information(this, "", QString("IMP ERROR %1").arg(s), QMessageBox::Ok);
+        break;
+    }
 }
 
 void PageImp::CalculateResult(QByteArray )
