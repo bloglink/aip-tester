@@ -160,13 +160,6 @@
             </property>
            </widget>
           </item>
-          <item row="0" column="4">
-           <widget class="QCheckBox" name="TestContinue">
-            <property name="text">
-             <string>连续测试</string>
-            </property>
-           </widget>
-          </item>
           <item row="1" column="4">
            <widget class="QCheckBox" name="EnablePhase">
             <property name="text">
@@ -179,6 +172,35 @@
             <property name="text">
              <string>启用PG测试</string>
             </property>
+           </widget>
+          </item>
+          <item row="0" column="5">
+           <widget class="QComboBox" name="TestContinue">
+            <item>
+             <property name="text">
+              <string>NULL</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>左工位</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>右工位</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>单工位</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>双工位</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>

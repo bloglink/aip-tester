@@ -222,7 +222,7 @@ void WinBack::InitSettings()
     ui->EditNumber->setText(t);
     ui->EnablePhase->setChecked(ini->value("EnablePhase", false).toBool());
     ui->EnablePG->setChecked(ini->value("EnablePG", false).toBool());
-    ui->TestContinue->setChecked(ini->value("RestartMode", false).toBool());
+    ui->TestContinue->setCurrentIndex(ini->value("RestartMode", "0").toInt());
     temp = ini->value("KDCR", "16384").toString().split(" ");
     for (int i=0; i < qMin(temp.size(), BoxDcr.size()); i++)
         BoxDcr.at(i)->setValue(temp.at(i).toInt());
@@ -257,7 +257,7 @@ void WinBack::SaveSettings()
     ini->setValue("Number", ui->EditNumber->text());
     ini->setValue("EnablePhase", ui->EnablePhase->isChecked());
     ini->setValue("EnablePG", ui->EnablePG->isChecked());
-    ini->setValue("RestartMode", ui->TestContinue->isChecked());
+    ini->setValue("RestartMode", ui->TestContinue->currentIndex());
 
     temp.clear();
     for (int i=0; i < BoxDcr.size(); i++)

@@ -482,6 +482,10 @@ void WinHome::ReadStatusAll()
 void WinHome::StartTest(QByteArray station)
 {
     stat = station;
+    if (CurrentReStartMode() == 1)
+        stat = QString("%1").arg(0x13).toUtf8();
+    if (CurrentReStartMode() == 2)
+        stat = QString("%1").arg(0x14).toUtf8();
     if (HomeMode == HOME_TEST)
         return;
     if (ui->desktop->currentWidget()->objectName() != "WinTest")
@@ -524,16 +528,40 @@ void WinHome::StartTest(QByteArray station)
     emit SendCommand(WIN_ID_TEST, CMD_JUDGE, ItemJudge.toUtf8());
 
     emit SendCommand(ADDR, CMD_STATUS, "ready");
-    if (CurrentReStartMode() && HomeMode != HOME_STOP) {
+    if (CurrentReStartMode() != 0 && HomeMode != HOME_STOP) {
         QTimer *timer = new QTimer(this);
-        timer->singleShot(500,  this,  SLOT(ReStartTest()));
+        timer->singleShot(2500,  this,  SLOT(ReStartTest()));
     }
     HomeMode = HOME_FREE;
 }
 
 void WinHome::ReStartTest()
 {
-    StartTest(stat);
+    switch (CurrentReStartMode()) {
+    case 0:
+        break;
+    case 1:
+        StartTest(QString("%1").arg(0x13).toUtf8());
+        break;
+    case 2:
+        StartTest(QString("%1").arg(0x14).toUtf8());
+        break;
+    case 3:
+        StartTest(stat);
+        break;
+    case 4:
+        if (stat.toInt() == 0x13) {
+            StartTest(QString("%1").arg(0x14).toUtf8());
+            break;
+        }
+        if (stat.toInt() == 0x14) {
+            StartTest(QString("%1").arg(0x13).toUtf8());
+            break;
+        }
+        break;
+    default:
+        break;
+    }
 }
 
 void WinHome::SaveTestJudge()
@@ -664,10 +692,10 @@ int WinHome::CurrentAlarmTime(QString msg)
         return ini->value("/GLOBAL/TimeOK", "0.1").toDouble()*1000;
 }
 
-bool WinHome::CurrentReStartMode()
+int WinHome::CurrentReStartMode()
 {
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
-    return ini->value("/GLOBAL/RestartMode", "0").toBool();
+    return ini->value("/GLOBAL/RestartMode", "0").toInt();
 }
 
 /*********************************END OF FILE**********************************/

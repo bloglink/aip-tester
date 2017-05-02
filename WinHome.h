@@ -105,7 +105,7 @@ private slots:
     int CurrentStartMode(void);
     int CurrentPauseMode(void);
     int CurrentAlarmTime(QString msg);
-    bool CurrentReStartMode(void);
+    int CurrentReStartMode(void);
 
 private:
     QList<int> previous_window;
