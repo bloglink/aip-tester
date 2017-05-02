@@ -151,10 +151,11 @@ void PageKey::focusChanged(QWidget *,  QWidget *nowWidget)
 #endif
         }
         this->setVisible(visible);
+        MoveWindows();
     }
 }
 
-void PageKey::showEvent(QShowEvent *e)
+void PageKey::MoveWindows()
 {
     int mouse_y = QCursor::pos().y(); // 鼠标点击处纵坐标
     int x = 0;
@@ -172,6 +173,5 @@ void PageKey::showEvent(QShowEvent *e)
     } else {
         this->move(x, mouse_y+50);
     }
-    e->accept();
 }
 /*********************************END OF FILE**********************************/

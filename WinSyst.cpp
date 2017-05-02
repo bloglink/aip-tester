@@ -99,8 +99,8 @@ void WinSyst::InitSettings()
     ui->BoxTimeNG->setValue(g_ini->value("TimeNG", "0.5").toDouble());
     ui->BoxTimeOK->setValue(g_ini->value("TimeOK", "0.2").toDouble());
     ui->BoxPower->setCurrentIndex(g_ini->value("PowerSupply", "0").toInt());
-    ui->EditCode1->setText(g_ini->value("Barcode1","0").toString());
-    ui->EditCode2->setText(g_ini->value("Barcode2","9").toString());
+    ui->EditCode1->setText(g_ini->value("Barcode1", "0").toString());
+    ui->EditCode2->setText(g_ini->value("Barcode2", "9").toString());
 
     password = g_ini->value("Password", "").toString();
     ui->EditPassword->clear();
@@ -137,8 +137,8 @@ void WinSyst::SaveSettings()
     g_ini->setValue("TimeNG", ui->BoxTimeNG->value());
     g_ini->setValue("TimeOK", ui->BoxTimeOK->value());
     g_ini->setValue("PowerSupply", ui->BoxPower->currentIndex());
-    g_ini->setValue("Barcode1",ui->EditCode1->text());
-    g_ini->setValue("Barcode2",ui->EditCode2->text());
+    g_ini->setValue("Barcode1", ui->EditCode1->text());
+    g_ini->setValue("Barcode2", ui->EditCode2->text());
 
     qDebug() << QTime::currentTime().toString() << "WinSyst save OK";
 }

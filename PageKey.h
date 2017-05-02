@@ -54,7 +54,8 @@ private slots:
     void ReadButtons(int);
     void SwitchInput(void);
     void focusChanged(QWidget *oldWidget,  QWidget *nowWidget);
-    void showEvent(QShowEvent *);
+    void MoveWindows(void);
+//    void showEvent(QShowEvent *);
 private:
     static PageKey *_instance;
     bool upper;
