@@ -19,6 +19,8 @@
 #include <QButtonGroup>
 #include <QListView>
 #include <QSettings>
+#include <QMessageBox>
+#include <QScrollBar>
 
 #include "define.h"
 

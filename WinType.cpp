@@ -162,16 +162,20 @@ void WinType::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        if (CurrentUser() == 0)
+        if (CurrentUser() == 0) {
+            QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
             return;
+        }
         CopySettings(ui->EditTypeName->text());
         ReadAllSettings();
         ReadAvailableItems();
         InitSettings();
         break;
     case Qt::Key_1:
-        if (CurrentUser() == 0)
+        if (CurrentUser() == 0) {
+            QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
             return;
+        }
         RemoveSettings();
         ReadAllSettings();
         break;
@@ -327,6 +331,10 @@ void WinType::SaveSettings()
 
 void WinType::SelectWireColor(int row, int column)
 {
+    if (CurrentUser() == 0) {
+        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        return;
+    }
     ui->Type->setCurrentIndex(0);
     QColor color = ui->TabColor->item(row, column)->backgroundColor();
     if (ui->TabWire->currentRow()  <  0)
@@ -338,11 +346,19 @@ void WinType::SelectWireColor(int row, int column)
 
 void WinType::ShowWireColorWindow()
 {
+    if (CurrentUser() == 0) {
+        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        return;
+    }
     ui->Type->setCurrentIndex(1);
 }
 
 void WinType::ShowAvailableItem(int, int)
 {
+    if (CurrentUser() == 0) {
+        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        return;
+    }
     ui->Other->setCurrentIndex(1);
 }
 
@@ -350,6 +366,10 @@ void WinType::JumptoSetWindows()
 {
     if (ui->TabTest->currentRow()  <  0)
         return;
+    if (CurrentUser() == 0) {
+        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        return;
+    }
     SaveSettings();
     if (ui->TabTest->currentItem()->text() == tr("电阻"))
         emit SendCommand(ADDR, CMD_JUMP, "PageDcr");
@@ -437,6 +457,7 @@ void WinType::QuerySettings()
     for (int i=0; i < qMin(FileNames.size(), ui->TabFile->rowCount()); i++) {
         ui->TabFile->item(i, 0)->setText(QString(FileNames.at(i)).remove(".ini"));
     }
+    ui->TabFile->verticalScrollBar()->setValue(0);
 }
 
 QString WinType::CurrentSettings()

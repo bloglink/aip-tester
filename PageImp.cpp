@@ -83,7 +83,7 @@ void PageImp::InitWindows()
 
         Volt.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 3, Volt.at(row));
-        Volt.at(row)->setMaximum(5000);
+        Volt.at(row)->setMaximum(3000);
         Volt.at(row)->setAlignment(Qt::AlignHCenter);
         Volt.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Volt.at(row)->setDecimals(0);
