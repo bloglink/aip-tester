@@ -308,7 +308,7 @@ void PageAcw::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
                     SendTestItemsAllError();
                     break;
                 }
-                Delay(5);
+                Delay(100);
                 Mode = ACW_FREE;
             }
         }
