@@ -299,19 +299,21 @@ void PageMag::ExcuteCanCmd(int id,  QByteArray msg)
         ReadCanCmdWave(msg);
         return;
     }
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+    if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 5 && (quint8)msg.at(0) == 0x02)
+    if (msg.size() >= 5 && (quint8)msg.at(0) == 0x02)
         ReadCanCmdResult(msg);
-    if (msg.size() == 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) != 0xff)
+    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) != 0xff)
         ReadCanCmdWaveStart(msg);
-    if (msg.size() == 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff)
+    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff)
         ReadCanCmdWaveOk(msg);
 }
 
 void PageMag::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0) {
+    if (quint8(msg.at(1)) == 0x01)
+        return;
+    if (quint8(msg.at(1)) >= 2) {
         emit SendCommand(ADDR, CMD_DEBUG, "MAG Error:");
         emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
         emit SendCommand(ADDR, CMD_DEBUG, "\n");

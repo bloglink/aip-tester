@@ -329,7 +329,7 @@ void WinBack::ExcuteCanCmd(quint16 addr,  QByteArray msg)
 {
     if (!Testing)
         return;
-    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex().append("\n"));
+//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex().append("\n"));
     switch (addr) {
     case CAN_ID_DCR:
         ReadCanCmdDcr(msg);
