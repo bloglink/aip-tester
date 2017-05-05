@@ -109,6 +109,7 @@ void WinHome::InitWindowsAll()
     PageDcr *pageDcr = new PageDcr(this);
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
+    connect(pageDcr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageDcr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageDcr,
@@ -118,6 +119,7 @@ void WinHome::InitWindowsAll()
     PageMag *pageMag = new PageMag(this);
     ui->desktop->addWidget(pageMag);
     pageMag->setObjectName("PageMag");
+    connect(pageMag, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageMag, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageMag,
@@ -127,6 +129,7 @@ void WinHome::InitWindowsAll()
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
+    connect(pageInr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageInr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageInr,
@@ -136,6 +139,7 @@ void WinHome::InitWindowsAll()
     PageAcw *pageAcw = new PageAcw(this);
     ui->desktop->addWidget(pageAcw);
     pageAcw->setObjectName("PageAcw");
+    connect(pageAcw, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageAcw, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageAcw,
@@ -145,6 +149,7 @@ void WinHome::InitWindowsAll()
     PageImp *pageImp = new PageImp(this);
     ui->desktop->addWidget(pageImp);
     pageImp->setObjectName("PageImp");
+    connect(pageImp, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageImp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageImp,
@@ -154,6 +159,7 @@ void WinHome::InitWindowsAll()
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
+    connect(pageInd, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageInd, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageInd,
@@ -163,6 +169,7 @@ void WinHome::InitWindowsAll()
     PagePwr *pagePwr = new PagePwr(this);
     ui->desktop->addWidget(pagePwr);
     pagePwr->setObjectName("PagePwr");
+    connect(pagePwr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pagePwr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pagePwr,
@@ -172,6 +179,7 @@ void WinHome::InitWindowsAll()
     PageLvs *pageLvs = new PageLvs(this);
     ui->desktop->addWidget(pageLvs);
     pageLvs->setObjectName("PageLvs");
+    connect(pageLvs, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageLvs, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageLvs,
@@ -181,6 +189,7 @@ void WinHome::InitWindowsAll()
     PageLck *pageLck = new PageLck(this);
     ui->desktop->addWidget(pageLck);
     pageLck->setObjectName("PageLck");
+    connect(pageLck, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageLck, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageLck,
@@ -190,6 +199,7 @@ void WinHome::InitWindowsAll()
     PageOut *pageOut = new PageOut(this);
     ui->desktop->addWidget(pageOut);
     pageOut->setObjectName("PageOut");
+    connect(pageOut, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(pageOut, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageOut,

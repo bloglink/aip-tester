@@ -304,10 +304,8 @@ void PageInd::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_CHECK:
         Mode = IND_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(20)) {
-            QMessageBox::warning(this, tr("警告"), tr("电感板异常"), QMessageBox::Ok);
-            emit SendCommand(ADDR, CMD_DEBUG, "Time out Error:PageInd\n");
-        }
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
         Mode = IND_FREE;
         break;
     case CMD_START:
@@ -353,17 +351,38 @@ void PageInd::ExcuteCanCmd(QByteArray msg)
 
 void PageInd::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0) {
-        if (quint8(msg.at(1)) > 3) {
-            QString e = QString("IND Error %1\n").arg(QString(msg.toHex()));
-            emit SendCommand(ADDR, CMD_DEBUG, e.toUtf8());
-            QMessageBox::information(this, "", e, QMessageBox::Ok);
-        }
-        Mode = IND_FREE;
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
+    case 0x02:
+        break;
+    case 0x03:
+        break;
+    case 0x04:
+        SendWarnning("CALIZERO");
+        break;
+    case 0x05:
+        SendWarnning("OFFSETTE");
+        break;
+    case 0x06:
+        SendWarnning("GAINTEST");
+        break;
+    case 0x07:
+        SendWarnning("ERRORGAIN");
+        break;
+    case 0x08:
+        SendWarnning("ERROROFFSET");
+        break;
+    case 0x09:
+        SendWarnning("ERRORREALY");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
     }
-    if (Mode == IND_INIT)
-        emit SendCommand(ADDR, CMD_DEBUG, "PageInd OK\n");
     Mode = IND_FREE;
 }
 
@@ -689,4 +708,13 @@ void PageInd::showEvent(QShowEvent *e)
 {
     InitSettings();
     e->accept();
+}
+
+void PageInd::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("电感异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }

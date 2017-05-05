@@ -55,6 +55,7 @@ private:
     Ui::PageDcr *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -81,6 +82,7 @@ private slots:
     void SendCanCmdConfig(void);
     void SendAlarm(QByteArray addr);
     void SendCanCmdPwr(quint8 pos);
+    void SendWarnning(QString s);
     double CalculateOffset(double t, quint8 num);
     void CalculateBalance(void);
     int CalculateGear(int row);

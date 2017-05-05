@@ -45,6 +45,7 @@ private:
     Ui::PageAcw *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -75,6 +76,7 @@ private slots:
     QString CurrentSettings(void);
     bool EnablePhase(void);
     virtual void showEvent(QShowEvent*);
+    void SendWarnning(QString s);
 private:
     quint16 TimeOut;
     QList<double> Volt;

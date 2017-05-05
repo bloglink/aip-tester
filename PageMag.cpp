@@ -311,14 +311,42 @@ void PageMag::ExcuteCanCmd(int id,  QByteArray msg)
 
 void PageMag::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) == 0x01)
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
-    if (quint8(msg.at(1)) >= 2) {
-        emit SendCommand(ADDR, CMD_DEBUG, "MAG Error:");
-        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-        emit SendCommand(ADDR, CMD_DEBUG, "\n");
-        MagMode = MAG_FREE;
-        return;
+    case 0x02:
+        SendWarnning("UNIVALID");
+        break;
+    case 0x03:
+        SendWarnning("FLASH_ERROR");
+        break;
+    case 0x04:
+        SendWarnning("ZERO_ERROR");
+        break;
+    case 0x05:
+        SendWarnning("AMP11_ERROR");
+        break;
+    case 0x06:
+        SendWarnning("AMP121_ERROR");
+        break;
+    case 0x07:
+        SendWarnning("REFER1_ERROR");
+        break;
+    case 0x08:
+        SendWarnning("REFER2_ERROR");
+        break;
+    case 0x09:
+        SendWarnning("CUR_ERROR");
+        break;
+    case 0x0A:
+        SendWarnning("CHAN_ERROR");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
     }
     if (MagMode == MAG_TEST && ui->BoxDir->currentIndex() != 0)
         CalculateDir();
@@ -591,6 +619,15 @@ void PageMag::CalculateDir()
     if (s.at(3) == " ")
         s[3] = judge;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+}
+
+void PageMag::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("反嵌异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 
 bool PageMag::WaitTimeOut(quint16 t)

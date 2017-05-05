@@ -45,6 +45,7 @@ public:
     ~PageImp();
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -80,6 +81,7 @@ private slots:
     void Delay(int ms);
     void AutoChangeVolt(void);
     void showEvent(QShowEvent*);
+    void SendWarnning(QString s);
 private:
     Ui::PageImp *ui;
     QList<Waveform *> WaveImp;

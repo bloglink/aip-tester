@@ -346,10 +346,8 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_CHECK:
         Mode = DCR_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(100)) {
-            QMessageBox::warning(this, tr("警告"), tr("电阻板异常"), QMessageBox::Ok);
-            emit SendCommand(ADDR, CMD_DEBUG, "Time out error:PageDcr\n");
-        }
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
         Mode = DCR_FREE;
         break;
     case CMD_START:
@@ -422,17 +420,43 @@ void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
 
 void PageDcr::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) == 1)
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
-    if (quint8(msg.at(1)) > 1) {
-        emit SendCommand(ADDR, CMD_DEBUG, "DCR Error:");
-        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-        emit SendCommand(ADDR, CMD_DEBUG, "\n");
-        Mode = DCR_FREE;
-        return;
+    case 0x02:
+        SendWarnning("UNIVALID");
+        break;
+    case 0x03:
+        SendWarnning("FLASH_ERROR");
+        break;
+    case 0x04:
+        SendWarnning("ZERO_ERROR");
+        break;
+    case 0x05:
+        SendWarnning("AMP11_ERROR");
+        break;
+    case 0x06:
+        SendWarnning("AMP121_ERROR");
+        break;
+    case 0x07:
+        SendWarnning("REFER1_ERROR");
+        break;
+    case 0x08:
+        SendWarnning("REFER2_ERROR");
+        break;
+    case 0x09:
+        SendWarnning("CUR_ERROR");
+        break;
+    case 0x0A:
+        SendWarnning("CHAN_ERROR");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
     }
-    if (Mode == DCR_INIT)
-        emit SendCommand(ADDR, CMD_DEBUG, "Check PageDcr OK\n");
     double offset = ui->BoxOffset->value();
     double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
     QString t = QString(tr("温度:%1°C")).arg(temp);
@@ -596,7 +620,7 @@ void PageDcr::SendCanCmdStart(quint8 pos)
             tt += 0x0001 << row;
     }
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x01) << quint8(0x00)
-       << quint8(pos) << quint8(tt/256) << quint8(tt%256);
+        << quint8(pos) << quint8(tt/256) << quint8(tt%256);
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
@@ -617,10 +641,10 @@ void PageDcr::SendCanCmdConfig()
     for (int row=0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             out << quint16(0x22) << quint8(0x06) << quint8(0x03) << quint8(row)
-               << quint8(Terminal1.at(row)->text().toInt())
-              << quint8(Terminal2.at(row)->text().toInt())
-             << quint8(CalculateGear(row))
-             << quint8(ui->BoxTime->value()*10);
+                << quint8(Terminal1.at(row)->text().toInt())
+                << quint8(Terminal2.at(row)->text().toInt())
+                << quint8(CalculateGear(row))
+                << quint8(ui->BoxTime->value()*10);
         }
     }
     emit SendCommand(ADDR, CMD_CAN, msg);
@@ -654,9 +678,18 @@ void PageDcr::SendCanCmdPwr(quint8 s)
     if (s == WIN_ID_OUT14)
         g  <<= 4;
     out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)
-       << quint8(0x00) << quint8(0x05) << quint8(p) << quint8(0x00)
-      << quint8(0x00) << quint8(0x00);
+        << quint8(0x00) << quint8(0x05) << quint8(p) << quint8(0x00)
+        << quint8(0x00) << quint8(0x00);
     emit SendCommand(ADDR, CMD_CAN, msg);
+}
+
+void PageDcr::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("电阻异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 
 double PageDcr::CalculateOffset(double t,  quint8 num)

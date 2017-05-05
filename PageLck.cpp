@@ -130,7 +130,6 @@ void PageLck::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         }
         SendTestJudge();
         Mode = LCK_FREE;
-
         break;
     case CMD_STOP:
         SendCanCmdStop();
@@ -301,8 +300,25 @@ void PageLck::CalculateSample()
 
 void PageLck::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0x00)
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
+    case 0x02:
+        SendWarnning("FLASH_ERROR");
+        break;
+    case 0x03:
+        SendWarnning("HV_ERROR");
+        break;
+    case 0x04:
+        SendWarnning("WAVE_ERROR");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
+    }
     if (Mode == LCK_TEST) {
         SendItemJudge();
         ClearResults();
@@ -359,5 +375,14 @@ void PageLck::showEvent(QShowEvent *e)
     ui->BtnExit->setFocus();
     InitSettings();
     e->accept();
+}
+
+void PageLck::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("堵转异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 /*********************************END OF FILE**********************************/

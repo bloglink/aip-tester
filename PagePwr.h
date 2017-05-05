@@ -49,6 +49,7 @@ private:
     Ui::PagePwr *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -88,6 +89,7 @@ private slots:
     QString CurrentPorwer(void);
     bool IsPGEnable(void);
     virtual void showEvent(QShowEvent *);
+    void SendWarnning(QString s);
 private:
     QSettings *set;
     quint16 TimeOut;

@@ -57,6 +57,7 @@ private:
     Ui::PageInd *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -87,6 +88,7 @@ private slots:
     void Delay(int ms);
     QString CurrentSettings(void);
     void showEvent(QShowEvent *);
+    void SendWarnning(QString s);
 private:
     QSettings *set;
     quint16 TimeOut;

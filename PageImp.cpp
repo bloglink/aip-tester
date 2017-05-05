@@ -447,10 +447,8 @@ void PageImp::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_CHECK:
         ImpMode = IMP_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(100)) {
-            QMessageBox::warning(this, tr("警告"), tr("匝间板异常"), QMessageBox::Ok);
-            emit SendCommand(ADDR, CMD_DEBUG, "Time out error:PageImp\n");
-        }
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
         ImpMode = IMP_FREE;
         break;
     case CMD_START:
@@ -656,23 +654,23 @@ void PageImp::ReadCanCmdStatus(QByteArray msg)
     int s = quint8(msg.at(1));
     switch (s) {
     case 0x00:
-        ImpMode = IMP_FREE;
         break;
     case 0x01:
-        break;
+        return;
     case 0x02:
-        QMessageBox::information(this, "", "IMP FLASH_ERROR", QMessageBox::Ok);
+        SendWarnning("FLASH_ERROR");
         break;
     case 0x03:
-        QMessageBox::information(this, "", "IMP HV_ERROR", QMessageBox::Ok);
+        SendWarnning("HV_ERROR");
         break;
     case 0x04:
-        QMessageBox::information(this, "", "IMP WAVE_ERROR", QMessageBox::Ok);
+        SendWarnning("WAVE_ERROR");
         break;
     default:
-        QMessageBox::information(this, "", QString("IMP ERROR %1").arg(s), QMessageBox::Ok);
+        SendWarnning("UNKONW_ERROR");
         break;
     }
+    ImpMode = IMP_FREE;
 }
 
 void PageImp::CalculateResult(QByteArray )
@@ -903,5 +901,14 @@ void PageImp::showEvent(QShowEvent *e)
 {
     InitSettings();
     e->accept();
+}
+
+void PageImp::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("匝间异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 /*********************************END OF FILE**********************************/

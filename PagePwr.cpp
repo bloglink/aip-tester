@@ -475,10 +475,8 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_CHECK:
         Mode = PWR_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(100)) {
-            QMessageBox::warning(this, tr("警告"), tr("功率板异常"), QMessageBox::Ok);
-            emit SendCommand(ADDR, CMD_DEBUG, "Time out Error:PagePwr\n");
-        }
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
         Mode = PWR_FREE;
         break;
     case CMD_START:
@@ -549,18 +547,25 @@ void PagePwr::ExcuteCanCmd(quint16 addr,  QByteArray msg)
 }
 void PagePwr::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0x00 && quint8(msg.at(1)) != 0x01) {
-        emit SendCommand(ADDR, CMD_DEBUG, "PWR Error:");
-        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-        emit SendCommand(ADDR, CMD_DEBUG, "\n");
-        Mode = PWR_FREE;
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
+    case 0x02:
+        SendWarnning("FLASH_ERROR");
+        break;
+    case 0x03:
+        SendWarnning("HV_ERROR");
+        break;
+    case 0x04:
+        SendWarnning("WAVE_ERROR");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
     }
-    if (quint8(msg.at(1)) == 0x01) {
-        return;
-    }
-    if (Mode == PWR_INIT)
-        emit SendCommand(ADDR, CMD_DEBUG, "Power check ok\n");
     if (Mode == PWR_TEST) {
         SendTestItem();
         ClearResults();
@@ -1021,6 +1026,15 @@ void PagePwr::showEvent(QShowEvent *e)
 {
     InitSettings();
     e->accept();
+}
+
+void PagePwr::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("功率异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 
 /*********************************END OF FILE**********************************/

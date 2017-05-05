@@ -42,6 +42,7 @@ private:
     Ui::PageLck *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -67,6 +68,7 @@ private slots:
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     virtual void showEvent(QShowEvent *);
+    void SendWarnning(QString s);
 private:
     QSettings *set;
     quint16 TimeOut;

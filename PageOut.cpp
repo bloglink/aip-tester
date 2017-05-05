@@ -75,23 +75,18 @@ void PageOut::SendCanCmdStatus(quint16 pos)
     switch (pos) {
     case 0:
         out << quint16(0x13) << quint8(0x01) << quint8(0x00);
-        w = tr("输出板13异常");
+        w = tr("左工位超时");
         break;
     case 1:
         out << quint16(0x14) << quint8(0x01) << quint8(0x00);
-        w = tr("输出板14异常");
-        break;
-    case 2:
-        out << quint16(0x15) << quint8(0x01) << quint8(0x00);
-        w = tr("输出板15异常");
+        w = tr("右工位超时");
         break;
     default:
         break;
     }
     emit SendCommand(ADDR, CMD_CAN, msg);
-    if (!WaitTestOver(100)) {
-        QMessageBox::warning(this, tr("警告"), w, QMessageBox::Ok);
-        emit SendCommand(ADDR, CMD_DEBUG, "Time out error:PageOut\n");
+    if (!WaitTestOver(30)) {
+        SendWarnning(w);
     }
 }
 
@@ -116,11 +111,23 @@ void PageOut::SendCanCmdConfig()
 
 void PageOut::ReadCanCmdStatus(quint16 addr, QByteArray msg)
 {
-    if (quint8(msg.at(1)) == 0x00) {
-        QByteArray n = QString("OUT%1 Check Ok\n").arg(addr, 0, 16).toUtf8();
-        emit SendCommand(ADDR, CMD_DEBUG, n);
-        Mode = OUT_FREE;
+    QString t;
+    if (addr == WIN_ID_OUT13)
+        t = tr("左工位");
+    if (addr == WIN_ID_OUT14)
+        t = tr("右工位");
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
+        SendWarnning(t + " UNIVALID");
+        return;
+    default:
+        SendWarnning(t + " UNKONW_ERROR");
+        break;
     }
+    Mode = OUT_FREE;
 }
 
 void PageOut::ReadCanCmdStart(quint16 addr)
@@ -184,5 +191,14 @@ void PageOut::Delay(int ms)
     t.start();
     while (t.elapsed() < ms)
         QCoreApplication::processEvents();
+}
+
+void PageOut::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("输出异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 /*********************************END OF FILE**********************************/

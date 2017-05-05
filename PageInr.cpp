@@ -255,10 +255,8 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_CHECK:
         Mode = INR_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(10)) {
-            QMessageBox::warning(this, tr("警告"), tr("绝缘板异常"), QMessageBox::Ok);
-            emit SendCommand(ADDR, CMD_DEBUG, "Time out Error:PageInr\n");
-        }
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
         Mode = INR_FREE;
         break;
     case CMD_START:
@@ -307,15 +305,19 @@ void PageInr::ExcuteCanCmd(QByteArray msg)
 
 void PageInr::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0) {
-        emit SendCommand(ADDR, CMD_DEBUG, "INR Error:");
-        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-        emit SendCommand(ADDR, CMD_DEBUG, "\n");
-        Mode = INR_FREE;
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
+    case 0x02:
+        SendWarnning("UNIVALID");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
     }
-    if (Mode == INR_INIT)
-        emit SendCommand(ADDR, CMD_DEBUG, "Check PageInr OK\n");
     if (Mode == INR_TEST) {
         SendTestItem();
         ClearResults();
@@ -617,5 +619,14 @@ void PageInr::showEvent(QShowEvent *e)
     ui->BtnExitIr->setFocus();
     InitSettings();
     e->accept();
+}
+
+void PageInr::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("绝缘异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 /*********************************END OF FILE**********************************/

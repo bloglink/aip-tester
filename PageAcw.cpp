@@ -343,12 +343,18 @@ void PageAcw::ExcuteCanCmd(QByteArray msg)
   */
 void PageAcw::ReadCanCmdStatus(QByteArray msg)
 {
-    if (quint8(msg.at(1)) != 0) {
-        emit SendCommand(ADDR, CMD_DEBUG, "ACW Error:");
-        emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-        emit SendCommand(ADDR, CMD_DEBUG, "\n");
-        Mode = ACW_FREE;
+    int s = quint8(msg.at(1));
+    switch (s) {
+    case 0x00:
+        break;
+    case 0x01:
         return;
+    case 0x02:
+        SendWarnning("UNIVALID");
+        break;
+    default:
+        SendWarnning("UNKONW_ERROR");
+        break;
     }
     if (Mode == ACW_TEST) {
         SendTestItem();
@@ -647,6 +653,15 @@ void PageAcw::showEvent(QShowEvent *e)
     ui->BtnExitAcw->setFocus();
     InitSettings();
     e->accept();
+}
+
+void PageAcw::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("交耐异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 /*********************************END OF FILE**********************************/
 

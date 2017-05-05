@@ -47,6 +47,7 @@ private:
     Ui::PageMag *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 public:
     QList<Waveform *> WaveMag;
@@ -75,6 +76,8 @@ private slots:
     void ReadCanCmdWaveOk(QByteArray msg);
     void SendWave(QByteArray msg);
     void CalculateDir();
+
+    void SendWarnning(QString s);
 
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);

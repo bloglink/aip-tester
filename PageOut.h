@@ -40,6 +40,7 @@ private:
     Ui::PageOut *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
@@ -55,6 +56,7 @@ private slots:
 
     bool WaitTestOver(quint16 t);
     void Delay(int ms);
+    void SendWarnning(QString s);
 private:
     bool Testing;
     bool isStop;
