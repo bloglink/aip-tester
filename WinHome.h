@@ -44,7 +44,7 @@
 #include "TcpClient.h"
 #include "UdpClient.h"
 #include "SerialPort.h"
-#include "message_box.h"
+#include "MessageBox.h"
 
 #define HOME_UNKOWN 0xff
 #define HOME_FREE 0x00
@@ -67,6 +67,7 @@ private:
     Ui::WinHome *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void message(QByteArray msg);
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
@@ -107,6 +108,10 @@ private slots:
     int CurrentAlarmTime(QString msg);
     int CurrentReStartMode(void);
 
+    void ReadVariant(QVariant s);
+    void Warnning(QVariantHash hash);
+    void ReadButtonBox(QByteArray msg);
+    void SendButtonBox(QString button);
 private:
     QList<int> previous_window;
     QString ItemJudge;

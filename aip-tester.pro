@@ -45,8 +45,7 @@ SOURCES += main.cpp\
     SqlClient.cpp \
     CanClient.cpp \
     SerialPort.cpp \
-    custom_window.cpp \
-    message_box.cpp
+    MessageBox.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -74,8 +73,7 @@ HEADERS  += \
     SqlClient.h \
     CanClient.h \
     SerialPort.h \
-    custom_window.h \
-    message_box.h
+    MessageBox.h
 
 FORMS    += \
     PageKey.ui \

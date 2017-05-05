@@ -336,10 +336,10 @@ void WinHome::ReadCanCmd(QByteArray msg)
                 in >> dat;
                 cmd.append(dat);
             }
-            if (id == CAN_ID_DCR && quint8(cmd.at(0)) != 0)
-                emit message(cmd);
-
-            emit SendCommand(id, CMD_CAN, cmd);
+            if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
+                ReadButtonBox(cmd);
+            else
+                emit SendCommand(id, CMD_CAN, cmd);
         }
     }
 }
@@ -403,10 +403,10 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         StartTest(QString(msg).split(" ").at(0).toUtf8());
         break;
     case CMD_STOP:
+        SendButtonBox("Ok");
         ItemJudge = "NG";
         if (msg.contains("DCR"))
             ShowLogMessage(msg);
-        emit message(QByteArray::fromHex("100001"));
         emit SendCommand(ADDR, CMD_STOP, msg);
         if (HomeMode != HOME_FREE)
             HomeMode = HOME_STOP;
@@ -586,14 +586,13 @@ void WinHome::TestPause()
 {
     isPause = true;
     TempItems.clear();
-    QString warn = tr("此项目不合格,是否重测");
-    msgBox = new MessageBox(this, "", warn, QMessageBox::Yes, QMessageBox::Cancel);
-    msgBox->setIcon(":/source/link.png");
-    connect(this, SIGNAL(message(QByteArray)), msgBox, SLOT(readcnd(QByteArray)));
+    QString text = tr("此项目不合格,是否重测");
+    MessageBox *box = new MessageBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
+    connect(this, SIGNAL(SendVariant(QVariant)), box, SLOT(ReadVariant(QVariant)));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x01));
     Delay(CurrentAlarmTime("NG"));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
-    int ret = msgBox->exec();
+    int ret = box->exec();
     if (ret == QMessageBox::Cancel)
     {
         ItemJudge = "OK";
@@ -698,4 +697,40 @@ int WinHome::CurrentReStartMode()
     return ini->value("/GLOBAL/RestartMode", "0").toInt();
 }
 
+
+void WinHome::ReadVariant(QVariant s)
+{
+    QVariantHash hash = s.toHash();
+    if (hash.value("TxAddress") != "WinHome") {
+        emit SendVariant(s);
+        return;
+    }
+    if (hash.value("TxCommand") == "Warnning")
+        Warnning(hash);
+}
+
+void WinHome::Warnning(QVariantHash hash)
+{
+    QString text = hash.value("TxMessage").toString();
+    MessageBox *box = new MessageBox(this, "", text, NULL, QMessageBox::Ok);
+    connect(this, SIGNAL(SendVariant(QVariant)), box, SLOT(ReadVariant(QVariant)));
+    box->exec();
+}
+
+void WinHome::SendButtonBox(QString button)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "BoxButton");
+    hash.insert("TxMessage", button);
+    emit SendVariant(QVariant::fromValue(hash));
+}
+
+void WinHome::ReadButtonBox(QByteArray msg)
+{
+    if (quint8(msg.at(1)) != 0)
+        SendButtonBox("Retry");
+    if (quint8(msg.at(2)) != 0)
+        SendButtonBox("Ok");
+}
 /*********************************END OF FILE**********************************/
