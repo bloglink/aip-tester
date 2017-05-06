@@ -13,6 +13,7 @@
 #include <QTime>
 #include <QDebug>
 #include <QWidget>
+#include <QProcess>
 #include <QShowEvent>
 #include <QListView>
 #include <QSettings>
@@ -55,6 +56,7 @@ private slots:
     void WriteLog(QByteArray msg);
     QString GetLocalHostIP(void);
     virtual void showEvent(QShowEvent *);
+    void ReadHardWareSpace(void);
     void SendWarnning(QString s);
 private:
     QString password;

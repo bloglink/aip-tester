@@ -115,6 +115,7 @@ private:
     QList<QDoubleSpinBox*> OffsetR;
     quint8 Mode;
     quint8 stat;
+    QList<double> pwr;
 };
 
 #endif // PAGEDCR_H

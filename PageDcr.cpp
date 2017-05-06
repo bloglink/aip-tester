@@ -353,6 +353,7 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         Judge = "OK";
         stat = msg.toInt();
         if (IsPowerOn()) {
+            pwr.clear();
             SendCanCmdPwr(stat);
             WaitTimeOut(150);
         }
@@ -406,8 +407,8 @@ void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
     if (Mode == DCR_FREE)
         return;
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
-        double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
-        if (v > 50) {
+        pwr.append(quint16(msg.at(1)*256)+quint8(msg.at(2)));
+        if (pwr.size() > 4 && pwr.last() > 50) {
             emit SendCommand(ADDR, CMD_STOP, "DCR PWR");
             SendWarnning(tr("请等待电机转动停止再测试"));
         }

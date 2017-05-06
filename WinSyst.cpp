@@ -16,6 +16,7 @@ WinSyst::WinSyst(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
+    ReadHardWareSpace();
 }
 
 WinSyst::~WinSyst()
@@ -219,6 +220,16 @@ void WinSyst::showEvent(QShowEvent *e)
     InitSettings();
     ui->StackWinSyst->setCurrentIndex(1);
     e->accept();
+}
+
+void WinSyst::ReadHardWareSpace()
+{
+#ifdef __arm__
+    QProcess *cmd = new QProcess(this);
+    cmd->start("df -h");
+    cmd->waitForFinished();
+    qDebug() << cmd->readAll();
+#endif
 }
 
 void WinSyst::SendWarnning(QString s)
