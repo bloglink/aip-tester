@@ -16,7 +16,8 @@ WinSyst::WinSyst(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    ReadHardWareSpace();
+    QTimer *timer = new QTimer(this);
+    timer->singleShot(10, this, SLOT(ReadHardWareSpace()));
 }
 
 WinSyst::~WinSyst()
@@ -217,6 +218,7 @@ QString WinSyst::GetLocalHostIP()
 
 void WinSyst::showEvent(QShowEvent *e)
 {
+    ReadHardWareSpace();
     InitSettings();
     ui->StackWinSyst->setCurrentIndex(1);
     e->accept();
@@ -228,7 +230,17 @@ void WinSyst::ReadHardWareSpace()
     QProcess *cmd = new QProcess(this);
     cmd->start("df -h");
     cmd->waitForFinished();
-    qDebug() << cmd->readAll();
+    QStringList s = QString(cmd->readAll()).split("\n");
+    for (int i=0; i < s.size(); i++) {
+        if (s.at(i).contains("/mnt/nandflash")) {
+            QStringList t = s.at(i).split(" ",QString::SkipEmptyParts);
+            QString a = t.at(qMin(4, t.size()));
+            ui->TextSpace->setText(a);
+            int b = a.remove(a.size()-1, 1).toInt();
+            if (b > 80)
+                SendWarnning(tr("系统空间不足%1%,请清理空间").arg(100-b));
+        }
+    }
 #endif
 }
 

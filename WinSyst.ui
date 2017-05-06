@@ -560,14 +560,14 @@
              <item row="9" column="0">
               <widget class="QLabel" name="label_14">
                <property name="text">
-                <string>磁盘剩余</string>
+                <string>磁盘使用:</string>
                </property>
               </widget>
              </item>
              <item row="9" column="1">
               <widget class="QLabel" name="TextSpace">
                <property name="text">
-                <string>TextLabel</string>
+                <string>未知</string>
                </property>
               </widget>
              </item>
