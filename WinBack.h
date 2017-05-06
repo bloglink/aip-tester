@@ -33,6 +33,7 @@ public:
 private:
     Ui::WinBack *ui;
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray msg);
 private slots:
     void InitWindows(void);

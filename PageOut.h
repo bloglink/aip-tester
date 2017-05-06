@@ -16,7 +16,6 @@
 #include <QObject>
 #include <QByteArray>
 #include <QDataStream>
-#include <QMessageBox>
 #include <QElapsedTimer>
 #include "define.h"
 

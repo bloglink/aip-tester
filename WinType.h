@@ -19,7 +19,6 @@
 #include <QButtonGroup>
 #include <QListView>
 #include <QSettings>
-#include <QMessageBox>
 #include <QScrollBar>
 
 #include "define.h"
@@ -40,6 +39,7 @@ private:
     Ui::WinType *ui;
 
 signals:
+    void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -69,6 +69,7 @@ private slots:
 
     virtual void showEvent(QShowEvent *);
     void on_TabFile_cellClicked(int row, int column);
+    void SendWarnning(QString s);
 
 private:
     QButtonGroup *btnGroup;

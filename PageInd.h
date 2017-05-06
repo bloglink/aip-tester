@@ -18,7 +18,6 @@
 #include <QSettings>
 #include <QListView>
 #include <QShowEvent>
-#include <QMessageBox>
 #include <QHeaderView>
 #include <QButtonGroup>
 #include <QElapsedTimer>

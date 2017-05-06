@@ -128,11 +128,9 @@ void WinBack::BtnJudge(int id)
         emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     case Qt::Key_1:
+        Testing = true;
         SendCanCmdVersion(0x13);
         SendCanCmdVersion(0x14);
-        SendCanCmdVersion(0x15);
-        SendCanCmdVersion(0x16);
-        SendCanCmdVersion(0x17);
         SendCanCmdVersion(0x22);
         SendCanCmdVersion(0x23);
         SendCanCmdVersion(0x24);
@@ -163,6 +161,7 @@ void WinBack::JudgeDcrBtn(int id)
     default:
         break;
     }
+    Testing = true;
 }
 
 void WinBack::JudgeInrBtn(int id)
@@ -181,6 +180,7 @@ void WinBack::JudgeInrBtn(int id)
     default:
         break;
     }
+    Testing = true;
 }
 
 void WinBack::JudgeImpBtn(int id)
@@ -199,6 +199,7 @@ void WinBack::JudgeImpBtn(int id)
     default:
         break;
     }
+    Testing = true;
 }
 
 void WinBack::InitSettings()
@@ -329,6 +330,7 @@ void WinBack::ExcuteCanCmd(quint16 addr,  QByteArray msg)
 {
     if (!Testing)
         return;
+    qDebug() << "back can msg" << msg.toHex();
 //    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex().append("\n"));
     switch (addr) {
     case CAN_ID_DCR:

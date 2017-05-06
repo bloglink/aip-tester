@@ -114,7 +114,7 @@ void WinSyst::InitSettings()
         tt = tt.addSecs(t);
         ui->EditTime->setDateTime(tt);
         SetDateTime();
-        QMessageBox::warning(this, tr("警告"), tr("日期丢失, 请重新设定日期"), QMessageBox::Ok);
+        SendWarnning(tr("日期丢失"));
     } else {
         ui->EditTime->setDateTime(QDateTime::currentDateTime());
     }
@@ -219,6 +219,15 @@ void WinSyst::showEvent(QShowEvent *e)
     InitSettings();
     ui->StackWinSyst->setCurrentIndex(1);
     e->accept();
+}
+
+void WinSyst::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("系统异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 
 /*********************************END OF FILE**********************************/

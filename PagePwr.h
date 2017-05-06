@@ -17,7 +17,6 @@
 #include <QSettings>
 #include <QListView>
 #include <QShowEvent>
-#include <QMessageBox>
 #include <QHeaderView>
 #include <QButtonGroup>
 #include <QElapsedTimer>
@@ -26,7 +25,7 @@
 #include "define.h"
 #include "qmath.h"
 
-#define PWR_ROW 3
+#define PWR_ROW 6
 #define PG_ROW 3
 
 #define PWR_FREE        0

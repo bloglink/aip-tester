@@ -17,7 +17,6 @@
 #include <QComboBox>
 #include <QSettings>
 #include <QListView>
-#include <QMessageBox>
 #include <QShowEvent>
 #include <QHeaderView>
 #include <QButtonGroup>

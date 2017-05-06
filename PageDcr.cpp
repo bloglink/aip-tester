@@ -292,15 +292,13 @@ bool PageDcr::CheckSetting()
         int t1 = Terminal1.at(i)->text().toInt();
         int t2 = Terminal2.at(i)->text().toInt();
         if (abs(t1-t2)%3 == 0) {
-            QString warning = QString("行%1:\n端子差不能为3, 保存失败").arg(i+1);
-            QMessageBox::warning(this, "警告",  warning, QMessageBox::Ok);
+            SendWarnning(QString("行%1:\n端子差不能为3, 保存失败").arg(i+1));
             return false;
         }
     }
     for (int i=0; i < qMin(Max.size(), Min.size()); i++) {
         if (Min.at(i)->value() > Max.at(i)->value()) {
-            QString warning = QString("行%1:\n上限大于下限, 保存失败").arg(i+1);
-            QMessageBox::warning(this, "警告",  warning, QMessageBox::Ok);
+            SendWarnning(QString("行%1:\n上限大于下限, 保存失败").arg(i+1));
             return false;
         }
     }
@@ -355,9 +353,8 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         Judge = "OK";
         stat = msg.toInt();
         if (IsPowerOn()) {
-            qDebug()  <<  "start pwr";
             SendCanCmdPwr(stat);
-            WaitTimeOut(50);
+            WaitTimeOut(150);
         }
         if (Mode == DCR_FREE)
             break;
@@ -412,8 +409,7 @@ void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
         double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
         if (v > 50) {
             emit SendCommand(ADDR, CMD_STOP, "DCR PWR");
-            emit SendCommand(ADDR, CMD_DEBUG, QString("DCR PWR %1").arg(v).toUtf8());
-            QMessageBox::information(this, "", "请等待电机转动停止再测试", QMessageBox::Ok);
+            SendWarnning(tr("请等待电机转动停止再测试"));
         }
     }
 }
@@ -511,7 +507,7 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     }
     if (temp < (Max.at(number)->value()/10)) {
         emit SendCommand(ADDR, CMD_STOP, "DCR LOW");
-        QMessageBox::information(this, "", "电阻值小于10%，请检查线路连接", QMessageBox::Ok);
+        SendWarnning(tr("电阻值小于10%，请检查线路连接"));
     }
 
     QStringList s = QString(Items.at(number)).split("@");

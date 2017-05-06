@@ -148,9 +148,9 @@ void PageLck::ExcuteCanCmd(QByteArray msg)
     if (Mode == LCK_FREE)
         return;
     TimeOut = 0;
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+    if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
+    if (msg.size() >= 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
 }
 
@@ -303,6 +303,7 @@ void PageLck::ReadCanCmdStatus(QByteArray msg)
     int s = quint8(msg.at(1));
     switch (s) {
     case 0x00:
+        emit SendCommand(ADDR, CMD_DEBUG, QString("lck ok, Mode=%1\n").arg(Mode).toUtf8());
         break;
     case 0x01:
         return;
@@ -323,7 +324,7 @@ void PageLck::ReadCanCmdStatus(QByteArray msg)
         SendItemJudge();
         ClearResults();
     }
-    Mode = LCK_FREE;
+//    Mode = LCK_FREE;
 }
 
 void PageLck::ReadCanCmdResult(QByteArray msg)

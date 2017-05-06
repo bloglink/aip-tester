@@ -163,7 +163,7 @@ void WinType::ReadButtons(int id)
     switch (id) {
     case Qt::Key_0:
         if (CurrentUser() == 0) {
-            QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+            SendWarnning(tr("用户权限不足"));
             return;
         }
         CopySettings(ui->EditTypeName->text());
@@ -173,7 +173,7 @@ void WinType::ReadButtons(int id)
         break;
     case Qt::Key_1:
         if (CurrentUser() == 0) {
-            QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+            SendWarnning(tr("用户权限不足"));
             return;
         }
         RemoveSettings();
@@ -332,7 +332,7 @@ void WinType::SaveSettings()
 void WinType::SelectWireColor(int row, int column)
 {
     if (CurrentUser() == 0) {
-        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        SendWarnning(tr("用户权限不足"));
         return;
     }
     ui->Type->setCurrentIndex(0);
@@ -347,7 +347,7 @@ void WinType::SelectWireColor(int row, int column)
 void WinType::ShowWireColorWindow()
 {
     if (CurrentUser() == 0) {
-        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        SendWarnning(tr("用户权限不足"));
         return;
     }
     ui->Type->setCurrentIndex(1);
@@ -356,7 +356,7 @@ void WinType::ShowWireColorWindow()
 void WinType::ShowAvailableItem(int, int)
 {
     if (CurrentUser() == 0) {
-        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        SendWarnning(tr("用户权限不足"));
         return;
     }
     ui->Other->setCurrentIndex(1);
@@ -367,7 +367,7 @@ void WinType::JumptoSetWindows()
     if (ui->TabTest->currentRow()  <  0)
         return;
     if (CurrentUser() == 0) {
-        QMessageBox::information(this, "", "用户权限不足", QMessageBox::Ok);
+        SendWarnning(tr("用户权限不足"));
         return;
     }
     SaveSettings();
@@ -503,6 +503,15 @@ void WinType::on_TabFile_cellClicked(int , int )
     ui->TextTypeShow->setText(ui->TabFile->currentItem()->text());
     ChangeSettings();
     InitSettings();
+}
+
+void WinType::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("操作异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 /*********************************END OF FILE**********************************/
 

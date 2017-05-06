@@ -68,6 +68,7 @@ void WinHome::InitWindowsAll()
     WinBack *winBack = new WinBack(this);
     ui->desktop->addWidget(winBack);
     winBack->setObjectName("WinBack");
+    connect(winBack, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(winBack, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winBack,
@@ -77,6 +78,7 @@ void WinHome::InitWindowsAll()
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
     winSyst->setObjectName("WinSyst");
+    connect(winSyst, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(winSyst, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winSyst,
@@ -86,6 +88,7 @@ void WinHome::InitWindowsAll()
     WinType *winType = new WinType(this);
     ui->desktop->addWidget(winType);
     winType->setObjectName("WinType");
+    connect(winType, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(winType, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize WinType OK\n");
@@ -93,6 +96,7 @@ void WinHome::InitWindowsAll()
     WinData *winData = new WinData(this);
     ui->desktop->addWidget(winData);
     winData->setObjectName("WinData");
+    connect(winData, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(winData, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize WinData OK\n");
@@ -100,6 +104,7 @@ void WinHome::InitWindowsAll()
     WinTest *winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
+    connect(winTest, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
     connect(winTest, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winTest,

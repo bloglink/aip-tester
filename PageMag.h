@@ -10,7 +10,6 @@
 #define PAGEMAG_H
 
 #include <QDate>
-#include <QMessageBox>
 #include <QWidget>
 #include <QListView>
 #include <QSettings>

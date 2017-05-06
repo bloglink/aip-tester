@@ -17,7 +17,6 @@
 #include <QComboBox>
 #include <QSettings>
 #include <QListView>
-#include <QMessageBox>
 #include <QHeaderView>
 #include <QButtonGroup>
 #include <QElapsedTimer>
