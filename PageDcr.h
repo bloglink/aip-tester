@@ -72,8 +72,7 @@ private slots:
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadOffset(QByteArray msg);
-    void SendTestItemsAllEmpty(void);
-    void SendTestItemsAllError(void);
+
     void SendTestJudge(void);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 pos);
@@ -81,7 +80,7 @@ private slots:
     void SendCanCmdConfig(void);
     void SendAlarm(QByteArray addr);
     void SendCanCmdPwr(quint8 pos);
-    void SendWarnning(QString s);
+
     double CalculateOffset(double t, quint8 num);
     void CalculateBalance(void);
     int CalculateGear(int row);
@@ -92,10 +91,11 @@ private slots:
     bool IsPowerOn(void);
     void AutoChangeMetal(int index);
     void AutoChangeUnit(int index);
-    void AutoChangeMin(double x);
-    void AutoChangeMax(double x);
-    void AutoChangeStd(double x);
     virtual void showEvent(QShowEvent*);
+    void ReadVariant(QVariant s);
+    void SendWarnning(QString s);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
 private:
     quint16 TimeOut;
     PageNum *input;
@@ -116,6 +116,7 @@ private:
     quint8 Mode;
     quint8 stat;
     QList<double> pwr;
+    QList<QVariant> ItemView;
 };
 
 #endif // PAGEDCR_H

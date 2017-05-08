@@ -66,6 +66,9 @@ private slots:
     void showEvent(QShowEvent *);
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
+    void ReadVariant(QVariant s);
+    void UpdateItem(void);
+    void ItemError(QVariantHash hash);
 private:
     QTimer *timer;
     QList<Waveform *>wave;
@@ -73,6 +76,7 @@ private:
     QStringList Items;
     QString code;
     QTimer *codeTimer;
+    QList<QVariant> ItemView;
 };
 
 #endif // WINTEST_H

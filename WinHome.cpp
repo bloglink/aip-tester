@@ -105,6 +105,7 @@ void WinHome::InitWindowsAll()
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
     connect(winTest, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
+    connect(this, SIGNAL(SendVariant(QVariant)), winTest, SLOT(ReadVariant(QVariant)));
     connect(winTest, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winTest,
@@ -115,6 +116,7 @@ void WinHome::InitWindowsAll()
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
     connect(pageDcr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
+    connect(this, SIGNAL(SendVariant(QVariant)), pageDcr, SLOT(ReadVariant(QVariant)));
     connect(pageDcr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageDcr,
@@ -445,27 +447,14 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 
 void WinHome::InitTestItems()
 {
-    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x00));
-    QStringList n = CurrentItems();
-    if (n.isEmpty())
-        return;
-    Items.clear();
-    if (CurrentStartMode() == 1 || CurrentStartMode() == 2) //滑罩启动
-        emit SendCommand(WIN_ID_OUT13, CMD_INIT, QString::number(CurrentStartMode()).toUtf8());
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "ItemInit");
+    emit SendVariant(QVariant::fromValue(hash));
 
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    for (int i=0; i < n.size(); i++) {
-        emit SendCommand(n.at(i).toInt(), CMD_INIT, NULL);
-    }
-    emit SendCommand(WIN_ID_TEST, CMD_INIT, Items.join("\n").toUtf8()); //初始化测试界面
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "ItemUpdate");
+    emit SendVariant(QVariant::fromValue(hash));
 }
 
 void WinHome::ReadStatusAll()
@@ -722,6 +711,8 @@ void WinHome::ReadVariant(QVariant s)
     }
     if (hash.value("TxCommand") == "Warnning")
         Warnning(hash);
+    if (hash.value("TxCommand") == "ItemView")
+        qDebug() << hash.value("TestItem").toString();
 }
 
 void WinHome::Warnning(QVariantHash hash)

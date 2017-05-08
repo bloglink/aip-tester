@@ -295,11 +295,15 @@ void WinTest::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     switch (cmd) {
     case CMD_INIT:
         ClearWave();
-        InitItem(msg);
+
+        UpdateItem();
+        //        ui->TabTest->setRowCount(0);
+        //        InitItem(msg);
         InitSettings();
         break;
     case CMD_ITEM:
         ShowItem(msg);
+
         break;
     case CMD_TEMP:
         ShowTemperature(msg);
@@ -384,6 +388,72 @@ void WinTest::keyReleaseEvent(QKeyEvent *e)
 {
     codeTimer->start(10);
     e->accept();
+}
+
+void WinTest::ReadVariant(QVariant s)
+{
+    QVariantHash hash = s.toHash();
+    if (hash.value("TxAddress") != "WinTest" && hash.value("TxAddress") != "WinHome")
+        return;
+    if (hash.value("TxCommand") == "ItemView")
+        ItemView.append(s);
+    if (hash.value("TxCommand") == "ItemInit")
+        ItemView.clear();
+    if (hash.value("TxCommand") == "ItemUpdate")
+        UpdateItem();
+    if (hash.value("TxCommand") == "ItemJudge")
+        ItemError(hash);
+    if (hash.value("TxCommand") == "ItemError")
+        ItemError(hash);
+}
+
+void WinTest::UpdateItem()
+{
+    ui->TabTest->setRowCount(ItemView.size());
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i).toHash();
+        ui->TabTest->setItem(i, 0, new QTableWidgetItem);
+        ui->TabTest->item(i, 0)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i, 0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i, 0)->setText(hash.value("TestItem").toString());
+
+        ui->TabTest->setItem(i, 1, new QTableWidgetItem);
+        ui->TabTest->item(i, 1)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i, 1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i, 1)->setText(hash.value("TestPara").toString());
+
+        ui->TabTest->setItem(i, 2, new QTableWidgetItem);
+        ui->TabTest->item(i, 2)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i, 2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
+
+        ui->TabTest->setItem(i, 3, new QTableWidgetItem);
+        ui->TabTest->item(i, 3)->setTextAlignment(Qt::AlignCenter);
+        ui->TabTest->item(i, 3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+        ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
+    }
+}
+
+void WinTest::ItemError(QVariantHash hash)
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash temp = ItemView.at(i).toHash();
+        if (temp.value("TestItem") == hash.value("TestItem")) {
+            if (hash.value("TestResult").toString().isEmpty())
+                ui->TabTest->item(i, 2)->setText("---");
+            else
+                ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
+            if (hash.value("TestJudge").toString().isEmpty())
+                ui->TabTest->item(i, 3)->setText("NG");
+            else
+                ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
+            if (ui->TabTest->item(i, 3)->text() == "NG")
+                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
+            else
+                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::green));
+            break;
+        }
+    }
 }
 
 /*********************************END OF FILE**********************************/
