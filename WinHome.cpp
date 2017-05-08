@@ -16,7 +16,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170505");
+    InitVersion("V-2.1.0.170508");
     HomeMode = HOME_FREE;
     InitThreadAll();
     isPause = false;
@@ -420,8 +420,8 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         StartTest(QString(msg).split(" ").at(0).toUtf8());
         break;
     case CMD_STOP:
-        SendButtonBox("Ok");
         ItemJudge = "NG";
+        SendButtonBox("Ok");
         if (msg.contains("DCR"))
             ShowLogMessage(msg);
         emit SendCommand(ADDR, CMD_STOP, msg);
@@ -597,7 +597,7 @@ void WinHome::TestPause()
     Delay(CurrentAlarmTime("NG"));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
     int ret = box->exec();
-    if (ret == QMessageBox::Cancel)
+    if (ret == QMessageBox::Retry)
     {
         ItemJudge = "OK";
         if (HomeMode != HOME_STOP)
@@ -606,7 +606,7 @@ void WinHome::TestPause()
         emit SendCommand(WIN_ID_TEST, CMD_ITEM_REPLACE, TempItems.join("\n").toUtf8());
         emit SendCommand(Current_Test_Item, CMD_START, stat);
         Delay(10);
-    } else if (ret == QMessageBox::Yes) {
+    } else if (ret == QMessageBox::Ok) {
         if (HomeMode != HOME_STOP)
             emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
     }

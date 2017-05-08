@@ -317,7 +317,6 @@ void PageAcw::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         break;
     case CMD_STOP:
         SendCanCmdStop();
-        Mode = ACW_FREE;
         break;
     case CMD_INIT:
         InitSettings();
