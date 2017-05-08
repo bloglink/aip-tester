@@ -684,6 +684,8 @@ void PageImp::CalculateResult(QByteArray )
     qint32 Area3 = 0;
     qint32 Phase1 = 0;
     qint32 Phase2 = 0;
+    qint32 Flut1 = 0;
+    qint32 Flut2 = 0;
     qint32 F = 0;
     qint32 A = 0;
     qint32 D = 0;
@@ -707,21 +709,23 @@ void PageImp::CalculateResult(QByteArray )
         int c3 = WaveImp.at(CurrentWave)->WaveTestH.at(i+1);
         Area3 += abs((b1+b2*2+b3)-(c1+c2*2+c3));
 
-        F +=abs(c2-c3);
+        Flut1 += abs(b2-b3);
+        Flut2 += abs(c2-c3);
         Phase1 += (a1-0x200)*(a1-0x200);
         Phase2 += (a1-0x200)*(a2-0x200);
     }
+    F = qMin(99, abs((Flut2-Flut1)*100/Flut1));
+    P = qMin(99, abs((Phase1-Phase2)*100/Phase1));
     A = qMin(99, abs((Area2-Area1)*100/Area1));
     D = qMin(99, abs(qMin(Area2, Area3/4)*100/Area1));
-    P = qMin(99, abs((Phase1-Phase2)*100/Phase1));
 
     QString n;
     QString judge = "OK";
     int number = CurrentWave;
     if (Flut.at(qMin(number, Flut.size()-1))->value() != 0)
-        n = QString("电晕:%3,相位:%4%,面积:%1%,差积:%2%").arg(F).arg(P).arg(A).arg(D);
+        n = QString("电晕:%1,相位:%2%,面积:%3%,差积:%4%").arg(F).arg(P).arg(A).arg(D);
     else
-        n = QString("相位:%3,面积:%1%,差积:%2%").arg(P).arg(A).arg(D);
+        n = QString("相位:%1,面积:%2%,差积:%3%").arg(P).arg(A).arg(D);
 
     if (abs(A) >= Area.at(qMin(number, Area.size()-1))->value())
         judge = "NG";
