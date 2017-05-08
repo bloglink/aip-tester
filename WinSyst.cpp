@@ -36,6 +36,9 @@ void WinSyst::InitWindows()
     file->open(QFile::ReadWrite);
 
     dateTime = ui->EditTime->dateTime();
+#ifdef __arm__
+    ui->BtnScreen->setEnabled(true);
+#endif
 }
 
 void WinSyst::InitButtons()
@@ -49,6 +52,7 @@ void WinSyst::InitButtons()
     btnGroup->addButton(ui->BtnExit, Qt::Key_4);
     btnGroup->addButton(ui->btnTime, Qt::Key_5);
     btnGroup->addButton(ui->BtnStatus, Qt::Key_6);
+    btnGroup->addButton(ui->BtnScreen, Qt::Key_7);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
@@ -83,6 +87,9 @@ void WinSyst::ReadButtons(int id)
         break;
     case Qt::Key_6:
         emit SendCommand(ADDR, CMD_STATUS, NULL);
+        break;
+    case Qt::Key_7:
+        system("/bin/ts_calibrate -&");
         break;
     default:
         break;

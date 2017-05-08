@@ -12,6 +12,7 @@
 #include <QFile>
 #include <QTime>
 #include <QTimer>
+#include <QDesktopWidget>
 #include <QDebug>
 #include <QWidget>
 #include <QProcess>
