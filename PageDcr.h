@@ -33,11 +33,6 @@
 
 #define MAX_ROW 8
 
-#define DCR_FREE        0
-#define DCR_INIT        4
-#define DCR_TEST        1
-#define DCR_OFFSET      2
-
 namespace Ui {
 class PageDcr;
 }
@@ -96,6 +91,8 @@ private slots:
     void SendWarnning(QString s);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
+    void SendTestItemsAll(void);
+    void SendTemperature(QByteArray msg);
 private:
     quint16 TimeOut;
     PageNum *input;
@@ -113,10 +110,10 @@ private:
     QList<QDoubleSpinBox*> Std;
     QList<QDoubleSpinBox*> Offset;
     QList<QDoubleSpinBox*> OffsetR;
-    quint8 Mode;
     quint8 stat;
     QList<double> pwr;
     QList<QVariant> ItemView;
+    QString TestMode;
 };
 
 #endif // PAGEDCR_H

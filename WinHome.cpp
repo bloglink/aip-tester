@@ -453,7 +453,7 @@ void WinHome::InitTestItems()
     emit SendVariant(QVariant::fromValue(hash));
 
     hash.insert("TxAddress", "WinTest");
-    hash.insert("TxCommand", "ItemUpdate");
+    hash.insert("TxCommand", "ItemShow");
     emit SendVariant(QVariant::fromValue(hash));
 }
 

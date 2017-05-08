@@ -296,7 +296,7 @@ void WinTest::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     case CMD_INIT:
         ClearWave();
 
-        UpdateItem();
+        ItemShow();
         //        ui->TabTest->setRowCount(0);
         //        InitItem(msg);
         InitSettings();
@@ -399,15 +399,15 @@ void WinTest::ReadVariant(QVariant s)
         ItemView.append(s);
     if (hash.value("TxCommand") == "ItemInit")
         ItemView.clear();
+    if (hash.value("TxCommand") == "ItemShow")
+        ItemShow();
     if (hash.value("TxCommand") == "ItemUpdate")
-        UpdateItem();
-    if (hash.value("TxCommand") == "ItemJudge")
-        ItemError(hash);
-    if (hash.value("TxCommand") == "ItemError")
-        ItemError(hash);
+        ItemUpdate(hash);
+    if (hash.value("TxCommand") == "Temperature")
+        ui->TextTestTemp->setText(hash.value("TxMessage").toString());
 }
 
-void WinTest::UpdateItem()
+void WinTest::ItemShow()
 {
     ui->TabTest->setRowCount(ItemView.size());
     for (int i=0; i < ItemView.size(); i++) {
@@ -434,19 +434,13 @@ void WinTest::UpdateItem()
     }
 }
 
-void WinTest::ItemError(QVariantHash hash)
+void WinTest::ItemUpdate(QVariantHash hash)
 {
     for (int i=0; i < ItemView.size(); i++) {
         QVariantHash temp = ItemView.at(i).toHash();
         if (temp.value("TestItem") == hash.value("TestItem")) {
-            if (hash.value("TestResult").toString().isEmpty())
-                ui->TabTest->item(i, 2)->setText("---");
-            else
-                ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
-            if (hash.value("TestJudge").toString().isEmpty())
-                ui->TabTest->item(i, 3)->setText("NG");
-            else
-                ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
+            ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
+            ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
             if (ui->TabTest->item(i, 3)->text() == "NG")
                 ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
             else

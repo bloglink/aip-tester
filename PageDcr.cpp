@@ -17,7 +17,7 @@ PageDcr::PageDcr(QWidget *parent) :
     InitWindows();
     InitButtons();
     InitSettings();
-    Mode = DCR_FREE;
+    TestMode = "free";
 }
 
 PageDcr::~PageDcr()
@@ -79,7 +79,7 @@ void PageDcr::InitWindows()
         Unit.append(new QComboBox(this));
         ui->TabParams->setCellWidget(row, 4, Unit.at(row));
         QStringList t2;
-        t2  << "mohm" << "ohm" << "kohm";
+        t2  << tr("mΩ") << tr("Ω") << tr("kΩ");
         Unit.at(row)->setView(new QListView(this));
         Unit.at(row)->addItems(t2);
 
@@ -136,10 +136,10 @@ void PageDcr::ReadButtons(int id)
     case Qt::Key_1:
         stat = WIN_ID_OUT13;
         SendCanCmdConfig();
-        Mode = DCR_OFFSET;
+        TestMode = "offset";
         SendCanCmdStart(stat);
         WaitTimeOut(100);
-        Mode = DCR_FREE;
+        TestMode = "free";
         break;
     case Qt::Key_2:
         if (CheckSetting())
@@ -149,10 +149,10 @@ void PageDcr::ReadButtons(int id)
     case Qt::Key_3:
         stat = WIN_ID_OUT14;
         SendCanCmdConfig();
-        Mode = DCR_OFFSET;
+        TestMode = "offset";
         SendCanCmdStart(stat);
         WaitTimeOut(100);
-        Mode = DCR_FREE;
+        TestMode = "free";
         break;
     default:
         break;
@@ -339,14 +339,14 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
             ExcuteCanCmdPwr(msg);
         break;
     case CMD_CHECK:
-        Mode = DCR_INIT;
+        TestMode = "init";
         SendCanCmdStatus();
         if (!WaitTimeOut(30))
             SendWarnning("超时");
-        Mode = DCR_FREE;
+        TestMode = "free";
         break;
     case CMD_START:
-        Mode = DCR_TEST;
+        TestMode = "test";
         Judge = "OK";
         stat = msg.toInt();
         if (IsPowerOn()) {
@@ -354,7 +354,7 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
             SendCanCmdPwr(stat);
             WaitTimeOut(150);
         }
-        if (Mode == DCR_FREE)
+        if (TestMode == "free")
             break;
         SendCanCmdStart(stat);
         if (!WaitTimeOut(ui->BoxTime->value()*100+100)) {
@@ -362,17 +362,10 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
             SendTestItemsAllError();
         }
         SendTestJudge();
-        Mode = DCR_FREE;
+        TestMode = "free";
         break;
     case CMD_STOP:
-        SendCanCmdStop();
-        Mode = DCR_FREE;
         SendAlarm(QByteArray(1, 0x00));
-        break;
-    case CMD_INIT:
-        InitSettings();
-        SendTestItemsAllEmpty();
-        SendCanCmdConfig();
         break;
     case CMD_ALARM:
         SendAlarm(msg);
@@ -384,7 +377,7 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 
 void PageDcr::ExcuteCanCmd(QByteArray msg)
 {
-    if (Mode == DCR_FREE)
+    if (TestMode == "free")
         return;
     TimeOut = 0;
 
@@ -392,7 +385,7 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
         ReadCanCmdStatus(msg);
     }
     if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01) {
-        if (Mode == DCR_OFFSET)
+        if (TestMode == "offset")
             ReadOffset(msg);
         else
             ReadCanCmdResult(msg);
@@ -401,7 +394,7 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
 
 void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
 {
-    if (Mode == DCR_FREE)
+    if (TestMode == "free")
         return;
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
         pwr.append(quint16(msg.at(1)*256)+quint8(msg.at(2)));
@@ -451,20 +444,10 @@ void PageDcr::ReadCanCmdStatus(QByteArray msg)
         SendWarnning("UNKONW_ERROR");
         break;
     }
-    double offset = ui->BoxOffset->value();
-    double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
-    QString t = QString(tr("温度:%1°C")).arg(temp);
-    emit SendCommand(ADDR, CMD_TEMP, t.toUtf8());
-
-    for (int i=0; i < ItemView.size(); i++) {
-         QVariantHash hash = ItemView.at(i).toHash();
-        if (hash.value("TestEnable") == "Y") {
-            hash.insert("TxAddress", "WinTest");
-            hash.insert("TxCommand", "ItemJudge");
-            emit SendVariant(QVariant::fromValue(hash));
-        }
-    }
-    Mode = DCR_FREE;
+    SendTemperature(msg);
+    CalculateBalance();
+    SendTestItemsAll();
+    TestMode = "free";
 }
 
 void PageDcr::ReadCanCmdResult(QByteArray msg)
@@ -520,8 +503,6 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     hash.insert("TestResult", t);
     hash.insert("TestJudge", JudgeItem);
     ItemView[number] = QVariant::fromValue(hash);
-
-    CalculateBalance();
 }
 
 void PageDcr::ReadOffset(QByteArray msg)
@@ -638,29 +619,17 @@ void PageDcr::SendCanCmdPwr(quint8 s)
 
 double PageDcr::CalculateOffset(double t,  quint8 num)
 {
-    double temp;
-    double res = 0;
-    switch (Metal.at(num)->currentIndex()) {
-    case 0:
-        res = ResCu;
-        break;
-    case 1:
-        res = ResCu_Al;
-        break;
-    case 2:
-        res = ResAl;
-        break;
-    default:
-        break;
-    }
-    temp = 1+res*(ui->BoxStd->value()-(t/10-50)-ui->BoxOffset->value());
+    QList<double> r;
+    r << ResCu << ResCu_Al << ResAl;
+    double res = r.at(Metal.at(num)->currentIndex());
+    double temp = 1+res*(ui->BoxStd->value()-(t/10-50)-ui->BoxOffset->value());
     return temp;
 }
 
 void PageDcr::CalculateBalance()
 {
     //计算不平衡度
-    if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
+    if ((ui->BoxUnbalance->value() != 0) && (Results.size() >= 3)) {
         QString JudgeItem = "OK";
         double sum = 0;
         double avr = 0;
@@ -682,10 +651,11 @@ void PageDcr::CalculateBalance()
                 Judge = "NG";
             }
         }
-//        QVariantHash hash = ItemView.last().toHash();
-//        hash.insert("TestResult", u);
-//        hash.insert("TestJudge", JudgeItem);
-//        ItemView[number] = QVariant::fromValue(hash);
+        int number = ItemView.size()-1;
+        QVariantHash hash = ItemView.at(number).toHash();
+        hash.insert("TestResult", u);
+        hash.insert("TestJudge", JudgeItem);
+        ItemView[number] = QVariant::fromValue(hash);
     }
 }
 
@@ -719,7 +689,7 @@ int PageDcr::CalculateGear(int row)
 bool PageDcr::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Mode != DCR_FREE) {
+    while (TestMode != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -821,17 +791,17 @@ void PageDcr::SendTestItemsAllEmpty()
         hash.insert("TestJudeg", " ");
         ItemView.append(QVariant::fromValue(hash));
     }
-    if (ui->BoxUnbalance->value() != 0 && Items.size() >= 3) {
+    if (ui->BoxUnbalance->value() != 0 && ItemView.size() >= 3) {
         QVariantHash hash;
         hash.insert("TestItem", tr("电阻平衡"));
-        hash.insert("TestPara", tr("%1").arg(ui->BoxUnbalance->value()));
+        hash.insert("TestPara", tr("%1%").arg(ui->BoxUnbalance->value()));
         hash.insert("TestResult", " ");
         hash.insert("TestJudeg", " ");
         hash.insert("TestEnable", "Y");
         ItemView.append(QVariant::fromValue(hash));
     }
     for (int i=0; i < ItemView.size(); i++) {
-         QVariantHash hash = ItemView.at(i).toHash();
+        QVariantHash hash = ItemView.at(i).toHash();
         if (hash.value("TestEnable") == "Y") {
             hash.insert("TxAddress", "WinTest");
             hash.insert("TxCommand", "ItemView");
@@ -843,13 +813,38 @@ void PageDcr::SendTestItemsAllEmpty()
 void PageDcr::SendTestItemsAllError()
 {
     for (int i=0; i < ItemView.size(); i++) {
-         QVariantHash hash = ItemView.at(i).toHash();
+        QVariantHash hash = ItemView.at(i).toHash();
         if (hash.value("TestEnable") == "Y") {
             hash.insert("TxAddress", "WinTest");
-            hash.insert("TxCommand", "ItemError");
+            hash.insert("TxCommand", "ItemUpdate");
+            hash.insert("TestResult", "---");
+            hash.insert("TestJudge", "NG");
             emit SendVariant(QVariant::fromValue(hash));
         }
     }
+}
+
+void PageDcr::SendTestItemsAll()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i).toHash();
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemUpdate");
+            emit SendVariant(QVariant::fromValue(hash));
+        }
+    }
+}
+
+void PageDcr::SendTemperature(QByteArray msg)
+{
+    double offset = ui->BoxOffset->value();
+    double temp = (quint16(msg.at(2)*256)+quint8(msg.at(3)))/10-50+offset;
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "Temperature");
+    hash.insert("TxMessage", tr("温度:%1°C").arg(temp));
+    emit SendVariant(QVariant::fromValue(hash));
 }
 
 /*********************************END OF FILE**********************************/

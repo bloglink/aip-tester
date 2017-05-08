@@ -67,8 +67,8 @@ private slots:
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
     void ReadVariant(QVariant s);
-    void UpdateItem(void);
-    void ItemError(QVariantHash hash);
+    void ItemShow(void);
+    void ItemUpdate(QVariantHash hash);
 private:
     QTimer *timer;
     QList<Waveform *>wave;
