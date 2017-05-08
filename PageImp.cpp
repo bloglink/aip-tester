@@ -463,10 +463,6 @@ void PageImp::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         SendTestJudge();
         ImpMode = IMP_FREE;
         break;
-    case CMD_STOP:
-        SendCanCmdStop();
-        ImpMode = IMP_FREE;
-        break;
     case CMD_INIT:
         InitSettings();
         InitTestItems();

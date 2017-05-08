@@ -368,8 +368,6 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         Mode = DCR_FREE;
         break;
     case CMD_STOP:
-        SendCanCmdStop();
-        Mode = DCR_FREE;
         SendAlarm(QByteArray(1, 0x00));
         break;
     case CMD_INIT:

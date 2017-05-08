@@ -16,7 +16,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170505");
+    InitVersion("V-2.1.0.170508");
     HomeMode = HOME_FREE;
     InitThreadAll();
     isPause = false;
@@ -419,7 +419,6 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         break;
     case CMD_STOP:
         SendButtonBox("Ok");
-        ItemJudge = "NG";
         if (msg.contains("DCR"))
             ShowLogMessage(msg);
         emit SendCommand(ADDR, CMD_STOP, msg);
@@ -526,8 +525,11 @@ void WinHome::StartTest(QByteArray station)
     for (int i=0; i < n.size(); i++) {
         Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
-        if (HomeMode == HOME_STOP)
+        if (HomeMode == HOME_STOP) {
+            if (i+1 < n.size())
+                ItemJudge == "NG";
             break;
+        }
         Delay(10);
     }
     SaveTestJudge();
