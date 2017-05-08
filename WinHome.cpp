@@ -418,6 +418,7 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         StartTest(QString(msg).split(" ").at(0).toUtf8());
         break;
     case CMD_STOP:
+        ItemJudge = "NG";
         SendButtonBox("Ok");
         if (msg.contains("DCR"))
             ShowLogMessage(msg);
@@ -525,11 +526,8 @@ void WinHome::StartTest(QByteArray station)
     for (int i=0; i < n.size(); i++) {
         Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
-        if (HomeMode == HOME_STOP) {
-            if (i+1 < n.size())
-                ItemJudge == "NG";
+        if (HomeMode == HOME_STOP)
             break;
-        }
         Delay(10);
     }
     SaveTestJudge();
