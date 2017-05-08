@@ -216,6 +216,10 @@ void PageDcr::InitSettings()
     temp = (ini->value("Offset", "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Offset.at(row)->setValue(temp.at(row).toDouble());
+    //补偿
+    temp = (ini->value("OffsetR", "0.0 0.0 0.0 0.0 0.0 0.0 0.0 0.0").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
+        OffsetR.at(row)->setValue(temp.at(row).toDouble());
     qDebug() << QTime::currentTime().toString() << "PageDcr read OK";
 }
 
@@ -272,6 +276,10 @@ void PageDcr::SaveSettings()
     for (int i=0; i < Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i < OffsetR.size(); i++)
+        temp.append(OffsetR.at(i)->text());
+    ini->setValue("OffsetR", (temp.join(" ").toUtf8()));
     qDebug() << QTime::currentTime().toString() << "PageDcr save OK";
 }
 
