@@ -38,6 +38,7 @@
 #include "PageLvs.h"
 #include "PageLck.h"
 #include "PageOut.h"
+#include "PageAmp.h"
 
 #include "SqlClient.h"
 #include "CanClient.h"

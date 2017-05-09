@@ -211,6 +211,15 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize PageOut OK\n");
 
+    PageAmp *pageAmp = new PageAmp(this);
+    pageOut->setObjectName("pageAmp");
+    connect(pageAmp, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
+    connect(pageAmp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
+            SLOT(ReadMessage(quint16, quint16, QByteArray)));
+    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageAmp,
+            SLOT(ReadMessage(quint16, quint16, QByteArray)));
+    ShowLogMessage("Initialize PageAmp OK\n");
+
     ReadStatusAll();
 }
 
@@ -473,6 +482,8 @@ void WinHome::ReadStatusAll()
     if (HomeMode != HOME_FREE)
         return;
     HomeMode = HOME_TEST;
+
+    emit SendCommand(WIN_ID_AMP, CMD_CHECK, NULL);
 
     QStringList t = EnableItems();
     for (int i=0; i < t.size(); i++) {

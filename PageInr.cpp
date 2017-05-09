@@ -219,6 +219,7 @@ void PageInr::SaveSettings()
     for (int i=0; i < Time.size(); i++)
         temp.append(QString::number(Time.at(i)->value()));
     ini->setValue("Time", (temp.join(" ").toUtf8()));
+    temp.clear();
     for (int i=0; i < Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset", (temp.join(" ").toUtf8()));
