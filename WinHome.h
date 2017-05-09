@@ -108,6 +108,7 @@ private slots:
     int CurrentPauseMode(void);
     int CurrentAlarmTime(QString msg);
     int CurrentReStartMode(void);
+    int CurrentDelay(void);
 
     void ReadVariant(QVariant s);
     void Warnning(QVariantHash hash);

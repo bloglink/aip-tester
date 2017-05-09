@@ -556,7 +556,7 @@ void WinHome::StartTest(QByteArray station)
     emit SendCommand(ADDR, CMD_STATUS, "ready");
     if (CurrentReStartMode() != 0 && HomeMode != HOME_STOP) {
         QTimer *timer = new QTimer(this);
-        timer->singleShot(2500,  this,  SLOT(ReStartTest()));
+        timer->singleShot(CurrentDelay(),  this,  SLOT(ReStartTest()));
     }
     HomeMode = HOME_FREE;
 }
@@ -721,6 +721,12 @@ int WinHome::CurrentReStartMode()
 {
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
     return ini->value("/GLOBAL/RestartMode", "0").toInt();
+}
+
+int WinHome::CurrentDelay()
+{
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/TestDelay", "1").toDouble()*1000;
 }
 
 

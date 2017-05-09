@@ -225,6 +225,7 @@ void WinBack::InitSettings()
     ui->EnablePG->setChecked(ini->value("EnablePG", false).toBool());
     ui->TestContinue->setCurrentIndex(ini->value("RestartMode", "0").toInt());
     ui->BoxDir->setCurrentIndex(ini->value("PowerDir", "0").toInt());
+    ui->BoxDelay->setValue(ini->value("TestDelay", "1").toDouble());
     temp = ini->value("KDCR", "16384").toString().split(" ");
     for (int i=0; i < qMin(temp.size(), BoxDcr.size()); i++)
         BoxDcr.at(i)->setValue(temp.at(i).toInt());
@@ -261,6 +262,7 @@ void WinBack::SaveSettings()
     ini->setValue("EnablePG", ui->EnablePG->isChecked());
     ini->setValue("RestartMode", ui->TestContinue->currentIndex());
     ini->setValue("PowerDir", ui->BoxDir->currentIndex());
+    ini->setValue("TestDelay", ui->BoxDelay->value());
 
     temp.clear();
     for (int i=0; i < BoxDcr.size(); i++)
