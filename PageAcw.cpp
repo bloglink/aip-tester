@@ -129,6 +129,7 @@ void PageAcw::InitButtons()
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExitAcw, Qt::Key_0);
     btnGroup->addButton(ui->btnInput, Qt::Key_1);
+    btnGroup->addButton(ui->BtnOffset, Qt::Key_2);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
@@ -141,6 +142,24 @@ void PageAcw::ReadButtons(int id)
         break;
     case Qt::Key_1:
         EnsureInput();
+        break;
+    case Qt::Key_2:
+        for (int row = 0; row < Enable.size(); row++) {
+            if (Enable.at(row)->text() == "Y") {
+                Mode = ACW_OFFSET;
+                TestRow = row;
+                SendCanCmdConfig(row);
+                Delay(5);
+                SendCanCmdStart(WIN_ID_OUT13);
+                if (!WaitTimeOut(100)) {
+                    ui->Text->setText("Time out");
+                    break;
+                }
+                Delay(100);
+                Mode = ACW_FREE;
+            }
+        }
+        Mode = ACW_FREE;
         break;
     default:
         break;
@@ -334,8 +353,12 @@ void PageAcw::ExcuteCanCmd(QByteArray msg)
     TimeOut = 0;
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01)
-        ReadCanCmdResult(msg);
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01) {
+        if (Mode == ACW_OFFSET)
+            ReadCanCmdOffset(msg);
+        else
+            ReadCanCmdResult(msg);
+    }
 }
 /**
   * @brief   耐压状态, ID:0x61;长度:0x02;命令:0x00 status;
@@ -359,6 +382,10 @@ void PageAcw::ReadCanCmdStatus(QByteArray msg)
         SendTestItem();
         ClearResults();
     }
+    if (Mode == ACW_OFFSET) {
+        CalOffset();
+        ClearResults();
+    }
     Mode = ACW_FREE;
 }
 /**
@@ -370,6 +397,7 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     tt *= qPow(10, -quint8(msg.at(5)));
+    tt -= qMin(tt, Offset.at(TestRow)->value());
     Volt.append(v);
     Curr.append(tt);
     SendTestItemTemp();
@@ -393,6 +421,16 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
         ClearResults();
     }
 }
+
+void PageAcw::ReadCanCmdOffset(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    tt *= qPow(10, -quint8(msg.at(5)));
+    Volt.append(v);
+    Curr.append(tt);
+}
+
 void PageAcw::SendTestItemsAllEmpty()
 {
     Items.clear();
@@ -534,6 +572,16 @@ void PageAcw::ClearResults()
 {
     Volt.clear();
     Curr.clear();
+}
+
+void PageAcw::CalOffset()
+{
+    if (Curr.size() < 2) {
+        ui->Text->setText("Offset Error");
+        return;
+    }
+    Curr.removeLast();
+    Offset.at(TestRow)->setValue(Curr.last());
 }
 
 bool PageAcw::WaitTimeOut(quint16 t)

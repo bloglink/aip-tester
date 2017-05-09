@@ -28,6 +28,7 @@
 #define ACW_INIT        4
 #define ACW_TEST        1
 #define ACW_ROW         4
+#define ACW_OFFSET      5
 
 namespace Ui {
 class PageAcw;
@@ -58,6 +59,7 @@ private slots:
     void ExcuteCanCmd(QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
+    void ReadCanCmdOffset(QByteArray msg);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
     void SendTestItemTemp(void);
@@ -68,6 +70,7 @@ private slots:
     void SendCanCmdStop(void);
     void SendCanCmdConfig(int row);
     void ClearResults(void);
+    void CalOffset(void);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     quint16 GetTeminal(int r, int c);
