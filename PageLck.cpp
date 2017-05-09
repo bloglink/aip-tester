@@ -148,6 +148,9 @@ void PageLck::ExcuteCanCmd(QByteArray msg)
     if (Mode == LCK_FREE)
         return;
     TimeOut = 0;
+    emit SendCommand(ADDR, CMD_DEBUG, "lck msg:");
+    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() >= 8 && (quint8)msg.at(0) == 0x01)
@@ -236,6 +239,7 @@ void PageLck::SendItemJudge()
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+    Mode = LCK_FREE;
 }
 
 void PageLck::SendTestJudge()

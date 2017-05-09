@@ -573,7 +573,7 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
     Mode = PWR_FREE;
     if (wave.isEmpty())
         return;
-    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y") {
+    if (IsPGEnable()) {
         emit SendCommand(ADDR, CMD_WAVE_ITEM, PGWaveItem.at(TestRow).toUtf8());
         emit SendCommand(ADDR, CMD_WAVE_BYTE, wave);
         switch (TestRow) {
@@ -681,7 +681,7 @@ void PagePwr::InitTestItems()
     if (TestDir.at(0)->currentIndex() != 0) {
         QString s = QString(tr("转向@%1@ @ ").arg(TestDir.at(0)->currentText()));
         Items.append(s);
-        isTestDir = 0x01;
+        isTestDir = CurrentPowerDir();
     } else {
         isTestDir = 0x00;
     }
@@ -709,7 +709,7 @@ void PagePwr::SendTestItemsAllEmpty()
     for (int row = 0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
-            if (IsPGEnable() && PGEnable.at(row)->text() == "Y")
+            if (IsPGEnable())
                 n.append(PGItems.at(row));
         }
     }
@@ -730,7 +730,7 @@ void PagePwr::SendTestItemsAllError()
             if (s.at(3) == " ")
                 s[3] = "NG";
             emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-            if (IsPGEnable() && PGEnable.at(row)->text() == "Y") {
+            if (IsPGEnable()) {
                 s = QString(PGItems.at(row)).split("@");
                 if (s.at(2) == " ")
                     s[2] = "---";
@@ -762,7 +762,7 @@ void PagePwr::SendTestItemTemp()
         s[2] = t;
     emit SendCommand(ADDR, CMD_ITEM_TEMP, s.join("@").toUtf8());
     Delay(5);
-    if (IsPGEnable() || PGEnable.at(TestRow)->text() == "Y") {
+    if (IsPGEnable()) {
         QString hhh = QString::number(PGUppers.last()/100, 'f', 2);
         QString lll = QString::number(PGLowers.last()/100, 'f', 2);
         QString ddd = QString::number(PGDutyAvr.last()/10, 'f', 2);
@@ -804,7 +804,7 @@ void PagePwr::SendTestItem()
         QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
         emit SendCommand(ADDR, CMD_ITEM, s.toUtf8());
     }
-    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y") {
+    if (IsPGEnable()) {
         QString hhh = QString::number(PGUppers.last()/100, 'f', 2);
         QString lll = QString::number(PGLowers.last()/100, 'f', 2);
         QString ddd = QString::number(PGDutyAvr.last()/10, 'f', 1);
@@ -877,7 +877,7 @@ void PagePwr::SendTestJudge()
 {
     QString s = QString(tr("功率@%1@%2")).arg(CurrentSettings()).arg(Judge);
     emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
-    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y") {
+    if (IsPGEnable()) {
         s = QString(tr("PG@%1@%2")).arg(CurrentSettings()).arg(PGJudge);
         emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
     }
@@ -901,18 +901,23 @@ void PagePwr::SendCanCmdStart(quint8 s)
     quint16 t = TestTime.at(TestRow)->value()*10;
     quint8 p = CurrentPorwer().toInt() << 4;
     quint8 vv = 0;
-    if (IsPGEnable() || PGEnable.at(TestRow)->text() == "Y")
-        vv = ui->BoxPGVolt->value()*10;
+    quint8 dir = CurrentPowerDir();
     quint8 g = TestRow+1;
+    if (IsPGEnable()) {
+        vv = ui->BoxPGVolt->value()*10;
+        g += 0x08;
+    }
     if (ui->BoxFreq->value() == 60)
         p += 0x02;
-    if (IsPGEnable() && PGEnable.at(TestRow)->text() == "Y")
-        g += 0x08;
-    if (s == WIN_ID_OUT14)
+    if (s == WIN_ID_OUT14) {
         g  <<= 4;
+        dir <<= 4;
+    }
+    if (TestDir.at(0)->currentIndex() == 0)
+        dir = 0;
     out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)
         << quint8(t/256) << quint8(t%256) << quint8(p+v/256) << quint8(v%256)
-        << quint8(isTestDir) << quint8(vv);
+        << quint8(dir) << quint8(vv);
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
@@ -1016,10 +1021,22 @@ QString PagePwr::CurrentPorwer()
     return n;
 }
 
+int PagePwr::CurrentPowerDir()
+{
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/PowerDir", "0").toInt();
+}
+
 bool PagePwr::IsPGEnable()
 {
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
-    return ini->value("/GLOBAL/EnablePG", false).toBool();
+    if (!ini->value("/GLOBAL/EnablePG", false).toBool())
+        return false;
+    if (TestRow >= 3)
+        return false;
+    if (PGEnable.at(TestRow)->text() != "Y")
+        return false;
+    return true;
 }
 
 void PagePwr::showEvent(QShowEvent *e)

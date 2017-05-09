@@ -86,6 +86,7 @@ private slots:
     void Delay(int ms);
     QString CurrentSettings(void);
     QString CurrentPorwer(void);
+    int CurrentPowerDir(void);
     bool IsPGEnable(void);
     virtual void showEvent(QShowEvent *);
     void SendWarnning(QString s);

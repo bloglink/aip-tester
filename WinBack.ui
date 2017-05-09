@@ -203,6 +203,25 @@
             </item>
            </widget>
           </item>
+          <item row="0" column="4">
+           <widget class="QComboBox" name="BoxDir">
+            <item>
+             <property name="text">
+              <string>不测转向</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>霍尔</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>感应</string>
+             </property>
+            </item>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
