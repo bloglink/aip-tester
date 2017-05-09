@@ -108,6 +108,7 @@ void PageInr::InitButtons()
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExitIr, Qt::Key_0);
     btnGroup->addButton(ui->btnInput, Qt::Key_1);
+    btnGroup->addButton(ui->BtnOffset, Qt::Key_2);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
@@ -120,6 +121,24 @@ void PageInr::ReadButtons(int id)
         break;
     case Qt::Key_1:
         EnsureInput();
+        break;
+    case Qt::Key_2:
+        for (int row = 0; row < Enable.size(); row++) {
+            if (Enable.at(row)->text() == "Y") {
+                Mode = INR_OFFSET;
+                TestRow = row;
+                SendCanCmdConfig(row);
+                Delay(5);
+                SendCanCmdStart(WIN_ID_OUT13);
+                if (!WaitTimeOut(100)) {
+                    ui->Text->setText("Time out");
+                    break;
+                }
+                Delay(100);
+                Mode = INR_FREE;
+            }
+        }
+        Mode = INR_FREE;
         break;
     default:
         break;
@@ -299,8 +318,12 @@ void PageInr::ExcuteCanCmd(QByteArray msg)
     TimeOut = 0;
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01)
-        ReadCanCmdResult(msg);
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01) {
+        if (Mode == INR_OFFSET)
+            ReadCanCmdOffset(msg);
+        else
+            ReadCanCmdResult(msg);
+    }
 }
 
 void PageInr::ReadCanCmdStatus(QByteArray msg)
@@ -322,6 +345,10 @@ void PageInr::ReadCanCmdStatus(QByteArray msg)
         SendTestItem();
         ClearResults();
     }
+    if (Mode == INR_OFFSET) {
+        CalOffset();
+        ClearResults();
+    }
     Mode = INR_FREE;
 }
 
@@ -330,6 +357,8 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     tt *= qPow(10, -quint8(msg.at(5)));
+    if (tt < Offset.at(TestRow)->value())
+        tt = tt*Offset.at(TestRow)->value()/(Offset.at(TestRow)->value()-tt);
     Volt.append(v);
     Res.append(tt);
     SendTestItemTemp();
@@ -351,6 +380,15 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
         }
         ClearResults();
     }
+}
+
+void PageInr::ReadCanCmdOffset(QByteArray msg)
+{
+    double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
+    double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
+    tt *= qPow(10, -quint8(msg.at(5)));
+    Volt.append(v);
+    Res.append(tt);
 }
 
 void PageInr::SendTestItemsAllEmpty()
@@ -501,6 +539,11 @@ void PageInr::ClearResults()
 {
     Volt.clear();
     Res.clear();
+}
+
+void PageInr::CalOffset()
+{
+    Offset.at(TestRow)->setValue(Res.last());
 }
 
 bool PageInr::WaitTimeOut(quint16 t)

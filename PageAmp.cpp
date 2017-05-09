@@ -16,8 +16,7 @@ void PageAmp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
     case CMD_CHECK:
         Mode = AMP_INIT;
         SendCanCmdStatus();
-        if (!WaitTimeOut(30))
-            SendWarnning("超时");
+        WaitTimeOut(30);
         Mode = AMP_FREE;
         break;
     default:
