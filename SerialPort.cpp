@@ -79,12 +79,21 @@ void SerialPort::SendAlarm(QByteArray msg)
 {
     if (!com->isOpen() || msg.isEmpty())
         return;
-    if (msg.at(0) & 0x02)
+    if (msg.at(0) & 0x02) {
         com->write("LEDY");
-    if (msg.at(0) & 0x04)
+        com->write("LEDY");
+        com->write("LEDY");
+    }
+    if (msg.at(0) & 0x04) {
         com->write("LEDG");
-    if (msg.at(0) & 0x08)
+        com->write("LEDG");
+        com->write("LEDG");
+    }
+    if (msg.at(0) & 0x08) {
         com->write("LEDR");
+        com->write("LEDR");
+        com->write("LEDR");
+    }
     if (msg.at(0) & 0x01)
         StartBeep();
     else
