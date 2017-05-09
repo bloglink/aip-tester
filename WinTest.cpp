@@ -137,6 +137,7 @@ void WinTest::SaveSettings()
 
 void WinTest::ShowItem(QString item)
 {
+    ui->TabTest->clearFocus();
     QStringList s = item.split("@");
     for (int i=0; i < ui->TabTest->rowCount(); i++) {
         QString n = ui->TabTest->item(i, 0)->text();
@@ -144,6 +145,7 @@ void WinTest::ShowItem(QString item)
         if (t != " ")
             continue;
         if (s.at(0) == n) {
+            ui->TabTest->verticalScrollBar()->setValue(i-10);
             ui->TabTest->item(i, 2)->setText(s.at(2));
             ui->TabTest->item(i, 3)->setText(s.at(3));
             if (s.at(3) == "NG")

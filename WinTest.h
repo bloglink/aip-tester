@@ -19,6 +19,7 @@
 #include <QButtonGroup>
 #include <QDataStream>
 #include <QElapsedTimer>
+#include <QScrollBar>
 
 #include "define.h"
 #include "Waveform.h"
