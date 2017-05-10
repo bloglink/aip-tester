@@ -138,9 +138,6 @@ void PageLck::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         SendTestJudge();
         Mode = LCK_FREE;
         break;
-    case CMD_STOP:
-        SendCanCmdStop();
-        break;
     case CMD_INIT:
         InitSettings();
         InitTestItems();

@@ -503,7 +503,6 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         break;
     case CMD_STOP:
         SendCanCmdStop();
-        Mode = PWR_FREE;
         break;
     case CMD_INIT:
         InitSettings();
@@ -523,6 +522,9 @@ void PagePwr::ExcuteCanCmd(quint16 addr,  QByteArray msg)
     if (Mode == PWR_FREE)
         return;
     TimeOut = 0;
+//    emit SendCommand(ADDR, CMD_DEBUG, "pwr msg:");
+//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+//    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     if (addr == CAN_ID_PG_WAVE) {
         ReadCanCmdPGWave(msg);
         return;
@@ -920,6 +922,7 @@ void PagePwr::SendCanCmdStart(quint8 s)
         g  <<= 4;
         dir <<= 4;
     }
+    qDebug() << dir;
     if (TestDir.at(0)->currentIndex() == 0)
         dir = 0;
     out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)

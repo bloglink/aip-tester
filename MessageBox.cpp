@@ -16,7 +16,7 @@
 #include <QDebug>
 #include "MessageBox.h"
 
-MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &text,
+PopupBox::PopupBox(QWidget  *parent, const QString &title, const QString &text,
                                QMessageBox::StandardButtons buttons,
                                QMessageBox::StandardButton defaultButton)
     : QDialog(parent, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
@@ -62,11 +62,11 @@ MessageBox::MessageBox(QWidget  *parent, const QString &title, const QString &te
             SLOT(onButtonClicked(QAbstractButton*)));
 }
 
-MessageBox::~MessageBox()
+PopupBox::~PopupBox()
 {
 }
 
-void MessageBox::changeEvent(QEvent *event)
+void PopupBox::changeEvent(QEvent *event)
 {
     switch (event->type()) {
     case QEvent::LanguageChange:
@@ -78,7 +78,7 @@ void MessageBox::changeEvent(QEvent *event)
     }
 }
 
-void MessageBox::TranslateButtonText()
+void PopupBox::TranslateButtonText()
 {
     QPushButton *RetryButton = ButtonBox->button(QDialogButtonBox::Retry);
     if (RetryButton != NULL)
@@ -92,7 +92,7 @@ void MessageBox::TranslateButtonText()
         OkButton->setText(tr("继续"));
 }
 
-void MessageBox::ReadVariant(QVariant s)
+void PopupBox::ReadVariant(QVariant s)
 {
     QVariantHash hash = s.toHash();
     if (hash.value("TxAddress") != "WinHome")
@@ -105,7 +105,7 @@ void MessageBox::ReadVariant(QVariant s)
         onButtonClicked(ButtonBox->button(QDialogButtonBox::Ok));
 }
 
-void MessageBox::onButtonClicked(QAbstractButton *button)
+void PopupBox::onButtonClicked(QAbstractButton *button)
 {
     if (!ButtonBox->buttons().contains(button))
         return;

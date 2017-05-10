@@ -108,10 +108,6 @@ void PageLvs::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         SendTestJudge();
         Mode = LVS_FREE;
         break;
-    case CMD_STOP:
-        SendCanCmdStop();
-        Mode = LVS_FREE;
-        break;
     case CMD_INIT:
         InitSettings();
         InitTestItems();
@@ -125,10 +121,13 @@ void PageLvs::ExcuteCanCmd(QByteArray msg)
 {
     if (Mode == LVS_FREE)
         return;
+//    emit SendCommand(ADDR, CMD_DEBUG, "lvs msg:");
+//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+//    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     TimeOut = 0;
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+    if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
+    if (msg.size() >= 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
 }
 
@@ -174,7 +173,7 @@ void PageLvs::SendCanCmdStart(quint8 s)
         p += 0x02;
     if (s == WIN_ID_OUT14)
         g  <<= 4;
-    out << quint16(0x27) << quint8(0x07) << quint8(0x01) << quint8(g)
+    out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)
        << quint8(t/256) << quint8(t%256) << quint8(p+v/256) << quint8(v%256)
       << quint8(0x00) << quint8(0x00);
     emit SendCommand(ADDR, CMD_CAN, msg);
@@ -256,8 +255,8 @@ void PageLvs::ReadCanCmdStatus(QByteArray msg)
     if (Mode == LVS_TEST) {
         SendItemJudge();
         ClearResults();
+        Mode = LVS_FREE;
     }
-    Mode = LVS_FREE;
 }
 
 void PageLvs::ReadCanCmdResult(QByteArray msg)
@@ -274,7 +273,7 @@ void PageLvs::ReadCanCmdResult(QByteArray msg)
         SendCanCmdStop();
         SendItemJudge();
         ClearResults();
-        Mode = LVS_FREE;
+//        Mode = LVS_FREE;
     }
 }
 

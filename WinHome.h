@@ -132,7 +132,7 @@ private:
     SerialPort serial;
     quint8 HomeMode;
     QByteArray stat;
-    MessageBox *msgBox;
+    PopupBox *msgBox;
     quint16 Current_Test_Item;
     QStringList TempItems;
     bool isPause;

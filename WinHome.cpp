@@ -613,7 +613,7 @@ void WinHome::TestPause()
     isPause = true;
     TempItems.clear();
     QString text = tr("此项目不合格,是否重测");
-    MessageBox *box = new MessageBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
+    PopupBox *box = new PopupBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
     connect(this, SIGNAL(SendVariant(QVariant)), box, SLOT(ReadVariant(QVariant)));
     emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x01));
     Delay(CurrentAlarmTime("NG"));
@@ -746,14 +746,14 @@ void WinHome::ReadVariant(QVariant s)
 void WinHome::Error(QVariantHash hash)
 {
     QString text = hash.value("TxMessage").toString();
-    MessageBox *box = new MessageBox(this, "", text, NULL, QMessageBox::NoButton);
+    PopupBox *box = new PopupBox(this, "", text, NULL, QMessageBox::NoButton);
     box->exec();
 }
 
 void WinHome::Warnning(QVariantHash hash)
 {
     QString text = hash.value("TxMessage").toString();
-    MessageBox *box = new MessageBox(this, "", text, NULL, QMessageBox::Ok);
+    PopupBox *box = new PopupBox(this, "", text, NULL, QMessageBox::Ok);
     connect(this, SIGNAL(SendVariant(QVariant)), box, SLOT(ReadVariant(QVariant)));
     box->exec();
 }
