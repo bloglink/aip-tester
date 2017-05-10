@@ -417,6 +417,7 @@ void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
         if (pwr.size() > 4 && pwr.last() > 50) {
             emit SendCommand(ADDR, CMD_STOP, "DCR PWR");
             SendWarnning(tr("请等待电机转动停止再测试"));
+            Mode = DCR_FREE;
         }
     }
 }
