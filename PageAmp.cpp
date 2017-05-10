@@ -53,6 +53,15 @@ void PageAmp::SendWarnning(QString s)
     emit SendVariant(QVariant::fromValue(hash));
 }
 
+void PageAmp::SendError(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Error");
+    hash.insert("TxMessage", tr("功放异常:\n%1").arg(s));
+    emit SendVariant(QVariant::fromValue(hash));
+}
+
 void PageAmp::ReadCanCmdStatus(QByteArray msg)
 {
     int s = quint8(msg.at(1));
@@ -62,7 +71,7 @@ void PageAmp::ReadCanCmdStatus(QByteArray msg)
     case 0x01:
         return;
     default:
-        SendWarnning("UNKONW_ERROR");
+        SendWarnning(tr("OTHER_ERROR %1").arg(s));
         break;
     }
     int e = quint8(msg.at(2));
@@ -70,13 +79,13 @@ void PageAmp::ReadCanCmdStatus(QByteArray msg)
     case 0x00:
         break;
     case 0x01:
-        SendWarnning("未接地");
+        SendError(tr("未接地"));
         break;
     case 0x02:
         SendWarnning("L/N reversed");
         break;
     default:
-        SendWarnning("UNKONW_ERROR");
+        SendWarnning(tr("PWR_ERROR %1").arg(e));
         break;
     }
     Mode = AMP_FREE;

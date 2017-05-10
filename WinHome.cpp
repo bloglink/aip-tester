@@ -739,6 +739,15 @@ void WinHome::ReadVariant(QVariant s)
     }
     if (hash.value("TxCommand") == "Warnning")
         Warnning(hash);
+    if (hash.value("TxCommand") == "Error")
+        Error(hash);
+}
+
+void WinHome::Error(QVariantHash hash)
+{
+    QString text = hash.value("TxMessage").toString();
+    MessageBox *box = new MessageBox(this, "", text, NULL, QMessageBox::NoButton);
+    box->exec();
 }
 
 void WinHome::Warnning(QVariantHash hash)

@@ -111,6 +111,7 @@ private slots:
     int CurrentDelay(void);
 
     void ReadVariant(QVariant s);
+    void Error(QVariantHash hash);
     void Warnning(QVariantHash hash);
     void ReadButtonBox(QByteArray msg);
     void SendButtonBox(QString button);

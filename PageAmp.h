@@ -25,6 +25,7 @@ private slots:
     void ExcuteCanCmd(QByteArray msg);
     void SendCanCmdStatus(void);
     void SendWarnning(QString s);
+    void SendError(QString s);
     void ReadCanCmdStatus(QByteArray msg);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
