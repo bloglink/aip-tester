@@ -336,6 +336,8 @@ void PageLck::ReadCanCmdResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double c = quint16(msg.at(3)*256)+quint8(msg.at(4));
     double p = quint16(msg.at(5)*256)+quint8(msg.at(6));
+    if (c == 0)
+        return;
     Volt.append(v);
     Curr.append(c);
     Power.append(p);

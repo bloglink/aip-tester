@@ -61,6 +61,7 @@ private slots:
     void ReadCanCmdPwr(QByteArray msg);
     void ReadCanCmdOut13(QByteArray msg);
     void ReadCanCmdOut14(QByteArray msg);
+    void ReadCanCmdAmp(QByteArray msg);
     void ClearParamDcr(void);
     void ClearParamInr(void);
     void ClearParamImp(void);

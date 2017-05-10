@@ -137,6 +137,7 @@ void WinBack::BtnJudge(int id)
         SendCanCmdVersion(0x25);
         SendCanCmdVersion(0x26);
         SendCanCmdVersion(0x27);
+        SendCanCmdVersion(0x2A);
         break;
     default:
         QProcess::execute("./nandflash/aip.sh");
@@ -335,7 +336,7 @@ void WinBack::ExcuteCanCmd(quint16 addr,  QByteArray msg)
     if (!Testing)
         return;
     qDebug() << "back can msg" << msg.toHex();
-//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex().append("\n"));
+    //    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex().append("\n"));
     switch (addr) {
     case CAN_ID_DCR:
         ReadCanCmdDcr(msg);
@@ -357,6 +358,8 @@ void WinBack::ExcuteCanCmd(quint16 addr,  QByteArray msg)
         break;
     case CAN_ID_14OUT:
         ReadCanCmdOut14(msg);
+        break;
+    case CAN_ID_AMP:
         break;
     default:
         break;
@@ -388,8 +391,8 @@ void WinBack::SendCanCmdParamDcr()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i < BoxDcr.size(); i++) {
         out  << quint16(0x22) << quint8(0x04) << quint8(0x06) << quint8(i+1)
-            << quint8(int(BoxDcr.at(i)->value())/256)
-           << quint8(int(BoxDcr.at(i)->value())%256);
+             << quint8(int(BoxDcr.at(i)->value())/256)
+             << quint8(int(BoxDcr.at(i)->value())%256);
     }
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
@@ -401,10 +404,10 @@ void WinBack::SendCanCmdParamInr()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i < BoxInr.size()/2; i++) {
         out  << quint16(0x23) << quint8(0x06) << quint8(0x06) << quint8(i)
-            << quint8(int(BoxInr.at(i*2+0)->value())/256)
-           << quint8(int(BoxInr.at(i*2+0)->value())%256)
-          << quint8(int(BoxInr.at(i*2+1)->value())/256)
-         << quint8(int(BoxInr.at(i*2+1)->value())%256);
+             << quint8(int(BoxInr.at(i*2+0)->value())/256)
+             << quint8(int(BoxInr.at(i*2+0)->value())%256)
+             << quint8(int(BoxInr.at(i*2+1)->value())/256)
+             << quint8(int(BoxInr.at(i*2+1)->value())%256);
     }
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
@@ -416,8 +419,8 @@ void WinBack::SendCanCmdParamImp()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i < BoxImp.size(); i++) {
         out  << quint16(0x24) << quint8(0x04) << quint8(0x06) << quint8(i)
-            << quint8(int(BoxImp.at(i)->value())/256)
-           << quint8(int(BoxImp.at(i)->value())%256);
+             << quint8(int(BoxImp.at(i)->value())/256)
+             << quint8(int(BoxImp.at(i)->value())%256);
     }
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
@@ -428,10 +431,10 @@ void WinBack::SendCanCmdStartDcr(quint8 gear)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x22) << quint8(0x06) << quint8(0x03) << quint8(0x00)
-       << quint8(0x01) << quint8(0x02)
-      << quint8(gear) << quint8(5);
+        << quint8(0x01) << quint8(0x02)
+        << quint8(gear) << quint8(5);
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x01) << quint8(0x00)
-       << quint8(0x13) << quint8(0x00) << quint8(0x01);
+        << quint8(0x13) << quint8(0x00) << quint8(0x01);
     emit SendCommand(ADDR, CMD_CAN, msg);
 }
 
@@ -542,6 +545,16 @@ void WinBack::ReadCanCmdOut14(QByteArray msg)
         for (int i=1; i < msg.size(); i++)
             v.append(QString::number(quint8(msg.at(i))));
         ui->TabOutput->item(1, 2)->setText(v);
+    }
+}
+
+void WinBack::ReadCanCmdAmp(QByteArray msg)
+{
+    if (quint8(msg.at(0)) == 0x08) {
+        QString v;
+        for (int i=1; i < msg.size(); i++)
+            v.append(QString::number(quint8(msg.at(i))));
+        ui->TabItems->item(10, 2)->setText(v);
     }
 }
 
