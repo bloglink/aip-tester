@@ -69,6 +69,7 @@ private slots:
     void SendTestItemTemp(void);
     void SendTestJudge(void);
     void SendTestItem(void);
+    void SendTestDir(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadCanCmdDir(QByteArray msg);

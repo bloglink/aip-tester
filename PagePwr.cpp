@@ -497,6 +497,7 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
                 Mode = PWR_FREE;
             }
         }
+        SendTestDir();
         Mode = PWR_FREE;
         SendTestJudge();
         break;
@@ -605,6 +606,8 @@ void PagePwr::ReadCanCmdResult(QByteArray msg)
 
 void PagePwr::ReadCanCmdDir(QByteArray msg)
 {
+    if (TestRow != 0)
+        return;
     if (quint8(msg.at(5)) == 0x00)
         dir = tr("不转");
     if (quint8(msg.at(5)) == 0x01)
@@ -796,14 +799,6 @@ void PagePwr::SendTestItem()
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-    if (TestDir.at(0)->currentIndex() != 0) {
-        QString n = TestDir.at(0)->currentText();
-        QString a = (dir == n) ? "OK":"NG";
-        if (a == "NG")
-            Judge = "NG";
-        QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
-        emit SendCommand(ADDR, CMD_ITEM, s.toUtf8());
-    }
     if (IsPGEnable()) {
         QString hhh = QString::number(PGUppers.last()/100, 'f', 2);
         QString lll = QString::number(PGLowers.last()/100, 'f', 2);
@@ -870,6 +865,18 @@ void PagePwr::SendTestItem()
         if (s.at(3) == " ")
             s[3] = PGJudge;
         emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+    }
+}
+
+void PagePwr::SendTestDir()
+{
+    if (TestDir.at(0)->currentIndex() != 0) {
+        QString n = TestDir.at(0)->currentText();
+        QString a = (dir == n) ? "OK":"NG";
+        if (a == "NG")
+            Judge = "NG";
+        QString s = QString(tr("转向@%1@%2@%3").arg(n).arg(dir).arg(a));
+        emit SendCommand(ADDR, CMD_ITEM, s.toUtf8());
     }
 }
 

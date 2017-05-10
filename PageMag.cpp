@@ -437,6 +437,8 @@ void PageMag::ReadCanCmdWaveOk(QByteArray )
         w = WaveMag.at(CurrentWave)->WaveTest;
         i = WaveMag.at(CurrentWave)->WaveItem;
         WaveMag.at(CurrentWave)->WaveTests[num] = w;
+        if (ui->BoxDir->currentIndex() != 0 && ui->BoxDirOnly->isChecked())
+            return;
         emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
         emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
     }
