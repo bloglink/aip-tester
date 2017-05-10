@@ -41,9 +41,16 @@ void PageLck::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
+        if (Mode == LCK_SAMPLE) {
+            Mode = LCK_FREE;
+            ClearResults();
+            ui->BtnSample->setText(QString("左工位采样"));
+            ui->BtnExit->setEnabled(true);
+            break;
+        }
         ui->BtnExit->setEnabled(false);
         for (int i=0; i < ui->BoxSampleTimes->value(); i++) {
-            ui->BtnSample->setText(QString("采样中%1").arg(i+1));
+            ui->BtnSample->setText(QString("中断采样%1").arg(i+1));
             Mode = LCK_SAMPLE;
             SendCanCmdStart(WIN_ID_OUT13);
             WaitTimeOut(1000);
@@ -148,9 +155,9 @@ void PageLck::ExcuteCanCmd(QByteArray msg)
     if (Mode == LCK_FREE)
         return;
     TimeOut = 0;
-    emit SendCommand(ADDR, CMD_DEBUG, "lck msg:");
-    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-    emit SendCommand(ADDR, CMD_DEBUG, "\n");
+//    emit SendCommand(ADDR, CMD_DEBUG, "lck msg:");
+//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+//    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() >= 8 && (quint8)msg.at(0) == 0x01)

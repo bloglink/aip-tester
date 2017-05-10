@@ -133,6 +133,7 @@ void PageMag::InitSettings()
         ui->BoxMain->setValue(temp.at(1).toInt());
         ui->BoxAuxiliary->setValue(temp.at(2).toInt());
     }
+    ui->BoxDirOnly->setChecked(set->value("DirOnly").toBool());
     //可用
     temp = (QString(set->value("Enable", "Y Y Y N N N N N").toByteArray())).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
@@ -192,6 +193,8 @@ void PageMag::SaveSettings()
     temp.append(QString::number(ui->BoxMain->value()));
     temp.append(QString::number(ui->BoxAuxiliary->value()));
     set->setValue("Other", (temp.join(" ").toUtf8()));
+
+    set->setValue("DirOnly", ui->BoxDirOnly->isChecked());
     temp.clear();
     for (int i=0; i < Enable.size(); i++)
         temp.append(Enable.at(i)->text());
@@ -374,6 +377,9 @@ void PageMag::ReadCanCmdResult(QByteArray msg)
         }
         return;
     }
+    if (ui->BoxDir->currentIndex() != 0 && ui->BoxDirOnly->isChecked())
+        return;
+
     quint16 area = abs((Area2-Area1)*100/Area1);
     QString n = QString("%1%").arg(area);
     QString judge = "OK";
@@ -457,6 +463,10 @@ void PageMag::SendTestItemsAllEmpty()
     }
     if (ui->BoxDir->currentIndex() != 0) {
         QString s = QString(tr("磁旋@%1@ @ ")).arg(ui->BoxDir->currentText());
+        if (ui->BoxDirOnly->isChecked()) {
+            Items.clear();
+            n.clear();
+        }
         Items.append(s);
         n.append(s);
     }

@@ -228,6 +228,13 @@
        </property>
       </widget>
      </item>
+     <item row="0" column="6">
+      <widget class="QCheckBox" name="BoxDirOnly">
+       <property name="text">
+        <string>只测磁旋</string>
+       </property>
+      </widget>
+     </item>
     </layout>
    </item>
   </layout>
