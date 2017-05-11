@@ -34,6 +34,7 @@ void PageDcr::InitWindows()
     ui->TabParams->horizontalHeader()->setResizeMode(6, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(7, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(9, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
     ui->TabParams->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
@@ -42,6 +43,7 @@ void PageDcr::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
@@ -513,10 +515,6 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
         Judge = "NG";
         JudgeItem = "NG";
     }
-    if (temp < (Max.at(number)->value()/10)) {
-        emit SendCommand(ADDR, CMD_STOP, "DCR LOW");
-        SendWarnning(tr("电阻值小于10%，请检查线路连接"));
-    }
 
     QStringList s = QString(Items.at(number)).split("@");
     if (s.at(2) == " ")
@@ -524,6 +522,11 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
     if (s.at(3) == " ")
         s[3] = JudgeItem;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+
+    if (temp < (Max.at(number)->value()/10)) {
+        emit SendCommand(ADDR, CMD_STOP, "DCR LOW");
+        SendWarnning(tr("电阻值小于10%，请检查线路连接"));
+    }
 
     CalculateBalance();
 }

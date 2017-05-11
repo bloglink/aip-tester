@@ -41,19 +41,20 @@ void PageLck::BtnJudge(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        if (Mode == LCK_SAMPLE) {
-            Mode = LCK_FREE;
-            ClearResults();
-            ui->BtnSample->setText(QString("左工位采样"));
-            ui->BtnExit->setEnabled(true);
-            break;
-        }
         ui->BtnExit->setEnabled(false);
+        ui->BtnSample->setEnabled(false);
         for (int i=0; i < ui->BoxSampleTimes->value(); i++) {
-            ui->BtnSample->setText(QString("中断采样%1").arg(i+1));
+            ui->BtnSample->setText(QString("采样中%1").arg(i+1));
             Mode = LCK_SAMPLE;
             SendCanCmdStart(WIN_ID_OUT13);
-            WaitTimeOut(1000);
+            if (!WaitTimeOut(500)) {
+                ClearResults();
+                ui->BtnSample->setText(QString("左工位采样"));
+                ui->BtnExit->setEnabled(true);
+                ui->BtnSample->setEnabled(true);
+                Mode = LCK_FREE;
+                return;
+            }
             Mode = LCK_FREE;
             Delay(ui->BoxSampleDelay->value()*1000);
         }
@@ -61,6 +62,7 @@ void PageLck::BtnJudge(int id)
         ClearResults();
         ui->BtnSample->setText(QString("左工位采样"));
         ui->BtnExit->setEnabled(true);
+        ui->BtnSample->setEnabled(true);
         break;
     case Qt::Key_2:
         SaveSettings();
@@ -152,9 +154,9 @@ void PageLck::ExcuteCanCmd(QByteArray msg)
     if (Mode == LCK_FREE)
         return;
     TimeOut = 0;
-//    emit SendCommand(ADDR, CMD_DEBUG, "lck msg:");
-//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-//    emit SendCommand(ADDR, CMD_DEBUG, "\n");
+    //    emit SendCommand(ADDR, CMD_DEBUG, "lck msg:");
+    //    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+    //    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() >= 8 && (quint8)msg.at(0) == 0x01)
@@ -172,7 +174,7 @@ void PageLck::InitTestItems()
     QString P1 = QString::number(ui->BoxPowerMin->value());
     QString P2 = QString::number(ui->BoxPowerMax->value());
     s.append(QString(tr("堵转")));
-    s.append(QString("%1~%2A, %3~%4W, %5~%6V").arg(C1).arg(C2).arg(P1).arg(P2).arg(U1).arg(U2));
+    s.append(QString("%1~%2V, %3~%4A, %5~%6W").arg(U1).arg(U2).arg(C1).arg(C2).arg(P1).arg(P2));
     s.append(" ");
     s.append(" ");
     Items.append(s.join("@"));
@@ -230,6 +232,11 @@ void PageLck::SendItemJudge()
     double vv = Volt.at(num)/10;
     double rr = Curr.at(num)/1000;
     double pp = Power.at(num)/10;
+    if (abs(Power.at(qMax(num,1)-1)/10-ui->BoxPower->value()) < (abs(pp-ui->BoxPower->value()))) {
+        pp = Power.at(qMax(num,1)-1)/10;
+        rr = Curr.at(qMax(num,1)-1)/1000;
+        vv = Volt.at(qMax(num,1)-1)/10;
+    }
 
     QString t = QString("%1V, %2A, %3W").arg(vv).arg(rr).arg(pp);
 
@@ -262,26 +269,32 @@ void PageLck::CalculateSample()
 
     int Power1 = 0;
     int Variance = 0;
-    QList<int> Variances;
-    for (int k=0; k < SampleTimes; k++) {
+    QList<double> Variances;
+    for (int k=0; k < Num; k++) {
         Power1 = 0;
         Variance = 0;
-        for (int i=0; i < Num; i++)
-            Power1 += Power.at(i*SampleTimes+k);
-        Power1 = Power1/Num;   // 得到平均数
-        for (int i=0; i < Num; i++) // 求取方差
-            Variance += ((Power1-Power.at(i*SampleTimes+k)))*((Power1-Power.at(i*SampleTimes+k)));
-        Variance = Variance / Num;
+        for (int i=0; i < SampleTimes; i++)
+            Power1 += Power.at(i*Num+k);
+        Power1 = Power1/SampleTimes;   // 得到平均数
+        for (int i=0; i < SampleTimes; i++) // 求取方差
+            Variance += ((Power1-Power.at(i*Num+k)))*((Power1-Power.at(i*Num+k)));
+        Variance = Variance / SampleTimes;
         Variances.append(Variance);
     }
     Variances.removeAt(Variances.size()-1);
     Variances.removeAt(1);
     Variances.removeAt(0);
-    int Trough = Variances.at(0);
-    int Trough_Point = 2;
+    double Trough = Variances.at(0);
+    double Trough_Point = 2;
+
+    double pwr_stable_average = 0; // 功率平均数
+    for (int i=0; i < SampleTimes; i++) {
+        pwr_stable_average += Power.at(i*Num+Num-1);
+    }
+    pwr_stable_average = pwr_stable_average/SampleTimes;
 
     for (int i=0; i < Variances.size()-1; i++) {  // 寻找测试点
-        if ((Trough > Variances.at(i+1)) && (Trough > 0)) {
+        if ((Trough > Variances.at(i+1)) && (Trough > 0) && (Trough > 1.5*pwr_stable_average)) {
             Trough = Variances.at(i+1);
             Trough_Point = i+3;
         } else if (Trough < Variances.at(i+1)) {
@@ -293,16 +306,17 @@ void PageLck::CalculateSample()
     ui->BoxFreq->setValue(Trough_Point+1);
 
     double Current1 = 0;
-    for (int i=0; i < Num; i++)
-        Current1 += Curr.at(i*SampleTimes+Trough_Point);
+    for (int i=0; i < SampleTimes; i++)
+        Current1 += Curr.at(i*Num+Trough_Point);
 
-    Current1 = Current1/Num;
+    Current1 = Current1/SampleTimes;
     ui->BoxCurr->setValue(Current1/1000);
 
-    double pwr_average = 0; // 功率平均数
-    for (int i=0; i < Num; i++)
-        pwr_average += Power.at(i*SampleTimes+Trough_Point);
-    pwr_average = pwr_average/Num;
+    double pwr_average = 0;
+    for (int i=0; i < SampleTimes; i++) {
+        pwr_average += Power.at(i*Num+Trough_Point);
+    }
+    pwr_average = pwr_average/SampleTimes;
     ui->BoxPower->setValue(pwr_average/10);
 }
 
@@ -311,7 +325,7 @@ void PageLck::ReadCanCmdStatus(QByteArray msg)
     int s = quint8(msg.at(1));
     switch (s) {
     case 0x00:
-        emit SendCommand(ADDR, CMD_DEBUG, QString("lck ok, Mode=%1\n").arg(Mode).toUtf8());
+//        emit SendCommand(ADDR, CMD_DEBUG, QString("lck ok, Mode=%1\n").arg(Mode).toUtf8());
         break;
     case 0x01:
         return;
@@ -332,7 +346,8 @@ void PageLck::ReadCanCmdStatus(QByteArray msg)
         SendItemJudge();
         ClearResults();
     }
-//    Mode = LCK_FREE;
+    if (Mode == LCK_SAMPLE)
+        Mode = LCK_FREE;
 }
 
 void PageLck::ReadCanCmdResult(QByteArray msg)

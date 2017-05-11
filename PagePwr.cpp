@@ -19,6 +19,7 @@ PagePwr::PagePwr(QWidget *parent) :
     InitSettings();
     Mode = PWR_FREE;
     isTestDir = 0x00;
+    isStop = false;
 }
 
 PagePwr::~PagePwr()
@@ -480,7 +481,8 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         Mode = PWR_FREE;
         break;
     case CMD_START:
-        emit SendCommand(ADDR,  CMD_WAVE_HIDE,  NULL);
+        if (IsPGEnable())
+            emit SendCommand(ADDR,  CMD_WAVE_HIDE,  NULL);
         for (int row = 0; row < Enable.size(); row++) {
             if (Enable.at(row)->text() == "Y") {
                 Mode = PWR_TEST;
@@ -494,7 +496,11 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
                     break;
                 }
                 Delay(5);
-                Mode = PWR_FREE;
+                if (isStop) {
+                    Mode = PWR_FREE;
+                    isStop = false;
+                    return;
+                }
             }
         }
         SendTestDir();
@@ -502,7 +508,10 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         SendTestJudge();
         break;
     case CMD_STOP:
-        SendCanCmdStop();
+        if (Mode == PWR_TEST) {
+            SendCanCmdStop();
+            isStop = true;
+        }
         break;
     case CMD_INIT:
         InitSettings();
@@ -522,9 +531,9 @@ void PagePwr::ExcuteCanCmd(quint16 addr,  QByteArray msg)
     if (Mode == PWR_FREE)
         return;
     TimeOut = 0;
-//    emit SendCommand(ADDR, CMD_DEBUG, "pwr msg:");
-//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
-//    emit SendCommand(ADDR, CMD_DEBUG, "\n");
+    //    emit SendCommand(ADDR, CMD_DEBUG, "pwr msg:");
+    //    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+    //    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     if (addr == CAN_ID_PG_WAVE) {
         ReadCanCmdPGWave(msg);
         return;
@@ -920,9 +929,9 @@ void PagePwr::SendCanCmdStart(quint8 s)
         p += 0x02;
     if (s == WIN_ID_OUT14) {
         g  <<= 4;
-        dir <<= 4;
+//        dir <<= 4;
     }
-    qDebug() << dir;
+//    qDebug() << dir;
     if (TestDir.at(0)->currentIndex() == 0)
         dir = 0;
     out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)

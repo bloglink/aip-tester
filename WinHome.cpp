@@ -16,7 +16,7 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170510");
+    InitVersion("V-2.1.0.170511");
     HomeMode = HOME_FREE;
     InitThreadAll();
     isPause = false;
@@ -537,8 +537,12 @@ void WinHome::StartTest(QByteArray station)
     for (int i=0; i < n.size(); i++) {
         Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
-        if (HomeMode == HOME_STOP)
+        if (HomeMode == HOME_STOP) {
+//            QVariantHash hash;
+//            hash.insert("TxMessage", tr("测试中断"));
+//            Warnning(hash);
             break;
+        }
         Delay(10);
     }
     SaveTestJudge();

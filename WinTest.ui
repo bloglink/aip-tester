@@ -304,10 +304,22 @@
       </item>
       <item>
        <widget class="QLabel" name="label_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="minimumSize">
          <size>
           <width>120</width>
           <height>60</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>150</width>
+          <height>75</height>
          </size>
         </property>
         <property name="text">
@@ -327,6 +339,12 @@
          <size>
           <width>0</width>
           <height>100</height>
+         </size>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>180</height>
          </size>
         </property>
         <layout class="QGridLayout" name="gridLayout_2">
@@ -455,12 +473,24 @@ color: rgb(0, 0, 0);</string>
       </item>
       <item>
        <widget class="QGroupBox" name="groupBox_2">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
         <property name="title">
          <string>线夹颜色</string>
         </property>
         <layout class="QGridLayout" name="gridLayout">
          <item row="0" column="0">
           <widget class="QLabel" name="LabelWireColor1">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>1</string>
            </property>
@@ -471,6 +501,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="1" column="2">
           <widget class="QLabel" name="LabelWireColor4">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>4</string>
            </property>
@@ -481,6 +517,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="2" column="0">
           <widget class="QLabel" name="LabelWireColor5">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>5</string>
            </property>
@@ -491,6 +533,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="3" column="0">
           <widget class="QLabel" name="LabelWireColor7">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>7</string>
            </property>
@@ -501,6 +549,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="1" column="0">
           <widget class="QLabel" name="LabelWireColor3">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>3</string>
            </property>
@@ -511,6 +565,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="0" column="2">
           <widget class="QLabel" name="LabelWireColor2">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>2</string>
            </property>
@@ -521,6 +581,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="3" column="2">
           <widget class="QLabel" name="LabelWireColor8">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>8</string>
            </property>
@@ -531,6 +597,12 @@ color: rgb(0, 0, 0);</string>
          </item>
          <item row="2" column="2">
           <widget class="QLabel" name="LabelWireColor6">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
            <property name="text">
             <string>6</string>
            </property>

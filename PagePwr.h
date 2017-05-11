@@ -31,6 +31,7 @@
 #define PWR_FREE        0
 #define PWR_INIT        4
 #define PWR_TEST        1
+#define PWR_STOP        5
 
 namespace Ui {
 class PagePwr;
@@ -143,6 +144,7 @@ private:
     QByteArray wave1;
     QByteArray wave2;
     QByteArray wave3;
+    bool isStop;
 };
 
 #endif // PAGEPWR_H

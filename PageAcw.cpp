@@ -280,6 +280,7 @@ void PageAcw::SaveSettings()
     for (int i=0; i < Arc.size(); i++)
         temp.append(QString::number(Arc.at(i)->currentIndex()));
     ini->setValue("Arc", (temp.join(" ").toUtf8()));
+    temp.clear();
     for (int i=0; i < Offset.size(); i++)
         temp.append(Offset.at(i)->text());
     ini->setValue("Offset", (temp.join(" ").toUtf8()));
@@ -351,6 +352,9 @@ void PageAcw::ExcuteCanCmd(QByteArray msg)
     if (Mode == ACW_FREE)
         return;
     TimeOut = 0;
+//    emit SendCommand(ADDR, CMD_DEBUG, "acw msg:");
+//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex());
+//    emit SendCommand(ADDR, CMD_DEBUG, "\n");
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01) {
