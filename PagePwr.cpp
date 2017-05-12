@@ -319,8 +319,16 @@ void PagePwr::InitSettings()
     for (int row=0; row < qMin(temp.size(), PG_ROW); row++)
         PGGrade.at(row)->setText(temp.at(row));
 
-    if (!IsPGEnable())
+    if (!IsPGEnable()) {
         ui->BoxPG->hide();
+        ui->TabParams->showRow(3);
+        ui->TabParams->showRow(4);
+        ui->TabParams->showRow(5);
+    } else {
+        ui->TabParams->hideRow(5);
+        ui->TabParams->hideRow(4);
+        ui->TabParams->hideRow(3);
+    }
 }
 
 void PagePwr::SaveSettings()
@@ -481,7 +489,7 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         Mode = PWR_FREE;
         break;
     case CMD_START:
-        if (IsPGEnable())
+        if (IsPGTest())
             emit SendCommand(ADDR,  CMD_WAVE_HIDE,  NULL);
         for (int row = 0; row < Enable.size(); row++) {
             if (Enable.at(row)->text() == "Y") {
@@ -585,7 +593,7 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
     Mode = PWR_FREE;
     if (wave.isEmpty())
         return;
-    if (IsPGEnable()) {
+    if (IsPGTest()) {
         emit SendCommand(ADDR, CMD_WAVE_ITEM, PGWaveItem.at(TestRow).toUtf8());
         emit SendCommand(ADDR, CMD_WAVE_BYTE, wave);
         switch (TestRow) {
@@ -723,7 +731,7 @@ void PagePwr::SendTestItemsAllEmpty()
     for (int row = 0; row < Enable.size(); row++) {
         if (Enable.at(row)->text() == "Y") {
             n.append(Items.at(row));
-            if (IsPGEnable())
+            if (IsPGTest())
                 n.append(PGItems.at(row));
         }
     }
@@ -744,7 +752,7 @@ void PagePwr::SendTestItemsAllError()
             if (s.at(3) == " ")
                 s[3] = "NG";
             emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-            if (IsPGEnable()) {
+            if (IsPGTest()) {
                 s = QString(PGItems.at(row)).split("@");
                 if (s.at(2) == " ")
                     s[2] = "---";
@@ -776,7 +784,7 @@ void PagePwr::SendTestItemTemp()
         s[2] = t;
     emit SendCommand(ADDR, CMD_ITEM_TEMP, s.join("@").toUtf8());
     Delay(5);
-    if (IsPGEnable()) {
+    if (IsPGTest()) {
         QString hhh = QString::number(PGUppers.last()/100, 'f', 2);
         QString lll = QString::number(PGLowers.last()/100, 'f', 2);
         QString ddd = QString::number(PGDutyAvr.last()/10, 'f', 2);
@@ -810,7 +818,7 @@ void PagePwr::SendTestItem()
     if (s.at(3) == " ")
         s[3] = Judge;
     emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-    if (IsPGEnable()) {
+    if (IsPGTest()) {
         QString hhh = QString::number(PGUppers.last()/100, 'f', 2);
         QString lll = QString::number(PGLowers.last()/100, 'f', 2);
         QString ddd = QString::number(PGDutyAvr.last()/10, 'f', 1);
@@ -895,7 +903,7 @@ void PagePwr::SendTestJudge()
 {
     QString s = QString(tr("功率@%1@%2")).arg(CurrentSettings()).arg(Judge);
     emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
-    if (IsPGEnable()) {
+    if (IsPGTest()) {
         s = QString(tr("PG@%1@%2")).arg(CurrentSettings()).arg(PGJudge);
         emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
     }
@@ -921,7 +929,7 @@ void PagePwr::SendCanCmdStart(quint8 s)
     quint8 vv = 0;
     quint8 dir = CurrentPowerDir();
     quint8 g = TestRow+1;
-    if (IsPGEnable()) {
+    if (IsPGTest()) {
         vv = ui->BoxPGVolt->value()*10;
         g += 0x08;
     }
@@ -929,9 +937,7 @@ void PagePwr::SendCanCmdStart(quint8 s)
         p += 0x02;
     if (s == WIN_ID_OUT14) {
         g  <<= 4;
-//        dir <<= 4;
     }
-//    qDebug() << dir;
     if (TestDir.at(0)->currentIndex() == 0)
         dir = 0;
     out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)
@@ -1050,6 +1056,13 @@ bool PagePwr::IsPGEnable()
 {
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
     if (!ini->value("/GLOBAL/EnablePG", false).toBool())
+        return false;
+    return true;
+}
+
+bool PagePwr::IsPGTest()
+{
+    if (!IsPGEnable())
         return false;
     if (TestRow >= 3)
         return false;

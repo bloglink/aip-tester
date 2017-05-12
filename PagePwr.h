@@ -90,6 +90,7 @@ private slots:
     QString CurrentPorwer(void);
     int CurrentPowerDir(void);
     bool IsPGEnable(void);
+    bool IsPGTest(void);
     virtual void showEvent(QShowEvent *);
     void SendWarnning(QString s);
 private:
