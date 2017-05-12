@@ -299,6 +299,7 @@ void PageInr::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
         }
         Mode = INR_FREE;
         SendTestJudge();
+        break;
     case CMD_STOP:
         SendCanCmdStop();
         break;

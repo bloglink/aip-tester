@@ -630,9 +630,9 @@ void PagePwr::ReadCanCmdDir(QByteArray msg)
     if (quint8(msg.at(5)) == 0x00)
         dir = tr("不转");
     if (quint8(msg.at(5)) == 0x01)
-        dir = tr("正转");
-    if (quint8(msg.at(5)) == 0x02)
         dir = tr("反转");
+    if (quint8(msg.at(5)) == 0x02)
+        dir = tr("正转");
 }
 
 void PagePwr::ReadCanCmdVolt(QByteArray msg)
