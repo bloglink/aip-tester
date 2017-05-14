@@ -694,7 +694,7 @@ void PagePwr::InitTestItems()
         double C1 = CapMin.at(qMin(row, CapMin.size()))->value();
         double C2 = CapMax.at(qMin(row, CapMax.size()))->value();
         s.append(QString(tr("功率%1")).arg(G1));
-        s.append(QString("%1~%2A, %3~%4W, %5~%6V").arg(I1).arg(I2).arg(P1).arg(P2).arg(C1).arg(C2));
+        s.append(QString("%1~%2A,%3~%4W,%5~%6V").arg(I1).arg(I2).arg(P1).arg(P2).arg(C1).arg(C2));
         s.append(" ");
         s.append(" ");
         Items.append(s.join("@"));
@@ -717,7 +717,7 @@ void PagePwr::InitTestItems()
         double C = PGCurrMin.at(qMin(row, PGCurrMax.size()))->value();
         double D = PGDutyMin.at(qMin(row, PGDutyMax.size()))->value();
         s.append(QString(tr("PG%1")).arg(G1));
-        s.append(QString("H:%1, L:%2, D:%3F:%4, %5mA").arg(H).arg(L).arg(D).arg(F).arg(C));
+        s.append(QString("H:%1,L:%2,D:%3F:%4,%5mA").arg(H).arg(L).arg(D).arg(F).arg(C));
         s.append(" ");
         s.append(" ");
         PGItems.append(s.join("@"));
@@ -777,7 +777,7 @@ void PagePwr::SendTestItemTemp()
     QString rrr = QString::number(Curr.last()/1000, 'f', 3);
     QString ppp = QString::number(Power.last()/10, 'f', 1);
     QString ccc = QString::number(CVolt.last()/10, 'f', 1);
-    QString t = QString("%1V, %2A, %3W, %4V").arg(vvv).arg(rrr).arg(ppp).arg(ccc);
+    QString t = QString("%1V,%2A,%3W,%4V").arg(vvv).arg(rrr).arg(ppp).arg(ccc);
 
     QStringList s = QString(Items.at(TestRow)).split("@");
     if (s.at(2) == " ")
@@ -790,7 +790,7 @@ void PagePwr::SendTestItemTemp()
         QString ddd = QString::number(PGDutyAvr.last()/10, 'f', 2);
         QString fff = QString::number(PGFreqAvr.last()/10, 'f', 0);
         QString ccc = QString::number(PGCurrs.last()/100, 'f', 2);
-        t = QString("H:%1V, L:%2V, D:%3, F:%4Hz, %5mA").
+        t = QString("H:%1V,L:%2V,D:%3,F:%4Hz,%5mA").
                 arg(hhh).arg(lll).arg(ddd).arg(fff).arg(ccc);
         s = QString(PGItems.at(TestRow)).split("@");
         if (s.at(2) == " ")

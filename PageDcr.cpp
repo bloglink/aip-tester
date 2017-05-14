@@ -365,7 +365,7 @@ void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
         if (IsPowerOn()) {
             pwr.clear();
             SendCanCmdPwr(stat);
-            WaitTimeOut(150);
+            WaitTimeOut(60);
         }
         if (Mode == DCR_FREE)
             break;

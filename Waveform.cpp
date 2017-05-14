@@ -26,22 +26,26 @@ void Waveform::WaveByteShow(QByteArray msg)
     WaveByte = msg;
     WaveByteH.clear();
     WaveByteY.clear();
-    if (WaveByte.size() == 400) {
+    if (WaveByte.size() <= 400 && WaveByte.size() >= 395) {
         for (int i=0; i < WaveByte.size(); i++)
             WaveByteH.append(quint8(WaveByte.at(i)));
+        for (int i=0; i < this->width(); i++) {
+            int t = i*WaveByteH.size()/this->width();
+            WaveByteY.append(this->height()-WaveByteH.at(t)*this->height()/256);
+        }
+        this->update();
+        return;
     }
-    if (WaveByte.size() == 800) {
+    if (WaveByte.size() <= 800 && WaveByte.size() >= 790) {
         for (int i=0; i < WaveByte.size()/2; i++)
             WaveByteH.append(quint16(WaveByte.at(i*2))*256+quint8(WaveByte.at(i*2+1)));
-    }
-    for (int i=0; i < this->width(); i++) {
-        int t = i*WaveByteH.size()/this->width();
-        if (WaveByte.size() == 800)
+        for (int i=0; i < this->width(); i++) {
+            int t = i*WaveByteH.size()/this->width();
             WaveByteY.append(this->height()-WaveByteH.at(t)*this->height()/1024);
-        if (WaveByte.size() == 400)
-            WaveByteY.append(this->height()-WaveByteH.at(t)*this->height()/256);
+        }
+        this->update();
+        return;
     }
-    this->update();
 }
 
 void Waveform::WaveTestShow(QByteArray msg)
@@ -49,18 +53,28 @@ void Waveform::WaveTestShow(QByteArray msg)
     WaveTest = msg;
     WaveTestH.clear();
     WaveTestY.clear();
-    for (int i=0; i < WaveTest.size()/2; i++) {
-        WaveTestH.append(quint16(msg.at(i*2)*256) + quint8(msg.at(i*2+1)));
+    if (WaveTest.size() <= 400 && WaveTest.size() >= 395) {
+        for (int i=0; i < WaveTest.size(); i++)
+            WaveTestH.append(quint8(WaveTest.at(i)));
+        for (int i=0; i < this->width(); i++) {
+            int t = i*WaveTestH.size()/this->width();
+            WaveTestY.append(this->height()-WaveTestH.at(t)*this->height()/256);
+        }
+        isTest = true;
+        this->update();
+        return;
     }
-    for (int i=0; i < this->width(); i++) {
-        int t = i*WaveTestH.size()/this->width();
-        if (WaveTestH.size() == 400)
+    if (WaveTest.size() <= 800 && WaveTest.size() >= 790) {
+        for (int i=0; i < WaveTest.size()/2; i++)
+            WaveTestH.append(quint16(WaveTest.at(i*2))*256+quint8(WaveTest.at(i*2+1)));
+        for (int i=0; i < this->width(); i++) {
+            int t = i*WaveTestH.size()/this->width();
             WaveTestY.append(this->height()-WaveTestH.at(t)*this->height()/1024);
-        if (WaveTestH.size() == 800)
-            WaveTestY.append(this->height()-WaveTestH.at(t)*this->height()/65536);
+        }
+        isTest = true;
+        this->update();
+        return;
     }
-    isTest = true;
-    this->update();
 }
 
 void Waveform::WaveItemShow(QByteArray msg)
@@ -108,16 +122,18 @@ void Waveform::paintEvent(QPaintEvent *e)
     painter->drawLine(QPoint(width()*2/4, 0), QPoint(width()*2/4, height()));
     painter->drawLine(QPoint(width()*3/4, 0), QPoint(width()*3/4, height()));
 
-    painter->setPen(QPen(Qt::green,  1,  Qt::SolidLine));
-    for (int i=0; i < WaveByteY.size()-1; i++) {
-        painter->drawLine(QPoint(i, WaveByteY.at(i)), QPoint(i+1, WaveByteY.at(i+1)));
-    }
     if (isTest) {
         painter->setPen(QPen(Qt::white,  1,  Qt::SolidLine));
         for (int i=0; i < WaveTestY.size()-1; i++) {
             painter->drawLine(QPoint(i, WaveTestY.at(i)), QPoint(i+1, WaveTestY.at(i+1)));
         }
     }
+
+    painter->setPen(QPen(Qt::green,  1,  Qt::SolidLine));
+    for (int i=0; i < WaveByteY.size()-1; i++) {
+        painter->drawLine(QPoint(i, WaveByteY.at(i)), QPoint(i+1, WaveByteY.at(i+1)));
+    }
+
     if (isItem) {
         painter->drawText(QPoint(width()*3/4, height()*1/4-5), WaveItem);
     }
