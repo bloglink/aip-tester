@@ -51,6 +51,10 @@ void WinTest::InitWindows()
     ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
     ui->TextPos->setStyleSheet("color:white;font:Bold 42pt Ubuntu;");
     connect(ui->TabTest, SIGNAL(cellClicked(int, int)), this, SLOT(ClickItem(int, int)));
+    connect(wave.at(0), SIGNAL(BlockClick(int)), this, SLOT(ClickWave0(int)));
+    connect(wave.at(1), SIGNAL(BlockClick(int)), this, SLOT(ClickWave1(int)));
+    connect(wave.at(2), SIGNAL(BlockClick(int)), this, SLOT(ClickWave2(int)));
+    connect(ui->LabelWave, SIGNAL(BlockClick(int)), this, SLOT(ClickWave(int)));
 }
 
 void WinTest::InitButtons()
@@ -276,6 +280,53 @@ void WinTest::ClickItem(int r,  int )
         ClearWave();
         emit SendCommand(ADDR, CMD_WAVE, t.toUtf8());
     }
+}
+
+void WinTest::ClickWave(QModelIndex)
+{
+    qDebug() << "wave";
+    ui->stackedWidget->setCurrentIndex(1);
+
+}
+
+void WinTest::ClickWave(int x)
+{
+    if (x < 0)
+        return;
+    ui->stackedWidget->setCurrentIndex(0);
+
+}
+
+void WinTest::ClickWave0(int x)
+{
+    if (x < 0)
+        return;
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->LabelWave->WaveByteShow(wave.at(0)->WaveByte);
+    ui->LabelWave->WaveTestShow(wave.at(0)->WaveTest);
+    ui->LabelWave->WaveItemShow(wave.at(0)->WaveItem);
+
+
+}
+
+void WinTest::ClickWave1(int x)
+{
+    if (x < 0)
+        return;
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->LabelWave->WaveByteShow(wave.at(1)->WaveByte);
+    ui->LabelWave->WaveTestShow(wave.at(1)->WaveTest);
+    ui->LabelWave->WaveItemShow(wave.at(1)->WaveItem);
+}
+
+void WinTest::ClickWave2(int x)
+{
+    if (x < 0)
+        return;
+    ui->stackedWidget->setCurrentIndex(1);
+    ui->LabelWave->WaveByteShow(wave.at(2)->WaveByte);
+    ui->LabelWave->WaveTestShow(wave.at(2)->WaveTest);
+    ui->LabelWave->WaveItemShow(wave.at(2)->WaveItem);
 }
 
 QString WinTest::BarCode1()

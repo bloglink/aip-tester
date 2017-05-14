@@ -60,7 +60,12 @@ private slots:
     void ShowTime(void);
     void ShowCode(void);
     void ClearWave(void);
-    void ClickItem(int r,  int c);
+    void ClickItem(int r, int c);
+    void ClickWave(QModelIndex);
+    void ClickWave(int x);
+    void ClickWave0(int x);
+    void ClickWave1(int x);
+    void ClickWave2(int x);
     QString BarCode1(void);
     QString BarCode2(void);
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray dataA);

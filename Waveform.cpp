@@ -46,6 +46,7 @@ void Waveform::WaveByteShow(QByteArray msg)
         this->update();
         return;
     }
+    this->update();
 }
 
 void Waveform::WaveTestShow(QByteArray msg)
@@ -75,6 +76,7 @@ void Waveform::WaveTestShow(QByteArray msg)
         this->update();
         return;
     }
+    this->update();
 }
 
 void Waveform::WaveItemShow(QByteArray msg)
@@ -161,10 +163,6 @@ void Waveform::resizeEvent(QResizeEvent *e)
 
 void Waveform::mousePressEvent(QMouseEvent *e)
 {
-    if (!isBlock) {
-        QLabel::mousePressEvent(e);
-        return;
-    }
     int x = e->x()*400/this->width();
     if (x >= 200)
         Block1 = x;
