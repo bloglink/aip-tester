@@ -711,11 +711,11 @@ void PagePwr::InitTestItems()
     for (int row = 0; row < PGEnable.size(); row++) {
         QStringList s;
         QString G1 = PGGrade.at(qMin(row, PGGrade.size()))->text();
-        double H = PGUpperMin.at(qMin(row, PGUpperMax.size()))->value();
-        double L = PGLowerMin.at(qMin(row, PGLowerMax.size()))->value();
-        double F = PGFreqMin.at(qMin(row, PGFreqMax.size()))->value();
-        double C = PGCurrMin.at(qMin(row, PGCurrMax.size()))->value();
-        double D = PGDutyMin.at(qMin(row, PGDutyMax.size()))->value();
+        double H = PGUpperMax.at(qMin(row, PGUpperMax.size()))->value();
+        double L = PGLowerMax.at(qMin(row, PGLowerMax.size()))->value();
+        double F = PGFreqMax.at(qMin(row, PGFreqMax.size()))->value();
+        double C = PGCurrMax.at(qMin(row, PGCurrMax.size()))->value();
+        double D = PGDutyMax.at(qMin(row, PGDutyMax.size()))->value();
         s.append(QString(tr("PG%1")).arg(G1));
         s.append(QString("H:%1,L:%2,D:%3F:%4,%5mA").arg(H).arg(L).arg(D).arg(F).arg(C));
         s.append(" ");
