@@ -89,7 +89,7 @@ void WinSyst::ReadButtons(int id)
         emit SendCommand(ADDR, CMD_STATUS, NULL);
         break;
     case Qt::Key_7:
-        system("/bin/ts_calibrate -&");
+//        system("/bin/ts_calibrate -&");
         break;
     default:
         break;
