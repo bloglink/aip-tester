@@ -149,7 +149,8 @@ void WinTest::ShowItem(QString item)
         if (t != " ")
             continue;
         if (s.at(0) == n) {
-            ui->TabTest->verticalScrollBar()->setValue(i-10);
+            int v = qMax(ui->TabTest->verticalScrollBar()->value(), i-10);
+            ui->TabTest->verticalScrollBar()->setValue(v);
             ui->TabTest->item(i, 2)->setText(s.at(2));
             ui->TabTest->item(i, 3)->setText(s.at(3));
             if (s.at(3) == "NG")
@@ -385,6 +386,7 @@ void WinTest::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 
 void WinTest::InitItem(QByteArray msg)
 {
+    ui->TabTest->verticalScrollBar()->setValue(0);
     ui->LabelState->setStyleSheet("color:rgb(0, 255, 0);font:Bold 42pt Ubuntu;border:none;");
     ui->LabelState->setText("--");
     if (msg.isEmpty()) {
