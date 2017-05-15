@@ -397,7 +397,7 @@ void WinTest::ReadVariant(QVariant s)
         return;
     if (hash.value("TxCommand") == "ItemView")
         ItemView.append(s);
-    if (hash.value("TxCommand") == "ItemInit")
+    if (hash.value("TxCommand") == "TestInit")
         ItemView.clear();
     if (hash.value("TxCommand") == "ItemShow")
         ItemShow();

@@ -99,6 +99,7 @@ private slots:
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
+    QString WinName(int n);
     QString CurrentSettings(void);
     QStringList CurrentItems(void);
     QStringList EnableItems(void);

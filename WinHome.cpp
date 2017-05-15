@@ -449,8 +449,16 @@ void WinHome::InitTestItems()
 {
     QVariantHash hash;
     hash.insert("TxAddress", "WinHome");
-    hash.insert("TxCommand", "ItemInit");
+    hash.insert("TxCommand", "TestInit");
     emit SendVariant(QVariant::fromValue(hash));
+
+    hash.insert("TxCommand", "ItemInit");
+    QStringList n = CurrentItems();
+    for (int i=0; i < n.size(); i++) {
+        QString s = WinName(n.at(i).toInt());
+        hash.insert("TxAddress", s);
+        emit SendVariant(QVariant::fromValue(hash));
+    }
 
     hash.insert("TxAddress", "WinTest");
     hash.insert("TxCommand", "ItemShow");
@@ -642,6 +650,33 @@ void WinHome::Delay(int ms)
     t.start();
     while (t.elapsed() < ms)
         QCoreApplication::processEvents();
+}
+
+QString WinHome::WinName(int n)
+{
+    switch (n) {
+    case WIN_ID_DCR:
+        return "PageDcr";
+    case WIN_ID_MAG:
+        return "PageMag";
+    case WIN_ID_INR:
+        return "PageInr";
+    case WIN_ID_ACW:
+        return "PageAcw";
+    case WIN_ID_IMP:
+        return "PageImp";
+    case WIN_ID_IND:
+        return "PageInd";
+    case WIN_ID_PWR:
+        return "PagePwr";
+    case WIN_ID_LVS:
+        return "PageLvs";
+    case WIN_ID_LCK:
+        return "PageLck";
+    default:
+        return NULL;
+        break;
+    }
 }
 
 QString WinHome::CurrentSettings()
