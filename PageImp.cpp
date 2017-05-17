@@ -404,6 +404,13 @@ void PageImp::ItemClick(int r,  int c)
         ui->BoxStart->setValue(Block0.at(r));
         ui->BoxEnd->setValue(Block1.at(r));
         CurrentWave = r;
+        if (ui->BoxStation->currentIndex() == 1) {
+            ui->BtnFrequcy1->setEnabled(false);
+            ui->BtnFrequcy3->setEnabled(false);
+        } else {
+            ui->BtnFrequcy1->setEnabled(true);
+            ui->BtnFrequcy3->setEnabled(true);
+        }
         break;
     default:
         break;
