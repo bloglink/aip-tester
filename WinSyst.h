@@ -43,8 +43,7 @@ private:
     Ui::WinSyst *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -53,13 +52,14 @@ private slots:
     void SaveSettings(void);
     void SetDateTime(void);
     void SetPassword(void);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void SendWinCmdStartMode(void);
     void WriteLog(QByteArray msg);
     QString GetLocalHostIP(void);
     virtual void showEvent(QShowEvent *);
     void ReadHardWareSpace(void);
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
+    void ReadStatusAll(void);
 private:
     QString password;
     QFile *file;

@@ -9,6 +9,7 @@
 #ifndef PAGEPWR_H
 #define PAGEPWR_H
 
+#include <QUuid>
 #include <QTime>
 #include <QDebug>
 #include <QWidget>
@@ -48,8 +49,8 @@ private:
     Ui::PagePwr *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -58,11 +59,7 @@ private slots:
     void SaveSettings(void);
     void ItemClick(int r, int c);
     void ItemClickPG(int r, int c);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(quint16 addr,  QByteArray msg);
-    void InitTestItems(void);
-    void SendTestItemsAllEmpty(void);
-    void SendTestItemsAllError(void);
+    void ExcuteCanCmd(int addr,  QByteArray msg);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 s);
     void SendCanCmdStop(void);
@@ -76,19 +73,25 @@ private slots:
     void ReadCanCmdPGCurrs(QByteArray msg);
     void ReadCanCmdPGFreqs(QByteArray msg);
     void ReadCanCmdPGDutys(QByteArray msg);
-    void ReadCanCmdPGWaveStart(void);
     void ReadCanCmdPGWaveStop(void);
-    void ReadCanCmdPGWave(QByteArray msg);
     void CalculateResult(void);
     void ClearResults(void);
-    void SendWave(QByteArray msg);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     QString CurrentSettings(void);
     QString CurrentPorwer(void);
     bool IsPGEnable(void);
     virtual void showEvent(QShowEvent *);
+
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendPwrItems(int num);
+    void SendDirItems(int num);
+    void SendPGItems(int num);
+    void TestThread(QVariantHash hash);
 private:
     QSettings *set;
     quint16 TimeOut;
@@ -141,6 +144,12 @@ private:
     QByteArray wave1;
     QByteArray wave2;
     QByteArray wave3;
+
+    quint8 stat;
+    QList<QVariantHash> PwrView;
+    QList<QVariantHash> DirView;
+    QList<QVariantHash> PGView;
+    QString TestStatus;
 };
 
 #endif // PAGEPWR_H

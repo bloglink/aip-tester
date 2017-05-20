@@ -16,10 +16,10 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170508");
-    HomeMode = HOME_FREE;
+    InitVersion("V-2.1.1.170520");
     InitThreadAll();
     isPause = false;
+    TestStatus = "free";
 }
 
 WinHome::~WinHome()
@@ -68,160 +68,136 @@ void WinHome::InitWindowsAll()
     WinBack *winBack = new WinBack(this);
     ui->desktop->addWidget(winBack);
     winBack->setObjectName("WinBack");
-    connect(winBack, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(winBack, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winBack,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize WinBack OK\n");
+    connect(winBack, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(winBack, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), winBack, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize WinBack OK");
 
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
     winSyst->setObjectName("WinSyst");
-    connect(winSyst, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(winSyst, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winSyst,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize WinSyst OK\n");
+    connect(winSyst, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), winSyst, SLOT(ReadVariant(QVariantHash)));
+    SendTestDebug("Initialize WinSyst OK");
 
     WinType *winType = new WinType(this);
     ui->desktop->addWidget(winType);
     winType->setObjectName("WinType");
-    connect(winType, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(winType, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize WinType OK\n");
+    connect(winType, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), winType, SLOT(ReadVariant(QVariantHash)));
+    SendTestDebug("Initialize WinType OK");
 
     WinData *winData = new WinData(this);
     ui->desktop->addWidget(winData);
     winData->setObjectName("WinData");
-    connect(winData, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(winData, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize WinData OK\n");
+    connect(winData, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), winData, SLOT(ReadVariant(QVariantHash)));
+    SendTestDebug("Initialize WinData OK");
 
     WinTest *winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
-    connect(winTest, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(this, SIGNAL(SendVariant(QVariant)), winTest, SLOT(ReadVariant(QVariant)));
-    connect(winTest, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winTest,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize WinTest OK\n");
+    connect(winTest, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), winTest, SLOT(ReadVariant(QVariantHash)));
+    SendTestDebug("Initialize WinTest OK");
 
     PageDcr *pageDcr = new PageDcr(this);
     ui->desktop->addWidget(pageDcr);
     pageDcr->setObjectName("PageDcr");
-    connect(pageDcr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(this, SIGNAL(SendVariant(QVariant)), pageDcr, SLOT(ReadVariant(QVariant)));
-    connect(pageDcr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageDcr,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageDcr OK\n");
+    connect(pageDcr, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageDcr, SLOT(ReadVariant(QVariantHash)));
+    connect(pageDcr, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageDcr, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageDcr OK");
 
     PageMag *pageMag = new PageMag(this);
     ui->desktop->addWidget(pageMag);
     pageMag->setObjectName("PageMag");
-    connect(pageMag, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageMag, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageMag,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageMag OK\n");
+    connect(pageMag, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageMag, SLOT(ReadVariant(QVariantHash)));
+    connect(pageMag, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageMag, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageMag OK");
 
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
-    connect(pageInr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageInr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageInr,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageInr OK\n");
+    connect(pageInr, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageInr, SLOT(ReadVariant(QVariantHash)));
+    connect(pageInr, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageInr, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageInr OK");
 
     PageAcw *pageAcw = new PageAcw(this);
     ui->desktop->addWidget(pageAcw);
     pageAcw->setObjectName("PageAcw");
-    connect(pageAcw, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageAcw, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageAcw,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageAcw OK\n");
+    connect(pageAcw, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageAcw, SLOT(ReadVariant(QVariantHash)));
+    connect(pageAcw, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageAcw, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageAcw OK");
 
     PageImp *pageImp = new PageImp(this);
     ui->desktop->addWidget(pageImp);
     pageImp->setObjectName("PageImp");
-    connect(pageImp, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageImp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageImp,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageImp OK\n");
+    connect(pageImp, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageImp, SLOT(ReadVariant(QVariantHash)));
+    connect(pageImp, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageImp, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageImp OK");
 
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
-    connect(pageInd, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageInd, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageInd,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageInd OK\n");
+    connect(pageInd, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageInd, SLOT(ReadVariant(QVariantHash)));
+    connect(pageInd, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageInd, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageInd OK");
 
     PagePwr *pagePwr = new PagePwr(this);
     ui->desktop->addWidget(pagePwr);
     pagePwr->setObjectName("PagePwr");
-    connect(pagePwr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pagePwr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pagePwr,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PagePwr OK\n");
+    connect(pagePwr, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pagePwr, SLOT(ReadVariant(QVariantHash)));
+    connect(pagePwr, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pagePwr, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PagePwr OK");
 
     PageLvs *pageLvs = new PageLvs(this);
     ui->desktop->addWidget(pageLvs);
     pageLvs->setObjectName("PageLvs");
-    connect(pageLvs, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageLvs, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageLvs,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageLvs OK\n");
+    connect(pageLvs, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageLvs, SLOT(ReadVariant(QVariantHash)));
+    connect(pageLvs, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageLvs, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageLvs OK");
 
     PageLck *pageLck = new PageLck(this);
     ui->desktop->addWidget(pageLck);
     pageLck->setObjectName("PageLck");
-    connect(pageLck, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageLck, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageLck,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageLck OK\n");
+    connect(pageLck, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageLck, SLOT(ReadVariant(QVariantHash)));
+    connect(pageLck, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageLck, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageLck OK");
 
     PageOut *pageOut = new PageOut(this);
     ui->desktop->addWidget(pageOut);
     pageOut->setObjectName("PageOut");
-    connect(pageOut, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageOut, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageOut,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageOut OK\n");
+    connect(pageOut, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), pageOut, SLOT(ReadVariant(QVariantHash)));
+    connect(pageOut, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
+    connect(this, SIGNAL(CanMsg(int, QByteArray)), pageOut, SLOT(ExcuteCanCmd(int, QByteArray)));
+    SendTestDebug("Initialize PageOut OK");
 
     ReadStatusAll();
 }
 
 void WinHome::JumpToWindow(QByteArray win)
 {
-    if (HomeMode == HOME_TEST)
-        return;
     int WinCurrent = ui->desktop->currentIndex();
-    if (win.isNull()) { //空代表返回
+    if (win.isEmpty()) { //空代表返回
         ui->desktop->setCurrentIndex(previous_window.last());
         previous_window.removeLast();
         return;
@@ -316,23 +292,20 @@ void WinHome::InitUdp()
     udp.moveToThread(thread_udp);
     connect(thread_udp, SIGNAL(started()), &udp, SLOT(Init()));
     connect(thread_udp, SIGNAL(finished()), &udp, SLOT(Quit()));
-    connect(&udp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), &udp,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
+    connect(&udp, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), &udp, SLOT(ReadVariant(QVariantHash)));
     thread_udp->start();
 }
 
 void WinHome::InitSerial()
 {
     thread_all = new QThread(this);
-    serial.moveToThread(thread_all);
-    connect(thread_all, SIGNAL(started()), &serial, SLOT(OpenSerial()));
-    connect(thread_all, SIGNAL(finished()), &serial, SLOT(CloseSerial()));
-    connect(&serial, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), &serial,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
+    btn.moveToThread(thread_all);
+    connect(thread_all, SIGNAL(started()), &btn, SLOT(OpenSerial()));
+    connect(thread_all, SIGNAL(finished()), &btn, SLOT(CloseSerial()));
+
+    connect(&btn, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), &btn, SLOT(ReadVariant(QVariantHash)));
     thread_all->start();
 }
 
@@ -356,80 +329,14 @@ void WinHome::ReadCanCmd(QByteArray msg)
             if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
                 ReadButtonBox(cmd);
             else
-                emit SendCommand(id, CMD_CAN, cmd);
+                emit CanMsg(id, cmd);
         }
     }
 }
 
 void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 {
-    if (addr != ADDR) {
-        emit SendCommand(addr, cmd, msg);
-        return;
-    }
     switch (cmd) {
-    case CMD_JUMP:
-        JumpToWindow(msg);
-        break;
-    case CMD_INIT:
-        InitTestItems();
-        break;
-    case CMD_STATUS:
-        ReadStatusAll();
-        break;
-    case CMD_INIT_ITEM:
-        if (isPause) {
-            TempItems.append(QString(msg).split("\n"));
-            break;
-        }
-        Items.append(QString(msg).split("\n"));
-        break;
-    case CMD_JUDGE:
-        SaveItemJudge(msg);
-        break;
-    case CMD_ITEM:
-        emit WriteSql(msg);
-        emit SendCommand(ADDR, cmd, msg);
-        break;
-    case CMD_ITEM_TEMP:
-        emit SendCommand(ADDR, CMD_ITEM, msg);
-        break;
-    case CMD_TEMP:
-    case CMD_WAVE_BYTE:
-    case CMD_WAVE_TEST:
-    case CMD_WAVE_ITEM:
-    case CMD_WAVE_HIDE:
-        emit SendCommand(WIN_ID_TEST, cmd, msg);
-        break;
-    case CMD_DEBUG:
-        ShowLogMessage(msg);
-        break;
-    case CMD_WAVE:
-        emit SendCommand(ADDR, CMD_WAVE, msg);
-        break;
-    case CMD_CAN:
-        emit PutCanData(msg);
-        break;
-    case CMD_START:
-        if (HomeMode != HOME_FREE)
-            break;
-        if (QString(msg).split(" ").size() < 2)
-            return;
-        if (QString(msg).split(" ").at(1).toInt() != CurrentStartMode())
-            return;
-        StartTest(QString(msg).split(" ").at(0).toUtf8());
-        break;
-    case CMD_STOP:
-        ItemJudge = "NG";
-        SendButtonBox("Ok");
-        if (msg.contains("DCR"))
-            ShowLogMessage(msg);
-        emit SendCommand(ADDR, CMD_STOP, msg);
-        if (HomeMode != HOME_FREE)
-            HomeMode = HOME_STOP;
-        else
-            InitTestItems();
-        break;
     case CMD_NET:
         ui->IconNet->setPixmap(QPixmap(":/source/wifi.png"));
         break;
@@ -450,135 +357,91 @@ void WinHome::InitTestItems()
     QVariantHash hash;
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "TestInit");
-    emit SendVariant(QVariant::fromValue(hash));
+    hash.insert("Station", tr("左"));
+    emit SendVariant(hash);
 
     hash.insert("TxCommand", "ItemInit");
     QStringList n = CurrentItems();
     for (int i=0; i < n.size(); i++) {
         QString s = WinName(n.at(i).toInt());
         hash.insert("TxAddress", s);
-        emit SendVariant(QVariant::fromValue(hash));
+        emit SendVariant(hash);
     }
 
     hash.insert("TxAddress", "WinTest");
     hash.insert("TxCommand", "ItemShow");
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
 }
 
 void WinHome::ReadStatusAll()
 {
-    if (HomeMode != HOME_FREE)
+    if (TestStatus != "free")
         return;
-    HomeMode = HOME_TEST;
+    TestStatus = "init";
 
+    QVariantHash hash;
+    hash.insert("TxCommand", "CheckStatus");
     QStringList t = EnableItems();
     for (int i=0; i < t.size(); i++) {
-        emit SendCommand(t.at(i).toInt(), CMD_CHECK, NULL);
+        hash.insert("TxAddress", WinName(t.at(i).toInt()));
+        emit SendVariant(hash);
     }
     QStringList s = EnableOutput();
     for (int i=0; i < s.size(); i++) {
-        emit SendCommand(WIN_ID_OUT13, CMD_CHECK, s.at(i).toUtf8());
+        hash.insert("TxAddress", "PageOut");
+        if (s.at(i).toInt() == 0)
+            hash.insert("Station", "left");
+        if (s.at(i).toInt() == 1)
+            hash.insert("Station", "right");
+        emit SendVariant(hash);
     }
     qDebug() << QTime::currentTime().toString() << "WinHome read OK";
 
     ui->Text->hide();
     ui->keybord->setCurrentIndex(1);
 
+    TestStatus = "free";
+
     HomeMode = HOME_FREE;
     if (ui->desktop->currentWidget()->objectName() == "MainPage") {
         Delay(1000);
         JumpToWindow("WinTest");
     }
-}
 
-void WinHome::StartTest(QByteArray station)
-{
-    stat = station;
-    if (CurrentReStartMode() == 1)
-        stat = QString("%1").arg(0x13).toUtf8();
-    if (CurrentReStartMode() == 2)
-        stat = QString("%1").arg(0x14).toUtf8();
-    if (HomeMode == HOME_TEST)
-        return;
-    if (ui->desktop->currentWidget()->objectName() != "WinTest")
-        return;
-    HomeMode = HOME_TEST;
-    ItemJudge = "OK";
-
-    InitTestItems();
-    emit SendCommand(ADDR, CMD_STATUS, "buzy");
-    emit SendCommand(WIN_ID_TEST, CMD_START, station);
-    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
-
-    QStringList n = CurrentItems();
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    for (int i=0; i < n.size(); i++) {
-        Current_Test_Item = n.at(i).toInt();
-        emit SendCommand(n.at(i).toInt(), CMD_START, station);
-        if (HomeMode == HOME_STOP)
-            break;
-        Delay(10);
-    }
-    SaveTestJudge();
-    if (ItemJudge == "NG") {
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x08 | 0x01));
-        Delay(CurrentAlarmTime("NG"));
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x08 | 0x00));
-    } else {
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x04 | 0x01));
-        Delay(CurrentAlarmTime("OK"));
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x04 | 0x00));
-    }
-    emit SendCommand(WIN_ID_TEST, CMD_JUDGE, ItemJudge.toUtf8());
-
-    emit SendCommand(ADDR, CMD_STATUS, "ready");
-    if (CurrentReStartMode() != 0 && HomeMode != HOME_STOP) {
-        QTimer *timer = new QTimer(this);
-        timer->singleShot(2500,  this,  SLOT(ReStartTest()));
-    }
-    HomeMode = HOME_FREE;
 }
 
 void WinHome::ReStartTest()
 {
-    switch (CurrentReStartMode()) {
-    case 0:
-        break;
-    case 1:
-        StartTest(QString("%1").arg(0x13).toUtf8());
-        break;
-    case 2:
-        StartTest(QString("%1").arg(0x14).toUtf8());
-        break;
-    case 3:
-        StartTest(stat);
-        break;
-    case 4:
-        if (stat.toInt() == 0x13) {
-            StartTest(QString("%1").arg(0x14).toUtf8());
-            break;
-        }
-        if (stat.toInt() == 0x14) {
-            StartTest(QString("%1").arg(0x13).toUtf8());
-            break;
-        }
-        break;
-    default:
-        break;
-    }
+    //    switch (CurrentReStartMode()) {
+    //    case 0:
+    //        break;
+    //    case 1:
+    //        TestThread(QString("%1").arg(0x13).toUtf8());
+    //        break;
+    //    case 2:
+    //        TestThread(QString("%1").arg(0x14).toUtf8());
+    //        break;
+    //    case 3:
+    //        TestThread(stat);
+    //        break;
+    //    case 4:
+    //        if (stat.toInt() == 0x13) {
+    //            TestThread(QString("%1").arg(0x14).toUtf8());
+    //            break;
+    //        }
+    //        if (stat.toInt() == 0x14) {
+    //            TestThread(QString("%1").arg(0x13).toUtf8());
+    //            break;
+    //        }
+    //        break;
+    //    default:
+    //        break;
+    //    }
 }
 
 void WinHome::SaveTestJudge()
 {
-    QString s = QString(tr("总数@%1@%2")).arg(CurrentSettings()).arg(ItemJudge);
+    QString s = QString(tr("总数@%1@%2")).arg(CurrentSettings()).arg(Judge);
     emit WriteSql(s.toUtf8());
 }
 
@@ -589,47 +452,29 @@ void WinHome::SaveItemJudge(QByteArray msg)
     if (s.size() < 3)
         return;
     if (s.at(2) == "NG")
-        ItemJudge = "NG";
+        Judge = "NG";
     if (s.at(2) == "NG" && CurrentPauseMode() != 1)
         TestPause();
 }
 
 void WinHome::TestPause()
 {
-    isPause = true;
-    TempItems.clear();
-    QString text = tr("此项目不合格,是否重测");
-    MessageBox *box = new MessageBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
-    connect(this, SIGNAL(SendVariant(QVariant)), box, SLOT(ReadVariant(QVariant)));
-    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x01));
-    Delay(CurrentAlarmTime("NG"));
-    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x0A | 0x00));
-    int ret = box->exec();
-    if (ret == QMessageBox::Retry)
-    {
-        ItemJudge = "OK";
-        if (HomeMode != HOME_STOP)
-            emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
-        emit SendCommand(Current_Test_Item, CMD_INIT, stat);
-        emit SendCommand(WIN_ID_TEST, CMD_ITEM_REPLACE, TempItems.join("\n").toUtf8());
-        emit SendCommand(Current_Test_Item, CMD_START, stat);
-        Delay(10);
-    } else if (ret == QMessageBox::Ok) {
-        if (HomeMode != HOME_STOP)
-            emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
-    }
-    isPause = false;
-    TempItems.clear();
-}
+    SendTestStatus("pause");
 
-void WinHome::ShowLogMessage(QByteArray msg)
-{
-    if (!ui->Text->isHidden()) {
-        ui->Text->insertPlainText(msg);
-        ui->Text->moveCursor(QTextCursor::EndOfBlock);
-        Delay(1);
+    QString text = tr("此项目不合格,是否重测");
+    PopupBox *box = new PopupBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
+    connect(this, SIGNAL(SendVariant(QVariantHash)), box, SLOT(ReadVariant(QVariantHash)));
+    int ret = box->exec();
+    if (ret == QMessageBox::Retry) {
+        QVariantHash hash;
+        hash.insert("TxAddress", WinName(Current_Test_Item));
+        hash.insert("TxCommand", "ItemInit");
+        emit SendVariant(hash);
+        hash.insert("TxCommand", "StartTest");
+        emit SendVariant(hash);
+        Delay(10);
     }
-    emit SendCommand(ADDR, CMD_DEBUG, msg);
+    SendTestStatus("buzy");
 }
 
 bool WinHome::WaitTimeOut(quint16 t)
@@ -736,35 +581,41 @@ int WinHome::CurrentReStartMode()
     return ini->value("/GLOBAL/RestartMode", "0").toInt();
 }
 
-
-void WinHome::ReadVariant(QVariant s)
+QString WinHome::CurrentUser()
 {
-    QVariantHash hash = s.toHash();
-    if (hash.value("TxAddress") != "WinHome") {
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    int s = ini->value("/GLOBAL/User", "0").toInt();
+    if (s == 0)
+        return tr("guest");
+    else
+        return tr("admin");
+}
+
+void WinHome::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "WinHome") {
         emit SendVariant(s);
         return;
     }
-    if (hash.value("TxCommand") == "Warnning")
-        Warnning(hash);
-    if (hash.value("TxCommand") == "ItemView")
-        qDebug() << hash.value("TestItem").toString();
-}
-
-void WinHome::Warnning(QVariantHash hash)
-{
-    QString text = hash.value("TxMessage").toString();
-    MessageBox *box = new MessageBox(this, "", text, NULL, QMessageBox::Ok);
-    connect(this, SIGNAL(SendVariant(QVariant)), box, SLOT(ReadVariant(QVariant)));
-    box->exec();
-}
-
-void WinHome::SendButtonBox(QString button)
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "WinHome");
-    hash.insert("TxCommand", "BoxButton");
-    hash.insert("TxMessage", button);
-    emit SendVariant(QVariant::fromValue(hash));
+    if (s.value("TxCommand") == "Warnning")
+        Warnning(s);
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand") == "InitTest")
+        InitTest(s);
+    if (s.value("TxCommand") == "StopTest")
+        StopTest(s);
+    if (s.value("TxCommand") == "JumpWindow")
+        JumpToWindow(s.value("TxMessage").toByteArray());
+    if (s.value("TxCommand") == "ReadStatus")
+        ReadStatusAll();
+    if (s.value("TxCommand") == "TestPause") {
+        Judge = s.value("TxMessage").toString();
+        if (CurrentPauseMode() != 1)
+            TestPause();
+    }
+    if (s.value("TxCommand") == "TestSave")
+        ReadTestSave(s);
 }
 
 void WinHome::ReadButtonBox(QByteArray msg)
@@ -774,4 +625,216 @@ void WinHome::ReadButtonBox(QByteArray msg)
     if (quint8(msg.at(2)) != 0)
         SendButtonBox("Ok");
 }
+
+void WinHome::Warnning(QVariantHash hash)
+{
+    QString text = hash.value("TxMessage").toString();
+    SendTestDebug(text);
+    PopupBox *box = new PopupBox(this, "", text, NULL, QMessageBox::Ok);
+    connect(this, SIGNAL(SendVariant(QVariantHash)), box, SLOT(ReadVariant(QVariantHash)));
+    box->exec();
+}
+
+void WinHome::SendButtonBox(QString button)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "BoxButton");
+    hash.insert("TxMessage", button);
+    emit SendVariant(hash);
+}
+
+void WinHome::SendTestStatus(QString msg)
+{
+    TestStatus = msg;
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestStatus");
+    hash.insert("TxMessage", msg);
+    emit SendVariant(hash);
+}
+
+void WinHome::SendTestSave()
+{
+    QVariantHash hash;
+    QStringList n = CurrentItems();
+    for (int i=0; i < n.size(); i++) {
+        hash.insert("TxAddress", WinName(n.at(i).toInt()));
+        hash.insert("TxCommand", "TestSave");
+        emit SendVariant(hash);
+    }
+    QString v = "总数1";
+    v += "@" + CurrentUser();
+    v += "@" + tr("code");
+    emit WriteSql(v.toUtf8());
+
+    v = "总数";
+    v += "@" + CurrentSettings();
+    v += "@" + Judge;
+    emit WriteSql(v.toUtf8());
+}
+
+void WinHome::ReadTestSave(QVariantHash s)
+{
+    QString v = s.value("ItemName").toString();
+    if (s.value("TestResult").toString().isEmpty()) {
+        v += "@" + CurrentSettings();
+        v += "@" + s.value("TxMessage").toString();
+    } else {
+        v += "@" + s.value("TestItem").toString();
+        v += " " + s.value("TestPara").toString();
+        v += "@" + s.value("TestResult").toString();
+        v += "@" + s.value("TestJudge").toString();
+    }
+    emit WriteSql(v.toUtf8());
+}
+
+void WinHome::SendTestAlarm(QString msg)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestAlarm");
+    if (msg == "OK") {
+        hash.insert("TxMessage", "LEDG BEEP");
+        emit SendVariant(hash);
+        Delay(CurrentAlarmTime("OK"));
+        hash.insert("TxMessage", "LEDG");
+        emit SendVariant(hash);
+    }
+    if (msg == "NG") {
+        hash.insert("TxMessage", "LEDR BEEP");
+        emit SendVariant(hash);
+        Delay(CurrentAlarmTime("NG"));
+        hash.insert("TxMessage", "LEDR");
+        emit SendVariant(hash);
+    }
+    if (msg == "LEDY") {
+        hash.insert("TxMessage", "LEDY");
+        emit SendVariant(hash);
+    }
+    if (msg == "pause") {
+        hash.insert("TxMessage", "LEDY LEDR BEEP");
+        emit SendVariant(hash);
+        Delay(CurrentAlarmTime("NG"));
+        hash.insert("TxMessage", "LEDY red");
+        emit SendVariant(hash);
+    }
+}
+
+void WinHome::SendTestDebug(QString msg)
+{
+    if (!ui->Text->isHidden()) {
+        ui->Text->insertPlainText(msg);
+        ui->Text->insertPlainText("\n");
+        ui->Text->moveCursor(QTextCursor::EndOfBlock);
+        Delay(1);
+    }
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestDebug");
+    hash.insert("TxMessage", msg);
+    emit SendVariant(hash);
+}
+
+void WinHome::SendTestJudge(QString msg)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "TestJudge");
+    hash.insert("TxMessage", msg);
+    emit SendVariant(hash);
+}
+
+void WinHome::TestThread(QVariantHash hash)
+{
+    qDebug() << "win test thread" << TestStatus;
+    if (ui->desktop->currentWidget()->objectName() != "WinTest")
+        return;
+    if (TestStatus != "free")
+        return;
+    if (!IsStartModeRight(hash)) {
+        hash.insert("TxMessage", tr("启动方式错误"));
+        Warnning(hash);
+        return;
+    }
+    Judge = "OK";
+    SendTestStatus("buzy");
+    SendTestAlarm("LEDY");
+    InitTest(hash);
+    QStringList n = CurrentItems();
+    for (int i=0; i < n.size(); i++) {
+        Delay(10);
+        if (TestStatus == "stop") {
+            Judge = "NG";
+            break;
+        }
+        Current_Test_Item = n.at(i).toInt();
+        hash.insert("TxAddress", WinName(n.at(i).toInt()));
+        emit SendVariant(hash);
+    }
+    SendTestSave();
+    SendTestAlarm(Judge);
+    SendTestJudge(Judge);
+    SendTestStatus("free");
+}
+
+void WinHome::InitTest(QVariantHash hash)
+{
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestInit");
+    emit SendVariant(hash);
+
+    hash.insert("TxCommand", "ItemInit");
+    QStringList n = CurrentItems();
+    for (int i=0; i < n.size(); i++) {
+        QString s = WinName(n.at(i).toInt());
+        hash.insert("TxAddress", s);
+        emit SendVariant(hash);
+    }
+
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "ItemShow");
+    emit SendVariant(hash);
+}
+
+void WinHome::StopTest(QVariantHash hash)
+{
+    if (TestStatus != "free") {
+        SendTestStatus("stop");
+        SendButtonBox("Ok");
+        return;
+    }
+    InitTest(hash);
+}
+
+bool WinHome::IsStartModeRight(QVariantHash hash)
+{
+    QString s;
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    switch (ini->value("/GLOBAL/Mode", "0").toInt()) {
+    case 0:
+        s = "btn";
+        break;
+    case 1:
+        s = "out";
+    case 2:
+        s = "out";
+        break;
+    case 3:
+        s = "udp";
+        break;
+    default:
+        break;
+    }
+    if (hash.value("StartMode").toString() == s)
+        return true;
+    else
+        return false;
+}
+
+void WinHome::ExcuteCanCmd(QByteArray msg)
+{
+    emit PutCanData(msg);
+}
+
 /*********************************END OF FILE**********************************/

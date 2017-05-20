@@ -45,9 +45,11 @@ void WinTest::InitWindows()
     ui->TabWave->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     for (int i=0; i < 3; i++) {
-        wave.append(new Waveform(this));
+        wave.append(new WaveBox(this));
         ui->TabWave->setCellWidget(0, i, wave.at(i));
+        connect(wave.at(i), SIGNAL(SendVariant(QVariantHash)), this, SLOT(WaveView(QVariantHash)));
     }
+    connect(ui->WaveView, SIGNAL(SendVariant(QVariantHash)), this, SLOT(WaveView(QVariantHash)));
     ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
     ui->TextPos->setStyleSheet("color:white;font:Bold 42pt Ubuntu;");
     connect(ui->TabTest, SIGNAL(cellClicked(int, int)), this, SLOT(ClickItem(int, int)));
@@ -67,11 +69,12 @@ void WinTest::ReadButtons(int win)
     switch (win) {
     case Qt::Key_0:
         SaveSettings();
+        GoToWindow(NULL);
         emit SendCommand(ADDR, CMD_JUMP, NULL);
         break;
     case Qt::Key_1:
         SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, "WinType");
+        GoToWindow("WinType");
         break;
     case Qt::Key_3:
         if (ui->BtnCmdStart->text() == "单次测试") {
@@ -135,109 +138,6 @@ void WinTest::SaveSettings()
     qDebug() << QTime::currentTime().toString() << "WinTest save OK";
 }
 
-void WinTest::ShowItem(QString item)
-{
-    QStringList s = item.split("@");
-    for (int i=0; i < ui->TabTest->rowCount(); i++) {
-        QString n = ui->TabTest->item(i, 0)->text();
-        QString t = ui->TabTest->item(i, 3)->text();
-        if (t != " ")
-            continue;
-        if (s.at(0) == n) {
-            ui->TabTest->item(i, 2)->setText(s.at(2));
-            ui->TabTest->item(i, 3)->setText(s.at(3));
-            if (s.at(3) == "NG")
-                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
-            else
-                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::green));
-            break;
-        }
-    }
-}
-
-void WinTest::ReplaceItem(QString item)
-{
-    QStringList t = item.split("\n");
-    for (int i=0; i < t.size(); i++) {
-        QStringList s = t.at(i).split("@");
-        for (int i=0; i < ui->TabTest->rowCount(); i++) {
-            QString n = ui->TabTest->item(i, 0)->text();
-            if (s.at(0) == n) {
-                ui->TabTest->item(i, 2)->setText(" ");
-                ui->TabTest->item(i, 3)->setText(" ");
-                break;
-            }
-        }
-    }
-}
-
-void WinTest::ShowJudge(QString judge)
-{
-    int sum = ui->LabelSum->text().toInt();
-    int qua = ui->LabelQualified->text().toInt();
-    int unq = ui->LabelUnqualified->text().toInt();
-    sum++;
-    if (judge == "NG") {
-        ui->LabelState->setStyleSheet("color:rgb(255, 0, 0);font: Bold 42pt Ubuntu;border: none;");
-        ui->LabelState->setText("NG");
-        unq++;
-    } else {
-        ui->LabelState->setStyleSheet("color:rgb(0, 255, 0);font:Bold 42pt Ubuntu;border:none;");
-        ui->LabelState->setText("OK");
-        qua++;
-    }
-    ui->LabelSum->setText(QString::number(sum));
-    ui->LabelQualified->setText(QString::number(qua));
-    ui->LabelUnqualified->setText(QString::number(unq));
-    ui->BtnCmdStart->setText("单次测试");
-}
-
-void WinTest::ShowWaveItem(QByteArray msg)
-{
-    if (!wave.last()->WaveItem.isEmpty()) {
-        ClearWave();
-    }
-    for (int i=0; i < wave.size(); i++) {
-        if (wave.at(i)->WaveItem.isEmpty()) {
-            wave.at(i)->WaveItemShow(msg);
-            break;
-        }
-    }
-}
-
-void WinTest::ShowWaveByte(QByteArray msg)
-{
-    for (int i=0; i < wave.size(); i++) {
-        if (wave.at(i)->WaveByte.isEmpty()) {
-            wave.at(i)->WaveByteShow(msg);
-            break;
-        }
-    }
-}
-
-void WinTest::ShowWaveTest(QByteArray msg)
-{
-    for (int i=0; i < wave.size(); i++) {
-        if (wave.at(i)->WaveTest.isEmpty()) {
-            wave.at(i)->WaveTestShow(msg);
-            break;
-        }
-    }
-}
-
-void WinTest::ShowTemperature(QByteArray msg)
-{
-    ui->TextTestTemp->setText(msg);
-}
-
-void WinTest::ShowStation(QByteArray msg)
-{
-    if (msg.toInt() == 0x13)
-        ui->TextPos->setText(tr("左"));
-    if (msg.toInt() == 0x14)
-        ui->TextPos->setText(tr("右"));
-}
-
 void WinTest::ShowTime()
 {
     QString t = QTime::currentTime().toString("hh:mm");
@@ -251,28 +151,27 @@ void WinTest::ShowCode()
     if (code.size() < 2)
         return;
     QString s = "code" + code;
-    emit SendCommand(ADDR, CMD_CODE, s.toUtf8());
     ui->TextTestNumb->setText(QString("编码:%1").arg(code));
     code.clear();
 }
 
 void WinTest::ClearWave()
 {
+    QVariantHash s;
     for (int i=0; i < wave.size(); i++) {
-        wave.at(i)->WaveByteShow(NULL);
-        wave.at(i)->WaveTestShow(NULL);
-        wave.at(i)->WaveItemShow(NULL);
-        QString t = QString::number(i+1);
-        ui->TabWave->horizontalHeaderItem(i)->setText(t);
+        wave.at(i)->ShowWave(s);
     }
 }
 
 void WinTest::ClickItem(int r,  int )
 {
-    QString t = ui->TabTest->item(r, 0)->text();
-    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")) || t.contains(tr("PG"))) {
-        ClearWave();
-        emit SendCommand(ADDR, CMD_WAVE, t.toUtf8());
+    if (ItemView.at(r).value("WaveItem").toString().isEmpty())
+        return;
+    ClearWave();
+    QString uid = ItemView.at(r).value("TestUid").toString();
+    for (int i=r; i < qMin(3+r, ItemView.size()); i++) {
+        if (ItemView.at(i).value("TestUid") == uid)
+            wave.at(i-r)->ShowWave(ItemView.at(i));
     }
 }
 
@@ -288,92 +187,16 @@ QString WinTest::BarCode2()
     return ini->value("/GLOBAL/Barcode2", "9").toString();
 }
 
-void WinTest::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_TEST)
-        return;
-    switch (cmd) {
-    case CMD_INIT:
-        ClearWave();
-
-        ItemShow();
-        //        ui->TabTest->setRowCount(0);
-        //        InitItem(msg);
-        InitSettings();
-        break;
-    case CMD_ITEM:
-        ShowItem(msg);
-
-        break;
-    case CMD_TEMP:
-        ShowTemperature(msg);
-        break;
-    case CMD_WAVE_BYTE:
-        ShowWaveByte(msg);
-        break;
-    case CMD_WAVE_TEST:
-        ShowWaveTest(msg);
-        break;
-    case CMD_WAVE_ITEM:
-        ShowWaveItem(msg);
-        break;
-    case CMD_WAVE_HIDE:
-        ClearWave();
-        break;
-    case CMD_START:
-        ShowStation(msg);
-        break;
-    case CMD_JUDGE:
-        ShowJudge(msg);
-        break;
-    case CMD_ITEM_REPLACE:
-        ReplaceItem(msg);
-        break;
-    default:
-        break;
-    }
-}
-
-void WinTest::InitItem(QByteArray msg)
-{
-    ui->LabelState->setStyleSheet("color:rgb(0, 255, 0);font:Bold 42pt Ubuntu;border:none;");
-    ui->LabelState->setText("--");
-    if (msg.isEmpty()) {
-        ui->TabTest->setRowCount(0);
-        return;
-    }
-    QStringList item = QString(msg).split("\n");
-    ui->TabTest->setRowCount(item.size());
-    for (int i=0; i < item.size(); i++) {
-        QStringList s = QString(item.at(i)).split("@");
-        ui->TabTest->setItem(i, 0, new QTableWidgetItem);
-        ui->TabTest->item(i, 0)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 0)->setText(s.at(0));
-
-        ui->TabTest->setItem(i, 1, new QTableWidgetItem);
-        ui->TabTest->item(i, 1)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 1)->setText(s.at(1));
-
-        ui->TabTest->setItem(i, 2, new QTableWidgetItem);
-        ui->TabTest->item(i, 2)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 2)->setText(s.at(2));
-
-        ui->TabTest->setItem(i, 3, new QTableWidgetItem);
-        ui->TabTest->item(i, 3)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 3)->setText(s.at(3));
-    }
-}
-
 void WinTest::showEvent(QShowEvent *e)
 {
     this->setFocus();
     ShowTime();
     InitSettings();
-    emit SendCommand(ADDR, CMD_INIT, NULL);
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "InitTest");
+    hash.insert("Station", "left");
+    emit SendVariant(hash);
     e->accept();
 }
 
@@ -390,28 +213,53 @@ void WinTest::keyReleaseEvent(QKeyEvent *e)
     e->accept();
 }
 
-void WinTest::ReadVariant(QVariant s)
+void WinTest::ReadVariant(QVariantHash s)
 {
-    QVariantHash hash = s.toHash();
-    if (hash.value("TxAddress") != "WinTest" && hash.value("TxAddress") != "WinHome")
+    if (s.value("TxAddress") != "WinTest" && s.value("TxAddress") != "WinHome")
         return;
-    if (hash.value("TxCommand") == "ItemView")
-        ItemView.append(s);
-    if (hash.value("TxCommand") == "TestInit")
-        ItemView.clear();
-    if (hash.value("TxCommand") == "ItemShow")
+    if (s.value("TxCommand") == "ItemView")
+        ViewItem(s);
+    if (s.value("TxCommand") == "TestInit")
+        InitTest(s);
+    if (s.value("TxCommand") == "WaveInit")
+        ClearWave();
+    if (s.value("TxCommand") == "ItemShow")
         ItemShow();
-    if (hash.value("TxCommand") == "ItemUpdate")
-        ItemUpdate(hash);
-    if (hash.value("TxCommand") == "Temperature")
-        ui->TextTestTemp->setText(hash.value("TxMessage").toString());
+    if (s.value("TxCommand") == "ItemUpdate")
+        UpdateItem(s);
+    if (s.value("TxCommand") == "Temperature")
+        ui->TextTestTemp->setText(s.value("TxMessage").toString());
+    if (s.value("TxCommand") == "TestStatus")
+        TestStatus = s.value("TxMessage").toString();
+    if (s.value("TxCommand") == "TestJudge")
+        UpdateJudge(s.value("TxMessage").toString());
+}
+
+void WinTest::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
+}
+
+void WinTest::InitTest(QVariantHash hash)
+{
+    ClearWave();
+    ItemView.clear();
+    ui->LabelState->setText("--");
+    if (hash.value("Station").toString() == "left")
+        ui->TextPos->setText(tr("左"));
+    if (hash.value("Station").toString() == "right")
+        ui->TextPos->setText(tr("右"));
 }
 
 void WinTest::ItemShow()
 {
     ui->TabTest->setRowCount(ItemView.size());
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i).toHash();
+        QVariantHash hash = ItemView.at(i);
         ui->TabTest->setItem(i, 0, new QTableWidgetItem);
         ui->TabTest->item(i, 0)->setTextAlignment(Qt::AlignCenter);
         ui->TabTest->item(i, 0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
@@ -434,20 +282,88 @@ void WinTest::ItemShow()
     }
 }
 
-void WinTest::ItemUpdate(QVariantHash hash)
+void WinTest::UpdateItem(QVariantHash hash)
 {
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash temp = ItemView.at(i).toHash();
-        if (temp.value("TestItem") == hash.value("TestItem")) {
+        QVariantHash temp = ItemView.at(i);
+        if (temp.value("TestItem").toString() == hash.value("TestItem").toString()) {
+            if (ui->TabTest->item(i, 3)->text() != " ")
+                continue;
+            ItemView[i] = hash;
             ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
             ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
-            if (ui->TabTest->item(i, 3)->text() == "NG")
-                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
-            else
+            if (ui->TabTest->item(i, 3)->text() == "OK")
                 ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::green));
+            else
+                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
+            if (!hash.value("WaveItem").toString().isEmpty())
+                UpdateWave(hash);
             break;
         }
     }
+}
+
+void WinTest::ViewItem(QVariantHash hash)
+{
+    if (TestStatus != "pause") {
+        ItemView.append(hash);
+        return;
+    }
+    for (int i=ItemView.size()-1; i >= 0 ; i--) {
+        QVariantHash temp = ItemView.at(i);
+        if (temp.value("TestItem") == hash.value("TestItem")) {
+            if (ui->TabTest->item(i, 3)->text() == " ")
+                continue;
+            ItemView[i] = hash;
+            ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
+            ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
+            break;
+        }
+    }
+}
+
+void WinTest::UpdateWave(QVariantHash hash)
+{
+    if (!wave.last()->WaveItem.isEmpty()) {
+        ClearWave();
+    }
+    for (int i=0; i < wave.size(); i++) {
+        if (wave.at(i)->WaveItem.isEmpty()) {
+            wave.at(i)->ShowWave(hash);
+            break;
+        }
+    }
+}
+
+void WinTest::UpdateJudge(QString judge)
+{
+    int sum = ui->LabelSum->text().toInt();
+    int qua = ui->LabelQualified->text().toInt();
+    int unq = ui->LabelUnqualified->text().toInt();
+    sum++;
+    if (judge == "NG") {
+        ui->LabelState->setStyleSheet("color:rgb(255, 0, 0);font: Bold 42pt Ubuntu;border: none;");
+        ui->LabelState->setText("NG");
+        unq++;
+    } else {
+        ui->LabelState->setStyleSheet("color:rgb(0, 255, 0);font:Bold 42pt Ubuntu;border:none;");
+        ui->LabelState->setText("OK");
+        qua++;
+    }
+    ui->LabelSum->setText(QString::number(sum));
+    ui->LabelQualified->setText(QString::number(qua));
+    ui->LabelUnqualified->setText(QString::number(unq));
+    ui->BtnCmdStart->setText("单次测试");
+}
+
+void WinTest::WaveView(QVariantHash s)
+{
+    if (ui->stackedWidget->currentIndex() == 0) {
+        ui->stackedWidget->setCurrentIndex(1);
+        ui->WaveView->ShowWave(s);
+        return;
+    }
+    ui->stackedWidget->setCurrentIndex(0);
 }
 
 /*********************************END OF FILE**********************************/

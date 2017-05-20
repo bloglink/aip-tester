@@ -33,8 +33,8 @@ public:
 private:
     Ui::WinBack *ui;
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray msg);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -46,8 +46,7 @@ private slots:
     void SaveSettings(void);
     void ClickItem(int r, int c);
     void ClickOutput(int r, int c);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(quint16 addr, QByteArray msg);
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdVersion(quint16 id);
     void SendCanCmdParam(quint16 id);
     void SendCanCmdParamDcr(void);
@@ -65,6 +64,8 @@ private slots:
     void ClearParamInr(void);
     void ClearParamImp(void);
     virtual void showEvent(QShowEvent *);
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
 private:
     bool Testing;
     QList<QDoubleSpinBox*> BoxDcr;

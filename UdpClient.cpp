@@ -10,7 +10,7 @@
 
 UdpClient::UdpClient(QObject *parent) : QUdpSocket(parent)
 {
-    Status = "free";
+    TestStatus = "free";
 }
 
 void UdpClient::Init()
@@ -92,9 +92,9 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
             break;
         case 3006: //设置测试型号
-            if (Status == "buzy") {
+            if (TestStatus == "buzy") {
                 TxMsg = "3013 ";
-                TxMsg.append(Status);
+                TxMsg.append(TestStatus);
                 this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
                 break;
             }
@@ -107,32 +107,32 @@ void UdpClient::ReadAll()
             this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
             break;
         case 3008: //启动测试
-            if (Status == "buzy") {
+            if (TestStatus == "buzy") {
                 TxMsg = "3013 ";
-                TxMsg.append(Status);
+                TxMsg.append(TestStatus);
                 this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
                 break;
             }
-            emit SendCommand(ADDR, CMD_START, QString("%1 %2").arg(0x13).arg(0x03).toUtf8());
+            SendContrl("StartTest");
             TxMsg = "3009 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
             break;
         case 3010: //停止测试
-            emit SendCommand(ADDR, CMD_STOP, QString("%1 %2").arg(0x13).arg(0x03).toUtf8());
+            SendContrl("StopTest");
             TxMsg = "3011 ";
             TxMsg.append(Number);
             this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
             break;
         case 3012: //获取状态
             TxMsg = "3013 ";
-            TxMsg.append(Status);
+            TxMsg.append(TestStatus);
             this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
             break;
         case 3014:
-            if (Status != "ready") {
+            if (TestStatus != "ready") {
                 TxMsg = "3013 ";
-                TxMsg.append(Status);
+                TxMsg.append(TestStatus);
                 this->writeDatagram(TxMsg.toUtf8(), sender, senderPort);
                 break;
             }
@@ -146,21 +146,26 @@ void UdpClient::ReadAll()
     }
 }
 
-void UdpClient::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void UdpClient::ReadVariant(QVariantHash s)
 {
-    if (addr != ADDR)
+    if (s.value("TxAddress") != "WinHome")
         return;
-    switch (cmd) {
-    case CMD_ITEM:
-        Items.append(msg);
-        break;
-    case CMD_STATUS:
-        Status = msg;
-        if (Status == "buzy")
+    if (s.value("TxCommand") == "TestItems")
+        Items.append(s.value("TxMessage").toString());
+    if (s.value("TxCommand") == "TestStatus") {
+        TestStatus = s.value("TxMessage").toString();
+        if (TestStatus == "buzy")
             Items.clear();
-        break;
-    default:
-        break;
     }
+}
+
+void UdpClient::SendContrl(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", s);
+    hash.insert("Station", "left");
+    hash.insert("StartMode", "udp");
+    emit SendVariant(hash);
 }
 /*********************************END OF FILE**********************************/

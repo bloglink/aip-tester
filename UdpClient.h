@@ -26,6 +26,7 @@ public:
     explicit UdpClient(QObject *parent = 0);
 
 signals:
+    void SendVariant(QVariantHash s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray msg);
 
 private slots:
@@ -34,7 +35,8 @@ private slots:
     void InitSettings(void);
     void SaveSettings(void);
     void ReadAll(void);
-    void ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg);
+    void ReadVariant(QVariantHash s);
+    void SendContrl(QString s);
 private:
     QString Number;
     QString Types;
@@ -43,7 +45,7 @@ private:
     QString FileInUse;
     QString TxMsg;
     QStringList Items;
-    QString Status;
+    QString TestStatus;
 };
 
 #endif // UDPCLIENT_H

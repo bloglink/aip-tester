@@ -17,7 +17,7 @@ PageLck::PageLck(QWidget *parent) :
     InitWindows();
     InitButtons();
     InitSettings();
-    Mode = LCK_FREE;
+    TestStatus = "free";
 }
 
 PageLck::~PageLck()
@@ -57,7 +57,7 @@ void PageLck::BtnJudge(int id)
         break;
     case Qt::Key_2:
         SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     default:
         break;
@@ -111,65 +111,17 @@ void PageLck::SaveSettings()
     qDebug() << QTime::currentTime().toString() << "PageLck save OK";
 }
 
-void PageLck::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void PageLck::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_LCK && addr != CAN_ID_PWR)
+    if (addr != CAN_ID_PWR)
         return;
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(msg);
-        break;
-    case CMD_START:
-        Mode = LCK_TEST;
-        Judge = "OK";
-        SendCanCmdStart(msg.toInt());
-        if (!WaitTimeOut(500)) {
-            Judge = "NG";
-            SendTestItemsAllError();
-            break;
-        }
-        SendTestJudge();
-        Mode = LCK_FREE;
-        break;
-    case CMD_STOP:
-        SendCanCmdStop();
-        break;
-    case CMD_INIT:
-        InitSettings();
-        InitTestItems();
-        break;
-    default:
-        break;
-    }
-}
-
-void PageLck::ExcuteCanCmd(QByteArray msg)
-{
-    if (Mode == LCK_FREE)
+    if (TestStatus == "free")
         return;
     TimeOut = 0;
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
     if (msg.size() >= 8 && (quint8)msg.at(0) == 0x01)
         ReadCanCmdResult(msg);
-}
-
-void PageLck::InitTestItems()
-{
-    Items.clear();
-    QStringList s;
-    QString U1 = QString::number(ui->BoxVoltMin->value());
-    QString U2 = QString::number(ui->BoxVoltMax->value());
-    QString C1 = QString::number(ui->BoxCurrMin->value());
-    QString C2 = QString::number(ui->BoxCurrMax->value());
-    QString P1 = QString::number(ui->BoxPowerMin->value());
-    QString P2 = QString::number(ui->BoxPowerMax->value());
-    s.append(QString(tr("堵转")));
-    s.append(QString("%1~%2A, %3~%4W, %5~%6V").arg(C1).arg(C2).arg(P1).arg(P2).arg(U1).arg(U2));
-    s.append(" ");
-    s.append(" ");
-    Items.append(s.join("@"));
-    emit SendCommand(ADDR, CMD_INIT_ITEM, Items.join("\n").toUtf8());
 }
 
 void PageLck::SendCanCmdStart(quint8 s)
@@ -187,20 +139,10 @@ void PageLck::SendCanCmdStart(quint8 s)
         g  <<= 4;
     out << quint16(0x27) << quint8(0x05) << quint8(0x03) << quint8(g)
         << quint8(t%256) << quint8(p+v/256) << quint8(v%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
-void PageLck::SendTestItemsAllError()
-{
-    for (int i=0; i < Items.size(); i++) {
-        QStringList s = QString(Items.at(i)).split("@");
-        if (s.at(2) == " ")
-            s[2] = "---";
-        if (s.at(3) == " ")
-            s[3] = "NG";
-        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-    }
-}
+
 
 void PageLck::SendCanCmdStop()
 {
@@ -208,43 +150,43 @@ void PageLck::SendCanCmdStop()
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x27) << quint8(0x01) << quint8(0x02);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageLck::SendItemJudge()
 {
-    int num = ui->BoxFreq->value();
-    if (Volt.size() < num)
-        return;
-    if (Curr.size() < num)
-        return;
-    if (Power.size() < num)
-        return;
-    double vv = Volt.at(num)/10;
-    double rr = Curr.at(num)/1000;
-    double pp = Power.at(num)/10;
+//    int num = ui->BoxFreq->value();
+//    if (Volt.size() < num)
+//        return;
+//    if (Curr.size() < num)
+//        return;
+//    if (Power.size() < num)
+//        return;
+//    double vv = Volt.at(num)/10;
+//    double rr = Curr.at(num)/1000;
+//    double pp = Power.at(num)/10;
 
-    QString t = QString("%1V, %2A, %3W").arg(vv).arg(rr).arg(pp);
+//    QString t = QString("%1V, %2A, %3W").arg(vv).arg(rr).arg(pp);
 
-    if (rr > ui->BoxCurrMax->value() || rr < ui->BoxCurrMin->value() )
-        Judge = "NG";
-    if (pp > ui->BoxPowerMax->value() || pp < ui->BoxPowerMin->value() )
-        Judge = "NG";
-    QStringList s = QString(Items.at(0)).split("@");
-    if (s.at(2) == " ")
-        s[2] = t;
-    if (s.at(3) == " ")
-        s[3] = Judge;
-    emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
+//    if (rr > ui->BoxCurrMax->value() || rr < ui->BoxCurrMin->value() )
+//        Judge = "NG";
+//    if (pp > ui->BoxPowerMax->value() || pp < ui->BoxPowerMin->value() )
+//        Judge = "NG";
+//    QStringList s = QString(Items.at(0)).split("@");
+//    if (s.at(2) == " ")
+//        s[2] = t;
+//    if (s.at(3) == " ")
+//        s[3] = Judge;
+//    emit CanMsg(ADDR, CMD_ITEM, s.join("@").toUtf8());
 }
 
 void PageLck::SendTestJudge()
 {
-    QStringList s;
-    s.append("堵转");
-    s.append(FileInUse);
-    s.append(Judge);
-    emit SendCommand(ADDR, CMD_JUDGE, s.join("@").toUtf8());
+//    QStringList s;
+//    s.append("堵转");
+//    s.append(FileInUse);
+//    s.append(Judge);
+//    emit CanMsg(ADDR, CMD_JUDGE, s.join("@").toUtf8());
 }
 
 void PageLck::CalculateSample()
@@ -303,7 +245,6 @@ void PageLck::ReadCanCmdStatus(QByteArray msg)
     int s = quint8(msg.at(1));
     switch (s) {
     case 0x00:
-        emit SendCommand(ADDR, CMD_DEBUG, QString("lck ok, Mode=%1\n").arg(Mode).toUtf8());
         break;
     case 0x01:
         return;
@@ -324,7 +265,6 @@ void PageLck::ReadCanCmdStatus(QByteArray msg)
         SendItemJudge();
         ClearResults();
     }
-//    Mode = LCK_FREE;
 }
 
 void PageLck::ReadCanCmdResult(QByteArray msg)
@@ -354,7 +294,7 @@ QString PageLck::CurrentPorwer()
 bool PageLck::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Mode != LCK_FREE) {
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -378,12 +318,106 @@ void PageLck::showEvent(QShowEvent *e)
     e->accept();
 }
 
+void PageLck::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageLck" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "ItemInit") {
+        if (s.value("Station").toString() == "left")
+            stat = WIN_ID_OUT13;
+        if (s.value("Station").toString() == "right")
+            stat = WIN_ID_OUT14;
+        InitSettings();
+        SendTestItemsAllEmpty();
+    }
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand") == "StopTest")
+        TestStatus = "stop";
+}
+
+void PageLck::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
+}
+
 void PageLck::SendWarnning(QString s)
 {
     QVariantHash hash;
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("堵转异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
+}
+
+void PageLck::SendTestItemsAllEmpty()
+{
+    ItemView.clear();
+    QString uid = QUuid::createUuid();
+    QString U1 = QString::number(ui->BoxVoltMin->value());
+    QString U2 = QString::number(ui->BoxVoltMax->value());
+    QString C1 = QString::number(ui->BoxCurrMin->value());
+    QString C2 = QString::number(ui->BoxCurrMax->value());
+    QString P1 = QString::number(ui->BoxPowerMin->value());
+    QString P2 = QString::number(ui->BoxPowerMax->value());
+    QVariantHash hash;
+    hash.insert("TestEnable", "Y");
+    hash.insert("TestItem", tr("堵转"));
+    hash.insert("TestPara", tr("%1~%2V %3~%4A %5~%6W").arg(U1).arg(U2).arg(C1).arg(C2).arg(P1).arg(P2));
+    hash.insert("TestResult", " ");
+    hash.insert("TestJudge", " ");
+    hash.insert("TestUid", uid);
+    ItemView.append(hash);
+
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemView");
+            emit SendVariant(hash);
+        }
+    }
+}
+
+void PageLck::SendTestItemsAllError()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemUpdate");
+            hash.insert("TestResult", "---");
+            hash.insert("TestJudge", "NG");
+            emit SendVariant(hash);
+        }
+    }
+    qDebug() << "lck test all error";
+}
+
+void PageLck::SendTestItems()
+{
+
+}
+
+void PageLck::TestThread(QVariantHash hash)
+{
+    Judge = "OK";
+    if (hash.value("Station").toString() == "left")
+        stat = WIN_ID_OUT13;
+    if (hash.value("Station").toString() == "right")
+        stat = WIN_ID_OUT14;
+    TestStatus = "buzy";
+    Judge = "OK";
+    SendCanCmdStart(stat);
+    if (!WaitTimeOut(100)) {
+        Judge = "NG";
+        SendTestItemsAllError();
+    }
+    SendTestJudge();
+    TestStatus = "free";
 }
 /*********************************END OF FILE**********************************/

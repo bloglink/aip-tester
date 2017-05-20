@@ -67,11 +67,13 @@ private:
     Ui::WinHome *ui;
 
 signals:
-    void SendVariant(QVariant s);
+    void SendVariant(QVariantHash s);
+    void CanMsg(int addr, QByteArray msg);
     void message(QByteArray msg);
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+
 private slots:
     void InitThreadAll(void);
     void InitWindows(void);
@@ -90,12 +92,10 @@ private slots:
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void InitTestItems(void);
     void ReadStatusAll(void);
-    void StartTest(QByteArray msg);
     void ReStartTest(void);
     void SaveTestJudge(void);
     void SaveItemJudge(QByteArray msg);
     void TestPause(void);
-    void ShowLogMessage(QByteArray msg);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
 
@@ -108,14 +108,26 @@ private slots:
     int CurrentPauseMode(void);
     int CurrentAlarmTime(QString msg);
     int CurrentReStartMode(void);
+    QString CurrentUser(void);
 
-    void ReadVariant(QVariant s);
+    void ReadVariant(QVariantHash s);
     void Warnning(QVariantHash hash);
     void ReadButtonBox(QByteArray msg);
     void SendButtonBox(QString button);
+    void SendTestStatus(QString msg);
+    void SendTestSave(void);
+    void ReadTestSave(QVariantHash s);
+    void SendTestAlarm(QString msg);
+    void SendTestDebug(QString msg);
+    void SendTestJudge(QString msg);
+    void TestThread(QVariantHash hash);
+    void InitTest(QVariantHash hash);
+    void StopTest(QVariantHash hash);
+    bool IsStartModeRight(QVariantHash hash);
+    void ExcuteCanCmd(QByteArray msg);
 private:
     QList<int> previous_window;
-    QString ItemJudge;
+    QString Judge;
     QStringList Items;
 
     QThread *thread_can;
@@ -127,13 +139,14 @@ private:
     SqlClient sql;
     TcpClient tcp;
     UdpClient udp;
-    SerialPort serial;
+    SerialPort btn;
     quint8 HomeMode;
     QByteArray stat;
-    MessageBox *msgBox;
+    PopupBox *msgBox;
     quint16 Current_Test_Item;
     QStringList TempItems;
     bool isPause;
+    QString TestStatus;
 };
 
 #endif // WINHOME_H

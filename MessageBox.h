@@ -6,22 +6,22 @@
 #include <QMessageBox>
 #include <QDialogButtonBox>
 
-class MessageBox : public QDialog
+class PopupBox : public QDialog
 {
     Q_OBJECT
 public:
-    explicit MessageBox(QWidget  *parent = 0, const QString &title = tr("Tip"),
+    explicit PopupBox(QWidget  *parent = 0, const QString &title = tr("Tip"),
                             const QString &text = "",
                             QMessageBox::StandardButtons buttons = QMessageBox::Ok,
                             QMessageBox::StandardButton defaultButton = QMessageBox::Ok);
 
-    ~MessageBox();
+    ~PopupBox();
 protected:
     void changeEvent(QEvent *event);
 private slots:
     void onButtonClicked(QAbstractButton *button);
     void TranslateButtonText(void);
-    void ReadVariant(QVariant s);
+    void ReadVariant(QVariantHash s);
 private:
     QDialogButtonBox *ButtonBox;
 };

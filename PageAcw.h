@@ -10,6 +10,7 @@
 #define PAGEACW_H
 
 #include <qmath.h>
+#include <QUuid>
 #include <QDate>
 #include <QDebug>
 #include <QWidget>
@@ -45,8 +46,8 @@ private:
     Ui::PageAcw *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -54,15 +55,9 @@ private slots:
     void InitSettings(void);
     void SaveSettings(void);
     void ItemClick(int r, int c);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(QByteArray msg);
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
-    void SendTestItemsAllEmpty(void);
-    void SendTestItemsAllError(void);
-    void SendTestItemTemp(void);
-    void SendTestItem(void);
-    void SendTestItemError(QString s);
     void SendTestJudge(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
@@ -76,7 +71,16 @@ private slots:
     QString CurrentSettings(void);
     bool EnablePhase(void);
     virtual void showEvent(QShowEvent*);
+
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendTestItems(int num);
+    void SendTestPause(void);
+    void SendTestSave(void);
+    void TestThread(QVariantHash hash);
 private:
     quint16 TimeOut;
     QList<double> Volt;
@@ -97,6 +101,10 @@ private:
     QList<QDoubleSpinBox*> Offset;
     quint8 TestRow;
     QList<QCheckBox*> Check;
+
+    quint8 stat;
+    QList<QVariantHash> ItemView;
+    QString TestStatus;
 };
 
 #endif // PAGEACW_H

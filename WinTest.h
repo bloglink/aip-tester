@@ -22,6 +22,7 @@
 
 #include "define.h"
 #include "Waveform.h"
+#include "WaveBox.h"
 
 namespace Ui {
 class WinTest;
@@ -39,7 +40,7 @@ private:
     Ui::WinTest *ui;
 
 signals:
-    void SendVariant(QVariant s);
+    void SendVariant(QVariantHash s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -47,36 +48,34 @@ private slots:
     void ReadButtons(int win);
     void InitSettings(void);
     void SaveSettings(void);
-    void InitItem(QByteArray msg);
-    void ShowItem(QString item);
-    void ReplaceItem(QString item);
-    void ShowJudge(QString judge);
-    void ShowWaveItem(QByteArray msg);
-    void ShowWaveByte(QByteArray msg);
-    void ShowWaveTest(QByteArray msg);
-    void ShowTemperature(QByteArray msg);
-    void ShowStation(QByteArray msg);
     void ShowTime(void);
     void ShowCode(void);
     void ClearWave(void);
     void ClickItem(int r,  int c);
     QString BarCode1(void);
     QString BarCode2(void);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray dataA);
     void showEvent(QShowEvent *);
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
-    void ReadVariant(QVariant s);
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
+    void InitTest(QVariantHash hash);
     void ItemShow(void);
-    void ItemUpdate(QVariantHash hash);
+    void UpdateItem(QVariantHash hash);
+    void ViewItem(QVariantHash hash);
+    void UpdateWave(QVariantHash hash);
+    void UpdateJudge(QString judge);
+    void WaveView(QVariantHash s);
 private:
     QTimer *timer;
-    QList<Waveform *>wave;
+    QList<WaveBox *>wave;
     QString motor_type;
     QStringList Items;
     QString code;
     QTimer *codeTimer;
-    QList<QVariant> ItemView;
+    QList<QVariantHash> ItemView;
+    QString TestStatus;
+
 };
 
 #endif // WINTEST_H

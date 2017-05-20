@@ -25,16 +25,17 @@ public:
     explicit WaveBox(QWidget *parent = 0);
 
 signals:
-    void BlockClick(QVariant msg);
+    void SendVariant(QVariantHash msg);
 public slots:
-    void ShowWave(QVariant msg);
+    void ShowWave(QVariantHash msg);
+public:
+    QVariantHash WaveInit;
+    QByteArray WaveItem;
 private slots:
     virtual void paintEvent(QPaintEvent *);
     virtual void resizeEvent(QResizeEvent *);
     virtual void mousePressEvent(QMouseEvent *ev);
 private:
-    QVariant WaveInit;
-    QByteArray WaveItem;
     QList<quint16> WaveByte;
     QList<quint16> WaveTest;
 

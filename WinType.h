@@ -39,8 +39,7 @@ private:
     Ui::WinType *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -69,6 +68,9 @@ private slots:
 
     virtual void showEvent(QShowEvent *);
     void on_TabFile_cellClicked(int row, int column);
+
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
 
 private:

@@ -66,7 +66,7 @@
    </item>
    <item>
     <layout class="QGridLayout" name="LayoutCtrl">
-     <item row="0" column="9">
+     <item row="0" column="8">
       <widget class="QPushButton" name="BtnSampleMag">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -85,7 +85,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="8">
+     <item row="0" column="7">
       <widget class="QComboBox" name="BoxStation">
        <property name="minimumSize">
         <size>
@@ -121,7 +121,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="7">
+     <item row="0" column="6">
       <widget class="QLabel" name="TextDebug">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -150,7 +150,7 @@
        </property>
       </widget>
      </item>
-     <item row="0" column="11">
+     <item row="0" column="9">
       <widget class="QPushButton" name="BtnExitMag">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -166,13 +166,6 @@
        </property>
        <property name="text">
         <string>保存退出</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="4">
-      <widget class="QLabel" name="TextAuxiliary">
-       <property name="text">
-        <string>副相：</string>
        </property>
       </widget>
      </item>
@@ -211,20 +204,7 @@
      <item row="0" column="2">
       <widget class="QLabel" name="TextMain">
        <property name="text">
-        <string>主相：</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="10">
-      <widget class="QPushButton" name="BtnExit">
-       <property name="minimumSize">
-        <size>
-         <width>97</width>
-         <height>44</height>
-        </size>
-       </property>
-       <property name="text">
-        <string>退出</string>
+        <string>主副相：</string>
        </property>
       </widget>
      </item>

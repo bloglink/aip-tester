@@ -57,38 +57,11 @@ void SerialPort::ReadSerial()
     msg.append(QString::number(0x13));
     msg.append(QString::number(0x00));
     if (cmd.size() == 4 && quint8(cmd.at(1) == 0x32))
-        SendCommand(ADDR, CMD_START, msg.join(" ").toUtf8());
+        SendContrl("StartTest");
     if (cmd.size() == 4 && quint8(cmd.at(1) == 0x31)) {
-        SendCommand(ADDR, CMD_STOP, msg.join(" ").toUtf8());
+        SendContrl("StopTest");
         com->write("LED1");
     }
-}
-
-void SerialPort::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR)
-        return;
-    switch (cmd) {
-    case CMD_ALARM:
-        SendAlarm(msg);
-        break;
-    }
-}
-
-void SerialPort::SendAlarm(QByteArray msg)
-{
-    if (!com->isOpen() || msg.isEmpty())
-        return;
-    if (msg.at(0) & 0x02)
-        com->write("LEDY");
-    if (msg.at(0) & 0x04)
-        com->write("LEDG");
-    if (msg.at(0) & 0x08)
-        com->write("LEDR");
-    if (msg.at(0) & 0x01)
-        StartBeep();
-    else
-        StopBeep();
 }
 
 void SerialPort::StartBeep()
@@ -112,3 +85,30 @@ void SerialPort::StopBeep()
 #endif
 }
 
+void SerialPort::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "TestAlarm") {
+        if (s.value("TxMessage").toString().contains("LEDY"))
+            com->write("LEDY");
+        if (s.value("TxMessage").toString().contains("LEDG"))
+            com->write("LEDG");
+        if (s.value("TxMessage").toString().contains("LEDR"))
+            com->write("LEDR");
+        if (s.value("TxMessage").toString().contains("BEEP"))
+            StartBeep();
+        else
+            StopBeep();
+    }
+}
+
+void SerialPort::SendContrl(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", s);
+    hash.insert("Station", "left");
+    hash.insert("StartMode", "btn");
+    emit SendVariant(hash);
+}

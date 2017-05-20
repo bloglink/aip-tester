@@ -10,6 +10,7 @@
 #define PAGEDCR_H
 
 #include <qmath.h>
+#include <QUuid>
 #include <QDate>
 #include <QTimer>
 #include <QDebug>
@@ -49,8 +50,8 @@ private:
     Ui::PageDcr *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -61,19 +62,17 @@ private slots:
     bool CheckSetting(void);
     void ItemClick(int r, int c);
     void ItemChange(QString msg);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(QByteArray msg);
-    void ExcuteCanCmdPwr(QByteArray msg);
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadOffset(QByteArray msg);
 
-    void SendTestJudge(void);
+
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);
     void SendCanCmdConfig(void);
-    void SendAlarm(QByteArray addr);
+    void SendAlarm(quint8 addr);
     void SendCanCmdPwr(quint8 pos);
 
     double CalculateOffset(double t, quint8 num);
@@ -87,12 +86,17 @@ private slots:
     void AutoChangeMetal(int index);
     void AutoChangeUnit(int index);
     virtual void showEvent(QShowEvent*);
-    void ReadVariant(QVariant s);
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
-    void SendTestItemsAll(void);
+    void SendTestItems(int num);
+    void SendSafeCheck(void);
+    void SendTestPause(void);
+    void SendTestSave(void);
     void SendTemperature(QByteArray msg);
+    void TestThread(QVariantHash hash);
 private:
     quint16 TimeOut;
     PageNum *input;
@@ -112,8 +116,8 @@ private:
     QList<QDoubleSpinBox*> OffsetR;
     quint8 stat;
     QList<double> pwr;
-    QList<QVariant> ItemView;
-    QString TestMode;
+    QList<QVariantHash> ItemView;
+    QString TestStatus;
 };
 
 #endif // PAGEDCR_H

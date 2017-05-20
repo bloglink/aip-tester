@@ -10,6 +10,7 @@
 #define PAGEIND_H
 
 #include <qmath.h>
+#include <QUuid>
 #include <QDate>
 #include <QDebug>
 #include <QWidget>
@@ -56,8 +57,8 @@ private:
     Ui::PageInd *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -69,11 +70,9 @@ private slots:
     void ItemChange(QString msg);
     int CalculateGear(int row);
     int CalculateMode(int row);
+    void CalculateBalance(void);
 
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(QByteArray msg);
-    void SendTestItemsAllEmpty(void);
-    void SendTestItemsAllError(void);
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void SendTestJudge(void);
     void SendCanCmdStatus(void);
     void ReadCanCmdStatus(QByteArray msg);
@@ -87,7 +86,13 @@ private slots:
     void Delay(int ms);
     QString CurrentSettings(void);
     void showEvent(QShowEvent *);
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendTestItems(int num);
+    void TestThread(QVariantHash hash);
 private:
     QSettings *set;
     quint16 TimeOut;
@@ -110,6 +115,11 @@ private:
     Resultunion  Result1;
     Resultunion  Result2;
     quint8 Mode;
+
+    QList<QVariantHash> ItemView;
+    QString TestStatus;
+    quint8 stat;
+    quint8 TestRow;
 };
 
 #endif // PAGEIND_H

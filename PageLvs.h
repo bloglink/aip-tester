@@ -9,6 +9,7 @@
 #ifndef PAGELVS_H
 #define PAGELVS_H
 
+#include <QUuid>
 #include <QTime>
 #include <QDebug>
 #include <QWidget>
@@ -45,8 +46,8 @@ private:
     Ui::PageLvs *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
     void InitWindows(void);
     void InitButton(void);
@@ -54,10 +55,7 @@ private slots:
     void InitSettings(void);
     void SaveSettings(void);
 
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(QByteArray msg);
-    void InitTestItems(void);
-    void SendTestItemsAllError();
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdStart(quint8 s);
     void SendCanCmdStop(void);
     void SendItemTemp(void);
@@ -70,7 +68,14 @@ private slots:
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     virtual void showEvent(QShowEvent *);
+
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
     void SendWarnning(QString s);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendTestItems(void);
+    void TestThread(QVariantHash hash);
 private:
     QSettings *set;
     quint16 TimeOut;
@@ -83,6 +88,10 @@ private:
     QString Judge;
     QString FileInUse;
     quint8 PowerSupply;
+
+    quint8 stat;
+    QList<QVariantHash> ItemView;
+    QString TestStatus;
 };
 
 #endif // PAGELVS_H

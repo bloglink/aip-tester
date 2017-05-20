@@ -9,6 +9,7 @@
 #ifndef PAGEMAG_H
 #define PAGEMAG_H
 
+#include <QUuid>
 #include <QDate>
 #include <QWidget>
 #include <QListView>
@@ -20,8 +21,8 @@
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
 #include "define.h"
-#include "Waveform.h"
 #include "PageNum.h"
+#include "WaveBox.h"
 
 #define MAX_ROW 8
 
@@ -46,10 +47,9 @@ private:
     Ui::PageMag *ui;
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
-public:
-    QList<Waveform *> WaveMag;
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
+
 private slots:
     void InitWindows(void);
     void InitButtons(void);
@@ -58,36 +58,34 @@ private slots:
     void SaveSettings(void);
     void ItemClick(int r,  int c);
     void ItemChange(QString msg);
-
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(int id, QByteArray msg);
-    void SendTestItemsAllEmpty(void);
-    void SendTestItemsAllError(void);
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdSample(quint8 s);
     void SendCanCmdStart(quint8 s);
-    void SendCanCmdStop(void);
     void SendCanCmdConfig(quint8 s);
-    void SendTestJudge(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
-    void ReadCanCmdWaveStart(QByteArray msg);
-    void ReadCanCmdWave(QByteArray msg);
-    void ReadCanCmdWaveOk(QByteArray msg);
-    void SendWave(QByteArray msg);
     void CalculateDir();
-
-    void SendWarnning(QString s);
-
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
     QString CurrentSettings(void);
     virtual void showEvent(QShowEvent*);
+
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
+    void SendWarnning(QString s);
+    void SendTestItemsAllEmpty(void);
+    void SendTestItemsAllError(void);
+    void SendTestWavesAllEmpty(void);
+    void SendTestItems(int num);
+    void SendTestPause(void);
+    void SendTestSave(void);
+    void TestThread(QVariantHash hash);
 private:
     QSettings *set;
 
     quint16 TimeOut;
     PageNum *input;
-    quint8 CurrentWave;
+    quint8 TestRow;
     QStringList Items;
     QString Judge;
 
@@ -101,8 +99,13 @@ private:
     QList<int> AreaR;
     QList<int> FreqR;
 
-    quint8 station;
+    quint8 stat;
     quint8 MagMode;
+
+    QList<QVariantHash> ItemView;
+    QByteArray wave;
+    QString TestStatus;
+    QList<WaveBox *> WaveMag;
 };
 
 #endif // PAGEMAG_H

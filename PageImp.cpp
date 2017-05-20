@@ -17,6 +17,7 @@ PageImp::PageImp(QWidget *parent) :
     InitWindows();
     InitButtons();
     InitSettings();
+    TestStatus = "free";
 }
 
 PageImp::~PageImp()
@@ -58,9 +59,9 @@ void PageImp::InitWindows()
     input->InitButtons(t);
     connect(input, SIGNAL(ItemChange(QString)), this, SLOT(ItemChange(QString)));
     input->hide();
-    ui->WindgetSetImp->setCurrentIndex(0);
+    ui->stackedWidget->setCurrentIndex(0);
 
-    connect(ui->LabelWave, SIGNAL(BlockClick(int)), this, SLOT(BlockClick(int)));
+    connect(ui->WaveView, SIGNAL(SendVariant(QVariantHash)), this, SLOT(WaveClick(QVariantHash)));
     connect(ui->BoxStart, SIGNAL(valueChanged(int)), this, SLOT(BlockClick(int)));
     connect(ui->BoxEnd, SIGNAL(valueChanged(int)), this, SLOT(BlockClick(int)));
 
@@ -123,18 +124,22 @@ void PageImp::InitWindows()
         Diff.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
         Diff.at(row)->setDecimals(0);
 
-        Freq.append(7);
-        Block0.append(0);
-        Block1.append(395);
-        VoltTest.append(0);
 
-        WaveImp.append(new Waveform(this));
+        Block0.append(5);
+        Block1.append(395);
+        VoltL.append(0);
+        FreqL.append(7);
+        VoltR.append(0);
+        FreqR.append(7);
+        WaveLeft.append("0");
+        WaveRight.append("0");
+
+        WaveImp.append(new WaveBox(this));
         ui->TabParams->setCellWidget(row, 9, WaveImp.at(row));
     }
-    station = WIN_ID_OUT13;
+    stat = WIN_ID_OUT13;
     connect(Volt.at(0), SIGNAL(editingFinished()), this, SLOT(AutoChangeVolt()));
     AvrCount = 0;
-    ImpMode = IMP_FREE;
 }
 
 void PageImp::InitButtons()
@@ -153,64 +158,96 @@ void PageImp::InitButtons()
 
 void PageImp::ReadButtons(int id)
 {
-    if (ImpMode != IMP_FREE)
+    if (TestStatus != "free")
         return;
+    QVariantHash hash;
     switch (id) {
     case Qt::Key_0: //自动采样
+        TestStatus = "sample";
         InitStation();
-        if (ui->BoxStation->currentIndex()  ==  0) {
-            ImpMode = IMP_SAMPLE;
-            SendCanCmdConfig();
-            SendCanCmdSampleAuto();
-        } else {
-            ImpMode = IMP_SAMPLE_OTHER;
-            SendCanCmdConfig();
-            SendCanCmdStart(station);
+        for (int i=0; i < WaveImp.size(); i++) {
+            WaveImp.at(i)->ShowWave(hash);
         }
+        SendCanCmdConfig();
+        SendCanCmdSampleAuto();
+        if (!WaitTimeOut(100))
+            SendWarnning(tr("采样失败"));
+        else
+            SaveSettings();
+        TestStatus = "free";
         AvrCount = 0;
         break;
     case Qt::Key_1:
-        ui->WindgetSetImp->setCurrentIndex(0);
+        ui->stackedWidget->setCurrentIndex(0);
         break;
     case Qt::Key_2: //退出
         SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     case Qt::Key_3: //减频采样
-        ImpMode = IMP_SAMPLE;
+        TestStatus = "sample";
         InitStation();
-        if (Freq[ui->TabParams->currentRow()] != 0)
-            Freq[ui->TabParams->currentRow()]--;
+        TestRow = ui->TabParams->currentRow();
+        if (FreqL[ui->TabParams->currentRow()] != 14)
+            FreqL[TestRow]--;
+        WaveImp.at(TestRow)->ShowWave(hash);
+        WaveView(hash);
         SendCanCmdConfig();
-        SendCanCmdSample(ui->TabParams->currentRow());
+        SendCanCmdSample(TestRow);
+        if (!WaitTimeOut(100))
+            SendWarnning(tr("采样失败"));
+        else
+            SaveSettings();
+        TestStatus = "free";
         AvrCount = 0;
         break;
     case Qt::Key_4: //定频采样
-        ImpMode = IMP_SAMPLE;
+        TestStatus = "sample";
         InitStation();
+        TestRow = ui->TabParams->currentRow();
+        WaveImp.at(TestRow)->ShowWave(hash);
+        WaveView(hash);
         SendCanCmdConfig();
-        SendCanCmdSample(ui->TabParams->currentRow());
+        SendCanCmdSample(TestRow);
+        if (!WaitTimeOut(100))
+            SendWarnning(tr("采样失败"));
+        else
+            SaveSettings();
+        TestStatus = "free";
         AvrCount = 0;
         break;
     case Qt::Key_5: //加频采样
-        ImpMode = IMP_SAMPLE;
+        TestStatus = "sample";
         InitStation();
-        if (Freq[ui->TabParams->currentRow()] != 14)
-            Freq[ui->TabParams->currentRow()]++;
+        TestRow = ui->TabParams->currentRow();
+        if (FreqL[ui->TabParams->currentRow()] != 14)
+            FreqL[TestRow]++;
+        WaveImp.at(TestRow)->ShowWave(hash);
+        WaveView(hash);
         SendCanCmdConfig();
-        SendCanCmdSample(ui->TabParams->currentRow());
+        SendCanCmdSample(TestRow);
+        if (!WaitTimeOut(100))
+            SendWarnning(tr("采样失败"));
+        else
+            SaveSettings();
+        TestStatus = "free";
         AvrCount = 0;
         break;
     case Qt::Key_6: //添加样品
-        ImpMode = IMP_SAMPLE_ADD;
+        TestStatus = "sample";
         InitStation();
         SendCanCmdConfig();
-        SendCanCmdStart(station);
-        WaitTimeOut(1000);
-        CalculateAvarageWave();
+        SendCanCmdStart(stat);
+        if (!WaitTimeOut(100))
+            SendWarnning(tr("采样失败"));
+        else
+            SaveSettings();
+        TestStatus = "free";
+        AvrCount = 0;
+        //        CalculateAvarageWave();
         break;
     case Qt::Key_7:
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     default:
         break;
@@ -220,9 +257,9 @@ void PageImp::ReadButtons(int id)
 void PageImp::InitStation()
 {
     if (ui->BoxStation->currentIndex()  ==  0)
-        station = WIN_ID_OUT13;
+        stat = WIN_ID_OUT13;
     if (ui->BoxStation->currentIndex()  ==  1)
-        station = WIN_ID_OUT14;
+        stat = WIN_ID_OUT14;
 }
 
 void PageImp::InitSettings()
@@ -256,9 +293,6 @@ void PageImp::InitSettings()
     temp = (set->value("Volt", "500 500 500 500 500 500 500 500").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Volt.at(row)->setValue(temp.at(row).toDouble());
-    temp = (set->value("VoltTest", "500 500 500 500 500 500 500 500").toString().split(" "));
-    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
-        VoltTest[row] = temp.at(row).toInt();
     //次数
     temp = (set->value("Time", "1 1 1 1 1 1 1 1").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
@@ -279,10 +313,6 @@ void PageImp::InitSettings()
     temp = (set->value("Diff", "10 10 10 10 10 10 10 10").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Diff.at(row)->setValue(temp.at(row).toDouble());
-    //频率
-    temp = (set->value("Freq", "7 7 7 7 7 7 7 7").toString()).split(" ");
-    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
-        Freq[row] = temp.at(row).toInt();
     //计算起点
     temp = (set->value("Block0", "5 5 5 5 5 5 5 5").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
@@ -291,25 +321,34 @@ void PageImp::InitSettings()
     temp = (set->value("Block1", "395 395 395 395 395 395 395 395").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         Block1[row] = temp.at(row).toInt();
+    //测试电压
+    temp = (set->value("VoltL", "500 500 500 500 500 500 500 500").toString().split(" "));
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
+        VoltL[row] = temp.at(row).toInt();
+    //频率
+    temp = (set->value("FreqL", "7 7 7 7 7 7 7 7").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
+        FreqL[row] = temp.at(row).toInt();
+    //测试电压
+    temp = (set->value("VoltR", "500 500 500 500 500 500 500 500").toString().split(" "));
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
+        VoltR[row] = temp.at(row).toInt();
+    //频率
+    temp = (set->value("FreqL", "7 7 7 7 7 7 7 7").toString()).split(" ");
+    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
+        FreqR[row] = temp.at(row).toInt();
     //波形
-    QByteArray w;
-    QByteArray def;
-    for (int i=0; i < 400; i++) {
-        def.append(QByteArray(1, 0x02));
-        def.append(QByteArray(1, 0x04));
-    }
-    for (int row=0; row < qMin(WaveImp.size(), MAX_ROW); row++) {
-        QString ByteL = "WaveImpL"+QString::number(row);
-        w = set->value(ByteL, def.toBase64()).toString().toUtf8();
-        WaveImp.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
-
-        QString ByteR = "WaveImpR"+QString::number(row);
-        w = set->value(ByteR, def.toBase64()).toString().toUtf8();
-        WaveImp.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
-
-        QString T1 = Terminal1.at(row)->text();
-        QString T2 = Terminal2.at(row)->text();
-        WaveImp.at(row)->WaveItem = QString(tr("匝间%1-%2")).arg(T1).arg(T2).toUtf8();
+    QVariantHash hash;
+    for (int i=0; i < qMin(WaveImp.size(), MAX_ROW); i++) {
+        QString ByteL = "WaveImpL"+QString::number(i);
+        QString ByteR = "WaveImpR"+QString::number(i);
+        WaveLeft[i] = set->value(ByteL).toString();
+        WaveRight[i] = set->value(ByteR).toString();
+        if (ui->BoxStation->currentIndex() == 0)
+            hash.insert("WaveByte", WaveLeft[i]);
+        if (ui->BoxStation->currentIndex() == 1)
+            hash.insert("WaveByte", WaveRight[i]);
+        WaveImp.at(i)->ShowWave(hash);
     }
     qDebug() << QTime::currentTime().toString() << "PageImp read OK";
 }
@@ -335,10 +374,6 @@ void PageImp::SaveSettings()
         temp.append(Volt.at(i)->text());
     set->setValue("Volt", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < VoltTest.size(); i++)
-        temp.append(QString::number(VoltTest.at(i)));
-    set->setValue("VoltTest", (temp.join(" ").toUtf8()));
-    temp.clear();
     for (int i=0; i < Time.size(); i++)
         temp.append(Time.at(i)->text());
     set->setValue("Time", (temp.join(" ").toUtf8()));
@@ -359,10 +394,6 @@ void PageImp::SaveSettings()
         temp.append(Diff.at(i)->text());
     set->setValue("Diff", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < Freq.size(); i++)
-        temp.append(QString::number(Freq.at(i)));
-    set->setValue("Freq", (temp.join(" ").toUtf8()));
-    temp.clear();
     for (int i=0; i < Block0.size(); i++)
         temp.append(QString::number(Block0.at(i)));
     set->setValue("Block0", (temp.join(" ").toUtf8()));
@@ -371,15 +402,29 @@ void PageImp::SaveSettings()
         temp.append(QString::number(Block1.at(i)));
     set->setValue("Block1", (temp.join(" ").toUtf8()));
 
-    for (int row=0; row < qMin(WaveImp.size(), ui->TabParams->rowCount()); row++) {
-        QString ByteL = "WaveImpL"+QString::number(row);
-        QString ByteR = "WaveImpR"+QString::number(row);
-        QString L = WaveImp.at(row)->WaveBytes.at(0).toBase64();
-        QString R = WaveImp.at(row)->WaveBytes.at(1).toBase64();
-        set->setValue(ByteL, L);
-        set->setValue(ByteR, R);
-    }
+    temp.clear();
+    for (int i=0; i < VoltL.size(); i++)
+        temp.append(QString::number(VoltL.at(i)));
+    set->setValue("VoltL", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i < FreqL.size(); i++)
+        temp.append(QString::number(FreqL.at(i)));
+    set->setValue("FreqL", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i < VoltR.size(); i++)
+        temp.append(QString::number(VoltL.at(i)));
+    set->setValue("VoltR", (temp.join(" ").toUtf8()));
+    temp.clear();
+    for (int i=0; i < FreqR.size(); i++)
+        temp.append(QString::number(FreqL.at(i)));
+    set->setValue("FreqR", (temp.join(" ").toUtf8()));
 
+    for (int i=0; i < ItemView.size(); i++) {
+        QString ByteL = "WaveImpL"+QString::number(i);
+        QString ByteR = "WaveImpR"+QString::number(i);
+        set->setValue(ByteL, WaveLeft[i]);
+        set->setValue(ByteR, WaveRight[i]);
+    }
     qDebug() << QTime::currentTime().toString() << "PageImp save OK";
 }
 
@@ -397,13 +442,9 @@ void PageImp::ItemClick(int r,  int c)
         input->showNormal();
         break;
     case 9:
-        ui->WindgetSetImp->setCurrentIndex(1);
-        ui->LabelWave->WaveByteShow(WaveImp.at(r)->WaveByte);
-        ui->LabelWave->WaveItemShow(WaveImp.at(r)->WaveItem);
-        ui->LabelWave->WaveBlock(Block0.at(r), Block1.at(r));
-        ui->BoxStart->setValue(Block0.at(r));
-        ui->BoxEnd->setValue(Block1.at(r));
-        CurrentWave = r;
+        TestRow = r;
+        WaveView(ItemView[r]);
+        ui->stackedWidget->setCurrentIndex(1);
         break;
     default:
         break;
@@ -417,130 +458,37 @@ void PageImp::ItemChange(QString msg)
 
 void PageImp::BlockClick(int x)
 {
-    if (x >=200) {
-        ui->LabelWave->WaveBlock(ui->LabelWave->Block0, x);
-        ui->BoxEnd->setValue(x);
-        Block1[CurrentWave] = x;
-    } else {
-        ui->LabelWave->WaveBlock(x, ui->LabelWave->Block1);
-        ui->BoxStart->setValue(x);
-        Block0[CurrentWave] = x;
-    }
+    if (x < 200)
+        Block0[TestRow] = x;
+    else
+        Block1[TestRow] = x;
+    QVariantHash hash = ItemView[TestRow];
+    hash.insert("Block0", Block0[TestRow]);
+    hash.insert("Block1", Block1[TestRow]);
+    hash.insert("WaveItem", hash.value("TestItem").toString());
+    ui->WaveView->ShowWave(hash);
 }
 
-void PageImp::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void PageImp::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    switch (addr) {
-    case ADDR:
-    case WIN_ID_IMP:
-    case CAN_ID_IMP:
-    case CAN_ID_IMP_WAVE:
-        break;
-    default:
+    if (addr != CAN_ID_IMP && addr != CAN_ID_IMP_WAVE)
         return;
-        break;
-    }
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(addr, msg);
-        break;
-    case CMD_CHECK:
-        ImpMode = IMP_INIT;
-        SendCanCmdStatus();
-        if (!WaitTimeOut(30))
-            SendWarnning("超时");
-        ImpMode = IMP_FREE;
-        break;
-    case CMD_START:
-        ImpMode = IMP_TEST;
-        emit SendCommand(ADDR, CMD_WAVE_HIDE, NULL);
-        SendCanCmdStart(msg.toInt());
-        JudgeAll = "OK";
-        if (!WaitTimeOut(1000)) {
-            JudgeAll = "NG";
-            SendTestItemsAllError();
-        }
-        SendTestJudge();
-        ImpMode = IMP_FREE;
-        break;
-    case CMD_INIT:
-        InitSettings();
-        InitTestItems();
-        SendCanCmdConfig();
-        break;
-    case CMD_WAVE:
-        SendWave(msg);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageImp::ExcuteCanCmd(int id, QByteArray msg)
-{
-    if (ImpMode  ==  IMP_FREE)
+    if (TestStatus == "free")
         return;
     TimeOut = 0;
-    if (id  ==  CAN_ID_IMP_WAVE) {
-        ReadCanCmdWave(msg);
+    if (addr  ==  CAN_ID_IMP_WAVE) {
+        wave.append(msg);
         return;
     }
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+    qDebug() << "imp" << msg.toHex();
+    if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
         ReadCanCmdStatus(msg);
-    if (msg.size() == 7 && (quint8)msg.at(0) == 0x02)
-        ReadCanCmdSample(msg);
-    if (msg.size() == 5 && (quint8)msg.at(0) == 0x03)
-        ReadCanCmdWaveStart(msg);
-    if (msg.size() == 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff)
-        ReadCanCmdWaveOk(msg);
-}
-
-void PageImp::InitTestItems()
-{
-    Items.clear();
-    WaveNumber.clear();
-    QStringList n;
-    for (int row = 0; row < Enable.size(); row++) {
-        QStringList s;
-        QString T1 = Terminal1.at(qMin(row, Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row, Terminal2.size()))->text();
-        QString V = Volt.at(qMin(row, Volt.size()))->text();
-        QString C = Flut.at(qMin(row, Flut.size()))->text();
-        QString P = Phase.at(qMin(row, Phase.size()))->text();
-        QString A = Area.at(qMin(row, Area.size()))->text();
-        QString D = Diff.at(qMin(row, Diff.size()))->text();
-
-        s.append(QString(tr("匝间%1-%2")).arg(T1).arg(T2));
-        if (C.toInt()  ==  0)
-            s.append(QString("%1V, %2, %3, %4").arg(V).arg(P).arg(A).arg(D));
-        else
-            s.append(QString("%1V, %2, %3, %4, %5").arg(V).arg(C).arg(P).arg(A).arg(D));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-        WaveImp.at(row)->WaveTest.clear();
-    }
-    for (int row = 0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text()  ==  "Y") {
-            n.append(Items.at(row));
-            WaveNumber.append(row);
-        }
-    }
-    emit SendCommand(ADDR, CMD_INIT_ITEM, n.join("\n").toUtf8());
-}
-
-void PageImp::SendTestItemsAllError()
-{
-    for (int row = 0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text()  ==  "Y") {
-            QStringList s = QString(Items.at(row)).split("@");
-            if (s.at(2)  ==  " ")
-                s[2] = "---";
-            if (s.at(3)  ==  " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-        }
-    }
+    if (msg.size() >= 7 && (quint8)msg.at(0) == 0x02)
+        ReadCanCmdResult(msg);
+    if (msg.size() >= 5 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) != 0xff)
+        wave.clear();
+    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff)
+        ReadCanCmdWaveOk();
 }
 
 void PageImp::SendCanCmdStatus()
@@ -549,7 +497,7 @@ void PageImp::SendCanCmdStatus()
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x24) << quint8(0x01) << quint8(0x00);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageImp::SendCanCmdSampleAuto()
@@ -565,9 +513,9 @@ void PageImp::SendCanCmdSampleAuto()
     quint8 mode = 0x01;
     if (ui->BoxOffset->isChecked())
         mode = 0x04;
-    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(mode) << quint8(station)
+    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(mode) << quint8(stat)
         << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageImp::SendCanCmdSample(quint16 t)
@@ -576,14 +524,14 @@ void PageImp::SendCanCmdSample(quint16 t)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0x0001 << t;
-    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x02) << quint8(station)
+    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x02) << quint8(stat)
         << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageImp::SendCanCmdStart(quint8 pos)
 {
-    station = pos;
+    stat = pos;
     QByteArray msg;
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -592,18 +540,9 @@ void PageImp::SendCanCmdStart(quint8 pos)
         if (Enable.at(row)->text()  ==  "Y")
             tt += 0x0001 << row;
     }
-    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x00) << quint8(station)
+    out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x00) << quint8(stat)
         << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
-}
-
-void PageImp::SendCanCmdStop()
-{
-    QByteArray msg;
-    QDataStream out(&msg,  QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out << quint16(0x24) << quint8(0x01) << quint8(0x02);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageImp::SendCanCmdConfig()
@@ -613,36 +552,27 @@ void PageImp::SendCanCmdConfig()
     out.setVersion(QDataStream::Qt_4_8);
     for (int row=0; row < Enable.size(); row++) {
         int v = 0;
-        switch (ImpMode) {
-        case IMP_FREE:
-        case IMP_INIT:
-        case IMP_TEST:
-        case IMP_SAMPLE_ADD:
-        case IMP_SAMPLE_OTHER:
-            v = VoltTest.at(row);
-            break;
-        case IMP_SAMPLE:
+        quint8 f = FreqL.at(row);
+//        if (stat == WIN_ID_OUT13)
+//            f = FreqL.at(row);
+//        if (stat == WIN_ID_OUT14)
+//            f = FreqR.at(row);
+//        qDebug() << f << FreqL.at(row) << FreqR.at(row);
+        if (TestStatus != "sample") {
+            if (stat == WIN_ID_OUT13)
+                v = VoltL.at(row);
+            if (stat == WIN_ID_OUT14)
+                v = VoltR.at(row);
+        } else {
             v = Volt.at(row)->value();
-            break;
-        default:
-            break;
         }
         out << quint16(0x24) << quint8(0x08) << quint8(0x03) << quint8(row)
             << quint8(Terminal1.at(row)->text().toInt())
             << quint8(Terminal2.at(row)->text().toInt())
             << quint8(v/256) << quint8(v%256)
-            << quint8(CalculateGear(row)) << quint8(Freq.at(row));
+            << quint8(CalculateGear(row)) << quint8(f);
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
-}
-
-void PageImp::SendTestJudge()
-{
-    QStringList s;
-    s.append("匝间");
-    s.append(FileInUse);
-    s.append(JudgeAll);
-    emit SendCommand(ADDR, CMD_JUDGE, s.join("@").toUtf8());
+    emit CanMsg(msg);
 }
 
 void PageImp::ReadCanCmdStatus(QByteArray msg)
@@ -666,15 +596,25 @@ void PageImp::ReadCanCmdStatus(QByteArray msg)
         SendWarnning("UNKONW_ERROR");
         break;
     }
-    ImpMode = IMP_FREE;
+    TestStatus = "free";
 }
 
-void PageImp::CalculateResult(QByteArray )
+void PageImp::CalculateResult()
 {
-    quint8 num = station - WIN_ID_OUT13;
-    WaveImp.at(CurrentWave)->InitWaveByte(num);
-    WaveImp.at(CurrentWave)->InitWaveTest(num);
+    QByteArray byte;
+    QByteArray test;
+    if (stat == WIN_ID_OUT13)
+        byte = QByteArray::fromBase64(WaveLeft[TestRow].toUtf8());
+    if (stat == WIN_ID_OUT14)
+        byte = QByteArray::fromBase64(WaveRight[TestRow].toUtf8());
+    test = QByteArray::fromBase64(ItemView[TestRow].value("WaveTest").toString().toUtf8());
 
+    QList<int> ByteY;
+    QList<int> TestY;
+    for (int i=0; i < qMin(byte.size()/2, test.size()/2); i++) {
+        ByteY.append(quint16(byte.at(i*2)*256) + quint8(byte.at(i*2+1)));
+        TestY.append(quint16(test.at(i*2)*256) + quint8(test.at(i*2+1)));
+    }
     qint32 Area1 = 0;
     qint32 Area2 = 0;
     qint32 Area3 = 0;
@@ -686,23 +626,23 @@ void PageImp::CalculateResult(QByteArray )
     qint32 A = 0;
     qint32 D = 0;
     qint32 P = 0;
-    quint16 s = Block0.at(CurrentWave);
-    quint16 e = Block1.at(CurrentWave);
+    quint16 s = Block0.at(TestRow);
+    quint16 e = Block1.at(TestRow);
     if (s  <  1)
         s = 1;
     if (e > 398)
         e = 398;
     for (int i=s; i < e; i++) {
-        int a1 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
-        int a2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
+        int a1 = ByteY.at(i);
+        int a2 = TestY.at(i);
         Area1 += abs(a1-0x200);
         Area2 += abs(a2-0x200);
-        int b1 = WaveImp.at(CurrentWave)->WaveByteH.at(i-1);
-        int b2 = WaveImp.at(CurrentWave)->WaveByteH.at(i);
-        int b3 = WaveImp.at(CurrentWave)->WaveByteH.at(i+1);
-        int c1 = WaveImp.at(CurrentWave)->WaveTestH.at(i-1);
-        int c2 = WaveImp.at(CurrentWave)->WaveTestH.at(i);
-        int c3 = WaveImp.at(CurrentWave)->WaveTestH.at(i+1);
+        int b1 = ByteY.at(i-1);
+        int b2 = ByteY.at(i);
+        int b3 = ByteY.at(i+1);
+        int c1 = TestY.at(i-1);
+        int c2 = TestY.at(i);
+        int c3 = TestY.at(i+1);
         Area3 += abs((b1+b2*2+b3)-(c1+c2*2+c3));
 
         Flut1 += abs(b2-b3);
@@ -717,140 +657,84 @@ void PageImp::CalculateResult(QByteArray )
 
     QString n;
     QString judge = "OK";
-    int number = CurrentWave;
-    if (Flut.at(qMin(number, Flut.size()-1))->value() != 0)
-        n = QString("电晕:%1,相位:%2%,面积:%3%,差积:%4%").arg(F).arg(P).arg(A).arg(D);
-    else
-        n = QString("相位:%1,面积:%2%,差积:%3%").arg(P).arg(A).arg(D);
 
-    if (abs(A) >= Area.at(qMin(number, Area.size()-1))->value())
-        judge = "NG";
-    else if (abs(D) >= Diff.at(qMin(number, Diff.size()-1))->value())
-        judge = "NG";
-    else if (abs(F) >= Flut.at(qMin(number, Flut.size()-1))->value() &&
-             Flut.at(qMin(number, Flut.size()-1))->value() != 0)
-        judge = "NG";
-    else if (abs(P) >= Phase.at(qMin(number, Phase.size()-1))->value())
-        judge = "NG";
-    if (judge  ==  "NG")
-        JudgeAll = "NG";
-    QStringList t = QString(Items.at(CurrentWave)).split("@");
-    if (t.at(2)  ==  " ")
-        t[2] = n;
-    if (t.at(3)  ==  " ")
-        t[3] = judge;
-    emit SendCommand(ADDR, CMD_ITEM, t.join("@").toUtf8());
+    if (Flut[TestRow]->value() != 0) {
+        n.append(tr("电晕:%1 ").arg(F));
+        if (Flut[TestRow]->value() < abs(F))
+            judge = "NG";
+    }
+    if (Phase[TestRow]->value() != 0) {
+        n.append(tr("相位:%1 ").arg(P));
+        if (Phase[TestRow]->value() < abs(P))
+            judge = "NG";
+    }
+    if (Area[TestRow]->value() != 0) {
+        n.append(tr("面积:%1 ").arg(A));
+        if (Area[TestRow]->value() < abs(A))
+            judge = "NG";
+    }
+    if (Diff[TestRow]->value() != 0) {
+        n.append(tr("差积:%1 ").arg(D));
+        if (Diff[TestRow]->value() < abs(D))
+            judge = "NG";
+    }
+
+    ItemView[TestRow].insert("TestResult", n);
+    ItemView[TestRow].insert("TestResult1", tr("电晕:%1").arg(F));
+    ItemView[TestRow].insert("TestResult2", tr("相位:%1").arg(P));
+    ItemView[TestRow].insert("TestResult3", tr("面积:%1").arg(A));
+    ItemView[TestRow].insert("TestResult4", tr("差积:%1").arg(D));
+    ItemView[TestRow].insert("TestJudge", judge);
 }
 
 void PageImp::CalculateAvarageWave()
 {
-    QByteArray w;
-    quint8 num = station - WIN_ID_OUT13;
-    QByteArray byte = WaveImp.at(CurrentWave)->WaveByte;
-    QByteArray test = WaveImp.at(CurrentWave)->WaveBytes[num];
-    AvrCount++;
-    for (int i=0; i < qMin(byte.size(), test.size()); i++)
-        w.append(quint8(test.at(i))+(quint8(test.at(i))-quint8(byte.at(i)))/AvrCount);
-    if (AvrCount  ==  1)
-        w = WaveImp.at(CurrentWave)->WaveByte;
-    WaveImp.at(CurrentWave)->WaveBytes[num] = w;
-    WaveImp.at(CurrentWave)->WaveByteShow(w);
-    ui->LabelWave->WaveByteShow(w);
+    //    QByteArray w;
+    //    quint8 num = stat - WIN_ID_OUT13;
+    //    QByteArray byte = WaveImp.at(TestRow)->WaveByte;
+    //    QByteArray test = WaveImp.at(TestRow)->WaveBytes[num];
+    //    AvrCount++;
+    //    for (int i=0; i < qMin(byte.size(), test.size()); i++)
+    //        w.append(quint8(test.at(i))+(quint8(test.at(i))-quint8(byte.at(i)))/AvrCount);
+    //    if (AvrCount  ==  1)
+    //        w = WaveImp.at(TestRow)->WaveByte;
+    //    WaveImp.at(TestRow)->WaveBytes[num] = w;
+    //    WaveImp.at(TestRow)->WaveByteShow(w);
+    //    ui->LabelWave->WaveByteShow(w);
 }
 
-void PageImp::ReadCanCmdSample(QByteArray msg)
+void PageImp::ReadCanCmdResult(QByteArray msg)
 {
-    if (ImpMode != IMP_SAMPLE)
+    TestRow = quint8(msg.at(1));
+    if (TestStatus != "sample")
         return;
-    quint8 num = quint8(msg.at(1));
-    Freq[num] = quint8(msg.at(3));
-    VoltTest[num] = quint16(msg.at(4)*256)+quint8(msg.at(5));
+    FreqL[TestRow] = quint8(msg.at(3));
+    VoltL[TestRow] = quint16(msg.at(4)*256)+quint8(msg.at(5));
+//    if (stat == WIN_ID_OUT13) {
+//        FreqL[TestRow] = quint8(msg.at(3));
+//        VoltL[TestRow] = quint16(msg.at(4)*256)+quint8(msg.at(5));
+//    }
+//    if (stat == WIN_ID_OUT14) {
+//        FreqR[TestRow] = quint8(msg.at(3));
+//        VoltR[TestRow] = quint16(msg.at(4)*256)+quint8(msg.at(5));
+//    }
 }
 
-void PageImp::ReadCanCmdWave(QByteArray msg)
+void PageImp::ReadCanCmdWaveOk()
 {
-    switch (ImpMode) {
-    case IMP_FREE:
-    case IMP_INIT:
-        break;
-    case IMP_SAMPLE:
-    case IMP_SAMPLE_ADD:
-    case IMP_SAMPLE_OTHER:
-        WaveImp.at(CurrentWave)->WaveByte.append(msg);
-        break;
-    case IMP_TEST:
-        WaveImp.at(CurrentWave)->WaveTest.append(msg);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageImp::ReadCanCmdWaveOk(QByteArray msg)
-{
-    QByteArray w;
-    quint8 num = station - WIN_ID_OUT13;
-    switch (ImpMode) {
-    case IMP_SAMPLE:
-    case IMP_SAMPLE_ADD:
-    case IMP_SAMPLE_OTHER:
-        w = WaveImp.at(CurrentWave)->WaveByte;
-        WaveImp.at(CurrentWave)->WaveBytes[num] = w;
-        WaveImp.at(CurrentWave)->WaveByteShow(w);
-        ui->LabelWave->WaveByteShow(w);
-        break;
-    case IMP_TEST:
-        w = WaveImp.at(CurrentWave)->WaveTest;
-        WaveImp.at(CurrentWave)->WaveTests[num] = w;
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
-        CalculateResult(msg);
-        break;
-    }
-}
-
-void PageImp::ReadCanCmdWaveStart(QByteArray msg)
-{
-    CurrentWave = (quint8)msg.at(1);
-    quint8 num = station - WIN_ID_OUT13;
-    QByteArray w = WaveImp.at(CurrentWave)->WaveBytes[num];
-    QByteArray i = WaveImp.at(CurrentWave)->WaveItem;
-    switch (ImpMode) {
-    case IMP_FREE:
-    case IMP_INIT:
-        break;
-    case IMP_SAMPLE:
-    case IMP_SAMPLE_ADD:
-    case IMP_SAMPLE_OTHER:
-        WaveImp.at(CurrentWave)->WaveByte.clear();
-        break;
-    case IMP_TEST:
-        WaveImp.at(CurrentWave)->WaveTest.clear();
-        emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
-        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageImp::SendWave(QByteArray msg)
-{
-    int t = WaveNumber.size();
-    for (int i=0; i < WaveNumber.size(); i++) {
-        if (WaveImp.at(WaveNumber.at(i))->WaveItem  ==  msg)
-            t = i;
-    }
-    if (t  ==  WaveNumber.size())
+    if (TestStatus == "sample") {
+        ItemView[TestRow].insert("WaveByte", wave.toBase64());
+        WaveImp[TestRow]->ShowWave(ItemView[TestRow]);
+        WaveView(ItemView[TestRow]);
+        if (stat == WIN_ID_OUT13)
+            WaveLeft[TestRow] = wave.toBase64();
+        if (stat == WIN_ID_OUT14)
+            WaveRight[TestRow] = wave.toBase64();
         return;
-    for (int i=0; i < qMin(3, WaveNumber.size()-t); i++) {
-        QByteArray w;
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
-        emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
-        emit SendCommand(ADDR, CMD_WAVE_TEST, w);
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
     }
+    ItemView[TestRow].insert("WaveTest", wave.toBase64());
+    CalculateResult();
+    SendTestItems(TestRow);
 }
 
 int PageImp::CalculateGear(int row)
@@ -872,9 +756,7 @@ int PageImp::CalculateGear(int row)
 bool PageImp::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (ImpMode != IMP_FREE) {
-        if (ImpMode == IMP_TEST && TimeOut%50 == 0)
-            SendCanCmdStatus();
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -900,7 +782,43 @@ void PageImp::AutoChangeVolt()
 void PageImp::showEvent(QShowEvent *e)
 {
     InitSettings();
+    SendTestItemsAllEmpty();
     e->accept();
+}
+
+void PageImp::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageImp" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "ItemInit") {
+        if (s.value("Station").toString() == "left")
+            stat = WIN_ID_OUT13;
+        if (s.value("Station").toString() == "right")
+            stat = WIN_ID_OUT14;
+        InitSettings();
+        SendCanCmdConfig();
+        SendTestItemsAllEmpty();
+    }
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand") == "CheckStatus") {
+        TestStatus = "init";
+        SendCanCmdStatus();
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
+        TestStatus = "free";
+    }
+    if (s.value("TxCommand").toString() == "TestSave")
+        SendTestSave();
+}
+
+void PageImp::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
 }
 
 void PageImp::SendWarnning(QString s)
@@ -909,6 +827,165 @@ void PageImp::SendWarnning(QString s)
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("匝间异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
+}
+
+void PageImp::SendTestItemsAllEmpty()
+{
+    ItemView.clear();
+    QString uid = QUuid::createUuid();
+    for (int i = 0; i < Enable.size(); i++) {
+        QString T1 = Terminal1.at(i)->text();
+        QString T2 = Terminal2.at(i)->text();
+        QString V = Volt.at(i)->text();
+        QString C = Flut.at(i)->text();
+        QString P = Phase.at(i)->text();
+        QString A = Area.at(i)->text();
+        QString D = Diff.at(i)->text();
+        QString para = tr("%3V").arg(V);
+        if (C.toInt() != 0)
+            para += " " + C;
+        if (P.toInt() != 0)
+            para += " " + P;
+        if (A.toInt() != 0)
+            para += " " + A + "%";
+        if (D.toInt() != 0)
+            para += " " + D + "%";
+        QVariantHash hash;
+        hash.insert("TestEnable", Enable.at(i)->text());
+        hash.insert("TestItem", tr("匝间%1-%2").arg(T1).arg(T2));
+        hash.insert("TestPara", para);
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestUid", uid);
+        hash.insert("ItemName", tr("匝间%1").arg(i+1));
+        if (stat == WIN_ID_OUT13)
+            hash.insert("WaveByte", WaveLeft.at(i));
+        if (stat == WIN_ID_OUT14)
+            hash.insert("WaveByte", WaveRight.at(i));
+        hash.insert("WaveTest", "");
+        ItemView.append(hash);
+    }
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemView");
+            emit SendVariant(hash);
+        }
+    }
+}
+
+void PageImp::SendTestItemsAllError()
+{
+    QByteArray def;
+    for (int i=0; i < 400; i++) {
+        def.append(QByteArray(1, 0x02));
+        def.append(QByteArray(1, 0x04));
+    }
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemUpdate");
+            hash.insert("TestResult", "---");
+            hash.insert("TestJudge", "NG");
+            hash.insert("WaveTest", def.toBase64());
+            hash.insert("WaveItem", hash.value("TestItem").toString());
+            emit SendVariant(hash);
+        }
+    }
+    qDebug() << "imp test all error";
+}
+
+void PageImp::SendTestWavesAllEmpty()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "WaveInit");
+    emit SendVariant(hash);
+}
+
+void PageImp::SendTestItems(int num)
+{
+    QVariantHash hash = ItemView.at(num);
+    if (hash.value("TestEnable") == "Y") {
+        hash.insert("TxAddress", "WinTest");
+        hash.insert("TxCommand", "ItemUpdate");
+        if (!hash.value("WaveTest").toString().isEmpty())
+            hash.insert("WaveItem", hash.value("TestItem").toString());
+        emit SendVariant(hash);
+    }
+}
+
+void PageImp::SendTestPause()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestPause");
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
+}
+
+void PageImp::SendTestSave()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            QStringList s;
+            s.append(hash.value("TestResult1").toString());
+            s.append(hash.value("TestResult2").toString());
+            s.append(hash.value("TestResult3").toString());
+            s.append(hash.value("TestResult4").toString());
+            hash.insert("TestResult", s.join(","));
+            hash.insert("TxAddress", "WinHome");
+            hash.insert("TxCommand", "TestSave");
+            emit SendVariant(hash);
+        }
+    }
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestSave");
+    hash.insert("ItemName", tr("匝间"));
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
+}
+
+void PageImp::WaveView(QVariantHash s)
+{
+    QVariantHash hash = s;
+    hash.insert("Block0", Block0[TestRow]);
+    hash.insert("Block1", Block1[TestRow]);
+    hash.insert("WaveItem", hash.value("TestItem").toString());
+    ui->WaveView->ShowWave(hash);
+    ui->BoxStart->setValue(Block0[TestRow]);
+    ui->BoxEnd->setValue(Block1[TestRow]);
+}
+
+void PageImp::WaveClick(QVariantHash s)
+{
+    ui->BoxStart->setValue(s.value("Block0").toInt());
+    ui->BoxEnd->setValue(s.value("Block1").toInt());
+    Block0[TestRow] = s.value("Block0").toInt();
+    Block1[TestRow] = s.value("Block1").toInt();
+}
+
+void PageImp::TestThread(QVariantHash hash)
+{
+    TestStatus = "buzy";
+    Judge = "OK";
+    if (hash.value("Station").toString() == "left")
+        stat = WIN_ID_OUT13;
+    if (hash.value("Station").toString() == "right")
+        stat = WIN_ID_OUT14;
+    SendTestWavesAllEmpty();
+    SendCanCmdStart(stat);
+    if (!WaitTimeOut(100)) {
+        Judge = "NG";
+        SendTestItemsAllError();
+    }
+    if (Judge == "NG")
+        SendTestPause();
+    TestStatus = "free";
 }
 /*********************************END OF FILE**********************************/

@@ -17,7 +17,7 @@ PageInd::PageInd(QWidget *parent) :
     InitWindows();
     InitButtons();
     InitSettings();
-    Mode = IND_FREE;
+    TestStatus = "free";
 }
 
 PageInd::~PageInd()
@@ -136,7 +136,7 @@ void PageInd::ReadButtons(int id)
         break;
     case Qt::Key_2:
         SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     default:
         break;
@@ -293,49 +293,11 @@ void PageInd::ItemChange(QString msg)
         ui->TabParams->currentItem()->setText(msg);
 }
 
-void PageInd::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void PageInd::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_IND && addr != CAN_ID_IND)
+    if (addr != CAN_ID_IND)
         return;
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(msg);
-        break;
-    case CMD_CHECK:
-        Mode = IND_INIT;
-        SendCanCmdStatus();
-        if (!WaitTimeOut(30))
-            SendWarnning("超时");
-        Mode = IND_FREE;
-        break;
-    case CMD_START:
-        Mode = IND_TEST;
-        Judge = "OK";
-        SendCanCmdStart(msg.toInt());
-        if (!WaitTimeOut(ui->BoxTime->value()*100+100)) {
-            Judge = "NG";
-            SendTestItemsAllError();
-        }
-        SendTestJudge();
-        Mode = IND_FREE;
-        break;
-    case CMD_STOP:
-        SendCanCmdStop();
-        Mode = IND_FREE;
-        break;
-    case CMD_INIT:
-        InitSettings();
-        SendTestItemsAllEmpty();
-        SendCanCmdConfig();
-        break;
-    default:
-        break;
-    }
-}
-
-void PageInd::ExcuteCanCmd(QByteArray msg)
-{
-    if (Mode == IND_FREE)
+    if (TestStatus == "free")
         return;
     TimeOut = 0;
     if (msg.size() == 8 && (quint8)msg.at(0) == 0x00) {
@@ -389,8 +351,9 @@ void PageInd::ReadCanCmdStatus(QByteArray msg)
 void PageInd::ReadCanCmdResult(QByteArray msg)
 {
     quint8 number = quint8(msg.at(1));
-    if (number >0 )
+    if (number > 0)
         number--;
+    TestRow = number;
     if (quint8(msg.at(3) == 0x00)) {
         Result1.dat[0] = quint8(msg.at(4));
         Result1.dat[1] = quint8(msg.at(5));
@@ -416,12 +379,12 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
 
         Results.append(Result1.Result);
 
-        t +=", " + QString::number(Result2.Result, 'f', 2);
-        double max = Max.at(number)->value();
-        double min = Min.at(number)->value();
-        double qmax = QMax.at(number)->value();
-        double qmin = QMin.at(number)->value();
-        if (Unit.at(number)->currentText() == "mH") {
+        t += ", " + QString::number(Result2.Result, 'f', 2);
+        double max = Max.at(TestRow)->value();
+        double min = Min.at(TestRow)->value();
+        double qmax = QMax.at(TestRow)->value();
+        double qmin = QMin.at(TestRow)->value();
+        if (Unit.at(TestRow)->currentText() == "mH") {
             max *= 1000;
             min *= 1000;
         }
@@ -431,39 +394,10 @@ void PageInd::ReadCanCmdResult(QByteArray msg)
             Judge = "NG";
             judge = "NG";
         }
-        QStringList s = QString(Items.at(number)).split("@");
-        if (s.at(2) == " ")
-            s[2] = t;
-        if (s.at(3) == " ")
-            s[3] = judge;
-        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
 
-        if ((ui->BoxUnbalance->value() != 0) && (Results.size() == 3)) {
-            double sum = 0;
-            double avr = 0;
-            QString u;
-            for (int i=0; i < Results.size(); i++) {
-                sum += Results.at(i);
-            }
-            avr = sum/Results.size();
-            judge = "OK";
-            for (int i=0; i < Results.size(); i++) {
-                double un = fabs(Results.at(i)-avr)*100/avr;
-                qDebug()  <<  un  <<  avr;
-                u.append(QString::number(un, 'f', 1));
-                u.append("% ");
-                if (un >= ui->BoxUnbalance->value()) {
-                    Judge = "NG";
-                    judge = "NG";
-                }
-            }
-            QStringList s = QString(Items.last()).split("@");
-            if (s.at(2) == " ")
-                s[2] = u;
-            if (s.at(3) == " ")
-                s[3] = judge;
-            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-        }
+        ItemView[number].insert("TestResult", t);
+        ItemView[number].insert("TestJudge", judge);
+        SendTestItems(number);
     }
 }
 
@@ -485,68 +419,10 @@ void PageInd::ReadCanCmdOffset(QByteArray msg)
     }
 }
 
-void PageInd::SendTestItemsAllEmpty()
-{
-    Items.clear();
-    Results.clear();
-    QStringList n;
-    for (int row = 0; row < Enable.size(); row++) {
-        QStringList s;
-        QString T1 = Terminal1.at(qMin(row, Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row, Terminal2.size()))->text();
-        QString M1 = Min.at(qMin(row, Min.size()))->text();
-        QString M2 = Max.at(qMin(row, Max.size()))->text();
-        QString Q1 = QMin.at(qMin(row, QMin.size()))->text();
-        QString Q2 = QMax.at(qMin(row, QMax.size()))->text();
-        s.append(QString(tr("电感%1-%2")).arg(T1).arg(T2));
-        s.append(QString("%1~%2, %3~%4").arg(M1).arg(M2).arg(Q1).arg(Q2));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-    }
-    for (int row = 0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            n.append(Items.at(row));
-        }
-    }
-    if (ui->BoxUnbalance->value() != 0 && n.size() >= 3) {
-        QStringList s;
-        s.append("电感平衡");
-        s.append(QString("%1%").arg(ui->BoxUnbalance->value()));
-        s.append(" ");
-        s.append(" ");
-        Items.append(s.join("@"));
-        n.append(Items.last());
-    }
-    emit SendCommand(ADDR, CMD_INIT_ITEM, n.join("\n").toUtf8());
-}
-
-void PageInd::SendTestItemsAllError()
-{
-    for (int row = 0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s = QString(Items.at(row)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-        }
-    }
-    if (ui->BoxUnbalance->value() != 0) {
-        QStringList s = QString(Items.last()).split("@");
-        if (s.at(2) == " ")
-            s[2] = "---";
-        if (s.at(3) == " ")
-            s[3] = "NG";
-        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-    }
-}
-
 void PageInd::SendTestJudge()
 {
-    QString s = QString(tr("电感@%1@%2")).arg(CurrentSettings()).arg(Judge);
-    emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
+//    QString s = QString(tr("电感@%1@%2")).arg(CurrentSettings()).arg(Judge);
+//    emit CanMsg(ADDR, CMD_JUDGE, s.toUtf8());
 }
 
 void PageInd::SendCanCmdStatus()
@@ -555,7 +431,7 @@ void PageInd::SendCanCmdStatus()
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x26) << quint8(0x01) << quint8(0x00);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageInd::SendCanCmdStart(quint8 pos)
@@ -570,7 +446,7 @@ void PageInd::SendCanCmdStart(quint8 pos)
     }
     out << quint16(0x26) << quint8(0x06) << quint8(0x01) << quint8(0x00) << quint8(0x00)
         << quint8(pos) << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageInd::SendCanCmdStop()
@@ -579,7 +455,7 @@ void PageInd::SendCanCmdStop()
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x26) << quint8(0x01) << quint8(0x02);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageInd::SendCanCmdConfig()
@@ -596,7 +472,7 @@ void PageInd::SendCanCmdConfig()
                 << quint8(CalculateGear(i)) << quint8(CalculateMode(i));
         }
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 int PageInd::CalculateGear(int row)
@@ -677,10 +553,37 @@ int PageInd::CalculateMode(int row)
     return t;
 }
 
+void PageInd::CalculateBalance()
+{
+    if ((ui->BoxUnbalance->value() != 0) && (Results.size() >= 3)) {
+        double sum = 0;
+        double avr = 0;
+        QString u;
+        for (int i=0; i < Results.size(); i++) {
+            sum += Results.at(i);
+        }
+        avr = sum/Results.size();
+        QString judge = "OK";
+        for (int i=0; i < Results.size(); i++) {
+            double un = fabs(Results.at(i)-avr)*100/avr;
+            u.append(QString::number(un, 'f', 1));
+            u.append("% ");
+            if (un >= ui->BoxUnbalance->value()) {
+                Judge = "NG";
+                judge = "NG";
+            }
+        }
+        int number = ItemView.size()-1;
+        ItemView[number].insert("TestResult", u);
+        ItemView[number].insert("TestJudge", judge);
+        SendTestItems(number);
+    }
+}
+
 bool PageInd::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Mode != IND_FREE) {
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -710,11 +613,126 @@ void PageInd::showEvent(QShowEvent *e)
     e->accept();
 }
 
+void PageInd::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageInd" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "ItemInit") {
+        InitSettings();
+        SendCanCmdConfig();
+        SendTestItemsAllEmpty();
+    }
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand") == "StopTest")
+        TestStatus = "stop";
+    if (s.value("TxCommand") == "CheckStatus") {
+        TestStatus = "init";
+        SendCanCmdStatus();
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
+        TestStatus = "free";
+    }
+}
+
+void PageInd::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
+}
+
 void PageInd::SendWarnning(QString s)
 {
     QVariantHash hash;
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("电感异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
+}
+
+
+void PageInd::SendTestItemsAllEmpty()
+{
+    ItemView.clear();
+    QString uid = QUuid::createUuid();
+    for (int i = 0; i < Enable.size(); i++) {
+        QString T1 = Terminal1.at(i)->text();
+        QString T2 = Terminal2.at(i)->text();
+        QString M1 = Min.at(i)->text();
+        QString M2 = Max.at(i)->text();
+        QString Q1 = QMin.at(i)->text();
+        QString Q2 = QMax.at(i)->text();
+        QString U1 = Unit.at(i)->currentText();
+        QVariantHash hash;
+        hash.insert("TestEnable", Enable.at(i)->text());
+        hash.insert("TestItem", tr("电感%1-%2").arg(T1).arg(T2));
+        hash.insert("TestPara", tr("%1-%2%3 %4-%5").arg(M1).arg(M2).arg(U1).arg(Q1).arg(Q2));
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestUid", uid);
+        ItemView.append(hash);
+    }
+    if (ui->BoxUnbalance->value() != 0 && ItemView.size() >= 3) {
+        QVariantHash hash;
+        hash.insert("TestItem", tr("电感平衡"));
+        hash.insert("TestPara", tr("%1%").arg(ui->BoxUnbalance->value()));
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestEnable", "Y");
+        hash.insert("TestUid", uid);
+        ItemView.append(hash);
+    }
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemView");
+            emit SendVariant(hash);
+        }
+    }
+}
+
+void PageInd::SendTestItemsAllError()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemUpdate");
+            hash.insert("TestResult", "---");
+            hash.insert("TestJudge", "NG");
+            emit SendVariant(hash);
+        }
+    }
+    qDebug() << "ind test all error";
+}
+
+void PageInd::SendTestItems(int num)
+{
+    QVariantHash hash = ItemView.at(num);
+    if (hash.value("TestEnable") == "Y") {
+        hash.insert("TxAddress", "WinTest");
+        hash.insert("TxCommand", "ItemUpdate");
+        emit SendVariant(hash);
+    }
+}
+
+void PageInd::TestThread(QVariantHash hash)
+{
+    TestStatus = "buzy";
+    Judge = "OK";
+    if (hash.value("Station").toString() == "left")
+        stat = WIN_ID_OUT13;
+    if (hash.value("Station").toString() == "right")
+        stat = WIN_ID_OUT14;
+    SendCanCmdStart(stat);
+    if (!WaitTimeOut(ui->BoxTime->value()*100+100)) {
+        Judge = "NG";
+        SendTestItemsAllError();
+    }
+//    CalculateBalance();
+    TestStatus = "free";
 }

@@ -39,7 +39,7 @@ public:
 private:
     Ui::WinData *ui;
 signals:
-    void SendVariant(QVariant s);
+    void SendVariant(QVariantHash s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
 private slots:
     void InitWindows(void);
@@ -54,6 +54,8 @@ private slots:
     virtual void showEvent(QShowEvent *);
 
     QByteArray ToGbk(const QString &inStr);
+    void ReadVariant(QVariantHash s);
+    void GoToWindow(QString w);
 private:
     QSqlDatabase db;
     QSqlTableModel *model;

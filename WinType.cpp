@@ -173,7 +173,7 @@ void WinType::ReadButtons(int id)
         break;
     case Qt::Key_1:
         if (CurrentUser() == 0) {
-            SendWarnning(tr("用户权限不足"));
+            SendWarnning(tr("用户权限不足\n"));
             return;
         }
         RemoveSettings();
@@ -185,7 +185,7 @@ void WinType::ReadButtons(int id)
     case Qt::Key_4:
         if (CurrentUser() == 1)
             SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     default:
         break;
@@ -248,8 +248,6 @@ void WinType::ReadAllSettings()
         ui->TabFile->item(i, 0)->setText(QString(FileNames.at(i)).remove(".ini"));
     }
 }
-
-
 
 void WinType::ReadAvailableItems()
 {
@@ -372,25 +370,25 @@ void WinType::JumptoSetWindows()
     }
     SaveSettings();
     if (ui->TabTest->currentItem()->text() == tr("电阻"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageDcr");
+        GoToWindow("PageDcr");
     if (ui->TabTest->currentItem()->text() == tr("反嵌"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageMag");
+        GoToWindow("PageMag");
     if (ui->TabTest->currentItem()->text() == tr("绝缘"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageInr");
+        GoToWindow("PageInr");
     if (ui->TabTest->currentItem()->text() == tr("交耐"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageAcw");
+        GoToWindow("PageAcw");
     if (ui->TabTest->currentItem()->text() == tr("直耐"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageDcw");
+        GoToWindow("PageDcw");
     if (ui->TabTest->currentItem()->text() == tr("匝间"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageImp");
+        GoToWindow("PageImp");
     if (ui->TabTest->currentItem()->text() == tr("电感"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageInd");
+        GoToWindow("PageInd");
     if (ui->TabTest->currentItem()->text() == tr("功率"))
-        emit SendCommand(ADDR, CMD_JUMP, "PagePwr");
+        GoToWindow("PagePwr");
     if (ui->TabTest->currentItem()->text() == tr("低启"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageLvs");
+        GoToWindow("PageLvs");
     if (ui->TabTest->currentItem()->text() == tr("堵转"))
-        emit SendCommand(ADDR, CMD_JUMP, "PageLck");
+        GoToWindow("PageLck");
 }
 
 void WinType::CopySettings(QString name)
@@ -505,13 +503,28 @@ void WinType::on_TabFile_cellClicked(int , int )
     InitSettings();
 }
 
+void WinType::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "WinHome")
+        return;
+}
+
+void WinType::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
+}
+
 void WinType::SendWarnning(QString s)
 {
     QVariantHash hash;
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("操作异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
 }
 /*********************************END OF FILE**********************************/
 

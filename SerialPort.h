@@ -47,16 +47,16 @@ public:
     explicit SerialPort(QObject *parent = 0);
 
 signals:
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray msg);
-public slots:
-    void OpenSerial();
+    void SendVariant(QVariantHash s);
 private slots:
+    void OpenSerial(void);
     void CloseSerial(void);
     void ReadSerial(void);
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void SendAlarm(QByteArray msg);
     void StartBeep(void);
     void StopBeep(void);
+
+    void ReadVariant(QVariantHash s);
+    void SendContrl(QString s);
 private:
     QSerialPort *com;
     QTimer *timer;

@@ -14,12 +14,8 @@ PageOut::PageOut(QWidget *parent) :
     ui(new Ui::PageOut)
 {
     ui->setupUi(this);
-
     Timer = new QTimer(this);
     connect(Timer, SIGNAL(timeout()), this, SLOT(SendWinCmdStart()));
-
-    Mode = OUT_FREE;
-    StartMode = 2;
 }
 
 PageOut::~PageOut()
@@ -27,43 +23,16 @@ PageOut::~PageOut()
     delete ui;
 }
 
-void PageOut::ReadMessage(quint16 addr, quint16 cmd, QByteArray data)
+void PageOut::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_OUT13 && addr != CAN_ID_13OUT &&
-            addr != CAN_ID_14OUT && addr != CAN_ID_15OUT)
+    if (addr != CAN_ID_13OUT && addr != CAN_ID_14OUT)
         return;
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(addr, data);
-        break;
-    case CMD_CHECK:
-        Mode = OUT_INIT;
-        SendCanCmdStatus(data.toInt());
-        Mode = OUT_FREE;
-        break;
-    case CMD_INIT:
-        StartMode = data.toInt();
-        SendCanCmdConfig();
-        break;
-    case CMD_ALARM:
-        SendAlarm(data);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageOut::ExcuteCanCmd(quint16 id, QByteArray msg)
-{
     if (quint8(msg.at(0)) == 0x00)
-        ReadCanCmdStatus(id, msg);
-
-    if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x01)) {
-        ReadCanCmdStart(id);
-    }
-    if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x00)) {
-        ReadCanCmdStop(id);
-    }
+        ReadCanCmdStatus(addr, msg);
+    if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x01))
+        ReadCanCmdStart(addr);
+    if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x00))
+        ReadCanCmdStop(addr);
 }
 
 void PageOut::SendCanCmdStatus(quint16 pos)
@@ -71,42 +40,27 @@ void PageOut::SendCanCmdStatus(quint16 pos)
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    QString w;
-    switch (pos) {
-    case 0:
-        out << quint16(0x13) << quint8(0x01) << quint8(0x00);
-        w = tr("左工位超时");
-        break;
-    case 1:
-        out << quint16(0x14) << quint8(0x01) << quint8(0x00);
-        w = tr("右工位超时");
-        break;
-    default:
-        break;
-    }
-    emit SendCommand(ADDR, CMD_CAN, msg);
-    if (!WaitTestOver(30)) {
-        SendWarnning(w);
-    }
+    out << quint16(pos) << quint8(0x01) << quint8(0x00);
+    emit CanMsg(msg);
 }
 
 void PageOut::SendWinCmdStart()
 {
-    QStringList msg;
-    msg.append(QString::number(Pos));
-    msg.append(QString::number(StartMode));
     Timer->stop();
-    emit SendCommand(ADDR, CMD_START, msg.join(" ").toUtf8());
+    SendContrl("StartTest");
 }
 
 void PageOut::SendCanCmdConfig()
 {
+    quint8 StartMode = CurrentStartMode();
+    if (StartMode != 1 && StartMode != 2)
+        return;
     QByteArray msg;
     QDataStream out(&msg, QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x13) << quint8(0x02) << quint8(0x03) << quint8(StartMode);
     out << quint16(0x14) << quint8(0x02) << quint8(0x03) << quint8(StartMode);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageOut::ReadCanCmdStatus(quint16 addr, QByteArray msg)
@@ -127,56 +81,31 @@ void PageOut::ReadCanCmdStatus(quint16 addr, QByteArray msg)
         SendWarnning(t + " UNKONW_ERROR");
         break;
     }
-    Mode = OUT_FREE;
+    TestStatus = "free";
 }
 
 void PageOut::ReadCanCmdStart(quint16 addr)
 {
-    if (Mode != OUT_FREE)
-        return;
-    if (addr == CAN_ID_13OUT) {
-        Pos = WIN_ID_OUT13;
-    }
-    if (addr == CAN_ID_14OUT) {
-        Pos = WIN_ID_OUT14;
-    }
-    Mode = OUT_FREE;
+    if (addr == CAN_ID_13OUT)
+        stat = WIN_ID_OUT13;
+    if (addr == CAN_ID_14OUT)
+        stat = WIN_ID_OUT14;
+    TestStatus = "free";
     Timer->start(10);
 }
 
 void PageOut::ReadCanCmdStop(quint16 addr)
 {
-    if (addr == CAN_ID_13OUT && Pos == 0x13) {
-        Mode = OUT_FREE;
-        emit SendCommand(ADDR, CMD_STOP, NULL);
-    }
-    if (addr == CAN_ID_14OUT && Pos == 0x14) {
-        Mode = OUT_FREE;
-        emit SendCommand(ADDR, CMD_STOP, NULL);
-    }
+    if (addr == CAN_ID_13OUT && stat == WIN_ID_OUT13)
+        SendContrl("StopTest");
+    if (addr == CAN_ID_14OUT && stat == WIN_ID_OUT14)
+        SendContrl("StopTest");
 }
 
-void PageOut::SendAlarm(QByteArray addr)
-{
-    quint8 t = 0x00;
-    if (addr.at(0) & 0x02)
-        t = 0x01;
-    if (addr.at(0) & 0x04)
-        t = 0x02;
-    if (addr.at(0) & 0x08)
-        t = 0x03;
-    QByteArray msg;
-    QDataStream out(&msg, QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out << quint16(0x13) << quint8(0x02) << quint8(0x02) << quint8(t);
-    out << quint16(0x14) << quint8(0x02) << quint8(0x02) << quint8(t);
-    emit SendCommand(ADDR, CMD_CAN, msg);
-}
-
-bool PageOut::WaitTestOver(quint16 t)
+bool PageOut::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Mode != OUT_FREE) {
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -193,12 +122,75 @@ void PageOut::Delay(int ms)
         QCoreApplication::processEvents();
 }
 
+void PageOut::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageOut" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "TestInit")
+        SendCanCmdConfig();
+
+    if (s.value("TxCommand") == "CheckStatus") {
+        TestStatus = "init";
+        QString w;
+        if (s.value("Station").toString() == "left") {
+            stat = WIN_ID_OUT13;
+            w = tr("左工位超时");
+        }
+        if (s.value("Station").toString() == "right") {
+            stat = WIN_ID_OUT14;
+            w = tr("右工位超时");
+        }
+        SendCanCmdStatus(stat);
+        if (!WaitTimeOut(30))
+            SendWarnning(w);
+        TestStatus = "free";
+    }
+    if (s.value("TxCommand") == "TestAlarm") {
+        quint8 t = 0x00;
+        if (s.value("TxMessage").toString().contains("LEDR"))
+            t = 0x01;
+        if (s.value("TxMessage").toString().contains("LEDG"))
+            t = 0x02;
+        if (s.value("TxMessage").toString().contains("LEDY"))
+            t = 0x03;
+        SendAlarm(t);
+    }
+}
+
 void PageOut::SendWarnning(QString s)
 {
     QVariantHash hash;
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("输出异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
+}
+
+void PageOut::SendContrl(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", s);
+    if (stat == WIN_ID_OUT13)
+        hash.insert("Station", "left");
+    if (stat == WIN_ID_OUT14)
+        hash.insert("Station", "right");
+    hash.insert("StartMode", "out");
+    emit SendVariant(hash);
+}
+
+void PageOut::SendAlarm(quint8 addr)
+{
+    QByteArray msg;
+    QDataStream out(&msg, QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out << quint16(stat) << quint8(0x02) << quint8(0x02) << quint8(addr);
+    emit CanMsg(msg);
+}
+
+int PageOut::CurrentStartMode()
+{
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    return ini->value("/GLOBAL/Mode", "0").toInt();
 }
 /*********************************END OF FILE**********************************/

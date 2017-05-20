@@ -125,7 +125,7 @@ void WinBack::BtnJudge(int id)
     case Qt::Key_0:
         SaveSettings();
         Testing = false;
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     case Qt::Key_1:
         Testing = true;
@@ -298,40 +298,11 @@ void WinBack::ClickOutput(int r,  int c)
         ui->TabOutput->item(r, c)->setText("N");
 }
 
-void WinBack::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void WinBack::ExcuteCanCmd(int addr,  QByteArray msg)
 {
-    switch (addr) {
-    case ADDR:
-    case CAN_ID_13OUT:
-    case CAN_ID_14OUT:
-    case CAN_ID_15OUT:
-    case CAN_ID_16OUT:
-    case CAN_ID_17OUT:
-    case CAN_ID_DCR:
-    case CAN_ID_INR:
-    case CAN_ID_IMP:
-    case CAN_ID_IND:
-    case CAN_ID_PWR:
-        break;
-    default:
-        return;
-        break;
-    }
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(addr, msg);
-        break;
-    default:
-        break;
-    }
-}
-
-void WinBack::ExcuteCanCmd(quint16 addr,  QByteArray msg)
-{
+    return;
     if (!Testing)
         return;
-    qDebug() << "back can msg" << msg.toHex();
-//    emit SendCommand(ADDR, CMD_DEBUG, msg.toHex().append("\n"));
     switch (addr) {
     case CAN_ID_DCR:
         ReadCanCmdDcr(msg);
@@ -365,7 +336,7 @@ void WinBack::SendCanCmdVersion(quint16 id)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(id) << quint8(0x01) << quint8(0x08);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void WinBack::SendCanCmdParam(quint16 id)
@@ -374,7 +345,7 @@ void WinBack::SendCanCmdParam(quint16 id)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(id) << quint8(0x02) << quint8(0x06) << quint8(0xEE);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void WinBack::SendCanCmdParamDcr()
@@ -384,10 +355,10 @@ void WinBack::SendCanCmdParamDcr()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i < BoxDcr.size(); i++) {
         out  << quint16(0x22) << quint8(0x04) << quint8(0x06) << quint8(i+1)
-            << quint8(int(BoxDcr.at(i)->value())/256)
-           << quint8(int(BoxDcr.at(i)->value())%256);
+             << quint8(int(BoxDcr.at(i)->value())/256)
+             << quint8(int(BoxDcr.at(i)->value())%256);
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void WinBack::SendCanCmdParamInr()
@@ -397,12 +368,12 @@ void WinBack::SendCanCmdParamInr()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i < BoxInr.size()/2; i++) {
         out  << quint16(0x23) << quint8(0x06) << quint8(0x06) << quint8(i)
-            << quint8(int(BoxInr.at(i*2+0)->value())/256)
-           << quint8(int(BoxInr.at(i*2+0)->value())%256)
-          << quint8(int(BoxInr.at(i*2+1)->value())/256)
-         << quint8(int(BoxInr.at(i*2+1)->value())%256);
+             << quint8(int(BoxInr.at(i*2+0)->value())/256)
+             << quint8(int(BoxInr.at(i*2+0)->value())%256)
+             << quint8(int(BoxInr.at(i*2+1)->value())/256)
+             << quint8(int(BoxInr.at(i*2+1)->value())%256);
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void WinBack::SendCanCmdParamImp()
@@ -412,10 +383,10 @@ void WinBack::SendCanCmdParamImp()
     out.setVersion(QDataStream::Qt_4_8);
     for (int i=0; i < BoxImp.size(); i++) {
         out  << quint16(0x24) << quint8(0x04) << quint8(0x06) << quint8(i)
-            << quint8(int(BoxImp.at(i)->value())/256)
-           << quint8(int(BoxImp.at(i)->value())%256);
+             << quint8(int(BoxImp.at(i)->value())/256)
+             << quint8(int(BoxImp.at(i)->value())%256);
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void WinBack::SendCanCmdStartDcr(quint8 gear)
@@ -424,11 +395,11 @@ void WinBack::SendCanCmdStartDcr(quint8 gear)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x22) << quint8(0x06) << quint8(0x03) << quint8(0x00)
-       << quint8(0x01) << quint8(0x02)
-      << quint8(gear) << quint8(5);
+        << quint8(0x01) << quint8(0x02)
+        << quint8(gear) << quint8(5);
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x01) << quint8(0x00)
-       << quint8(0x13) << quint8(0x00) << quint8(0x01);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+        << quint8(0x13) << quint8(0x00) << quint8(0x01);
+    emit CanMsg(msg);
 }
 
 void WinBack::ReadCanCmdDcr(QByteArray msg)
@@ -567,4 +538,56 @@ void WinBack::showEvent(QShowEvent *e)
     InitSettings();
     Testing = true;
     e->accept();
+}
+
+void WinBack::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "WinBack" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "PageDcrVersion") {
+        ui->TabItems->item(0, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(1, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageInrVersion") {
+        ui->TabItems->item(2, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(3, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(4, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageImpVersion") {
+        ui->TabItems->item(5, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageIndVersion") {
+        ui->TabItems->item(6, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PagePwrVersion") {
+        ui->TabItems->item(7, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(8, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(9, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageAmpVersion") {
+        ui->TabItems->item(10, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageOut13Version") {
+        ui->TabOutput->item(0, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageOut14Version") {
+        ui->TabOutput->item(1, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+}
+
+void WinBack::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
 }

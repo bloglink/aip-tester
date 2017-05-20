@@ -17,7 +17,7 @@ PageMag::PageMag(QWidget *parent) :
     InitWindows();
     InitButtons();
     InitSettings();
-    MagMode = MAG_FREE;
+    TestStatus = "free";
 }
 
 PageMag::~PageMag()
@@ -43,6 +43,8 @@ void PageMag::InitWindows()
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     ui->BoxDir->setView(new QListView(this));
+    ui->BoxStation->setView(new QListView(this));
+    connect(ui->BoxStation, SIGNAL(currentIndexChanged(int)), this, SLOT(InitSettings()));
     connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
     input = new PageNum(this);
     QStringList t;
@@ -70,11 +72,12 @@ void PageMag::InitWindows()
 
         Max.append(new QDoubleSpinBox(this));
         ui->TabParams->setCellWidget(row, 3, Max.at(row));
+        Max.at(row)->setDecimals(0);
         Max.at(row)->setMaximum(100);
         Max.at(row)->setAlignment(Qt::AlignHCenter);
         Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
 
-        WaveMag.append(new Waveform(this));
+        WaveMag.append(new WaveBox(this));
         ui->TabParams->setCellWidget(row, 4, WaveMag.at(row));
 
         AreaL.append(0);
@@ -88,7 +91,6 @@ void PageMag::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnSampleMag, Qt::Key_0);
-    btnGroup->addButton(ui->BtnExit, Qt::Key_1);
     btnGroup->addButton(ui->BtnExitMag, Qt::Key_2);
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
@@ -97,22 +99,24 @@ void PageMag::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        MagMode = MAG_SAMPLE;
-        if (ui->BoxStation->currentIndex() == 0) {
-            SendCanCmdConfig(WIN_ID_OUT13);
-            SendCanCmdSample(WIN_ID_OUT13);
+        TestStatus = "sample";
+        if (ui->BoxStation->currentIndex() == 0)
+            stat = WIN_ID_OUT13;
+        if (ui->BoxStation->currentIndex() == 1)
+            stat = WIN_ID_OUT14;
+        SendCanCmdConfig(stat);
+        SendCanCmdSample(stat);
+        if (!WaitTimeOut(100)) {
+            SendWarnning(tr("采样失败"));
+        } else {
+//            CalculateDir();
+            SaveSettings();
         }
-        if (ui->BoxStation->currentIndex() == 1) {
-            SendCanCmdConfig(WIN_ID_OUT14);
-            SendCanCmdSample(WIN_ID_OUT14);
-        }
-        break;
-    case Qt::Key_1:
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        TestStatus = "free";
         break;
     case Qt::Key_2:
         SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     default:
         break;
@@ -165,23 +169,16 @@ void PageMag::InitSettings()
         AreaR[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
-    QByteArray def;
-    for (int i=0; i < 400; i++) {
-        def.append(QByteArray(1, 0x80));
-    }
+    QVariantHash hash;
     for (int row=0; row < qMin(WaveMag.size(), MAX_ROW); row++) {
         QString ByteL = "WaveMagL"+QString::number(row);
-        w = set->value(ByteL, def.toBase64()).toString().toUtf8();
-        WaveMag.at(row)->WaveBytes[0] = QByteArray::fromBase64(w);
-        WaveMag.at(row)->WaveByteShow(QByteArray::fromBase64(w));
-
         QString ByteR = "WaveMagR"+QString::number(row);
-        w = set->value(ByteR, def.toBase64()).toString().toUtf8();
-        WaveMag.at(row)->WaveBytes[1] = QByteArray::fromBase64(w);
-
-        QString T1 = Terminal1.at(row)->text();
-        QString T2 = Terminal2.at(row)->text();
-        WaveMag.at(row)->WaveItem = QString(tr("反嵌%1-%2")).arg(T1).arg(T2).toUtf8();
+        if (ui->BoxStation->currentIndex() == 0)
+            w = set->value(ByteL).toString().toUtf8();
+        if (ui->BoxStation->currentIndex() == 1)
+            w = set->value(ByteR).toString().toUtf8();
+        hash.insert("WaveTest", w);
+        WaveMag.at(row)->ShowWave(hash);
     }
 }
 
@@ -225,11 +222,13 @@ void PageMag::SaveSettings()
         temp.append(QString::number(FreqR.at(i)));
     set->setValue("FreqR", (temp.join(" ").toUtf8()));
 
-    for (int row=0; row < WaveMag.size(); row++) {
-        QString ByteL = "WaveMagL"+QString::number(row);
-        QString ByteR = "WaveMagR"+QString::number(row);
-        set->setValue(ByteL, WaveMag.at(row)->WaveBytes.at(0).toBase64());
-        set->setValue(ByteR, WaveMag.at(row)->WaveBytes.at(1).toBase64());
+    for (int i=0; i < ItemView.size(); i++) {
+        QString ByteL = "WaveMagL"+QString::number(i);
+        QString ByteR = "WaveMagR"+QString::number(i);
+        if (ui->BoxStation->currentIndex() == 0)
+            set->setValue(ByteL, ItemView[i].value("WaveTest").toString());
+        if (ui->BoxStation->currentIndex() == 1)
+            set->setValue(ByteR, ItemView[i].value("WaveTest").toString());
     }
 }
 
@@ -254,49 +253,16 @@ void PageMag::ItemChange(QString msg)
     ui->TabParams->currentItem()->setText(msg);
 }
 
-void PageMag::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void PageMag::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (addr != ADDR &&
-            addr != WIN_ID_MAG &&
-            addr != CAN_ID_DCR &&
-            addr != CAN_ID_DCR_WAVE)
+    if (addr != CAN_ID_DCR && addr != CAN_ID_DCR_WAVE)
         return;
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(addr, msg);
-        break;
-    case CMD_START:
-        MagMode = MAG_TEST;
-        SendCanCmdConfig(msg.toInt());
-        emit SendCommand(ADDR, CMD_WAVE_HIDE, NULL);
-        SendCanCmdStart(msg.toInt());
-        Judge = "OK";
-        if (!WaitTimeOut(100)) {
-            Judge = "NG";
-            SendTestItemsAllError();
-        }
-        SendTestJudge();
-        MagMode = MAG_FREE;
-        break;
-    case CMD_INIT:
-        InitSettings();
-        SendTestItemsAllEmpty();
-        break;
-    case CMD_WAVE:
-        SendWave(msg);
-        break;
-    default:
-        break;
-    }
-}
+    if (TestStatus == "free")
+        return;
 
-void PageMag::ExcuteCanCmd(int id,  QByteArray msg)
-{
-    if (MagMode == MAG_FREE)
-        return;
     TimeOut = 0;
-    if (id == CAN_ID_DCR_WAVE) {
-        ReadCanCmdWave(msg);
+    if (addr == CAN_ID_DCR_WAVE) {
+        wave.append(msg);
         return;
     }
     if (msg.size() >= 4 && (quint8)msg.at(0) == 0x00)
@@ -304,9 +270,14 @@ void PageMag::ExcuteCanCmd(int id,  QByteArray msg)
     if (msg.size() >= 5 && (quint8)msg.at(0) == 0x02)
         ReadCanCmdResult(msg);
     if (msg.size() >= 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) != 0xff)
-        ReadCanCmdWaveStart(msg);
-    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff)
-        ReadCanCmdWaveOk(msg);
+        wave.clear();
+    if (msg.size() >= 2 && (quint8)msg.at(0) == 0x03 && (quint8)msg.at(1) == 0xff) {
+        ItemView[TestRow].insert("WaveTest", wave.toBase64());
+        if (TestStatus == "sample")
+            WaveMag.at(TestRow)->ShowWave(ItemView[TestRow]);
+        if (TestStatus == "buzy")
+            SendTestItems(TestRow);
+    }
 }
 
 void PageMag::ReadCanCmdStatus(QByteArray msg)
@@ -348,147 +319,39 @@ void PageMag::ReadCanCmdStatus(QByteArray msg)
         SendWarnning("UNKONW_ERROR");
         break;
     }
-    if (MagMode == MAG_TEST && ui->BoxDir->currentIndex() != 0)
-        CalculateDir();
-    MagMode = MAG_FREE;
+    TestStatus = "free";
 }
 
 void PageMag::ReadCanCmdResult(QByteArray msg)
 {
-    CurrentWave = (quint8)msg.at(1);
-    quint16 Area1 = 0;
-    if (station == WIN_ID_OUT13)
-        Area1 = AreaL[CurrentWave];
-    if (station == WIN_ID_OUT14) {
-        Area1 = AreaR[CurrentWave];
-    }
-    quint16 Area2 = quint16(msg.at(2)*256)+quint8(msg.at(3));
-    if (MagMode == MAG_SAMPLE) {
-        if (station == WIN_ID_OUT13) {
-            AreaL[CurrentWave] = Area2;
-            FreqL[CurrentWave] = quint8(msg.at(4));
+    TestRow = (quint8)msg.at(1);
+    if (TestStatus == "sample") {
+        if (stat == WIN_ID_OUT13) {
+            AreaL[TestRow] = quint16(msg.at(2)*256)+quint8(msg.at(3));
+            FreqL[TestRow] = quint8(msg.at(4));
         }
-        if (station == WIN_ID_OUT14) {
-            AreaR[CurrentWave] = Area2;
-            FreqR[CurrentWave] = quint8(msg.at(4));
+        if (stat == WIN_ID_OUT14) {
+            AreaR[TestRow] = quint16(msg.at(2)*256)+quint8(msg.at(3));
+            FreqR[TestRow] = quint8(msg.at(4));
         }
         return;
+    }
+    quint16 Area1 = 0;
+    quint16 Area2 = quint16(msg.at(2)*256)+quint8(msg.at(3));
+    if (stat == WIN_ID_OUT13)
+        Area1 = AreaL[TestRow];
+    if (stat == WIN_ID_OUT14) {
+        Area1 = AreaR[TestRow];
     }
     quint16 area = abs((Area2-Area1)*100/Area1);
     QString n = QString("%1%").arg(area);
     QString judge = "OK";
-    if (CurrentWave >= Max.size() || area > Max.at(CurrentWave)->value()) {
+    if (area > Max.at(TestRow)->value()) {
         Judge = "NG";
         judge = "NG";
     }
-    QStringList s = QString(Items.at(CurrentWave)).split("@");
-    if (s.at(2) == " ")
-        s[2] = n;
-    if (s.at(3) == " ")
-        s[3] = judge;
-    emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-}
-
-void PageMag::ReadCanCmdWaveStart(QByteArray )
-{
-    switch (MagMode) {
-    case MAG_SAMPLE:
-        WaveMag.at(CurrentWave)->WaveByte.clear();
-        break;
-    case MAG_TEST:
-        WaveMag.at(CurrentWave)->WaveTest.clear();
-        break;
-    default:
-        break;
-    }
-}
-
-void PageMag::ReadCanCmdWave(QByteArray msg)
-{
-    switch (MagMode) {
-    case MAG_SAMPLE:
-        WaveMag.at(CurrentWave)->WaveByte.append(msg);
-        break;
-    case MAG_TEST:
-        WaveMag.at(CurrentWave)->WaveTest.append(msg);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageMag::ReadCanCmdWaveOk(QByteArray )
-{
-    quint8 num = station - WIN_ID_OUT13;
-    QByteArray w;
-    QByteArray i;
-    if (MagMode == MAG_SAMPLE) {
-        w = WaveMag.at(CurrentWave)->WaveByte;
-        WaveMag.at(CurrentWave)->WaveBytes[num] = w;
-        WaveMag.at(CurrentWave)->WaveByteShow(w);
-    }
-    if (MagMode == MAG_TEST) {
-        w = WaveMag.at(CurrentWave)->WaveTest;
-        i = WaveMag.at(CurrentWave)->WaveItem;
-        WaveMag.at(CurrentWave)->WaveTests[num] = w;
-        emit SendCommand(ADDR, CMD_WAVE_ITEM, i);
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
-    }
-}
-
-void PageMag::SendTestItemsAllEmpty()
-{
-    Items.clear();
-    WaveNumber.clear();
-    QStringList n;
-    for (int row = 0; row < Enable.size(); row++) {
-        QString T1 = Terminal1.at(qMin(row, Terminal1.size()))->text();
-        QString T2 = Terminal2.at(qMin(row, Terminal2.size()))->text();
-        QString M1 = Max.at(qMin(row, Max.size()))->text();
-        QString s = QString(tr("反嵌%1-%2@%3%@ @ ")).arg(T1).arg(T2).arg(M1);
-        Items.append(s);
-        WaveMag.at(row)->WaveTest.clear();
-    }
-    for (int row = 0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            n.append(Items.at(row));
-            WaveNumber.append(row);
-        }
-    }
-    if (ui->BoxDir->currentIndex() != 0) {
-        QString s = QString(tr("磁旋@%1@ @ ")).arg(ui->BoxDir->currentText());
-        Items.append(s);
-        n.append(s);
-    }
-    emit SendCommand(ADDR, CMD_INIT_ITEM, n.join("\n").toUtf8());
-}
-
-void PageMag::SendTestItemsAllError()
-{
-    for (int row = 0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            QStringList s = QString(Items.at(row)).split("@");
-            if (s.at(2) == " ")
-                s[2] = "---";
-            if (s.at(3) == " ")
-                s[3] = "NG";
-            emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-        }
-    }
-    if (ui->BoxDir->currentIndex() != 0) {
-        QStringList s = QString(Items.last()).split("@");
-        if (s.at(2) == " ")
-            s[2] = "---";
-        if (s.at(3) == " ")
-            s[3] = "NG";
-        emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-    }
-}
-
-void PageMag::SendTestJudge()
-{
-    QString s = QString(tr("反嵌@%1@%2")).arg(CurrentSettings()).arg(Judge);
-    emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
+    ItemView[TestRow].insert("TestResult", n);
+    ItemView[TestRow].insert("TestJudge", judge);
 }
 
 void PageMag::SendCanCmdSample(quint8 s)
@@ -503,7 +366,7 @@ void PageMag::SendCanCmdSample(quint8 s)
     }
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x02) << quint8(0x01)
         << quint8(s) << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageMag::SendCanCmdStart(quint8 s)
@@ -518,21 +381,11 @@ void PageMag::SendCanCmdStart(quint8 s)
     }
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x02) << quint8(0x00)
         << quint8(s) << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
-}
-
-void PageMag::SendCanCmdStop()
-{
-    QByteArray msg;
-    QDataStream out(&msg,  QIODevice::ReadWrite);
-    out.setVersion(QDataStream::Qt_4_8);
-    out << quint16(0x22) << quint8(0x01) << quint8(0x02);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageMag::SendCanCmdConfig(quint8 s)
 {
-    station = s;
     QByteArray msg;
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
@@ -549,91 +402,72 @@ void PageMag::SendCanCmdConfig(quint8 s)
                 << quint8(freq);
         }
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
-}
-
-void PageMag::SendWave(QByteArray msg)
-{
-    int t = WaveNumber.size();
-    for (int i=0; i < WaveNumber.size(); i++) {
-        if (WaveMag.at(WaveNumber.at(i))->WaveItem == msg)
-            t = i;
-    }
-    if (t == WaveNumber.size())
-        return;
-    for (int i=0; i < qMin(3, WaveNumber.size()-t); i++) {
-        QByteArray w;
-        w = WaveMag.at(WaveNumber.at(t+i))->WaveItem;
-        emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
-        w = WaveMag.at(WaveNumber.at(t+i))->WaveTest;
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
-    }
+    emit CanMsg(msg);
 }
 
 void PageMag::CalculateDir()
 {
-    //计算主副相的面积，差积，和左右移动的差积
-    qint32 area1, area2, diff, diff1, diff2;
-    area1 = 0;
-    area2 = 0;
-    diff = 0;
-    diff1 = 0;
-    diff2 = 0;
-    int b1 = ui->BoxMain->value()-1;
-    int b2 = ui->BoxAuxiliary->value()-1;
-    int s1 = WaveMag.at(b1)->WaveTest.size();
-    int s2 = WaveMag.at(b2)->WaveTest.size();
-    for (int i=10; i < qMin(s1, s2)-10; i++) {
-        int P1 = quint8(WaveMag.at(b1)->WaveTest.at(i))-0x80;
-        int P2 = quint8(WaveMag.at(b2)->WaveTest.at(i))-0x80;
-        area1 += P1*P1;
-        area2 += P2*P2;
-        diff += (P1-P2)*(P1-P2);
-        for (int j=1; j < 11; j++) {
-            int P3 = quint8(WaveMag.at(b2)->WaveTest.at(i+j))-0x80;
-            int P4 = quint8(WaveMag.at(b2)->WaveTest.at(i-j))-0x80;
-            diff1 += (P1-P3)*(P1-P3);
-            diff2 += (P1-P4)*(P1-P4);
+    if (ui->BoxDir->currentIndex() != 0 && ItemView.size() >= 2) {
+        //计算主副相的面积，差积，和左右移动的差积
+        qint32 area1, area2, diff, diff1, diff2;
+        area1 = 0;
+        area2 = 0;
+        diff = 0;
+        diff1 = 0;
+        diff2 = 0;
+        int b1 = ui->BoxMain->value()-1;
+        int b2 = ui->BoxAuxiliary->value()-1;
+        QByteArray w1 = QByteArray::fromBase64(ItemView.at(b1).value("WaveTest").toString().toUtf8());
+        QByteArray w2 = QByteArray::fromBase64(ItemView.at(b2).value("WaveTest").toString().toUtf8());
+
+        for (int i=10; i < qMin(w1.size(), w2.size())-10; i++) {
+            int P1 = quint8(w1.at(i))-0x80;
+            int P2 = quint8(w2.at(i))-0x80;
+            area1 += P1*P1;
+            area2 += P2*P2;
+            diff += (P1-P2)*(P1-P2);
+            for (int j=1; j < 11; j++) {
+                int P3 = quint8(w2.at(i+j))-0x80;
+                int P4 = quint8(w2.at(i-j))-0x80;
+                diff1 += (P1-P3)*(P1-P3);
+                diff2 += (P1-P4)*(P1-P4);
+            }
         }
-    }
-    diff1 /= 10;
-    diff2 /= 10;
-    QString n;
-    QString judge = "OK";
+        diff1 /= 10;
+        diff2 /= 10;
+        QString n;
+        QString judge = "OK";
 
-    if (((diff*3 < area1) &&(diff*3 < area2)) || (area1 < (area2 >> 4)) || (area2 < (area1 >> 4)))
-        n = tr("不转"); // 偏移不超过1/3, 或面积差大于3/4, 判定为不转
-    else if (diff1 < diff2) // 副相在前
-        n = tr("正转");
-    else if (diff1 > diff2) // 主相在前
-        n = tr("反转");
-    else
-        n = tr("不转");
-    if (n != ui->BoxDir->currentText()) {
-        Judge = "NG";
-        judge = "NG";
+        if (((diff*3 < area1) &&(diff*3 < area2)) || (area1 < (area2 >> 4)) || (area2 < (area1 >> 4)))
+            n = tr("不转"); // 偏移不超过1/3, 或面积差大于3/4, 判定为不转
+        else if (diff1 < diff2) // 副相在前
+            n = tr("正转");
+        else if (diff1 > diff2) // 主相在前
+            n = tr("反转");
+        else
+            n = tr("不转");
+        if (n != ui->BoxDir->currentText()) {
+            Judge = "NG";
+            judge = "NG";
+        }
+        if (TestStatus == "sample") {
+            if (n == tr("正转"))
+                ui->BoxDir->setCurrentIndex(1);
+            if (n == tr("反转"))
+                ui->BoxDir->setCurrentIndex(2);
+            return;
+        }
+        int number = ItemView.size()-1;
+        ItemView[number].insert("TestResult", n);
+        ItemView[number].insert("TestJudge", judge);
+        SendTestItems(number);
     }
-    QStringList s = QString(Items.last()).split("@");
-    if (s.at(2) == " ")
-        s[2] = n;
-    if (s.at(3) == " ")
-        s[3] = judge;
-    emit SendCommand(ADDR, CMD_ITEM, s.join("@").toUtf8());
-}
-
-void PageMag::SendWarnning(QString s)
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "WinHome");
-    hash.insert("TxCommand", "Warnning");
-    hash.insert("TxMessage", tr("反嵌异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
 }
 
 bool PageMag::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (MagMode != MAG_FREE) {
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -660,6 +494,172 @@ QString PageMag::CurrentSettings()
 void PageMag::showEvent(QShowEvent *e)
 {
     InitSettings();
+    SendTestItemsAllEmpty();
     e->accept();
+}
+
+void PageMag::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageMag" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "ItemInit") {
+        if (s.value("Station").toString() == "left")
+            stat = WIN_ID_OUT13;
+        if (s.value("Station").toString() == "right")
+            stat = WIN_ID_OUT14;
+        InitSettings();
+        SendCanCmdConfig(stat);
+        SendTestItemsAllEmpty();
+    }
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand").toString() == "TestSave")
+        SendTestSave();
+}
+
+void PageMag::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
+}
+
+void PageMag::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("反嵌异常:\n%1").arg(s));
+    emit SendVariant(hash);
+}
+
+void PageMag::SendTestItemsAllEmpty()
+{
+    ItemView.clear();
+    QString uid = QUuid::createUuid();
+    for (int i = 0; i < Enable.size(); i++) {
+        QString T1 = Terminal1.at(i)->text();
+        QString T2 = Terminal2.at(i)->text();
+        QString M2 = Max.at(i)->text();
+        QVariantHash hash;
+        hash.insert("TestEnable", Enable.at(i)->text());
+        hash.insert("TestItem", tr("反嵌%1-%2").arg(T1).arg(T2));
+        hash.insert("TestPara", tr("%3%").arg(M2));
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestUid", uid);
+        hash.insert("ItemName", tr("反嵌%1").arg(i+1));
+        ItemView.append(hash);
+    }
+    if (ui->BoxDir->currentIndex() != 0 && ItemView.size() >= 2) {
+        QVariantHash hash;
+        hash.insert("TestItem", tr("磁旋"));
+        hash.insert("TestPara", tr("%1").arg(ui->BoxDir->currentText()));
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestEnable", "Y");
+        hash.insert("TestUid", uid);
+        hash.insert("ItemName", tr("磁旋"));
+        ItemView.append(hash);
+    }
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemView");
+            emit SendVariant(hash);
+        }
+    }
+}
+
+void PageMag::SendTestItemsAllError()
+{
+    QByteArray def;
+    for (int i=0; i < 400; i++) {
+        def.append(QByteArray(1, 0x80));
+    }
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemUpdate");
+            hash.insert("TestResult", "---");
+            hash.insert("TestJudge", "NG");
+            hash.insert("WaveTest", def.toBase64());
+            hash.insert("WaveItem", hash.value("TestItem").toString());
+            emit SendVariant(hash);
+        }
+    }
+    qDebug() << "mag test all error";
+}
+
+void PageMag::SendTestWavesAllEmpty()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "WaveInit");
+    emit SendVariant(hash);
+}
+
+void PageMag::SendTestItems(int num)
+{
+    QVariantHash hash = ItemView.at(num);
+    if (hash.value("TestEnable") == "Y") {
+        hash.insert("TxAddress", "WinTest");
+        hash.insert("TxCommand", "ItemUpdate");
+        if (!hash.value("WaveTest").toString().isEmpty())
+            hash.insert("WaveItem", hash.value("TestItem").toString());
+        emit SendVariant(hash);
+    }
+}
+
+void PageMag::SendTestPause()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestPause");
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
+}
+
+void PageMag::SendTestSave()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinHome");
+            hash.insert("TxCommand", "TestSave");
+            emit SendVariant(hash);
+        }
+    }
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestSave");
+    hash.insert("ItemName", tr("反嵌"));
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
+}
+
+void PageMag::TestThread(QVariantHash hash)
+{
+    TestStatus = "buzy";
+    Judge = "OK";
+    if (hash.value("Station").toString() == "left")
+        stat = WIN_ID_OUT13;
+    if (hash.value("Station").toString() == "right")
+        stat = WIN_ID_OUT14;
+    SendTestWavesAllEmpty();
+    SendCanCmdStart(stat);
+    if (!WaitTimeOut(100)) {
+        Judge = "NG";
+        SendTestItemsAllError();
+    } else {
+        CalculateDir();
+    }
+    if (Judge == "NG")
+        SendTestPause();
+    TestStatus = "free";
 }
 /*********************************END OF FILE**********************************/

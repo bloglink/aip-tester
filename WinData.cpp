@@ -51,7 +51,7 @@ void WinData::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     case Qt::Key_1:
         ExportToUsb();
@@ -223,6 +223,20 @@ QByteArray WinData::ToGbk(const QString &inStr)
 {
     QTextCodec *gbk = QTextCodec::codecForName("GB18030");
     return gbk->fromUnicode(inStr);
+}
+
+void WinData::ReadVariant(QVariantHash s)
+{
+
+}
+
+void WinData::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
 }
 
 void WinData::showEvent(QShowEvent *e)

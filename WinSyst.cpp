@@ -61,7 +61,7 @@ void WinSyst::ReadButtons(int id)
     switch (id) {
     case Qt::Key_0:
         if (ui->EditPassword->text() == "AIP9918")
-            emit SendCommand(ADDR, CMD_JUMP, "WinBack");
+            GoToWindow("WinBack");
         else if (ui->EditPassword->text() == password)
             ui->StackWinSyst->setCurrentIndex(0);
         else if (ui->EditPassword->text() == "aip9918")
@@ -70,7 +70,7 @@ void WinSyst::ReadButtons(int id)
             ui->EditPassword->clear();
         break;
     case Qt::Key_1:
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     case Qt::Key_2:
         ui->StackWinSyst->setCurrentIndex(2);
@@ -80,13 +80,13 @@ void WinSyst::ReadButtons(int id)
         break;
     case Qt::Key_4:
         SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     case Qt::Key_5:
         SetDateTime();
         break;
     case Qt::Key_6:
-        emit SendCommand(ADDR, CMD_STATUS, NULL);
+        ReadStatusAll();
         break;
     case Qt::Key_7:
         system("/bin/ts_calibrate -&");
@@ -170,40 +170,25 @@ void WinSyst::SetPassword()
         password = new1;
         SaveSettings();
         ui->StackWinSyst->setCurrentIndex(0);
-    }
-}
-
-void WinSyst::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_SYS)
         return;
-    switch (cmd) {
-    case CMD_DEBUG:
-        WriteLog(msg);
-        break;
-    case CMD_INIT:
-        SendWinCmdStartMode();
-        break;
-    default:
-        break;
     }
-}
-
-void WinSyst::SendWinCmdStartMode()
-{
-    QByteArray msg;
-    msg.append(quint8(ui->BoxMode->currentIndex()));
-    emit SendCommand(WIN_ID_OUT13, CMD_INIT, msg);
+    if (old == "aip9918" && new1 == new2) {
+        password = new1;
+        SaveSettings();
+        ui->StackWinSyst->setCurrentIndex(0);
+        return;
+    }
 }
 
 void WinSyst::WriteLog(QByteArray msg)
 {
     ui->TextDebug->insertPlainText(msg);
+    ui->TextDebug->insertPlainText("\n");
     ui->TextDebug->moveCursor(QTextCursor::End);
     QTextStream out(file);
     out.seek(file->size());
     out << QDateTime::currentDateTime().toString("yyyyMMdd hh:mm ");
-    out << msg;
+    out << msg << "\n";
 }
 
 QString WinSyst::GetLocalHostIP()
@@ -244,11 +229,28 @@ void WinSyst::ReadHardWareSpace()
             QString a = t.at(qMin(4, t.size()));
             ui->TextSpace->setText(a);
             int b = a.remove(a.size()-1, 1).toInt();
-            if (b > 80)
-                SendWarnning(tr("系统空间不足%1%,请清理空间").arg(100-b));
+            if (b > 95)
+                SendWarnning(tr("系统空间不足%1%,请清理空间\n").arg(100-b));
         }
     }
 #endif
+}
+
+void WinSyst::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "TestDebug")
+        WriteLog(s.value("TxMessage").toByteArray());
+}
+
+void WinSyst::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
 }
 
 void WinSyst::SendWarnning(QString s)
@@ -257,7 +259,15 @@ void WinSyst::SendWarnning(QString s)
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("系统异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
+}
+
+void WinSyst::ReadStatusAll()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "ReadStatus");
+    emit SendVariant(hash);
 }
 
 /*********************************END OF FILE**********************************/

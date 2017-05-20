@@ -17,7 +17,7 @@ PageDcr::PageDcr(QWidget *parent) :
     InitWindows();
     InitButtons();
     InitSettings();
-    TestMode = "free";
+    TestStatus = "free";
 }
 
 PageDcr::~PageDcr()
@@ -34,6 +34,7 @@ void PageDcr::InitWindows()
     ui->TabParams->horizontalHeader()->setResizeMode(6, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(7, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setResizeMode(9, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
 #else
     ui->TabParams->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
@@ -42,6 +43,7 @@ void PageDcr::InitWindows()
     ui->TabParams->horizontalHeader()->setSectionResizeMode(6, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(7, QHeaderView::Stretch);
     ui->TabParams->horizontalHeader()->setSectionResizeMode(8, QHeaderView::Stretch);
+    ui->TabParams->horizontalHeader()->setSectionResizeMode(9, QHeaderView::Stretch);
     ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
 #endif
     connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
@@ -136,23 +138,23 @@ void PageDcr::ReadButtons(int id)
     case Qt::Key_1:
         stat = WIN_ID_OUT13;
         SendCanCmdConfig();
-        TestMode = "offset";
+        TestStatus = "offset";
         SendCanCmdStart(stat);
         WaitTimeOut(100);
-        TestMode = "free";
+        TestStatus = "free";
         break;
     case Qt::Key_2:
         if (CheckSetting())
             SaveSettings();
-        emit SendCommand(ADDR, CMD_JUMP, NULL);
+        GoToWindow(NULL);
         break;
     case Qt::Key_3:
         stat = WIN_ID_OUT14;
         SendCanCmdConfig();
-        TestMode = "offset";
+        TestStatus = "offset";
         SendCanCmdStart(stat);
         WaitTimeOut(100);
-        TestMode = "free";
+        TestStatus = "free";
         break;
     default:
         break;
@@ -335,57 +337,11 @@ void PageDcr::ItemChange(QString msg)
         ui->TabParams->currentItem()->setText(msg);
 }
 
-void PageDcr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
+void PageDcr::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (addr != ADDR && addr != WIN_ID_DCR && addr != CAN_ID_DCR && addr != CAN_ID_PWR)
+    if (addr != CAN_ID_DCR)
         return;
-    switch (cmd) {
-    case CMD_CAN:
-        if (addr == CAN_ID_DCR)
-            ExcuteCanCmd(msg);
-        if (addr == CAN_ID_PWR)
-            ExcuteCanCmdPwr(msg);
-        break;
-    case CMD_CHECK:
-        TestMode = "init";
-        SendCanCmdStatus();
-        if (!WaitTimeOut(30))
-            SendWarnning("超时");
-        TestMode = "free";
-        break;
-    case CMD_START:
-        TestMode = "test";
-        Judge = "OK";
-        stat = msg.toInt();
-        if (IsPowerOn()) {
-            pwr.clear();
-            SendCanCmdPwr(stat);
-            WaitTimeOut(150);
-        }
-        if (TestMode == "free")
-            break;
-        SendCanCmdStart(stat);
-        if (!WaitTimeOut(ui->BoxTime->value()*100+100)) {
-            Judge = "NG";
-            SendTestItemsAllError();
-        }
-        SendTestJudge();
-        TestMode = "free";
-        break;
-    case CMD_STOP:
-        SendAlarm(QByteArray(1, 0x00));
-        break;
-    case CMD_ALARM:
-        SendAlarm(msg);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageDcr::ExcuteCanCmd(QByteArray msg)
-{
-    if (TestMode == "free")
+    if (TestStatus == "free")
         return;
     TimeOut = 0;
 
@@ -393,25 +349,25 @@ void PageDcr::ExcuteCanCmd(QByteArray msg)
         ReadCanCmdStatus(msg);
     }
     if (msg.size() >= 7 && (quint8)msg.at(0) == 0x01) {
-        if (TestMode == "offset")
+        if (TestStatus == "offset")
             ReadOffset(msg);
         else
             ReadCanCmdResult(msg);
     }
 }
 
-void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
-{
-    if (TestMode == "free")
-        return;
-    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
-        pwr.append(quint16(msg.at(1)*256)+quint8(msg.at(2)));
-        if (pwr.size() > 4 && pwr.last() > 50) {
-            emit SendCommand(ADDR, CMD_STOP, "DCR PWR");
-            SendWarnning(tr("请等待电机转动停止再测试"));
-        }
-    }
-}
+//void PageDcr::ExcuteCanCmdPwr(QByteArray msg)
+//{
+//    if (TestStatus == "free")
+//        return;
+//    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01) {
+//        pwr.append(quint16(msg.at(1)*256)+quint8(msg.at(2)));
+//        if (pwr.size() > 4 && pwr.last() > 50) {
+//            emit SendCommand(ADDR, CMD_STOP, "DCR PWR");
+//            SendWarnning(tr("请等待电机转动停止再测试"));
+//        }
+//    }
+//}
 
 void PageDcr::ReadCanCmdStatus(QByteArray msg)
 {
@@ -453,9 +409,7 @@ void PageDcr::ReadCanCmdStatus(QByteArray msg)
         break;
     }
     SendTemperature(msg);
-    CalculateBalance();
-    SendTestItemsAll();
-    TestMode = "free";
+    TestStatus = "free";
 }
 
 void PageDcr::ReadCanCmdResult(QByteArray msg)
@@ -470,47 +424,51 @@ void PageDcr::ReadCanCmdResult(QByteArray msg)
         temp *= offset;
     }
     QString t;
-    QString JudgeItem = "OK";
+    QString judge = "OK";
     double offset = 0;
     if (stat == WIN_ID_OUT13)
         offset = Offset.at(number)->value();
     if (stat == WIN_ID_OUT14)
         offset = OffsetR.at(number)->value();
-    if (Unit.at(number)->currentText() == "mohm")
+    if (Unit.at(number)->currentText() == tr("mΩ"))
         offset /= 1000;
-    if (Unit.at(number)->currentText() == "kohm")
+    if (Unit.at(number)->currentText() == tr("kΩ"))
         offset *= 1000;
 
     temp *= qPow(10, (grade-6));
     temp -= qMin(temp, offset);
     if (grade == 1 || grade == 2)
-        t = QString("%1mohm").arg(temp*1000, 0, 'r', (3-grade%3));
+        t = QString("%1mΩ").arg(temp*1000, 0, 'r', (3-grade%3));
     if (grade == 3 || grade == 4 || grade == 5)
-        t = QString("%1ohm").arg(temp, 0, 'r', (3-grade%3));
+        t = QString("%1Ω").arg(temp, 0, 'r', (3-grade%3));
     if (grade == 6 || grade == 7)
-        t = QString("%1kohm").arg(temp/1000, 0, 'r', (3-grade%3));
+        t = QString("%1kΩ").arg(temp/1000, 0, 'r', (3-grade%3));
 
     double gg = 2 * qPow(10, (grade-2)) * 1.1;
     if (temp > gg)
-        t = QString(">%1ohm").arg(gg);
+        t = QString(">%1Ω").arg(gg);
 
     Results.append(temp);
-    if (Unit.at(number)->currentText() == "mohm")
+    if (Unit.at(number)->currentText() == tr("mΩ"))
         temp *= 1000;
-    if (Unit.at(number)->currentText() == "kohm")
+    if (Unit.at(number)->currentText() == tr("kΩ"))
         temp /= 1000;
-    if (temp<Min.at(number)->value() || temp>Max.at(number)->value()) {
+    if (temp < Min.at(number)->value() || temp > Max.at(number)->value()) {
         Judge = "NG";
-        JudgeItem = "NG";
+        judge = "NG";
     }
-    if (temp < (Max.at(number)->value()/10)) {
-        emit SendCommand(ADDR, CMD_STOP, "DCR LOW");
+
+    ItemView[number].insert("TestResult", t);
+    ItemView[number].insert("TestJudge", judge);
+    SendTestItems(number);
+
+    if (IsPowerOn() && temp < (Max.at(number)->value()/10)) {
+        QVariantHash hash;
+        hash.insert("TxAddress", "WinHome");
+        hash.insert("TxCommand", "StopTest");
+        emit SendVariant(hash);
         SendWarnning(tr("电阻值小于10%，请检查线路连接"));
     }
-    QVariantHash hash = ItemView.at(number).toHash();
-    hash.insert("TestResult", t);
-    hash.insert("TestJudge", JudgeItem);
-    ItemView[number] = QVariant::fromValue(hash);
 }
 
 void PageDcr::ReadOffset(QByteArray msg)
@@ -519,11 +477,11 @@ void PageDcr::ReadOffset(QByteArray msg)
     quint8 grade = quint8(msg.at(2));
     double temp = (quint16)(msg.at(3)*256)+(quint8)msg.at(4);
 
-    if (Unit.at(number)->currentText() == "mohm")
+    if (Unit.at(number)->currentText() == tr("mΩ"))
         temp *= qPow(10, (grade-3));
-    if (Unit.at(number)->currentText() == "ohm")
+    if (Unit.at(number)->currentText() == tr("Ω"))
         temp *= qPow(10, (grade-6));
-    if (Unit.at(number)->currentText() == "kohm")
+    if (Unit.at(number)->currentText() == tr("kΩ"))
         temp *= qPow(10, (grade-9));
 
     if (temp*20 > Max.at(number)->value())
@@ -534,19 +492,13 @@ void PageDcr::ReadOffset(QByteArray msg)
         OffsetR.at(number)->setValue(temp);
 }
 
-void PageDcr::SendTestJudge()
-{
-    QString s = QString(tr("电阻@%1@%2")).arg(CurrentSettings()).arg(Judge);
-    emit SendCommand(ADDR, CMD_JUDGE, s.toUtf8());
-}
-
 void PageDcr::SendCanCmdStatus()
 {
     QByteArray msg;
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x22) << quint8(0x01) << quint8(0x00);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageDcr::SendCanCmdStart(quint8 pos)
@@ -561,7 +513,7 @@ void PageDcr::SendCanCmdStart(quint8 pos)
     }
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x01) << quint8(0x00)
         << quint8(pos) << quint8(tt/256) << quint8(tt%256);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageDcr::SendCanCmdStop()
@@ -570,7 +522,7 @@ void PageDcr::SendCanCmdStop()
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x22) << quint8(0x01) << quint8(0x02);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageDcr::SendCanCmdConfig()
@@ -587,25 +539,16 @@ void PageDcr::SendCanCmdConfig()
                 << quint8(ui->BoxTime->value()*10);
         }
     }
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
-void PageDcr::SendAlarm(QByteArray addr)
+void PageDcr::SendAlarm(quint8 addr)
 {
-    quint8 t = 0x00;
-    if (addr.at(0) & 0x01)
-        t += 0x08;
-    if (addr.at(0) & 0x02)
-        t += 0x04;
-    if (addr.at(0) & 0x04)
-        t += 0x02;
-    if (addr.at(0) & 0x08)
-        t += 0x01;
     QByteArray msg;
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    out << quint16(0x22) << quint8(0x02) << quint8(0x09) << quint8(t);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    out << quint16(0x22) << quint8(0x02) << quint8(0x09) << quint8(addr);
+    emit CanMsg(msg);
 }
 
 void PageDcr::SendCanCmdPwr(quint8 s)
@@ -620,10 +563,8 @@ void PageDcr::SendCanCmdPwr(quint8 s)
     out << quint16(0x27) << quint8(0x08) << quint8(0x01) << quint8(g)
         << quint8(0x00) << quint8(0x05) << quint8(p) << quint8(0x00)
         << quint8(0x00) << quint8(0x00);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
-
-
 
 double PageDcr::CalculateOffset(double t,  quint8 num)
 {
@@ -638,15 +579,15 @@ void PageDcr::CalculateBalance()
 {
     //计算不平衡度
     if ((ui->BoxUnbalance->value() != 0) && (Results.size() >= 3)) {
-        QString JudgeItem = "OK";
+        QString judge = "OK";
         double sum = 0;
         double avr = 0;
         QString u;
-        for (int i=0; i < Results.size(); i++) {
+        for (int i=0; i < 3; i++) {
             sum += Results.at(i);
         }
-        avr = sum/Results.size();
-        for (int i=0; i < Results.size(); i++) {
+        avr = sum/3;
+        for (int i=0; i < 3; i++) {
             double un;
             if (avr == 0)
                 un = 0;
@@ -655,15 +596,14 @@ void PageDcr::CalculateBalance()
             u.append(QString::number(un, 'f', 1));
             u.append("% ");
             if (un >= ui->BoxUnbalance->value()) {
-                JudgeItem = "NG";
+                judge = "NG";
                 Judge = "NG";
             }
         }
         int number = ItemView.size()-1;
-        QVariantHash hash = ItemView.at(number).toHash();
-        hash.insert("TestResult", u);
-        hash.insert("TestJudge", JudgeItem);
-        ItemView[number] = QVariant::fromValue(hash);
+        ItemView[number].insert("TestResult", u);
+        ItemView[number].insert("TestJudge", judge);
+        SendTestItems(number);
     }
 }
 
@@ -674,9 +614,9 @@ int PageDcr::CalculateGear(int row)
     if (row >= Unit.size())
         return 7;
     double r = Max.at(row)->value();
-    if (Unit.at(row)->currentText() == "mohm")
+    if (Unit.at(row)->currentText() == tr("mΩ"))
         r /= 1000;
-    if (Unit.at(row)->currentText() == "kohm")
+    if (Unit.at(row)->currentText() == tr("kΩ"))
         r *= 1000;
     if (r <= 0.2)
         return 1;
@@ -697,7 +637,7 @@ int PageDcr::CalculateGear(int row)
 bool PageDcr::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (TestMode != "free") {
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -761,16 +701,49 @@ void PageDcr::showEvent(QShowEvent *e)
     e->accept();
 }
 
-void PageDcr::ReadVariant(QVariant s)
+void PageDcr::ReadVariant(QVariantHash s)
 {
-    QVariantHash hash = s.toHash();
-    if (hash.value("TxAddress") != "PageDcr" && hash.value("TxAddress") != "WinHome")
+    if (s.value("TxAddress") != "PageDcr" && s.value("TxAddress") != "WinHome")
         return;
-    if (hash.value("TxCommand") == "ItemInit") {
+    if (s.value("TxCommand") == "ItemInit") {
         InitSettings();
         SendCanCmdConfig();
         SendTestItemsAllEmpty();
     }
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand") == "StopTest")
+        TestStatus = "stop";
+    if (s.value("TxCommand") == "CheckStatus") {
+        TestStatus = "init";
+        SendCanCmdStatus();
+        if (!WaitTimeOut(30))
+            SendWarnning("超时");
+        TestStatus = "free";
+    }
+    if (s.value("TxCommand") == "TestAlarm") {
+        quint8 t = 0x00;
+        if (s.value("TxMessage").toString().contains("LEDY"))
+            t += 0x04;
+        if (s.value("TxMessage").toString().contains("LEDG"))
+            t += 0x02;
+        if (s.value("TxMessage").toString().contains("LEDR"))
+            t += 0x01;
+        if (s.value("TxMessage").toString().contains("BEEP"))
+            t += 0x08;
+        SendAlarm(t);
+    }
+    if (s.value("TxCommand").toString() == "TestSave")
+        SendTestSave();
+}
+
+void PageDcr::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
 }
 
 void PageDcr::SendWarnning(QString s)
@@ -779,12 +752,13 @@ void PageDcr::SendWarnning(QString s)
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("电阻异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
 }
 
 void PageDcr::SendTestItemsAllEmpty()
 {
     ItemView.clear();
+    QString uid = QUuid::createUuid();
     for (int i = 0; i < Enable.size(); i++) {
         QString T1 = Terminal1.at(i)->text();
         QString T2 = Terminal2.at(i)->text();
@@ -792,28 +766,32 @@ void PageDcr::SendTestItemsAllEmpty()
         QString M2 = Max.at(i)->text();
         QString U1 = Unit.at(i)->currentText();
         QVariantHash hash;
+
         hash.insert("TestEnable", Enable.at(i)->text());
         hash.insert("TestItem", tr("电阻%1-%2").arg(T1).arg(T2));
         hash.insert("TestPara", tr("%3-%4%5").arg(M1).arg(M2).arg(U1));
         hash.insert("TestResult", " ");
-        hash.insert("TestJudeg", " ");
-        ItemView.append(QVariant::fromValue(hash));
+        hash.insert("TestJudge", " ");
+        hash.insert("TestUid", uid);
+        hash.insert("ItemName", tr("电阻%1").arg(i+1));
+        ItemView.append(hash);
     }
     if (ui->BoxUnbalance->value() != 0 && ItemView.size() >= 3) {
         QVariantHash hash;
         hash.insert("TestItem", tr("电阻平衡"));
         hash.insert("TestPara", tr("%1%").arg(ui->BoxUnbalance->value()));
         hash.insert("TestResult", " ");
-        hash.insert("TestJudeg", " ");
+        hash.insert("TestJudge", " ");
         hash.insert("TestEnable", "Y");
-        ItemView.append(QVariant::fromValue(hash));
+        hash.insert("TestUid", uid);
+        ItemView.append(hash);
     }
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i).toHash();
+        QVariantHash hash = ItemView.at(i);
         if (hash.value("TestEnable") == "Y") {
             hash.insert("TxAddress", "WinTest");
             hash.insert("TxCommand", "ItemView");
-            emit SendVariant(QVariant::fromValue(hash));
+            emit SendVariant(hash);
         }
     }
 }
@@ -821,27 +799,53 @@ void PageDcr::SendTestItemsAllEmpty()
 void PageDcr::SendTestItemsAllError()
 {
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i).toHash();
+        QVariantHash hash = ItemView.at(i);
         if (hash.value("TestEnable") == "Y") {
             hash.insert("TxAddress", "WinTest");
             hash.insert("TxCommand", "ItemUpdate");
             hash.insert("TestResult", "---");
             hash.insert("TestJudge", "NG");
-            emit SendVariant(QVariant::fromValue(hash));
+            emit SendVariant(hash);
         }
+    }
+    qDebug() << "dcr test all error";
+}
+
+void PageDcr::SendTestItems(int num)
+{
+    QVariantHash hash = ItemView.at(num);
+    if (hash.value("TestEnable") == "Y") {
+        hash.insert("TxAddress", "WinTest");
+        hash.insert("TxCommand", "ItemUpdate");
+        emit SendVariant(hash);
     }
 }
 
-void PageDcr::SendTestItemsAll()
+void PageDcr::SendTestPause()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestPause");
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
+}
+
+void PageDcr::SendTestSave()
 {
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i).toHash();
+        QVariantHash hash = ItemView.at(i);
         if (hash.value("TestEnable") == "Y") {
-            hash.insert("TxAddress", "WinTest");
-            hash.insert("TxCommand", "ItemUpdate");
-            emit SendVariant(QVariant::fromValue(hash));
+            hash.insert("TxAddress", "WinHome");
+            hash.insert("TxCommand", "TestSave");
+            emit SendVariant(hash);
         }
     }
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestSave");
+    hash.insert("ItemName", tr("电阻"));
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
 }
 
 void PageDcr::SendTemperature(QByteArray msg)
@@ -852,7 +856,43 @@ void PageDcr::SendTemperature(QByteArray msg)
     hash.insert("TxAddress", "WinTest");
     hash.insert("TxCommand", "Temperature");
     hash.insert("TxMessage", tr("温度:%1°C").arg(temp));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
+}
+
+void PageDcr::SendSafeCheck()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "PagePwr");
+    hash.insert("TxCommand", "SafeCheck");
+    emit SendVariant(hash);
+}
+
+
+
+void PageDcr::TestThread(QVariantHash hash)
+{
+    TestStatus = "buzy";
+    if (IsPowerOn())
+        SendSafeCheck();
+    if (TestStatus == "stop") {
+        TestStatus = "free";
+        return;
+    }
+    Judge = "OK";
+    if (hash.value("Station").toString() == "left")
+        stat = WIN_ID_OUT13;
+    if (hash.value("Station").toString() == "right")
+        stat = WIN_ID_OUT14;
+    SendCanCmdStart(stat);
+    if (!WaitTimeOut(ui->BoxTime->value()*100+100)) {
+        Judge = "NG";
+        SendTestItemsAllError();
+    } else {
+        CalculateBalance();
+    }
+    if (Judge == "NG")
+        SendTestPause();
+    TestStatus = "free";
 }
 
 /*********************************END OF FILE**********************************/
