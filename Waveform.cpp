@@ -170,5 +170,6 @@ void Waveform::mousePressEvent(QMouseEvent *e)
         Block0 = x;
     this->update();
     emit BlockClick(x);
+    QLabel::mousePressEvent(e);
 }
 /*********************************END OF FILE**********************************/
