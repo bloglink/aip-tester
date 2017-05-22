@@ -97,9 +97,14 @@ void PageMag::InitButtons()
 
 void PageMag::ReadButtons(int id)
 {
+    QVariantHash hash;
     switch (id) {
     case Qt::Key_0:
+        if (TestStatus == "sample")
+            return;
         TestStatus = "sample";
+        for (int i=0; i < WaveMag.size(); i++)
+            WaveMag.at(i)->ShowWave(hash);
         if (ui->BoxStation->currentIndex() == 0)
             stat = WIN_ID_OUT13;
         if (ui->BoxStation->currentIndex() == 1)
@@ -109,7 +114,8 @@ void PageMag::ReadButtons(int id)
         if (!WaitTimeOut(100)) {
             SendWarnning(tr("采样失败"));
         } else {
-//            CalculateDir();
+            TestStatus = "sample";
+            CalculateDir();
             SaveSettings();
         }
         TestStatus = "free";

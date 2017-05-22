@@ -747,7 +747,6 @@ void WinHome::SendTestJudge(QString msg)
 
 void WinHome::TestThread(QVariantHash hash)
 {
-    qDebug() << "win test thread" << TestStatus;
     if (ui->desktop->currentWidget()->objectName() != "WinTest")
         return;
     if (TestStatus != "free")
