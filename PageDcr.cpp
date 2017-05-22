@@ -867,8 +867,6 @@ void PageDcr::SendSafeCheck()
     emit SendVariant(hash);
 }
 
-
-
 void PageDcr::TestThread(QVariantHash hash)
 {
     TestStatus = "buzy";

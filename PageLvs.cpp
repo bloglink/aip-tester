@@ -14,8 +14,7 @@ PageLvs::PageLvs(QWidget *parent) :
     ui(new Ui::PageLvs)
 {
     ui->setupUi(this);
-    InitWindows();
-    InitButton();
+    InitButtons();
     InitSettings();
     TestStatus = "free";
 }
@@ -25,18 +24,14 @@ PageLvs::~PageLvs()
     delete ui;
 }
 
-void PageLvs::InitWindows()
-{
-}
-
-void PageLvs::InitButton()
+void PageLvs::InitButtons()
 {
     QButtonGroup *btnGroup = new QButtonGroup;
     btnGroup->addButton(ui->BtnExit, Qt::Key_0);
-    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(BtnJudge(int)));
+    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
-void PageLvs::BtnJudge(int id)
+void PageLvs::ReadButtons(int id)
 {
     switch (id) {
     case Qt::Key_0:
@@ -95,10 +90,17 @@ void PageLvs::ExcuteCanCmd(int addr, QByteArray msg)
     if (TestStatus == "free")
         return;
     TimeOut = 0;
-    if (msg.size() == 4 && (quint8)msg.at(0) == 0x00)
+    quint8 cmd = (quint8)msg.at(0);
+    switch (cmd) {
+    case 0x00:
         ReadCanCmdStatus(msg);
-    if (msg.size() == 8 && (quint8)msg.at(0) == 0x01)
+        break;
+    case 0x01:
         ReadCanCmdResult(msg);
+        break;
+    default:
+        break;
+    }
 }
 
 void PageLvs::SendCanCmdStart(quint8 s)
@@ -129,48 +131,6 @@ void PageLvs::SendCanCmdStop()
     emit CanMsg(msg);
 }
 
-void PageLvs::SendItemTemp()
-{
-//    if (Volt.size() < 2 || Curr.size() < 2 || Power.size() < 2) {
-//        return;
-//    }
-//    QString rrr = QString::number(Curr.last()/1000, 'f', 3);
-//    QString ppp = QString::number(Power.last()/10, 'f', 1);
-//    QString t = QString("%1A, %2W").arg(rrr).arg(ppp);
-
-//    QStringList s = QString(Items.at(0)).split("@");
-//    if (s.at(2) == " ")
-//        s[2] = t;
-//    emit CanMsg(ADDR, CMD_ITEM_TEMP, s.join("@").toUtf8());
-}
-
-void PageLvs::SendItemJudge()
-{
-//    if (Curr.isEmpty()) {
-//        SendTestItemsAllError();
-//        return;
-//    }
-//    QString rrr = QString::number(Curr.last()/1000, 'f', 3);
-//    QString ppp = QString::number(Power.last()/10, 'f', 1);
-//    QString t = QString("%1A, %2W").arg(rrr).arg(ppp);
-
-//    QStringList s = QString(Items.at(0)).split("@");
-//    if (s.at(2) == " ")
-//        s[2] = t;
-//    if (s.at(3) == " ")
-//        s[3] = Judge;
-//    emit CanMsg(ADDR, CMD_ITEM, s.join("@").toUtf8());
-}
-
-void PageLvs::SendTestJudge()
-{
-//    QStringList s;
-//    s.append("低启");
-//    s.append(FileInUse);
-//    s.append(Judge);
-//    emit CanMsg(ADDR, CMD_JUDGE, s.join("@").toUtf8());
-}
-
 void PageLvs::ReadCanCmdStatus(QByteArray msg)
 {
     int s = quint8(msg.at(1));
@@ -192,12 +152,7 @@ void PageLvs::ReadCanCmdStatus(QByteArray msg)
         SendWarnning("UNKONW_ERROR");
         break;
     }
-
-    if (Mode == LVS_TEST) {
-        SendItemJudge();
-        ClearResults();
-    }
-    Mode = LVS_FREE;
+    TestStatus = "free";
 }
 
 void PageLvs::ReadCanCmdResult(QByteArray msg)
@@ -208,14 +163,19 @@ void PageLvs::ReadCanCmdResult(QByteArray msg)
     Volt.append(v);
     Curr.append(c);
     Power.append(p);
-    SendItemTemp();
+
+    QString rrr = QString::number(Curr.last()/1000, 'f', 3);
+    QString ppp = QString::number(Power.last()/10, 'f', 1);
+    QString t = QString("%1A, %2W").arg(rrr).arg(ppp);
+    ItemView[0].insert("TestResult", t);
+
     CalculateResult();
     if (Judge == "NG") {
+        ItemView[0].insert("TestJudge", "STOP");
         SendCanCmdStop();
-        SendItemJudge();
         ClearResults();
-        Mode = LVS_FREE;
     }
+    SendTestItems(0);
 }
 
 void PageLvs::CalculateResult()
@@ -278,8 +238,16 @@ void PageLvs::ReadVariant(QVariantHash s)
     }
     if (s.value("TxCommand") == "StartTest")
         TestThread(s);
-    if (s.value("TxCommand") == "StopTest")
-        TestStatus = "stop";
+    if (s.value("TxCommand") == "TestStatus") {
+        if (TestStatus == "free")
+            return;
+        if (s.value("TxMessage").toString() == "stop") {
+            SendCanCmdStop();
+            TestStatus = "stop";
+        }
+    }
+    if (s.value("TxCommand").toString() == "TestSave")
+        SendTestSave();
 }
 
 void PageLvs::GoToWindow(QString w)
@@ -342,9 +310,41 @@ void PageLvs::SendTestItemsAllError()
     qDebug() << "lvs test all error";
 }
 
-void PageLvs::SendTestItems()
+void PageLvs::SendTestItems(int num)
 {
+    QVariantHash hash = ItemView.at(num);
+    if (hash.value("TestEnable") == "Y") {
+        hash.insert("TxAddress", "WinTest");
+        hash.insert("TxCommand", "ItemUpdate");
+        emit SendVariant(hash);
+    }
+}
 
+void PageLvs::SendTestPause()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestPause");
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
+}
+
+void PageLvs::SendTestSave()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinHome");
+            hash.insert("TxCommand", "TestSave");
+            emit SendVariant(hash);
+        }
+    }
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "TestSave");
+    hash.insert("ItemName", tr("低启"));
+    hash.insert("TxMessage", Judge);
+    emit SendVariant(hash);
 }
 
 void PageLvs::TestThread(QVariantHash hash)
@@ -360,8 +360,13 @@ void PageLvs::TestThread(QVariantHash hash)
     if (!WaitTimeOut(100)) {
         Judge = "NG";
         SendTestItemsAllError();
+    } else {
+        ItemView[0].insert("TestJudge", Judge);
+        SendTestItems(0);
+        ClearResults();
     }
-    SendTestJudge();
+    if (Judge == "NG")
+        SendTestPause();
     TestStatus = "free";
 }
 /*********************************END OF FILE**********************************/

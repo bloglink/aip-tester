@@ -678,6 +678,8 @@ void PageImp::CalculateResult()
         if (Diff[TestRow]->value() < abs(D))
             judge = "NG";
     }
+    if (judge == "NG")
+        Judge = "NG";
 
     ItemView[TestRow].insert("TestResult", n);
     ItemView[TestRow].insert("TestResult1", tr("电晕:%1").arg(F));

@@ -49,18 +49,13 @@ signals:
     void SendVariant(QVariantHash s);
     void CanMsg(QByteArray msg);
 private slots:
-    void InitWindows(void);
-    void InitButton(void);
-    void BtnJudge(int id);
+    void InitButtons(void);
+    void ReadButtons(int id);
     void InitSettings(void);
     void SaveSettings(void);
-
     void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdStart(quint8 s);
     void SendCanCmdStop(void);
-    void SendItemTemp(void);
-    void SendItemJudge(void);
-    void SendTestJudge(void);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void CalculateResult(void);
@@ -74,7 +69,9 @@ private slots:
     void SendWarnning(QString s);
     void SendTestItemsAllEmpty(void);
     void SendTestItemsAllError(void);
-    void SendTestItems(void);
+    void SendTestItems(int num);
+    void SendTestPause(void);
+    void SendTestSave(void);
     void TestThread(QVariantHash hash);
 private:
     QSettings *set;
