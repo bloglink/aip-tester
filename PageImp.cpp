@@ -842,6 +842,7 @@ void PageImp::ReadCanCmdWaveStart(QByteArray msg)
 
 void PageImp::SendWave(QByteArray msg)
 {
+    quint8 num = station - WIN_ID_OUT13;
     int t = WaveNumber.size();
     for (int i=0; i < WaveNumber.size(); i++) {
         if (WaveImp.at(WaveNumber.at(i))->WaveItem  ==  msg)
@@ -853,7 +854,7 @@ void PageImp::SendWave(QByteArray msg)
         QByteArray w;
         w = WaveImp.at(WaveNumber.at(t+i))->WaveItem;
         emit SendCommand(ADDR, CMD_WAVE_ITEM, w);
-        w = WaveImp.at(WaveNumber.at(t+i))->WaveByte;
+        w = WaveImp.at(WaveNumber.at(t+i))->WaveBytes[num];
         emit SendCommand(ADDR, CMD_WAVE_TEST, w);
         w = WaveImp.at(WaveNumber.at(t+i))->WaveTest;
         emit SendCommand(ADDR, CMD_WAVE_BYTE, w);
