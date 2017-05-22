@@ -282,6 +282,8 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     double tt = quint16(msg.at(3)*256)+quint8(msg.at(4));
     tt *= qPow(10, -quint8(msg.at(5)));
+    if (tt < Offset.at(TestRow)->value())
+        tt = tt*Offset.at(TestRow)->value()/(Offset.at(TestRow)->value()-tt);
     Volt.append(v);
     Res.append(tt);
     QString rrr = QString::number(Res.last(), 'f', 1);
