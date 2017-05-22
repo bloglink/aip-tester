@@ -410,34 +410,7 @@ void WinHome::ReadStatusAll()
 
 }
 
-void WinHome::ReStartTest()
-{
-    //    switch (CurrentReStartMode()) {
-    //    case 0:
-    //        break;
-    //    case 1:
-    //        TestThread(QString("%1").arg(0x13).toUtf8());
-    //        break;
-    //    case 2:
-    //        TestThread(QString("%1").arg(0x14).toUtf8());
-    //        break;
-    //    case 3:
-    //        TestThread(stat);
-    //        break;
-    //    case 4:
-    //        if (stat.toInt() == 0x13) {
-    //            TestThread(QString("%1").arg(0x14).toUtf8());
-    //            break;
-    //        }
-    //        if (stat.toInt() == 0x14) {
-    //            TestThread(QString("%1").arg(0x13).toUtf8());
-    //            break;
-    //        }
-    //        break;
-    //    default:
-    //        break;
-    //    }
-}
+
 
 void WinHome::SaveTestJudge()
 {
@@ -654,6 +627,39 @@ void WinHome::SendTestStatus(QString msg)
     emit SendVariant(hash);
 }
 
+void WinHome::SendTestRestart()
+{
+    switch (CurrentReStartMode()) {
+    case 0:
+        break;
+    case 1:
+        TestHash.insert("Station", "left");
+        TestThread(TestHash);
+        break;
+    case 2:
+        TestHash.insert("Station", "right");
+        TestThread(TestHash);
+        break;
+    case 3:
+        TestThread(TestHash);
+        break;
+    case 4:
+        if (TestHash.value("Station") == "left") {
+            TestHash.insert("Station", "right");
+            TestThread(TestHash);
+            break;
+        }
+        if (TestHash.value("Station") == "right") {
+            TestHash.insert("Station", "left");
+            TestThread(TestHash);
+            break;
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 void WinHome::SendTestSave()
 {
     QVariantHash hash;
@@ -756,6 +762,7 @@ void WinHome::TestThread(QVariantHash hash)
         Warnning(hash);
         return;
     }
+    TestHash = hash;
     Judge = "OK";
     SendTestStatus("buzy");
     SendTestAlarm("LEDY");
@@ -774,6 +781,10 @@ void WinHome::TestThread(QVariantHash hash)
     SendTestSave();
     SendTestAlarm(Judge);
     SendTestJudge(Judge);
+    if (CurrentReStartMode() != 0 && TestStatus != "stop") {
+        QTimer *timer = new QTimer(this);
+        timer->singleShot(2000,  this,  SLOT(SendTestRestart()));
+    }
     SendTestStatus("free");
 }
 

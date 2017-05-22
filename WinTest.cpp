@@ -259,34 +259,32 @@ void WinTest::ItemShow()
 {
     ui->TabTest->setRowCount(ItemView.size());
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i);
         ui->TabTest->setItem(i, 0, new QTableWidgetItem);
         ui->TabTest->item(i, 0)->setTextAlignment(Qt::AlignCenter);
         ui->TabTest->item(i, 0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 0)->setText(hash.value("TestItem").toString());
+        ui->TabTest->item(i, 0)->setText(ItemView[i].value("TestItem").toString());
 
         ui->TabTest->setItem(i, 1, new QTableWidgetItem);
         ui->TabTest->item(i, 1)->setTextAlignment(Qt::AlignCenter);
         ui->TabTest->item(i, 1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 1)->setText(hash.value("TestPara").toString());
+        ui->TabTest->item(i, 1)->setText(ItemView[i].value("TestPara").toString());
 
         ui->TabTest->setItem(i, 2, new QTableWidgetItem);
         ui->TabTest->item(i, 2)->setTextAlignment(Qt::AlignCenter);
         ui->TabTest->item(i, 2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 2)->setText(hash.value("TestResult").toString());
+        ui->TabTest->item(i, 2)->setText(ItemView[i].value("TestResult").toString());
 
         ui->TabTest->setItem(i, 3, new QTableWidgetItem);
         ui->TabTest->item(i, 3)->setTextAlignment(Qt::AlignCenter);
         ui->TabTest->item(i, 3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 3)->setText(hash.value("TestJudge").toString());
+        ui->TabTest->item(i, 3)->setText(ItemView[i].value("TestJudge").toString());
     }
 }
 
 void WinTest::UpdateItem(QVariantHash hash)
 {
     for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash temp = ItemView.at(i);
-        if (temp.value("TestItem").toString() == hash.value("TestItem").toString()) {
+        if (ItemView[i].value("TestItem").toString() == hash.value("TestItem").toString()) {
             if (ui->TabTest->item(i, 3)->text() != " ")
                 continue;
             ItemView[i] = hash;
@@ -310,8 +308,7 @@ void WinTest::ViewItem(QVariantHash hash)
         return;
     }
     for (int i=ItemView.size()-1; i >= 0 ; i--) {
-        QVariantHash temp = ItemView.at(i);
-        if (temp.value("TestItem") == hash.value("TestItem")) {
+        if (ItemView[i].value("TestItem") == hash.value("TestItem")) {
             if (ui->TabTest->item(i, 3)->text() == " ")
                 continue;
             ItemView[i] = hash;

@@ -92,7 +92,7 @@ private slots:
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void InitTestItems(void);
     void ReadStatusAll(void);
-    void ReStartTest(void);
+    void SendTestRestart(void);
     void SaveTestJudge(void);
     void SaveItemJudge(QByteArray msg);
     void TestPause(void);
@@ -147,6 +147,7 @@ private:
     QStringList TempItems;
     bool isPause;
     QString TestStatus;
+    QVariantHash TestHash;
 };
 
 #endif // WINHOME_H
