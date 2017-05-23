@@ -352,27 +352,6 @@ void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
     }
 }
 
-void WinHome::InitTestItems()
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "WinHome");
-    hash.insert("TxCommand", "TestInit");
-    hash.insert("Station", tr("左"));
-    emit SendVariant(hash);
-
-    hash.insert("TxCommand", "ItemInit");
-    QStringList n = CurrentItems();
-    for (int i=0; i < n.size(); i++) {
-        QString s = WinName(n.at(i).toInt());
-        hash.insert("TxAddress", s);
-        emit SendVariant(hash);
-    }
-
-    hash.insert("TxAddress", "WinTest");
-    hash.insert("TxCommand", "ItemShow");
-    emit SendVariant(hash);
-}
-
 void WinHome::ReadStatusAll()
 {
     if (TestStatus != "free")
@@ -395,71 +374,15 @@ void WinHome::ReadStatusAll()
             hash.insert("Station", "right");
         emit SendVariant(hash);
     }
-    qDebug() << QTime::currentTime().toString() << "WinHome read OK";
-
     ui->Text->hide();
     ui->keybord->setCurrentIndex(1);
 
     TestStatus = "free";
 
-    HomeMode = HOME_FREE;
     if (ui->desktop->currentWidget()->objectName() == "MainPage") {
         Delay(1000);
         JumpToWindow("WinTest");
     }
-
-}
-
-
-
-void WinHome::SaveTestJudge()
-{
-    QString s = QString(tr("总数@%1@%2")).arg(CurrentSettings()).arg(Judge);
-    emit WriteSql(s.toUtf8());
-}
-
-void WinHome::SaveItemJudge(QByteArray msg)
-{
-    emit WriteSql(msg);
-    QStringList s = QString(msg).split("@");
-    if (s.size() < 3)
-        return;
-    if (s.at(2) == "NG")
-        Judge = "NG";
-    if (s.at(2) == "NG" && CurrentPauseMode() != 1)
-        TestPause();
-}
-
-void WinHome::TestPause()
-{
-    SendTestStatus("pause");
-
-    QString text = tr("此项目不合格,是否重测");
-    PopupBox *box = new PopupBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
-    connect(this, SIGNAL(SendVariant(QVariantHash)), box, SLOT(ReadVariant(QVariantHash)));
-    int ret = box->exec();
-    if (ret == QMessageBox::Retry) {
-        QVariantHash hash;
-        hash.insert("TxAddress", WinName(Current_Test_Item));
-        hash.insert("TxCommand", "ItemInit");
-        emit SendVariant(hash);
-        hash.insert("TxCommand", "StartTest");
-        emit SendVariant(hash);
-        Delay(10);
-    }
-    SendTestStatus("buzy");
-}
-
-bool WinHome::WaitTimeOut(quint16 t)
-{
-    int TimeOut = 0;
-    while (HomeMode != HOME_FREE) {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > t)
-            return false;
-    }
-    return true;
 }
 
 void WinHome::Delay(int ms)
@@ -575,9 +498,9 @@ void WinHome::ReadVariant(QVariantHash s)
     if (s.value("TxCommand") == "StartTest")
         TestThread(s);
     if (s.value("TxCommand") == "InitTest")
-        InitTest(s);
+        SendTestInit(s);
     if (s.value("TxCommand") == "StopTest")
-        StopTest(s);
+        SendTestStop(s);
     if (s.value("TxCommand") == "JumpWindow")
         JumpToWindow(s.value("TxMessage").toByteArray());
     if (s.value("TxCommand") == "ReadStatus")
@@ -585,7 +508,7 @@ void WinHome::ReadVariant(QVariantHash s)
     if (s.value("TxCommand") == "TestPause") {
         Judge = s.value("TxMessage").toString();
         if (CurrentPauseMode() != 1)
-            TestPause();
+            SendTestPause();
     }
     if (s.value("TxCommand") == "TestSave")
         ReadTestSave(s);
@@ -660,6 +583,26 @@ void WinHome::SendTestRestart()
     }
 }
 
+void WinHome::SendTestPause()
+{
+    SendTestStatus("pause");
+
+    QString text = tr("此项目不合格,是否重测");
+    PopupBox *box = new PopupBox(this, "", text, QMessageBox::Retry, QMessageBox::Ok);
+    connect(this, SIGNAL(SendVariant(QVariantHash)), box, SLOT(ReadVariant(QVariantHash)));
+    int ret = box->exec();
+    if (ret == QMessageBox::Retry) {
+        QVariantHash hash;
+        hash.insert("TxAddress", WinName(Current_Test_Item));
+        hash.insert("TxCommand", "ItemInit");
+        emit SendVariant(hash);
+        hash.insert("TxCommand", "StartTest");
+        emit SendVariant(hash);
+        Delay(10);
+    }
+    SendTestStatus("buzy");
+}
+
 void WinHome::SendTestSave()
 {
     QVariantHash hash;
@@ -669,6 +612,9 @@ void WinHome::SendTestSave()
         hash.insert("TxCommand", "TestSave");
         emit SendVariant(hash);
     }
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "TestSave");
+    emit SendVariant(hash);
     QString v = "总数1";
     v += "@" + CurrentUser();
     v += "@" + tr("code");
@@ -751,44 +697,8 @@ void WinHome::SendTestJudge(QString msg)
     emit SendVariant(hash);
 }
 
-void WinHome::TestThread(QVariantHash hash)
-{
-    if (ui->desktop->currentWidget()->objectName() != "WinTest")
-        return;
-    if (TestStatus != "free")
-        return;
-    if (!IsStartModeRight(hash)) {
-        hash.insert("TxMessage", tr("启动方式错误"));
-        Warnning(hash);
-        return;
-    }
-    TestHash = hash;
-    Judge = "OK";
-    SendTestStatus("buzy");
-    SendTestAlarm("LEDY");
-    InitTest(hash);
-    QStringList n = CurrentItems();
-    for (int i=0; i < n.size(); i++) {
-        Delay(10);
-        if (TestStatus == "stop") {
-            Judge = "NG";
-            break;
-        }
-        Current_Test_Item = n.at(i).toInt();
-        hash.insert("TxAddress", WinName(n.at(i).toInt()));
-        emit SendVariant(hash);
-    }
-    SendTestSave();
-    SendTestAlarm(Judge);
-    SendTestJudge(Judge);
-    if (CurrentReStartMode() != 0 && TestStatus != "stop") {
-        QTimer *timer = new QTimer(this);
-        timer->singleShot(2000,  this,  SLOT(SendTestRestart()));
-    }
-    SendTestStatus("free");
-}
 
-void WinHome::InitTest(QVariantHash hash)
+void WinHome::SendTestInit(QVariantHash hash)
 {
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "TestInit");
@@ -807,14 +717,14 @@ void WinHome::InitTest(QVariantHash hash)
     emit SendVariant(hash);
 }
 
-void WinHome::StopTest(QVariantHash hash)
+void WinHome::SendTestStop(QVariantHash hash)
 {
     if (TestStatus != "free") {
         SendTestStatus("stop");
         SendButtonBox("Ok");
         return;
     }
-    InitTest(hash);
+    SendTestInit(hash);
 }
 
 bool WinHome::IsStartModeRight(QVariantHash hash)
@@ -845,6 +755,43 @@ bool WinHome::IsStartModeRight(QVariantHash hash)
 void WinHome::ExcuteCanCmd(QByteArray msg)
 {
     emit PutCanData(msg);
+}
+
+void WinHome::TestThread(QVariantHash hash)
+{
+    if (ui->desktop->currentWidget()->objectName() != "WinTest")
+        return;
+    if (TestStatus != "free")
+        return;
+    if (!IsStartModeRight(hash)) {
+        hash.insert("TxMessage", tr("启动方式错误"));
+        Warnning(hash);
+        return;
+    }
+    TestHash = hash;
+    Judge = "OK";
+    SendTestStatus("buzy");
+    SendTestAlarm("LEDY");
+    SendTestInit(hash);
+    QStringList n = CurrentItems();
+    for (int i=0; i < n.size(); i++) {
+        Delay(10);
+        if (TestStatus == "stop") {
+            Judge = "NG";
+            break;
+        }
+        Current_Test_Item = n.at(i).toInt();
+        hash.insert("TxAddress", WinName(n.at(i).toInt()));
+        emit SendVariant(hash);
+    }
+    SendTestSave();
+    SendTestAlarm(Judge);
+    SendTestJudge(Judge);
+    if (CurrentReStartMode() != 0 && TestStatus != "stop") {
+        QTimer *timer = new QTimer(this);
+        timer->singleShot(2000,  this,  SLOT(SendTestRestart()));
+    }
+    SendTestStatus("free");
 }
 
 /*********************************END OF FILE**********************************/

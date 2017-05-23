@@ -90,13 +90,9 @@ private slots:
     void ReadCanCmd(QByteArray msg);
 
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
-    void InitTestItems(void);
     void ReadStatusAll(void);
     void SendTestRestart(void);
-    void SaveTestJudge(void);
-    void SaveItemJudge(QByteArray msg);
-    void TestPause(void);
-    bool WaitTimeOut(quint16 t);
+    void SendTestPause(void);
     void Delay(int ms);
 
     QString WinName(int n);
@@ -120,15 +116,14 @@ private slots:
     void SendTestAlarm(QString msg);
     void SendTestDebug(QString msg);
     void SendTestJudge(QString msg);
-    void TestThread(QVariantHash hash);
-    void InitTest(QVariantHash hash);
-    void StopTest(QVariantHash hash);
+    void SendTestInit(QVariantHash hash);
+    void SendTestStop(QVariantHash hash);
     bool IsStartModeRight(QVariantHash hash);
     void ExcuteCanCmd(QByteArray msg);
+    void TestThread(QVariantHash hash);
 private:
     QList<int> previous_window;
     QString Judge;
-    QStringList Items;
 
     QThread *thread_can;
     QThread *thread_sql;
@@ -140,7 +135,6 @@ private:
     TcpClient tcp;
     UdpClient udp;
     SerialPort btn;
-    quint8 HomeMode;
     QByteArray stat;
     PopupBox *msgBox;
     quint16 Current_Test_Item;
