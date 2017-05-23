@@ -68,7 +68,6 @@ private slots:
     void ReadCanCmdResult(QByteArray msg);
     void ReadCanCmdWaveOk(void);
     void CalculateResult(void);
-    void CalculateAvarageWave(void);
     int CalculateGear(int row);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
