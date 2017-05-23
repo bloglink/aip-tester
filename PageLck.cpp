@@ -151,8 +151,6 @@ void PageLck::SendCanCmdStart(quint8 s)
     emit CanMsg(msg);
 }
 
-
-
 void PageLck::SendCanCmdStop()
 {
     QByteArray msg;
@@ -407,7 +405,6 @@ void PageLck::SendTestItems(int num)
         SendTestItemsAllError();
         return;
     }
-
     double vv = Volt.at(num)/10;
     double rr = Curr.at(num)/1000;
     double pp = Power.at(num)/10;
@@ -423,7 +420,6 @@ void PageLck::SendTestItems(int num)
     ItemView[0].insert("TestResult1", tr("电压:%1V").arg(vv));
     ItemView[0].insert("TestResult2", tr("电流:%1A").arg(rr));
     ItemView[0].insert("TestResult3", tr("功率:%1W").arg(pp));
-
 
     QVariantHash hash = ItemView.at(0);
     if (hash.value("TestEnable") == "Y") {
