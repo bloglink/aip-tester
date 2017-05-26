@@ -271,7 +271,7 @@ void PageLvs::SendWarnning(QString s)
 void PageLvs::SendTestItemsAllEmpty()
 {
     ItemView.clear();
-    QString uid = QUuid::createUuid();
+    QString uid = QUuid::createUuid().toString();
     double M1 = ui->BoxCurrMin->value();
     double M2 = ui->BoxCurrMax->value();
     double Q1 = ui->BoxPowerMin->value();

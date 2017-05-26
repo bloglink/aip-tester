@@ -358,7 +358,7 @@ void PageLck::SendWarnning(QString s)
 void PageLck::SendTestItemsAllEmpty()
 {
     ItemView.clear();
-    QString uid = QUuid::createUuid();
+    QString uid = QUuid::createUuid().toString();
     QString U1 = QString::number(ui->BoxVoltMin->value());
     QString U2 = QString::number(ui->BoxVoltMax->value());
     QString C1 = QString::number(ui->BoxCurrMin->value());

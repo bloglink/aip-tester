@@ -869,7 +869,7 @@ void PageImp::SendWarnning(QString s)
 void PageImp::SendTestItemsAllEmpty()
 {
     ItemView.clear();
-    QString uid = QUuid::createUuid();
+    QString uid = QUuid::createUuid().toString();
     for (int i = 0; i < Enable.size(); i++) {
         QString T1 = Terminal1.at(i)->text();
         QString T2 = Terminal2.at(i)->text();

@@ -901,7 +901,7 @@ void PagePwr::SendTestItemsAllEmpty()
     PwrView.clear();
     DirView.clear();
     PGView.clear();
-    QString uid = QUuid::createUuid();
+    QString uid = QUuid::createUuid().toString();
     for (int i = 0; i < Enable.size(); i++) {
         QString G1 = Grade.at(i)->text();
         double I1 = CurrMin.at(i)->value();

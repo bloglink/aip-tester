@@ -581,7 +581,7 @@ void PageAcw::SendWarnning(QString s)
 void PageAcw::SendTestItemsAllEmpty()
 {
     ItemView.clear();
-    QString uid = QUuid::createUuid();
+    QString uid = QUuid::createUuid().toString();
     for (int i = 0; i < Enable.size(); i++) {
         QString T1 = Terminal1.at(i)->text();
         QString U1 = Vol.at(i)->text();
