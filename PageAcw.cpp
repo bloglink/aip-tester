@@ -418,6 +418,18 @@ void PageAcw::ReadCanCmdResult(QByteArray msg)
         case 3:
             SendTestItemError("ARC");
             break;
+        case 4:
+            SendTestItemError(tr("漏电保护"));
+            break;
+        case 5:
+            SendTestItemError(tr("功率保护"));
+            break;
+        case 6:
+            SendTestItemError(tr("DCPT"));
+            break;
+        case 7:
+            SendTestItemError(">20mA");
+            break;
         default:
             SendTestItemError(QString("PT+%1").arg(quint8(msg.at(6))));
             break;

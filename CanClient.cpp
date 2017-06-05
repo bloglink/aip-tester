@@ -18,6 +18,43 @@ CanClient::CanClient(QObject *parent) : QObject(parent)
 void CanClient::DeviceOpen()
 {
 #ifdef __arm__
+    char str[256];
+
+    struct can_filter rfilter[14];      //  rfilter 记录总数
+    //#define CAN_SFF_MASK 0x000007FFU
+    rfilter[0].can_id = 0x41;           // 电阻板ID
+    rfilter[0].can_mask = CAN_SFF_MASK;
+    rfilter[1].can_id = 0x441;          // 反嵌板波形ID
+    rfilter[1].can_mask = CAN_SFF_MASK;
+    rfilter[2].can_id = 0x61;           // 绝缘板ID
+    rfilter[2].can_mask = CAN_SFF_MASK;
+    rfilter[3].can_id = 0x261;          // 输出板ID  13
+    rfilter[3].can_mask = CAN_SFF_MASK;
+    rfilter[4].can_id = 0x81;           // 匝间板ID
+    rfilter[4].can_mask = CAN_SFF_MASK;
+    rfilter[5].can_id = 0x481;          // 匝间板波形ID
+    rfilter[5].can_mask = CAN_SFF_MASK;
+
+    rfilter[6].can_id = 0x281;          // 输出板ID  14
+    rfilter[6].can_mask = CAN_SFF_MASK;
+    rfilter[7].can_id = 0x2A1;          // 输出板ID  15
+    rfilter[7].can_mask = CAN_SFF_MASK;
+    rfilter[8].can_id = 0x2C1;          // 输出板ID  16
+    rfilter[8].can_mask = CAN_SFF_MASK;
+    rfilter[9].can_id = 0x2E1;          // 输出板ID  17
+    rfilter[9].can_mask = CAN_SFF_MASK;
+
+    rfilter[10].can_id = 0xC1;           // 电感板ID
+    rfilter[10].can_mask = CAN_SFF_MASK;
+
+    rfilter[11].can_id = 0xE1;           // 电参板ID 1   27
+    rfilter[11].can_mask = CAN_SFF_MASK;
+
+    rfilter[12].can_id = 0x101;          // 电参板ID 2   28
+    rfilter[12].can_mask = CAN_SFF_MASK;
+
+    rfilter[13].can_id = 0x4E1;          // 电参板 PG波形
+    rfilter[13].can_mask = CAN_SFF_MASK;
     struct sockaddr_can     addr;
     struct ifreq            ifr;
     s = socket(PF_CAN,  SOCK_RAW,  CAN_RAW);  /*打开套接字*/
@@ -168,10 +205,11 @@ void CanClient::WriteAll(QByteArray msg)
             TxMsg.arryData[i] = dat;
         }
 #endif
-        if (!DeviceSend()) {
-            DeviceQuit();
-            DeviceOpen();
-            break;
-        }
+        //        if (!DeviceSend()) {
+        //            DeviceQuit();
+        //            DeviceOpen();
+        //            break;
+        //        }
+        DeviceSend();
     }
 }
