@@ -142,6 +142,7 @@ private:
     QString PGJudge;
 
     QStringList PGWaveItem;
+    QByteArray wave0;
     QByteArray wave1;
     QByteArray wave2;
     QByteArray wave3;

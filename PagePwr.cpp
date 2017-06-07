@@ -595,16 +595,16 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
         return;
     if (IsPGTest()) {
         emit SendCommand(ADDR, CMD_WAVE_ITEM, PGWaveItem.at(TestRow).toUtf8());
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, wave);
+        emit SendCommand(ADDR, CMD_WAVE_BYTE, wave0);
         switch (TestRow) {
         case 0:
-            wave1 = wave;
+            wave1 = wave0;
             break;
         case 1:
-            wave2 = wave;
+            wave2 = wave0;
             break;
         case 2:
-            wave3 = wave;
+            wave3 = wave0;
             break;
         default:
             break;
@@ -668,10 +668,13 @@ void PagePwr::ReadCanCmdPGDutys(QByteArray msg)
 void PagePwr::ReadCanCmdPGWaveStart()
 {
     wave.clear();
+    wave0.clear();
 }
 
 void PagePwr::ReadCanCmdPGWaveStop()
 {
+    if (wave.size() >= 400)
+        wave0 = wave;
 }
 
 void PagePwr::ReadCanCmdPGWave(QByteArray msg)
