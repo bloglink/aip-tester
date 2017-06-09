@@ -1,6 +1,7 @@
 #include "desktop.h"
 #include <QApplication>
 #include <QTextCodec>
+#include "PageKey.h"
 
 int main(int argc, char *argv[])
 {
@@ -13,9 +14,9 @@ int main(int argc, char *argv[])
 
     QApplication a(argc, argv);
 
-//#ifdef __arm__
-//    PageKey::Instance()->hide();
-//#endif
+#ifdef __arm__
+    PageKey::Instance()->hide();
+#endif
 
     Desktop w;
     w.show();

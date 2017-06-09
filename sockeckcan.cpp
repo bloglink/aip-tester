@@ -43,7 +43,13 @@ bool SockeckCan::DeviceOpen()
 
 bool SockeckCan::DeviceQuit()
 {
-    return false;
+#ifdef __arm__
+    close(s);
+#else
+    CAN_ChannelStop(s, 0);
+    CAN_DeviceClose(s);
+#endif
+    return true;
 }
 
 bool SockeckCan::DeviceSend(quint16 addr, QByteArray msg)
