@@ -19,11 +19,9 @@ public:
     explicit PageAmp(QObject *parent = 0);
 
 signals:
-    void SendVariant(QVariant s);
-    void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void SendVariant(QVariantHash s);
+    void CanMsg(QByteArray msg);
 private slots:
-    void ReadMessage(quint16 addr, quint16 cmd, QByteArray msg);
-    void ExcuteCanCmd(QByteArray msg);
     void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdStatus(void);
     void SendWarnning(QString s);
@@ -31,9 +29,11 @@ private slots:
     void ReadCanCmdStatus(QByteArray msg);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+    void ReadVariant(QVariantHash s);
 private:
     quint8 Mode;
     quint16 TimeOut;
+    QString TestStatus;
 };
 
 #endif // PAGEAMP_H

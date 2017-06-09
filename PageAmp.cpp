@@ -2,37 +2,7 @@
 
 PageAmp::PageAmp(QObject *parent) : QObject(parent)
 {
-    Mode = AMP_FREE;
-}
-
-void PageAmp::ReadMessage(quint16 addr, quint16 cmd, QByteArray msg)
-{
-    if (addr != ADDR && addr != WIN_ID_AMP && addr != CAN_ID_AMP)
-        return;
-    switch (cmd) {
-    case CMD_CAN:
-        ExcuteCanCmd(msg);
-        break;
-    case CMD_CHECK:
-        Mode = AMP_INIT;
-        SendCanCmdStatus();
-        WaitTimeOut(30);
-        Mode = AMP_FREE;
-        break;
-    default:
-        break;
-    }
-}
-
-void PageAmp::ExcuteCanCmd(QByteArray msg)
-{
-    if (Mode == AMP_FREE)
-        return;
-    TimeOut = 0;
-
-    if (msg.size() >= 8 && (quint8)msg.at(0) == 0x00) {
-        ReadCanCmdStatus(msg);
-    }
+    TestStatus = "free";
 }
 
 void PageAmp::ExcuteCanCmd(int addr, QByteArray msg)
@@ -54,7 +24,7 @@ void PageAmp::SendCanCmdStatus()
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     out << quint16(0x2A) << quint8(0x01) << quint8(0x00);
-    emit SendCommand(ADDR, CMD_CAN, msg);
+    emit CanMsg(msg);
 }
 
 void PageAmp::SendWarnning(QString s)
@@ -63,7 +33,7 @@ void PageAmp::SendWarnning(QString s)
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Warnning");
     hash.insert("TxMessage", tr("功放异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
 }
 
 void PageAmp::SendError(QString s)
@@ -72,7 +42,7 @@ void PageAmp::SendError(QString s)
     hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "Error");
     hash.insert("TxMessage", tr("功放异常:\n%1").arg(s));
-    emit SendVariant(QVariant::fromValue(hash));
+    emit SendVariant(hash);
 }
 
 void PageAmp::ReadCanCmdStatus(QByteArray msg)
@@ -101,13 +71,13 @@ void PageAmp::ReadCanCmdStatus(QByteArray msg)
         SendWarnning(tr("PWR_ERROR %1").arg(e));
         break;
     }
-    Mode = AMP_FREE;
+    TestStatus = "free";
 }
 
 bool PageAmp::WaitTimeOut(quint16 t)
 {
     TimeOut = 0;
-    while (Mode != AMP_FREE) {
+    while (TestStatus != "free") {
         Delay(10);
         TimeOut++;
         if (TimeOut > t)
@@ -122,4 +92,16 @@ void PageAmp::Delay(int ms)
     t.start();
     while (t.elapsed() < ms)
         QCoreApplication::processEvents();
+}
+
+void PageAmp::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageOut" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "CheckStatus") {
+        TestStatus = "init";
+        SendCanCmdStatus();
+        WaitTimeOut(30);
+        TestStatus = "free";
+    }
 }

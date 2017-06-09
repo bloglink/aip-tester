@@ -313,13 +313,7 @@ void Desktop::InitWindowsAll()
     connect(pageAmp, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
     connect(this, SIGNAL(SendVariant(QVariantHash)), pageAmp, SLOT(ReadVariant(QVariantHash)));
     connect(pageAmp, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
-    connect(this, SIGNAL(SendCanCmdOut(int, QByteArray)), pageAmp, SLOT(ExcuteCanCmd(int, QByteArray)));
-
-    connect(pageAmp, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageAmp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageAmp,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
+    connect(this, SIGNAL(SendCanCmdAmp(int, QByteArray)), pageAmp, SLOT(ExcuteCanCmd(int, QByteArray)));
     ReadStatusAll();
 }
 
