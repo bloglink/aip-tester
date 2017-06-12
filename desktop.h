@@ -100,8 +100,6 @@ private slots:
     QString CurrentUser(void);
 
     void ReadVariant(QVariantHash s);
-    void ReadButtonBox(QByteArray msg);
-    void SendButtonBox(QString button);
     void SendTestStatus(QString msg);
     void SendTestSave(void);
     void ReadTestSave(QVariantHash s);

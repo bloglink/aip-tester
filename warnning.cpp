@@ -75,7 +75,7 @@ void Warnning::ReadVariant(QVariantHash s)
 {
     if (s.value("TxAddress") != "WinHome")
         return;
-    if (s.value("TxCommand") != "BoxButton")
+    if (s.value("TxCommand") != "ButtonBox")
         return;
     if (s.value("TxMessage") == "Retry")
         onButtonClicked(ButtonBox->button(QDialogButtonBox::Retry));

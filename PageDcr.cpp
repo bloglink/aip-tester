@@ -339,10 +339,11 @@ void PageDcr::ItemChange(QString msg)
 
 void PageDcr::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (TestStatus == "free")
+    quint8 cmd = (quint8)msg.at(0);
+    if (TestStatus == "free" && cmd != 0x09)
         return;
     TimeOut = 0;
-    quint8 cmd = (quint8)msg.at(0);
+
     switch (cmd) {
     case 0x00: //状态
         ReadCanCmdStatus(msg);
@@ -361,6 +362,9 @@ void PageDcr::ExcuteCanCmd(int addr, QByteArray msg)
         break;
     case 0x08: //软件版本
         qDebug() << msg.toHex();
+        break;
+    case 0x09:
+        ReadButtonBox(msg);
         break;
     default:
         qDebug() << addr << msg.toHex();
@@ -489,6 +493,19 @@ void PageDcr::ReadOffset(QByteArray msg)
         Offset.at(number)->setValue(temp);
     if (stat == WIN_ID_OUT14)
         OffsetR.at(number)->setValue(temp);
+}
+
+void PageDcr::ReadButtonBox(QByteArray msg)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "ButtonBox");
+
+    if (quint8(msg.at(1)) != 0)
+        hash.insert("TxMessage", "Retry");
+    else
+        hash.insert("TxMessage", "Ok");
+    emit SendVariant(hash);
 }
 
 void PageDcr::SendCanCmdStatus()

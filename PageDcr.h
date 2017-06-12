@@ -66,6 +66,7 @@ private slots:
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
     void ReadOffset(QByteArray msg);
+    void ReadButtonBox(QByteArray msg);
 
 
     void SendCanCmdStatus(void);
@@ -74,6 +75,7 @@ private slots:
     void SendCanCmdConfig(void);
     void SendAlarm(quint8 addr);
     void SendCanCmdPwr(quint8 pos);
+
 
     double CalculateOffset(double t, quint8 num);
     void CalculateBalance(void);

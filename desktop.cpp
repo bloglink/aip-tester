@@ -207,15 +207,6 @@ void Desktop::InitBtn()
     connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
 }
 
-void Desktop::Warnnings(QVariantHash hash)
-{
-    QString text = hash.value("TxMessage").toString();
-    SendTestDebug(text);
-    Warnning *box = new Warnning(this, "", text, NULL, QMessageBox::Ok);
-    connect(this, SIGNAL(SendVariant(QVariantHash)), box, SLOT(ReadVariant(QVariantHash)));
-    box->exec();
-}
-
 void Desktop::InitWindowsAll()
 {
     PageDcr *pageDcr = new PageDcr(this);
@@ -377,9 +368,9 @@ void Desktop::ReadCanCmd(QByteArray msg)
                 in >> dat;
                 cmd.append(dat);
             }
-            if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
-                ReadButtonBox(cmd);
-            else
+//            if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
+//                ReadButtonBox(cmd);
+//            else
                 emit CanMsg(id, cmd);
         }
     }
@@ -569,30 +560,24 @@ void Desktop::ReadVariant(QVariantHash s)
     }
     if (s.value("TxCommand") == "TestSave")
         ReadTestSave(s);
+    if (s.value("TxCommand") == "ButtonBox")
+        emit SendVariant(s);
 }
 
-void Desktop::ReadButtonBox(QByteArray msg)
+void Desktop::Warnnings(QVariantHash hash)
 {
-    if (quint8(msg.at(1)) != 0)
-        SendButtonBox("Retry");
-    if (quint8(msg.at(2)) != 0)
-        SendButtonBox("Ok");
-}
-
-void Desktop::SendButtonBox(QString button)
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "Desktop");
-    hash.insert("TxCommand", "BoxButton");
-    hash.insert("TxMessage", button);
-    emit SendVariant(hash);
+    QString text = hash.value("TxMessage").toString();
+    SendTestDebug(text);
+    Warnning *box = new Warnning(this, "", text, NULL, QMessageBox::Ok);
+    connect(this, SIGNAL(SendVariant(QVariantHash)), box, SLOT(ReadVariant(QVariantHash)));
+    box->exec();
 }
 
 void Desktop::SendTestStatus(QString msg)
 {
     TestStatus = msg;
     QVariantHash hash;
-    hash.insert("TxAddress", "Desktop");
+    hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "TestStatus");
     hash.insert("TxMessage", msg);
     emit SendVariant(hash);
@@ -692,7 +677,7 @@ void Desktop::ReadTestSave(QVariantHash s)
 void Desktop::SendTestAlarm(QString msg)
 {
     QVariantHash hash;
-    hash.insert("TxAddress", "Desktop");
+    hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "TestAlarm");
     if (msg == "OK") {
         hash.insert("TxMessage", "LEDG BEEP");
@@ -730,7 +715,7 @@ void Desktop::SendTestDebug(QString msg)
         Delay(1);
     }
     QVariantHash hash;
-    hash.insert("TxAddress", "Desktop");
+    hash.insert("TxAddress", "WinHome");
     hash.insert("TxCommand", "TestDebug");
     hash.insert("TxMessage", msg);
     emit SendVariant(hash);
@@ -769,7 +754,7 @@ void Desktop::SendTestStop(QVariantHash hash)
 {
     if (TestStatus != "free") {
         SendTestStatus("stop");
-        SendButtonBox("Ok");
+//        SendButtonBox("Ok");
         return;
     }
     SendTestInit(hash);
