@@ -49,10 +49,23 @@ void WinTest::InitWindows()
         ui->TabWave->setCellWidget(0, i, wave.at(i));
         connect(wave.at(i), SIGNAL(SendVariant(QVariantHash)), this, SLOT(WaveView(QVariantHash)));
     }
-    connect(ui->WaveView, SIGNAL(SendVariant(QVariantHash)), this, SLOT(WaveView(QVariantHash)));
     ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
     ui->TextPos->setStyleSheet("color:white;font:Bold 42pt Ubuntu;");
     connect(ui->TabTest, SIGNAL(cellClicked(int, int)), this, SLOT(ClickItem(int, int)));
+
+    QLinearGradient gradient(0, 0, 0, 400);
+    gradient.setColorAt(0, QColor(18, 25, 34));
+    gradient.setColorAt(0.5, QColor(105, 105, 105));
+    gradient.setColorAt(1, QColor(18, 25, 34));
+    ui->customPlot->setBackground(QBrush(gradient)); //设置背景色
+    ui->customPlot->rescaleAxes();
+    ui->customPlot->xAxis->setTicks(false);
+    ui->customPlot->yAxis->setTicks(false);
+    ui->customPlot->xAxis->setTickLabels(false);
+    ui->customPlot->yAxis->setTickLabels(false);
+    ui->customPlot->axisRect()->setupFullAxesBox();
+    ui->customPlot->axisRect()->setMinimumMargins(QMargins(0,0,0,0));
+    connect(ui->customPlot, SIGNAL(mousePress(QMouseEvent*)), this, SLOT(WaveHide()));
 }
 
 void WinTest::InitButtons()
@@ -353,9 +366,14 @@ void WinTest::WaveView(QVariantHash s)
 {
     if (ui->stackedWidget->currentIndex() == 0) {
         ui->stackedWidget->setCurrentIndex(1);
-        ui->WaveView->ShowWave(s);
+//        ui->WaveView->ShowWave(s);
         return;
     }
+    ui->stackedWidget->setCurrentIndex(0);
+}
+
+void WinTest::WaveHide()
+{
     ui->stackedWidget->setCurrentIndex(0);
 }
 

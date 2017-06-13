@@ -24,6 +24,8 @@
 #include "Waveform.h"
 #include "WaveBox.h"
 
+#include "qcustomplot.h"
+
 namespace Ui {
 class WinTest;
 }
@@ -66,6 +68,7 @@ private slots:
     void UpdateWave(QVariantHash hash);
     void UpdateJudge(QString judge);
     void WaveView(QVariantHash s);
+    void WaveHide(void);
     void SendContrl(QString s);
 private:
     QTimer *timer;

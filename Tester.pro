@@ -7,7 +7,7 @@
 QT       += core gui sql network serialport
 CONFIG   += serialport
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 TARGET = Tester
 TEMPLATE = app
@@ -43,7 +43,8 @@ SOURCES += main.cpp\
     UdpClient.cpp \
     WaveBox.cpp \
     Waveform.cpp \
-    PageAmp.cpp
+    PageAmp.cpp \
+    qcustomplot.cpp
 
 HEADERS  += desktop.h \
     sockeckcan.h \
@@ -73,7 +74,8 @@ HEADERS  += desktop.h \
     UdpClient.h \
     WaveBox.h \
     Waveform.h \
-    PageAmp.h
+    PageAmp.h \
+    qcustomplot.h
 
 FORMS    += desktop.ui \
     PageAcw.ui \

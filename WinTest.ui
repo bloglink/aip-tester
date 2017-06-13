@@ -32,7 +32,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>1</number>
      </property>
      <widget class="QWidget" name="page">
       <layout class="QHBoxLayout" name="horizontalLayout_2" stretch="5,1">
@@ -635,11 +635,7 @@ color: rgb(0, 0, 0);</string>
      <widget class="QWidget" name="page_2">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="WaveBox" name="WaveView">
-         <property name="text">
-          <string/>
-         </property>
-        </widget>
+        <widget class="QCustomPlot" name="customPlot" native="true"/>
        </item>
       </layout>
      </widget>
@@ -649,9 +645,10 @@ color: rgb(0, 0, 0);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>WaveBox</class>
-   <extends>QLabel</extends>
-   <header>WaveBox.h</header>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>
