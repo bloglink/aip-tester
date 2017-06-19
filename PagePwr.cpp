@@ -502,6 +502,10 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
                     Judge = "NG";
                     SendTestItemsAllError();
                     break;
+                } else {
+                    CalculateResult();
+                    SendTestItem();
+                    ClearResults();
                 }
                 Delay(5);
                 if (isStop) {
@@ -640,12 +644,12 @@ void PagePwr::ReadCanCmdVolt(QByteArray msg)
     double v = quint16(msg.at(1)*256)+quint8(msg.at(2));
     CVolt.append(v);
     SendTestItemTemp();
-    CalculateResult();
-    if (Judge == "NG") {
-        SendCanCmdStop();
-        SendTestItem();
-        ClearResults();
-    }
+//    CalculateResult();
+//    if (Judge == "NG") {
+//        SendCanCmdStop();
+//        SendTestItem();
+//        ClearResults();
+//    }
 }
 
 void PagePwr::ReadCanCmdPGCurrs(QByteArray msg)

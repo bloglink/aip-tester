@@ -104,6 +104,10 @@ void PageLvs::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
             Judge = "NG";
             SendTestItemsAllError();
             break;
+        } else {
+            CalculateResult();
+            SendTestItem();
+            ClearResults();
         }
         SendTestJudge();
         Mode = LVS_FREE;
@@ -203,7 +207,7 @@ void PageLvs::SendItemTemp()
     emit SendCommand(ADDR, CMD_ITEM_TEMP, s.join("@").toUtf8());
 }
 
-void PageLvs::SendItemJudge()
+void PageLvs::SendTestItem()
 {
     if (Curr.isEmpty()) {
         SendTestItemsAllError();
@@ -253,7 +257,7 @@ void PageLvs::ReadCanCmdStatus(QByteArray msg)
     }
 
     if (Mode == LVS_TEST) {
-        SendItemJudge();
+        SendTestItem();
         ClearResults();
         Mode = LVS_FREE;
     }
@@ -271,7 +275,7 @@ void PageLvs::ReadCanCmdResult(QByteArray msg)
     CalculateResult();
     if (Judge == "NG") {
         SendCanCmdStop();
-        SendItemJudge();
+        SendTestItem();
         ClearResults();
 //        Mode = LVS_FREE;
     }
