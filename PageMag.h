@@ -20,11 +20,12 @@
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
-#include "define.h"
-#include "PageNum.h"
-#include "WaveBox.h"
+
+#include "qcustomplot.h"
+#include "delegate.h"
 
 #define MAX_ROW 8
+#define MAG_MAX 8
 
 #define MAG_FREE        0
 #define MAG_INIT        4
@@ -51,24 +52,21 @@ signals:
     void CanMsg(QByteArray msg);
 
 private slots:
-    void InitWindows(void);
-    void InitButtons(void);
-    void ReadButtons(int id);
-    void InitSettings(void);
-    void SaveSettings(void);
-    void ItemClick(int r,  int c);
-    void ItemChange(QString msg);
+    void InitWin(void);
+    void InitSet(void);
+    void SaveSet(void);
+    void InitItems(void);
     void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdSample(quint8 s);
     void SendCanCmdStart(quint8 s);
     void SendCanCmdConfig(quint8 s);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
-    void CalculateDir();
+    void ReadCanCmdSample(QByteArray msg);
+    void ReadCanCmdWave(QByteArray msg);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-    QString CurrentSettings(void);
-    virtual void showEvent(QShowEvent*);
+
 
     void ReadVariant(QVariantHash s);
     void GoToWindow(QString w);
@@ -77,23 +75,24 @@ private slots:
     void SendTestItemsAllError(void);
     void SendTestWavesAllEmpty(void);
     void SendTestItems(int num);
+    void SendTestItemsAll(void);
     void SendTestPause(void);
     void SendTestSave(void);
     void TestThread(QVariantHash hash);
+    virtual void showEvent(QShowEvent*);
+    void on_btn1_clicked();
+
+    void on_btn2_clicked();
+
 private:
-    QSettings *set;
+    StandardItemModel *m;
+    QSettings *ini;
 
     quint16 TimeOut;
-    PageNum *input;
     quint8 TestRow;
     QStringList Items;
     QString Judge;
 
-    QList<QTableWidgetItem*> Enable;
-    QList<QTableWidgetItem*> Terminal1;
-    QList<QTableWidgetItem*> Terminal2;
-    QList<QDoubleSpinBox*> Max;
-    QList<int> WaveNumber;
     QList<int> AreaL;
     QList<int> FreqL;
     QList<int> AreaR;
@@ -105,7 +104,7 @@ private:
     QList<QVariantHash> ItemView;
     QByteArray wave;
     QString TestStatus;
-    QList<WaveBox *> WaveMag;
+    QList<QCustomPlot *> Waves;
 };
 
 #endif // PAGEMAG_H

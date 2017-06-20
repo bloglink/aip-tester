@@ -36,7 +36,7 @@ Desktop::~Desktop()
     delete ui;
 }
 
-void Desktop::InitWin()
+void Desktop::InitWin(void)
 {
     QString v = "V-2.1.1.170520";
     QSettings *ini = new QSettings("./nandflash/global.ini", QSettings::IniFormat);
@@ -45,8 +45,8 @@ void Desktop::InitWin()
     ui->titleVn->setText(v);
 
 #ifdef __arm__
-    ui->btnQuit->hide();
-    //    this->setWindowFlags(Qt::FramelessWindowHint);
+//    ui->btnQuit->hide();
+    this->setWindowFlags(Qt::FramelessWindowHint);
 #endif
     ui->keybord->setCurrentIndex(0);
     //设置界面风格
@@ -61,8 +61,8 @@ void Desktop::InitWin()
     ui->desktop->addWidget(winBack);
     winBack->setObjectName("WinBack");
     connect(winBack, SIGNAL(SendVariant(QVariantHash)), this, SLOT(ReadVariant(QVariantHash)));
+    connect(this, SIGNAL(SendVariant(QVariantHash)), winBack, SLOT(ReadVariant(QVariantHash)));
     connect(winBack, SIGNAL(CanMsg(QByteArray)), this, SLOT(ExcuteCanCmd(QByteArray)));
-    connect(this, SIGNAL(CanMsg(int, QByteArray)), winBack, SLOT(ExcuteCanCmd(int, QByteArray)));
 
     WinSyst *winSyst = new WinSyst(this);
     ui->desktop->addWidget(winSyst);
@@ -128,20 +128,20 @@ void Desktop::ReadCan()
         case 0x0481: // 匝间板波形
             emit SendCanCmdImp(addr, msg);
             break;
-//        case 0x00C1: // 电感板
-//            emit SendCanCmdInd(addr, msg);
-//            break;
-//        case 0x00E1: // 功率板
-//            emit SendCanCmdPwr(addr, msg);
-//            emit SendCanCmdLvs(addr, msg);
-//            emit SendCanCmdLck(addr, msg);
-//            break;
-//        case 0x04E1: // PG波形
-//            emit SendCanCmdPwr(addr, msg);
-//            break;
-//        case 0x0141: // 功放板
-//            emit SendCanCmdAmp(addr, msg);
-//            break;
+            //        case 0x00C1: // 电感板
+            //            emit SendCanCmdInd(addr, msg);
+            //            break;
+            //        case 0x00E1: // 功率板
+            //            emit SendCanCmdPwr(addr, msg);
+            //            emit SendCanCmdLvs(addr, msg);
+            //            emit SendCanCmdLck(addr, msg);
+            //            break;
+            //        case 0x04E1: // PG波形
+            //            emit SendCanCmdPwr(addr, msg);
+            //            break;
+            //        case 0x0141: // 功放板
+            //            emit SendCanCmdAmp(addr, msg);
+            //            break;
         case 0x0261: // 输出板13
             emit SendCanCmdOut(addr, msg);
             break;
@@ -368,10 +368,10 @@ void Desktop::ReadCanCmd(QByteArray msg)
                 in >> dat;
                 cmd.append(dat);
             }
-//            if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
-//                ReadButtonBox(cmd);
-//            else
-                emit CanMsg(id, cmd);
+            //            if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
+            //                ReadButtonBox(cmd);
+            //            else
+            emit CanMsg(id, cmd);
         }
     }
 }
@@ -754,7 +754,7 @@ void Desktop::SendTestStop(QVariantHash hash)
 {
     if (TestStatus != "free") {
         SendTestStatus("stop");
-//        SendButtonBox("Ok");
+        //        SendButtonBox("Ok");
         return;
     }
     SendTestInit(hash);

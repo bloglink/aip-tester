@@ -1,38 +1,21 @@
-/*******************************************************************************
- * Copyright [2016]   <青岛艾普智能仪器有限公司>
- * All rights reserved.
- *
- * version:     2.1.0.170427
- * author:      zhaonanlin
- * brief:       电阻模块
-*******************************************************************************/
 #ifndef PAGEDCR_H
 #define PAGEDCR_H
 
-#include <qmath.h>
 #include <QUuid>
-#include <QDate>
-#include <QTimer>
+#include <QFile>
 #include <QDebug>
 #include <QWidget>
-#include <QComboBox>
 #include <QSettings>
-#include <QListView>
 #include <QShowEvent>
-#include <QHeaderView>
-#include <QButtonGroup>
 #include <QElapsedTimer>
-#include <QDoubleSpinBox>
-#include <QTableWidgetItem>
 
-#include "define.h"
-#include "PageNum.h"
+#include <qmath.h>
+#include "delegate.h"
 
+#define DCR_MAX 8
 #define  ResCu    0.0039  //  铜材料
 #define  ResCu_Al 0.0041  //  铜铝材料
 #define  ResAl    0.0043  //  铝材料
-
-#define MAX_ROW 8
 
 namespace Ui {
 class PageDcr;
@@ -46,80 +29,59 @@ public:
     explicit PageDcr(QWidget *parent = 0);
     ~PageDcr();
 
-private:
-    Ui::PageDcr *ui;
-
 signals:
     void SendVariant(QVariantHash s);
     void CanMsg(QByteArray msg);
 private slots:
-    void InitWindows(void);
-    void InitButtons(void);
-    void ReadButtons(int id);
-    void InitSettings(void);
-    void SaveSettings(void);
-    void AutoCalculateMinAndMax(void);
-    bool CheckSetting(void);
-    void ItemClick(int r, int c);
-    void ItemChange(QString msg);
+    void InitWin(void);
+    void InitSet(void);
+    void SaveSet(void);
+    void InitItems(void);
     void ExcuteCanCmd(int addr, QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
+    void SendWarnning(QString s);
     void ReadCanCmdResult(QByteArray msg);
-    void ReadOffset(QByteArray msg);
-    void ReadButtonBox(QByteArray msg);
-
-
-    void SendCanCmdStatus(void);
+    void ReadCanCmdBack(QByteArray msg);
+    void SendCanCmdStatus();
     void SendCanCmdStart(quint8 pos);
-    void SendCanCmdStop(void);
-    void SendCanCmdConfig(void);
+    void SendCanCmdStop();
+    void SendCanCmdConfig();
+    void SendCanCmdDebug();
+    void SendCanCmdCode();
+    void SendCanCmdVersion();
     void SendAlarm(quint8 addr);
-    void SendCanCmdPwr(quint8 pos);
-
-
-    double CalculateOffset(double t, quint8 num);
-    void CalculateBalance(void);
     int CalculateGear(int row);
-    bool WaitTimeOut(quint16 t);
-    void Delay(int ms);
-    QString CurrentSettings(void);
-    QString CurrentPorwer(void);
-    bool IsPowerOn(void);
-    void AutoChangeMetal(int index);
-    void AutoChangeUnit(int index);
-    virtual void showEvent(QShowEvent*);
     void ReadVariant(QVariantHash s);
     void GoToWindow(QString w);
-    void SendWarnning(QString s);
-    void SendTestItemsAllEmpty(void);
-    void SendTestItemsAllError(void);
+    void SendTestItemsAllEmpty();
+    void SendTestItemsAllError();
     void SendTestItems(int num);
-    void SendSafeCheck(QVariantHash s);
-    void SendTestPause(void);
-    void SendTestSave(void);
+    void SendTestItemsAll();
+    void SendTestPause();
+    void SendTestSave();
     void SendTemperature(QByteArray msg);
+    void SendSafeCheck(QVariantHash s);
     void TestThread(QVariantHash hash);
-private:
-    quint16 TimeOut;
-    PageNum *input;
-    QStringList Items;
-    QList<double> Results;
-    QString Judge;
+    bool WaitTimeOut(quint16 t);
+    void Delay(int ms);
+    virtual void showEvent(QShowEvent *e);
+    void on_btn1_clicked();
 
-    QList<QTableWidgetItem*> Enable;
-    QList<QTableWidgetItem*> Terminal1;
-    QList<QTableWidgetItem*> Terminal2;
-    QList<QComboBox*> Metal;
-    QList<QComboBox*> Unit;
-    QList<QDoubleSpinBox*> Min;
-    QList<QDoubleSpinBox*> Max;
-    QList<QDoubleSpinBox*> Std;
-    QList<QDoubleSpinBox*> Offset;
-    QList<QDoubleSpinBox*> OffsetR;
-    quint8 stat;
-    QList<double> pwr;
-    QList<QVariantHash> ItemView;
+    void on_btn2_clicked();
+
+    void on_btn3_clicked();
+
+    void on_btn4_clicked();
+
+private:
+    Ui::PageDcr *ui;
+    StandardItemModel *m;
+    QSettings *ini;
     QString TestStatus;
+    quint16 TimeOut;
+    QList<QVariantHash> ItemView;
+    QString Judge;
+    quint8 stat;
 };
 
 #endif // PAGEDCR_H

@@ -20,18 +20,11 @@
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
-#include "define.h"
-#include "Waveform.h"
-#include "PageNum.h"
-#include "WaveBox.h"
 
-#define MAX_ROW 8
-#define IMP_FREE        0
-#define IMP_INIT        4
-#define IMP_TEST        1
-#define IMP_SAMPLE      2
-#define IMP_SAMPLE_ADD  5
-#define IMP_SAMPLE_OTHER 3
+#include "delegate.h"
+#include "qcustomplot.h"
+
+#define IMP_MAX 8
 
 namespace Ui {
 class PageImp;
@@ -49,30 +42,29 @@ signals:
     void SendVariant(QVariantHash s);
     void CanMsg(QByteArray msg);
 private slots:
-    void InitWindows(void);
-    void InitButtons(void);
-    void ReadButtons(int id);
-    void InitSettings(void);
-    void InitStation(void);
-    void SaveSettings(void);
-    void ItemClick(int r,  int c);
-    void ItemChange(QString msg);
-    void BlockClick(int x);
+    void InitWin(void);
+    void InitSet(void);
+    void SaveSet(void);
+    void InitItems(void);
+    void WaveChange(QModelIndex m);
     void ExcuteCanCmd(int id, QByteArray msg);
+    void ReadCanCmdStatus(QByteArray msg);
+    void ReadCanCmdResult(QByteArray msg);
+    void ReadCanCmdWaveOk(void);
+    void ReadCanCmdBack(QByteArray msg);
     void SendCanCmdStatus(void);
     void SendCanCmdSampleAuto();
     void SendCanCmdSample(quint16 row);
     void SendCanCmdStart(quint8 stat);
     void SendCanCmdConfig(void);
-    void ReadCanCmdStatus(QByteArray msg);
-    void ReadCanCmdResult(QByteArray msg);
-    void ReadCanCmdWaveOk(void);
+    void SendCanCmdDebug();
+    void SendCanCmdCode();
+    void SendCanCmdVersion();
+
     void CalculateResult(void);
     int CalculateGear(int row);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
-    void AutoChangeVolt(void);
-    void showEvent(QShowEvent*);
 
     void ReadVariant(QVariantHash s);
     void GoToWindow(QString w);
@@ -83,30 +75,28 @@ private slots:
     void SendTestItems(int num);
     void SendTestPause(void);
     void SendTestSave(void);
-    void WaveView(QVariantHash s);
-    void WaveClick(QVariantHash s);
     void TestThread(QVariantHash hash);
+    void showEvent(QShowEvent*);
+
+    void on_btn1_clicked();
+
+    void on_btn2_clicked();
+
+    void on_btn3_clicked();
+
 private:
     Ui::PageImp *ui;
-    QList<WaveBox *> WaveImp;
-    QSettings *set;
+    StandardItemModel *m;
+    QSettings *ini;
+    QList<QCustomPlot *> Waves;
+
     quint16 AvrCount;
     quint16 TimeOut;
-    PageNum *input;
     quint8 TestRow;
     QStringList Items;
     QString Judge;
     QString FileInUse;
 
-    QList<QTableWidgetItem*> Enable;
-    QList<QTableWidgetItem*> Terminal1;
-    QList<QTableWidgetItem*> Terminal2;
-    QList<QDoubleSpinBox*> Volt;
-    QList<QDoubleSpinBox*> Time;
-    QList<QDoubleSpinBox*> Flut;
-    QList<QDoubleSpinBox*> Phase;
-    QList<QDoubleSpinBox*> Area;
-    QList<QDoubleSpinBox*> Diff;
     QList<int> WaveNumber;
     QList<int> Origin;
     QList<int> Terminal;
@@ -117,14 +107,13 @@ private:
     QList<int> VoltL;
     QList<int> FreqR;
     QList<int> VoltR;
-    QStringList WaveLeft;
-    QStringList WaveRight;
+    QStringList WaveL;
+    QStringList WaveR;
     quint8 ImpMode;
 
     QList<QVariantHash> ItemView;
     QByteArray wave;
     QString TestStatus;
-    QList<WaveBox *> WaveMag;
     quint8 stat;
 };
 

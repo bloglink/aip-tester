@@ -15,7 +15,7 @@
   </property>
   <layout class="QVBoxLayout" name="verticalLayout" stretch="1,0">
    <item>
-    <widget class="QTableWidget" name="TabParams">
+    <widget class="QTableView" name="parameters">
      <property name="horizontalScrollBarPolicy">
       <enum>Qt::ScrollBarAlwaysOff</enum>
      </property>
@@ -31,43 +31,18 @@
      <property name="selectionMode">
       <enum>QAbstractItemView::SingleSelection</enum>
      </property>
-     <attribute name="horizontalHeaderDefaultSectionSize">
+     <attribute name="horizontalHeaderMinimumSectionSize">
       <number>50</number>
      </attribute>
-     <attribute name="verticalHeaderVisible">
-      <bool>true</bool>
+     <attribute name="verticalHeaderDefaultSectionSize">
+      <number>1</number>
      </attribute>
-     <column>
-      <property name="text">
-       <string>选中</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>端一</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>端二</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>上限</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>波形</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>
     <layout class="QGridLayout" name="LayoutCtrl">
      <item row="0" column="8">
-      <widget class="QPushButton" name="BtnSampleMag">
+      <widget class="QPushButton" name="btn1">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>
@@ -151,7 +126,7 @@
       </widget>
      </item>
      <item row="0" column="9">
-      <widget class="QPushButton" name="BtnExitMag">
+      <widget class="QPushButton" name="btn2">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
          <horstretch>0</horstretch>

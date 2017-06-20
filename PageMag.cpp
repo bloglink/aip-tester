@@ -14,9 +14,8 @@ PageMag::PageMag(QWidget *parent) :
     ui(new Ui::PageMag)
 {
     ui->setupUi(this);
-    InitWindows();
-    InitButtons();
-    InitSettings();
+    InitWin();
+    InitSet();
     TestStatus = "free";
 }
 
@@ -25,238 +24,206 @@ PageMag::~PageMag()
     delete ui;
 }
 
-void PageMag::InitWindows()
+void PageMag::InitWin()
 {
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
-    ui->TabParams->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(4, 400);
-    ui->TabParams->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-#else
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    ui->TabParams->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
-    ui->TabParams->setColumnWidth(4, 400);
-    ui->TabParams->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
-    ui->BoxDir->setView(new QListView(this));
-    ui->BoxStation->setView(new QListView(this));
-    connect(ui->BoxStation, SIGNAL(currentIndexChanged(int)), this, SLOT(InitSettings()));
-    connect(ui->TabParams, SIGNAL(cellClicked(int, int)), this, SLOT(ItemClick(int, int)));
-    input = new PageNum(this);
-    QStringList t;
-    t  << "1" << "2" << "3" << "4" << "5" << "6" << "7" << "8" << "9" << "10" << "11" << "12";
-    input->InitButtons(t);
-    connect(input, SIGNAL(ItemChange(QString)), this, SLOT(ItemChange(QString)));
-    input->hide();
+    this->setFocus();
+    m = new StandardItemModel(MAG_MAX, 5);
 
-    ui->TabParams->setRowCount(MAX_ROW);
-    for (int row=0; row < MAX_ROW; row++) {
-        Enable.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row, 0, Enable.at(row));
-        Enable.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Enable.at(row)->setTextAlignment(Qt::AlignCenter);
+    QStringList headerList;
+    headerList << tr("反嵌") << tr("端一") << tr("端二") << tr("上限") << tr("波形");
+    m->setHorizontalHeaderLabels(headerList);
 
-        Terminal1.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row, 1, Terminal1.at(row));
-        Terminal1.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal1.at(row)->setTextAlignment(Qt::AlignCenter);
-
-        Terminal2.append(new QTableWidgetItem);
-        ui->TabParams->setItem(row, 2, Terminal2.at(row));
-        Terminal2.at(row)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        Terminal2.at(row)->setTextAlignment(Qt::AlignCenter);
-
-        Max.append(new QDoubleSpinBox(this));
-        ui->TabParams->setCellWidget(row, 3, Max.at(row));
-        Max.at(row)->setDecimals(0);
-        Max.at(row)->setMaximum(100);
-        Max.at(row)->setAlignment(Qt::AlignHCenter);
-        Max.at(row)->setButtonSymbols(QDoubleSpinBox::NoButtons);
-
-        WaveMag.append(new WaveBox(this));
-        ui->TabParams->setCellWidget(row, 4, WaveMag.at(row));
-
+    ui->parameters->setModel(m);
+    ui->parameters->setItemDelegateForColumn(0, new EnableDelegate(this));
+    ui->parameters->setItemDelegateForColumn(1, new PortDelegate);
+    ui->parameters->setItemDelegateForColumn(2, new PortDelegate);
+    ui->parameters->setItemDelegateForColumn(3, new RateDelegate);
+    for (int i=0; i < MAG_MAX; i++) {
+        Waves.append(new QCustomPlot(this));
+        Waves.at(i)->setBackground(QBrush(QColor(25, 25, 25))); //设置背景色
+        Waves.at(i)->xAxis->grid()->setPen(QPen(Qt::darkGreen, 1, Qt::DotLine));
+        Waves.at(i)->yAxis->grid()->setPen(QPen(Qt::darkGreen, 1, Qt::DotLine));
+        Waves.at(i)->xAxis->setTicks(false);
+        Waves.at(i)->yAxis->setTicks(false);
+        Waves.at(i)->xAxis->setTickLabels(false);
+        Waves.at(i)->yAxis->setTickLabels(false);
+        Waves.at(i)->axisRect()->setMinimumMargins(QMargins(0,0,0,0));
+        Waves.at(i)->axisRect()->setupFullAxesBox();
+        Waves.at(i)->rescaleAxes();
+        Waves.at(i)->addGraph();
+        Waves.at(i)->xAxis->setRange(0,400);
+        Waves.at(i)->yAxis->setRange(0,255);
+        Waves.at(i)->graph(0)->setPen(QPen(Qt::green));
+        ui->parameters->setIndexWidget(m->index(i,4), Waves.at(i));
         AreaL.append(0);
         FreqL.append(0);
         AreaR.append(0);
         FreqR.append(0);
     }
+    ui->parameters->setEditTriggers(QAbstractItemView::CurrentChanged);
+    ui->BoxDir->setView(new QListView(this));
+    ui->BoxStation->setView(new QListView(this));
+
+#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
+    ui->parameters->horizontalHeader()->setResizeMode(0, QHeaderView::Stretch);
+    ui->parameters->horizontalHeader()->setResizeMode(1, QHeaderView::Stretch);
+    ui->parameters->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
+    ui->parameters->horizontalHeader()->setResizeMode(3, QHeaderView::Stretch);
+    ui->parameters->setColumnWidth(4, 400);
+    ui->parameters->verticalHeader()->setResizeMode(QHeaderView::Stretch);
+#else
+    ui->parameters->horizontalHeader()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->parameters->horizontalHeader()->setSectionResizeMode(1, QHeaderView::Stretch);
+    ui->parameters->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->parameters->horizontalHeader()->setSectionResizeMode(3, QHeaderView::Stretch);
+    ui->parameters->setColumnWidth(4, 400);
+    ui->parameters->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+#endif
 }
 
-void PageMag::InitButtons()
+void PageMag::InitSet()
 {
-    QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->BtnSampleMag, Qt::Key_0);
-    btnGroup->addButton(ui->BtnExitMag, Qt::Key_2);
-    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
-}
+    QSettings *g = new QSettings("./nandflash/global.ini", QSettings::IniFormat);
+    QString n = g->value("/GLOBAL/FileInUse", "aip9918.ini").toString().remove(".ini");
+    QString s = QString("./config/%1.ini").arg(n);
+    ini = new QSettings(s, QSettings::IniFormat);
+    ini->setIniCodec("GB18030");
+    ini->beginGroup("SetMag");
 
-void PageMag::ReadButtons(int id)
-{
-    QVariantHash hash;
-    switch (id) {
-    case Qt::Key_0:
-        if (TestStatus == "sample")
-            return;
-        TestStatus = "sample";
-        for (int i=0; i < WaveMag.size(); i++)
-            WaveMag.at(i)->ShowWave(hash);
-        if (ui->BoxStation->currentIndex() == 0)
-            stat = WIN_ID_OUT13;
-        if (ui->BoxStation->currentIndex() == 1)
-            stat = WIN_ID_OUT14;
-        SendCanCmdConfig(stat);
-        SendCanCmdSample(stat);
-        if (!WaitTimeOut(100)) {
-            SendWarnning(tr("采样失败"));
-        } else {
-            TestStatus = "sample";
-            CalculateDir();
-            SaveSettings();
-        }
-        TestStatus = "free";
-        break;
-    case Qt::Key_2:
-        SaveSettings();
-        GoToWindow(NULL);
-        break;
-    default:
-        break;
-    }
-}
-
-void PageMag::InitSettings()
-{
-    //当前使用的测试项目
-    QString t = QString("./config/%1.ini").arg(CurrentSettings());
-    set = new QSettings(t, QSettings::IniFormat);
-    set->setIniCodec("GB18030");
-    set->beginGroup("SetMag");
-
-    QStringList temp = (set->value("Other", "0 1 2").toString()).split(" ");
+    QStringList temp = (ini->value("Other", "0 1 2").toString()).split(" ");
     if (temp.size() >= 3) {
         ui->BoxDir->setCurrentIndex(temp.at(0).toInt());
         ui->BoxMain->setValue(temp.at(1).toInt());
         ui->BoxAuxiliary->setValue(temp.at(2).toInt());
     }
     //可用
-    temp = (QString(set->value("Enable", "Y Y Y N N N N N").toByteArray())).split(" ");
-    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
-        Enable.at(row)->setText(temp.at(row));
+    temp = (QString(ini->value("Enable", "Y Y Y N N N N N").toByteArray())).split(" ");
+    for (int i=0; i < qMin(temp.size(), MAX_ROW); i++)
+        m->setItem(i,0,new QStandardItem(temp.at(i)));
     //端一
-    temp = (set->value("Terminal1", "1 2 1 4 5 6 7 8").toString()).split(" ");
-    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
-        Terminal1.at(row)->setText(temp.at(row));
+    temp = (ini->value("Terminal1", "1 2 1 4 5 6 7 8").toString()).split(" ");
+    for (int i=0; i < qMin(temp.size(), MAX_ROW); i++)
+        m->setItem(i,1,new QStandardItem(temp.at(i)));
     //端二
-    temp = (set->value("Terminal2", "2 3 3 5 6 7 8 1").toString()).split(" ");
-    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
-        Terminal2.at(row)->setText(temp.at(row));
+    temp = (ini->value("Terminal2", "2 3 3 5 6 7 8 1").toString()).split(" ");
+    for (int i=0; i < qMin(temp.size(), MAX_ROW); i++)
+        m->setItem(i,2,new QStandardItem(temp.at(i)));
     //最大值
-    temp = (set->value("Max", "10 10 10 10 10 10 10 10").toString()).split(" ");
-    for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
-        Max.at(row)->setValue(temp.at(row).toDouble());
+    temp = (ini->value("Max", "10 10 10 10 10 10 10 10").toString()).split(" ");
+    for (int i=0; i < qMin(temp.size(), MAX_ROW); i++)
+        m->setItem(i,3,new QStandardItem(temp.at(i)));
     //频率
-    temp = (set->value("FreqL", "0 0 0 0 0 0 0 0").toString()).split(" ");
+    temp = (ini->value("FreqL", "0 0 0 0 0 0 0 0").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         FreqL[row] = temp.at(row).toInt();
-    temp = (set->value("AreaL", "1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
+    temp = (ini->value("AreaL", "1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         AreaL[row] = temp.at(row).toInt();
     //频率
-    temp = (set->value("FreqR", "0 0 0 0 0 0 0 0").toString()).split(" ");
+    temp = (ini->value("FreqR", "0 0 0 0 0 0 0 0").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         FreqR[row] = temp.at(row).toInt();
-    temp = (set->value("AreaR", "1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
+    temp = (ini->value("AreaR", "1000 1000 1000 1000 1000 1000 1000 1000").toString()).split(" ");
     for (int row=0; row < qMin(temp.size(), MAX_ROW); row++)
         AreaR[row] = temp.at(row).toInt();
     //波形
     QByteArray w;
-    QVariantHash hash;
-    for (int row=0; row < qMin(WaveMag.size(), MAX_ROW); row++) {
+    QVector<double> x(400), y(400);
+    for (int row=0; row < qMin(Waves.size(), MAX_ROW); row++) {
         QString ByteL = "WaveMagL"+QString::number(row);
         QString ByteR = "WaveMagR"+QString::number(row);
         if (ui->BoxStation->currentIndex() == 0)
-            w = set->value(ByteL).toString().toUtf8();
+            w = ini->value(ByteL).toString().toUtf8();
         if (ui->BoxStation->currentIndex() == 1)
-            w = set->value(ByteR).toString().toUtf8();
-        hash.insert("WaveTest", w);
-        WaveMag.at(row)->ShowWave(hash);
+            w = ini->value(ByteR).toString().toUtf8();
+
+        for (int i=0; i < qMin(400,w.size()); i++) {
+            x[i] = i;
+            y[i] = quint8(w.at(i));
+        }
+        Waves.at(row)->graph(0)->setData(x,y);
     }
 }
 
-void PageMag::SaveSettings()
+void PageMag::SaveSet()
 {
     QStringList temp;
     temp.append(QString::number(ui->BoxDir->currentIndex()));
     temp.append(QString::number(ui->BoxMain->value()));
     temp.append(QString::number(ui->BoxAuxiliary->value()));
-    set->setValue("Other", (temp.join(" ").toUtf8()));
+    ini->setValue("Other", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < Enable.size(); i++)
-        temp.append(Enable.at(i)->text());
-    set->setValue("Enable", (temp.join(" ").toUtf8()));
+    for (int i=0; i < MAG_MAX; i++)
+        temp.append(m->item(i,0)->text());
+    ini->setValue("Enable", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < Terminal1.size(); i++)
-        temp.append(Terminal1.at(i)->text());
-    set->setValue("Terminal1", (temp.join(" ").toUtf8()));
+    for (int i=0; i < MAG_MAX; i++)
+        temp.append(m->item(i,1)->text());
+    ini->setValue("Terminal1", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < Terminal2.size(); i++)
-        temp.append(Terminal2.at(i)->text());
-    set->setValue("Terminal2", (temp.join(" ").toUtf8()));
+    for (int i=0; i < MAG_MAX; i++)
+        temp.append(m->item(i,2)->text());
+    ini->setValue("Terminal2", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < Max.size(); i++)
-        temp.append(QString::number(Max.at(i)->value()));
-    set->setValue("Max", (temp.join(" ").toUtf8()));
+    for (int i=0; i < MAG_MAX; i++)
+        temp.append(m->item(i,3)->text());
+    ini->setValue("Max", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < AreaL.size(); i++)
+    for (int i=0; i < MAG_MAX; i++)
         temp.append(QString::number(AreaL.at(i)));
-    set->setValue("AreaL", (temp.join(" ").toUtf8()));
+    ini->setValue("AreaL", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < FreqL.size(); i++)
+    for (int i=0; i < MAG_MAX; i++)
         temp.append(QString::number(FreqL.at(i)));
-    set->setValue("FreqL", (temp.join(" ").toUtf8()));
+    ini->setValue("FreqL", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < AreaR.size(); i++)
+    for (int i=0; i < MAG_MAX; i++)
         temp.append(QString::number(AreaR.at(i)));
-    set->setValue("AreaR", (temp.join(" ").toUtf8()));
+    ini->setValue("AreaR", (temp.join(" ").toUtf8()));
     temp.clear();
-    for (int i=0; i < FreqR.size(); i++)
+    for (int i=0; i < MAG_MAX; i++)
         temp.append(QString::number(FreqR.at(i)));
-    set->setValue("FreqR", (temp.join(" ").toUtf8()));
+    ini->setValue("FreqR", (temp.join(" ").toUtf8()));
 
     for (int i=0; i < ItemView.size(); i++) {
         QString ByteL = "WaveMagL"+QString::number(i);
         QString ByteR = "WaveMagR"+QString::number(i);
         if (ui->BoxStation->currentIndex() == 0)
-            set->setValue(ByteL, ItemView[i].value("WaveTest").toString());
+            ini->setValue(ByteL, ItemView[i].value("WaveTest").toString());
         if (ui->BoxStation->currentIndex() == 1)
-            set->setValue(ByteR, ItemView[i].value("WaveTest").toString());
+            ini->setValue(ByteR, ItemView[i].value("WaveTest").toString());
     }
 }
 
-void PageMag::ItemClick(int r,  int c)
+void PageMag::InitItems()
 {
-    switch (c) {
-    case 0:
-        if (Enable.at(r)->text() != "Y")
-            Enable.at(r)->setText("Y");
-        else
-            Enable.at(r)->setText("N");
-        break;
-    case 1:
-    case 2:
-        input->showNormal();
-        break;
+    ItemView.clear();
+    QString uid = QUuid::createUuid().toString();
+    for (int i = 0; i < MAG_MAX; i++) {
+        QString T1 = m->item(i,1)->text();
+        QString T2 = m->item(i,2)->text();
+        QString M2 = m->item(i,3)->text();
+        QVariantHash hash;
+        hash.insert("TestEnable", m->item(i,0)->text());
+        hash.insert("TestItem", tr("反嵌%1-%2").arg(T1).arg(T2));
+        hash.insert("TestPara", tr("%3%").arg(M2));
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestUid", uid);
+        hash.insert("ItemName", tr("反嵌%1").arg(i+1));
+        ItemView.append(hash);
     }
-}
-
-void PageMag::ItemChange(QString msg)
-{
-    ui->TabParams->currentItem()->setText(msg);
+    if (ui->BoxDir->currentIndex() != 0 && ItemView.size() >= 2) {
+        QVariantHash hash;
+        hash.insert("TestItem", tr("磁旋"));
+        hash.insert("TestPara", tr("%1").arg(ui->BoxDir->currentText()));
+        hash.insert("TestResult", " ");
+        hash.insert("TestJudge", " ");
+        hash.insert("TestEnable", "Y");
+        hash.insert("TestUid", uid);
+        hash.insert("ItemName", tr("磁旋"));
+        ItemView.append(hash);
+    }
 }
 
 void PageMag::ExcuteCanCmd(int addr, QByteArray msg)
@@ -264,7 +231,7 @@ void PageMag::ExcuteCanCmd(int addr, QByteArray msg)
     if (TestStatus == "free")
         return;
     TimeOut = 0;
-    if (addr == CAN_ID_DCR_WAVE) {
+    if (addr == 0x441) {
         wave.append(msg);
         return;
     }
@@ -274,7 +241,10 @@ void PageMag::ExcuteCanCmd(int addr, QByteArray msg)
         ReadCanCmdStatus(msg);
         break;
     case 0x02:
-        ReadCanCmdResult(msg);
+        if (TestStatus == "sample")
+            ReadCanCmdSample(msg);
+        else
+            ReadCanCmdResult(msg);
         break;
     case 0x03:
         if ((quint8)msg.at(1) != 0xff) {
@@ -282,7 +252,7 @@ void PageMag::ExcuteCanCmd(int addr, QByteArray msg)
         } else {
             ItemView[TestRow].insert("WaveTest", wave.toBase64());
             if (TestStatus == "sample")
-                WaveMag.at(TestRow)->ShowWave(ItemView[TestRow]);
+                ReadCanCmdWave(wave);
             if (TestStatus == "buzy")
                 SendTestItems(TestRow);
         }
@@ -335,33 +305,46 @@ void PageMag::ReadCanCmdStatus(QByteArray msg)
 void PageMag::ReadCanCmdResult(QByteArray msg)
 {
     TestRow = (quint8)msg.at(1);
-    if (TestStatus == "sample") {
-        if (stat == WIN_ID_OUT13) {
-            AreaL[TestRow] = quint16(msg.at(2)*256)+quint8(msg.at(3));
-            FreqL[TestRow] = quint8(msg.at(4));
-        }
-        if (stat == WIN_ID_OUT14) {
-            AreaR[TestRow] = quint16(msg.at(2)*256)+quint8(msg.at(3));
-            FreqR[TestRow] = quint8(msg.at(4));
-        }
-        return;
-    }
     quint16 Area1 = 0;
     quint16 Area2 = quint16(msg.at(2)*256)+quint8(msg.at(3));
-    if (stat == WIN_ID_OUT13)
+    if (stat == 0x13)
         Area1 = AreaL[TestRow];
-    if (stat == WIN_ID_OUT14) {
+    if (stat == 0x14) {
         Area1 = AreaR[TestRow];
     }
     quint16 area = abs((Area2-Area1)*100/Area1);
     QString n = QString("%1%").arg(area);
     QString judge = "OK";
-    if (area > Max.at(TestRow)->value()) {
+    if (area > m->item(TestRow,3)->text().toInt()) {
         Judge = "NG";
         judge = "NG";
     }
     ItemView[TestRow].insert("TestResult", n);
     ItemView[TestRow].insert("TestJudge", judge);
+}
+
+void PageMag::ReadCanCmdSample(QByteArray msg)
+{
+    TestRow = (quint8)msg.at(1);
+    if (stat == 0x13) {
+        AreaL[TestRow] = quint16(msg.at(2)*256)+quint8(msg.at(3));
+        FreqL[TestRow] = quint8(msg.at(4));
+    }
+    if (stat == 0x14) {
+        AreaR[TestRow] = quint16(msg.at(2)*256)+quint8(msg.at(3));
+        FreqR[TestRow] = quint8(msg.at(4));
+    }
+    return;
+}
+
+void PageMag::ReadCanCmdWave(QByteArray msg)
+{
+    QVector<double> x(400), y(400);
+    for (int i=0; i < qMin(400,msg.size()); i++) {
+        x[i] = i;
+        y[i] = quint8(msg.at(i));
+    }
+    Waves.at(TestRow)->graph(0)->setData(x,y);
 }
 
 void PageMag::SendCanCmdSample(quint8 s)
@@ -370,8 +353,8 @@ void PageMag::SendCanCmdSample(quint8 s)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
-    for (int row=0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
+    for (int row=0; row < MAG_MAX; row++) {
+        if (m->item(row,0)->text() == "Y")
             tt += 0x0001 << row;
     }
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x02) << quint8(0x01)
@@ -385,8 +368,8 @@ void PageMag::SendCanCmdStart(quint8 s)
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
-    for (int row=0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y")
+    for (int row=0; row < MAG_MAX; row++) {
+        if (m->item(row,0)->text() == "Y")
             tt += 0x0001 << row;
     }
     out << quint16(0x22) << quint8(0x06) << quint8(0x01) << quint8(0x02) << quint8(0x00)
@@ -399,24 +382,140 @@ void PageMag::SendCanCmdConfig(quint8 s)
     QByteArray msg;
     QDataStream out(&msg,  QIODevice::ReadWrite);
     out.setVersion(QDataStream::Qt_4_8);
-    for (int row=0; row < Enable.size(); row++) {
-        if (Enable.at(row)->text() == "Y") {
-            quint8 freq = FreqL.at(row);
-            if (s == WIN_ID_OUT13)
-                freq = FreqL.at(row);
-            if (s == WIN_ID_OUT14)
-                freq = FreqR.at(row);
-            out << quint16(0x22) << quint8(0x05) << quint8(0x04) << quint8(row)
-                << quint8(Terminal1.at(row)->text().toInt())
-                << quint8(Terminal2.at(row)->text().toInt())
+    for (int i=0; i < MAG_MAX; i++) {
+        if (m->item(i,0)->text() == "Y") {
+            quint8 freq = FreqL.at(i);
+            if (s == 0x13)
+                freq = FreqL.at(i);
+            if (s == 0x14)
+                freq = FreqR.at(i);
+            out << quint16(0x22) << quint8(0x05) << quint8(0x04) << quint8(i)
+                << quint8(m->item(i,1)->text().toInt())
+                << quint8(m->item(i,1)->text().toInt())
                 << quint8(freq);
         }
     }
     emit CanMsg(msg);
 }
 
-void PageMag::CalculateDir()
+bool PageMag::WaitTimeOut(quint16 t)
 {
+    TimeOut = 0;
+    while (TestStatus != "free") {
+        Delay(10);
+        TimeOut++;
+        if (TimeOut > t)
+            return false;
+    }
+    return true;
+}
+
+void PageMag::Delay(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while (t.elapsed() < ms)
+        QCoreApplication::processEvents();
+}
+
+void PageMag::ReadVariant(QVariantHash s)
+{
+    if (s.value("TxAddress") != "PageMag" && s.value("TxAddress") != "WinHome")
+        return;
+    if (s.value("TxCommand") == "ItemInit") {
+        if (s.value("Station").toString() == "left")
+            stat = 0x13;
+        if (s.value("Station").toString() == "right")
+            stat = 0x14;
+        InitSet();
+        InitItems();
+        SendCanCmdConfig(stat);
+        SendTestItemsAllEmpty();
+    }
+    if (s.value("TxCommand") == "StartTest")
+        TestThread(s);
+    if (s.value("TxCommand").toString() == "TestSave")
+        SendTestSave();
+}
+
+void PageMag::GoToWindow(QString w)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "JumpWindow");
+    hash.insert("TxMessage", w);
+    emit SendVariant(hash);
+}
+
+void PageMag::SendWarnning(QString s)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinHome");
+    hash.insert("TxCommand", "Warnning");
+    hash.insert("TxMessage", tr("反嵌异常:\n%1").arg(s));
+    emit SendVariant(hash);
+}
+
+void PageMag::SendTestItemsAllEmpty()
+{
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemView");
+            emit SendVariant(hash);
+        }
+    }
+}
+
+void PageMag::SendTestItemsAllError()
+{
+    QByteArray def;
+    for (int i=0; i < 400; i++) {
+        def.append(QByteArray(1, 0x80));
+    }
+    for (int i=0; i < ItemView.size(); i++) {
+        QVariantHash hash = ItemView.at(i);
+        if (hash.value("TestEnable") == "Y") {
+            hash.insert("TxAddress", "WinTest");
+            hash.insert("TxCommand", "ItemUpdate");
+            hash.insert("TestResult", "---");
+            hash.insert("TestJudge", "NG");
+            hash.insert("WaveTest", def.toBase64());
+            hash.insert("WaveItem", hash.value("TestItem").toString());
+            emit SendVariant(hash);
+        }
+    }
+    qDebug() << "mag test all error";
+}
+
+void PageMag::SendTestWavesAllEmpty()
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinTest");
+    hash.insert("TxCommand", "WaveInit");
+    emit SendVariant(hash);
+}
+
+void PageMag::SendTestItems(int num)
+{
+    QVariantHash hash = ItemView.at(num);
+    if (hash.value("TestEnable") == "Y") {
+        hash.insert("TxAddress", "WinTest");
+        hash.insert("TxCommand", "ItemUpdate");
+        if (!hash.value("WaveTest").toString().isEmpty())
+            hash.insert("WaveItem", hash.value("TestItem").toString());
+        emit SendVariant(hash);
+    }
+}
+
+void PageMag::SendTestItemsAll()
+{
+    for (int i=0; i < MAG_MAX; i++) {
+        if (ItemView[i].value("TestEnable") == "Y") {
+            SendTestItems(i);
+        }
+    }
     if (ui->BoxDir->currentIndex() != 0 && ItemView.size() >= 2) {
         //计算主副相的面积，差积，和左右移动的差积
         qint32 area1, area2, diff, diff1, diff2;
@@ -474,157 +573,6 @@ void PageMag::CalculateDir()
     }
 }
 
-bool PageMag::WaitTimeOut(quint16 t)
-{
-    TimeOut = 0;
-    while (TestStatus != "free") {
-        Delay(10);
-        TimeOut++;
-        if (TimeOut > t)
-            return false;
-    }
-    return true;
-}
-
-void PageMag::Delay(int ms)
-{
-    QElapsedTimer t;
-    t.start();
-    while (t.elapsed() < ms)
-        QCoreApplication::processEvents();
-}
-
-QString PageMag::CurrentSettings()
-{
-    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
-    QString n = ini->value("/GLOBAL/FileInUse", INI_DEFAULT).toString();
-    return n.remove(".ini");
-}
-
-void PageMag::showEvent(QShowEvent *e)
-{
-    InitSettings();
-    SendTestItemsAllEmpty();
-    e->accept();
-}
-
-void PageMag::ReadVariant(QVariantHash s)
-{
-    if (s.value("TxAddress") != "PageMag" && s.value("TxAddress") != "WinHome")
-        return;
-    if (s.value("TxCommand") == "ItemInit") {
-        if (s.value("Station").toString() == "left")
-            stat = WIN_ID_OUT13;
-        if (s.value("Station").toString() == "right")
-            stat = WIN_ID_OUT14;
-        InitSettings();
-        SendCanCmdConfig(stat);
-        SendTestItemsAllEmpty();
-    }
-    if (s.value("TxCommand") == "StartTest")
-        TestThread(s);
-    if (s.value("TxCommand").toString() == "TestSave")
-        SendTestSave();
-}
-
-void PageMag::GoToWindow(QString w)
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "WinHome");
-    hash.insert("TxCommand", "JumpWindow");
-    hash.insert("TxMessage", w);
-    emit SendVariant(hash);
-}
-
-void PageMag::SendWarnning(QString s)
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "WinHome");
-    hash.insert("TxCommand", "Warnning");
-    hash.insert("TxMessage", tr("反嵌异常:\n%1").arg(s));
-    emit SendVariant(hash);
-}
-
-void PageMag::SendTestItemsAllEmpty()
-{
-    ItemView.clear();
-    QString uid = QUuid::createUuid().toString();
-    for (int i = 0; i < Enable.size(); i++) {
-        QString T1 = Terminal1.at(i)->text();
-        QString T2 = Terminal2.at(i)->text();
-        QString M2 = Max.at(i)->text();
-        QVariantHash hash;
-        hash.insert("TestEnable", Enable.at(i)->text());
-        hash.insert("TestItem", tr("反嵌%1-%2").arg(T1).arg(T2));
-        hash.insert("TestPara", tr("%3%").arg(M2));
-        hash.insert("TestResult", " ");
-        hash.insert("TestJudge", " ");
-        hash.insert("TestUid", uid);
-        hash.insert("ItemName", tr("反嵌%1").arg(i+1));
-        ItemView.append(hash);
-    }
-    if (ui->BoxDir->currentIndex() != 0 && ItemView.size() >= 2) {
-        QVariantHash hash;
-        hash.insert("TestItem", tr("磁旋"));
-        hash.insert("TestPara", tr("%1").arg(ui->BoxDir->currentText()));
-        hash.insert("TestResult", " ");
-        hash.insert("TestJudge", " ");
-        hash.insert("TestEnable", "Y");
-        hash.insert("TestUid", uid);
-        hash.insert("ItemName", tr("磁旋"));
-        ItemView.append(hash);
-    }
-    for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i);
-        if (hash.value("TestEnable") == "Y") {
-            hash.insert("TxAddress", "WinTest");
-            hash.insert("TxCommand", "ItemView");
-            emit SendVariant(hash);
-        }
-    }
-}
-
-void PageMag::SendTestItemsAllError()
-{
-    QByteArray def;
-    for (int i=0; i < 400; i++) {
-        def.append(QByteArray(1, 0x80));
-    }
-    for (int i=0; i < ItemView.size(); i++) {
-        QVariantHash hash = ItemView.at(i);
-        if (hash.value("TestEnable") == "Y") {
-            hash.insert("TxAddress", "WinTest");
-            hash.insert("TxCommand", "ItemUpdate");
-            hash.insert("TestResult", "---");
-            hash.insert("TestJudge", "NG");
-            hash.insert("WaveTest", def.toBase64());
-            hash.insert("WaveItem", hash.value("TestItem").toString());
-            emit SendVariant(hash);
-        }
-    }
-    qDebug() << "mag test all error";
-}
-
-void PageMag::SendTestWavesAllEmpty()
-{
-    QVariantHash hash;
-    hash.insert("TxAddress", "WinTest");
-    hash.insert("TxCommand", "WaveInit");
-    emit SendVariant(hash);
-}
-
-void PageMag::SendTestItems(int num)
-{
-    QVariantHash hash = ItemView.at(num);
-    if (hash.value("TestEnable") == "Y") {
-        hash.insert("TxAddress", "WinTest");
-        hash.insert("TxCommand", "ItemUpdate");
-        if (!hash.value("WaveTest").toString().isEmpty())
-            hash.insert("WaveItem", hash.value("TestItem").toString());
-        emit SendVariant(hash);
-    }
-}
-
 void PageMag::SendTestPause()
 {
     QVariantHash hash;
@@ -657,19 +605,54 @@ void PageMag::TestThread(QVariantHash hash)
     TestStatus = "buzy";
     Judge = "OK";
     if (hash.value("Station").toString() == "left")
-        stat = WIN_ID_OUT13;
+        stat = 0x13;
     if (hash.value("Station").toString() == "right")
-        stat = WIN_ID_OUT14;
+        stat = 0x14;
     SendTestWavesAllEmpty();
     SendCanCmdStart(stat);
     if (!WaitTimeOut(100)) {
         Judge = "NG";
         SendTestItemsAllError();
     } else {
-        CalculateDir();
+        SendTestItemsAll();
     }
     if (Judge == "NG")
         SendTestPause();
     TestStatus = "free";
+}
+
+void PageMag::showEvent(QShowEvent *e)
+{
+    this->setFocus();
+    InitSet();
+    InitItems();
+    e->accept();
+}
+
+void PageMag::on_btn1_clicked()
+{
+    if (TestStatus == "sample")
+        return;
+    TestStatus = "sample";
+    if (ui->BoxStation->currentIndex() == 0)
+        stat = 0x13;
+    if (ui->BoxStation->currentIndex() == 1)
+        stat = 0x14;
+    SendCanCmdConfig(stat);
+    SendCanCmdSample(stat);
+    if (!WaitTimeOut(1000)) {
+        SendWarnning(tr("采样失败"));
+    } else {
+        TestStatus = "sample";
+        SaveSet();
+    }
+    TestStatus = "free";
+    this->setFocus();
+}
+
+void PageMag::on_btn2_clicked()
+{
+    SaveSet();
+    GoToWindow(NULL);
 }
 /*********************************END OF FILE**********************************/

@@ -259,6 +259,17 @@ void PageInr::ExcuteCanCmd(int addr, QByteArray msg)
     case 0x01:
         ReadCanCmdResult(msg);
         break;
+    case 0x06: //调试参数
+        ReadCanCmdBack(msg);
+        break;
+    case 0x07: //模块编码
+//        ui->code->setText(msg.toHex());
+        ReadCanCmdBack(msg);
+        break;
+    case 0x08: //软件版本
+//        ui->version->setText(msg.toHex());
+        ReadCanCmdBack(msg);
+        break;
     default:
         qDebug() << addr << msg.toHex();
         break;
@@ -315,6 +326,15 @@ void PageInr::ReadCanCmdResult(QByteArray msg)
         ClearResults();
     }
     SendTestItems(TestRow);
+}
+
+void PageInr::ReadCanCmdBack(QByteArray msg)
+{
+    QVariantHash hash;
+    hash.insert("TxAddress", "WinBack");
+    hash.insert("TxCommand", "InrMsg");
+    hash.insert("TxMessage", msg.toBase64());
+    emit SendVariant(hash);
 }
 
 void PageInr::SendCanCmdStatus()

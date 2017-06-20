@@ -60,7 +60,7 @@ private slots:
     void ExcuteCanCmd(int addr, QByteArray msg);
     void ReadCanCmdStatus(QByteArray msg);
     void ReadCanCmdResult(QByteArray msg);
-
+    void ReadCanCmdBack(QByteArray msg);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 pos);
     void SendCanCmdStop(void);

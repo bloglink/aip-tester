@@ -20,7 +20,6 @@ SOURCES += main.cpp\
     sockeckcan.cpp \
     warnning.cpp \
     PageAcw.cpp \
-    PageDcr.cpp \
     PageImp.cpp \
     PageInd.cpp \
     PageInr.cpp \
@@ -44,13 +43,14 @@ SOURCES += main.cpp\
     WaveBox.cpp \
     Waveform.cpp \
     PageAmp.cpp \
-    qcustomplot.cpp
+    qcustomplot.cpp \
+    delegate.cpp \
+    PageDcr.cpp
 
 HEADERS  += desktop.h \
     sockeckcan.h \
     warnning.h \
     PageAcw.h \
-    PageDcr.h \
     PageImp.h \
     PageInd.h \
     PageInr.h \
@@ -75,11 +75,12 @@ HEADERS  += desktop.h \
     WaveBox.h \
     Waveform.h \
     PageAmp.h \
-    qcustomplot.h
+    qcustomplot.h \
+    delegate.h \
+    PageDcr.h
 
 FORMS    += desktop.ui \
     PageAcw.ui \
-    PageDcr.ui \
     PageImp.ui \
     PageInd.ui \
     PageInr.ui \
@@ -92,10 +93,10 @@ FORMS    += desktop.ui \
     PagePwr.ui \
     WinBack.ui \
     WinData.ui \
-    WinHome.ui \
     WinSyst.ui \
     WinTest.ui \
-    WinType.ui
+    WinType.ui \
+    PageDcr.ui
 
 RESOURCES += \
     image.qrc
