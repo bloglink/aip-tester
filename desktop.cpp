@@ -128,20 +128,20 @@ void Desktop::ReadCan()
         case 0x0481: // 匝间板波形
             emit SendCanCmdImp(addr, msg);
             break;
-            //        case 0x00C1: // 电感板
-            //            emit SendCanCmdInd(addr, msg);
-            //            break;
-            //        case 0x00E1: // 功率板
-            //            emit SendCanCmdPwr(addr, msg);
-            //            emit SendCanCmdLvs(addr, msg);
-            //            emit SendCanCmdLck(addr, msg);
-            //            break;
-            //        case 0x04E1: // PG波形
-            //            emit SendCanCmdPwr(addr, msg);
-            //            break;
-            //        case 0x0141: // 功放板
-            //            emit SendCanCmdAmp(addr, msg);
-            //            break;
+        case 0x00C1: // 电感板
+            emit SendCanCmdInd(addr, msg);
+            break;
+        case 0x00E1: // 功率板
+            emit SendCanCmdPwr(addr, msg);
+            emit SendCanCmdLvs(addr, msg);
+            emit SendCanCmdLck(addr, msg);
+            break;
+        case 0x04E1: // PG波形
+            emit SendCanCmdPwr(addr, msg);
+            break;
+        case 0x0141: // 功放板
+            emit SendCanCmdAmp(addr, msg);
+            break;
         case 0x0261: // 输出板13
             emit SendCanCmdOut(addr, msg);
             break;

@@ -17,6 +17,7 @@ PageImp::PageImp(QWidget *parent) :
     InitWin();
     InitSet();
     TestStatus = "free";
+    stat = 0x13;
     AvrCount = 0;
 }
 
@@ -39,7 +40,7 @@ void PageImp::InitWin()
     ui->parameters->setItemDelegateForColumn(0, new EnableDelegate(this));
     ui->parameters->setItemDelegateForColumn(1, new PortDelegate);
     ui->parameters->setItemDelegateForColumn(2, new PortDelegate);
-    ui->parameters->setItemDelegateForColumn(3, new RateDelegate);
+    ui->parameters->setItemDelegateForColumn(3, new VoltDelegate);
     ui->parameters->setItemDelegateForColumn(4, new RateDelegate);
     ui->parameters->setItemDelegateForColumn(5, new RateDelegate);
     ui->parameters->setItemDelegateForColumn(6, new RateDelegate);
@@ -181,17 +182,24 @@ void PageImp::InitSet()
         FreqR[row] = temp.at(row).toInt();
     //波形
     QVector<double> x(400), y(400);
-    for (int i=0; i < 400; i++) {
-        x[i] = i;
-        y[i] = quint8(i%150);
-    }
     for (int i=0; i < IMP_MAX; i++) {
         QString ByteL = "WaveL"+QString::number(i);
         QString ByteR = "WaveR"+QString::number(i);
         WaveL[i] = ini->value(ByteL).toString().toUtf8();
         WaveR[i] = ini->value(ByteR).toString().toUtf8();
+        if (ui->BoxStation->currentIndex() == 0)
+            wave = QByteArray::fromBase64(WaveL[i].toUtf8());
+        else
+            wave = QByteArray::fromBase64(WaveR[i].toUtf8());
+        if (wave.size() < 100)
+            continue;
+        for(int j=0; j < wave.size()/2; j++) {
+            x[j] = j;
+            y[j] = (quint16(wave.at(2*j)*256) + quint8(wave.at(2*j+1)))/4;
+        }
         Waves.at(i)->graph(0)->setData(x,y);
     }
+    wave.clear();
 }
 
 void PageImp::SaveSet()
@@ -260,8 +268,8 @@ void PageImp::SaveSet()
     ini->setValue("FreqR", (temp.join(" ").toUtf8()));
 
     for (int i=0; i < ItemView.size(); i++) {
-        QString ByteL = "WaveImpL"+QString::number(i);
-        QString ByteR = "WaveImpR"+QString::number(i);
+        QString ByteL = "WaveL"+QString::number(i);
+        QString ByteR = "WaveR"+QString::number(i);
         ini->setValue(ByteL, WaveL[i]);
         ini->setValue(ByteR, WaveR[i]);
     }
@@ -314,6 +322,12 @@ void PageImp::WaveChange(QModelIndex m)
             FreqL[TestRow]--;
         if (stat == 0x14 && FreqR[TestRow] != 0)
             FreqR[TestRow]--;
+        QVector<double> x(1),y(1);
+        x[1] = 0;
+        y[1] = 0;
+        Waves.at(TestRow)->graph(0)->setData(x,y);
+        Waves.at(TestRow)->replot();
+
         SendCanCmdConfig();
         SendCanCmdSample(TestRow);
         if (!WaitTimeOut(100))
@@ -321,6 +335,7 @@ void PageImp::WaveChange(QModelIndex m)
         else
             SaveSet();
         TestStatus = "free";
+        Waves.at(TestRow)->replot();
     }
     if (m.column() == 11) {
         TestStatus = "sample";
@@ -329,6 +344,11 @@ void PageImp::WaveChange(QModelIndex m)
             FreqL[TestRow]++;
         if (stat == 0x14 && FreqR[TestRow] != 14)
             FreqR[TestRow]++;
+        QVector<double> x(1),y(1);
+        x[1] = 0;
+        y[1] = 0;
+        Waves.at(TestRow)->graph(0)->setData(x,y);
+        Waves.at(TestRow)->replot();
         SendCanCmdConfig();
         SendCanCmdSample(TestRow);
         if (!WaitTimeOut(100))
@@ -336,6 +356,7 @@ void PageImp::WaveChange(QModelIndex m)
         else
             SaveSet();
         TestStatus = "free";
+        Waves.at(TestRow)->replot();
     }
 }
 
@@ -423,35 +444,41 @@ void PageImp::ReadCanCmdWaveOk()
             WaveL[TestRow] = wave.toBase64();
         if (stat == 0x14)
             WaveR[TestRow] = wave.toBase64();
+        QVector<double> x(400),y(400);
+        for(int i=0; i < wave.size()/2; i++) {
+            x[i] = i;
+            y[i] = (quint16(wave.at(2*i)*256) + quint8(wave.at(2*i+1)))/4;
+        }
+        Waves.at(TestRow)->graph(0)->setData(x,y);
         return;
     }
-//    if (TestStatus == "add") {
-//        QList<quint16> Byte;
-//        QList<quint16> Test;
-//        for (int i=0; i < wave.size()/2; i++)
-//            Test.append(quint16(wave.at(i*2+0)*256) + quint8(wave.at(i*2+1)));
-//        QByteArray s = QByteArray::fromBase64(ItemView[TestRow].value("WaveByte").toByteArray());
-//        for (int i=0; i < s.size()/2; i++)
-//            Byte.append(quint16(s.at(i*2+0)*256) + quint8(s.at(i*2+1)));
+    //    if (TestStatus == "add") {
+    //        QList<quint16> Byte;
+    //        QList<quint16> Test;
+    //        for (int i=0; i < wave.size()/2; i++)
+    //            Test.append(quint16(wave.at(i*2+0)*256) + quint8(wave.at(i*2+1)));
+    //        QByteArray s = QByteArray::fromBase64(ItemView[TestRow].value("WaveByte").toByteArray());
+    //        for (int i=0; i < s.size()/2; i++)
+    //            Byte.append(quint16(s.at(i*2+0)*256) + quint8(s.at(i*2+1)));
 
-//        for (int i=0; i < qMin(Byte.size(), Test.size()); i++) {
-//            Byte[i] -= (Byte[i] - Test[i]) / AvrCount;
-//        }
+    //        for (int i=0; i < qMin(Byte.size(), Test.size()); i++) {
+    //            Byte[i] -= (Byte[i] - Test[i]) / AvrCount;
+    //        }
 
-//        QByteArray n;
-//        for (int i=0; i < Byte.size(); i++) {
-//            n.append(quint8(Byte.at(i)/256));
-//            n.append(quint8(Byte.at(i)%256));
-//        }
-//        ItemView[TestRow].insert("WaveByte", n.toBase64());
-//        WaveImp[TestRow]->ShowWave(ItemView[TestRow]);
-//        WaveView(ItemView[TestRow]);
-//        if (stat == 0x13)
-//            WaveL[TestRow] = n.toBase64();
-//        if (stat == 0x14)
-//            WaveR[TestRow] = n.toBase64();
-//        return;
-//    }
+    //        QByteArray n;
+    //        for (int i=0; i < Byte.size(); i++) {
+    //            n.append(quint8(Byte.at(i)/256));
+    //            n.append(quint8(Byte.at(i)%256));
+    //        }
+    //        ItemView[TestRow].insert("WaveByte", n.toBase64());
+    //        WaveImp[TestRow]->ShowWave(ItemView[TestRow]);
+    //        WaveView(ItemView[TestRow]);
+    //        if (stat == 0x13)
+    //            WaveL[TestRow] = n.toBase64();
+    //        if (stat == 0x14)
+    //            WaveR[TestRow] = n.toBase64();
+    //        return;
+    //    }
     ItemView[TestRow].insert("WaveTest", wave.toBase64());
     CalculateResult();
     SendTestItems(TestRow);
@@ -482,7 +509,7 @@ void PageImp::SendCanCmdSampleAuto()
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
     for (int row=0; row < IMP_MAX; row++) {
-        if (m->item(row,1)->text()  ==  "Y")
+        if (m->item(row,0)->text()  ==  "Y")
             tt += 0x0001 << row;
     }
     quint8 mode = 0x01;
@@ -512,7 +539,7 @@ void PageImp::SendCanCmdStart(quint8 pos)
     out.setVersion(QDataStream::Qt_4_8);
     quint16 tt = 0;
     for (int row=0; row < IMP_MAX; row++) {
-        if (m->item(row,1)->text()  ==  "Y")
+        if (m->item(row,0)->text()  ==  "Y")
             tt += 0x0001 << row;
     }
     out << quint16(0x24) << quint8(0x05) << quint8(0x01) << quint8(0x00) << quint8(stat)
@@ -678,7 +705,7 @@ int PageImp::CalculateGear(int row)
     else if (m->item(row,3)->text().toDouble() <= 5000)
         gear = 4;
     gear <<=  4;
-    gear += m->item(TestRow,4)->text().toInt()+1;
+    gear += m->item(row,4)->text().toInt()+1;
     return gear;
 }
 
@@ -860,6 +887,8 @@ void PageImp::showEvent(QShowEvent *e)
     this->setFocus();
     InitSet();
     InitItems();
+    for (int i=0; i < IMP_MAX; i++)
+        Waves.at(i)->replot();
     e->accept();
 }
 
@@ -895,6 +924,13 @@ void PageImp::on_btn1_clicked()
 
     if (TestStatus != "free")
         return;
+    QVector<double> x(1),y(1);
+    x[1] = 0;
+    y[1] = 0;
+    for (int i=0; i < IMP_MAX; i++) {
+        Waves.at(i)->graph(0)->setData(x,y);
+        Waves.at(i)->replot();
+    }
     TestStatus = "sample";
     SendCanCmdConfig();
     SendCanCmdSampleAuto();
@@ -904,6 +940,8 @@ void PageImp::on_btn1_clicked()
         SaveSet();
     TestStatus = "free";
     this->setFocus();
+    for (int i=0; i < IMP_MAX; i++)
+        Waves.at(i)->replot();
 }
 
 void PageImp::on_btn2_clicked()

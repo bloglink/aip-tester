@@ -45,7 +45,8 @@ SOURCES += main.cpp\
     PageAmp.cpp \
     qcustomplot.cpp \
     delegate.cpp \
-    PageDcr.cpp
+    PageDcr.cpp \
+    PageHal.cpp
 
 HEADERS  += desktop.h \
     sockeckcan.h \
@@ -77,7 +78,8 @@ HEADERS  += desktop.h \
     PageAmp.h \
     qcustomplot.h \
     delegate.h \
-    PageDcr.h
+    PageDcr.h \
+    PageHal.h
 
 FORMS    += desktop.ui \
     PageAcw.ui \
@@ -96,7 +98,8 @@ FORMS    += desktop.ui \
     WinSyst.ui \
     WinTest.ui \
     WinType.ui \
-    PageDcr.ui
+    PageDcr.ui \
+    PageHal.ui
 
 RESOURCES += \
     image.qrc

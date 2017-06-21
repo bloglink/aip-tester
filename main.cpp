@@ -2,6 +2,7 @@
 #include <QApplication>
 #include <QTextCodec>
 #include "PageKey.h"
+#include "PageHal.h"
 
 int main(int argc, char *argv[])
 {
@@ -19,6 +20,7 @@ int main(int argc, char *argv[])
 #endif
 
     Desktop w;
+//    PageHal w;
     w.show();
 
     return a.exec();

@@ -248,10 +248,10 @@ void PageInr::ItemClick(int r, int c)
 
 void PageInr::ExcuteCanCmd(int addr, QByteArray msg)
 {
-    if (TestStatus == "free")
+    quint8 cmd = (quint8)msg.at(0);
+    if (TestStatus == "free" && cmd != 0x06)
         return;
     TimeOut = 0;
-    quint8 cmd = (quint8)msg.at(0);
     switch (cmd) {
     case 0x00:
         ReadCanCmdStatus(msg);
@@ -263,11 +263,11 @@ void PageInr::ExcuteCanCmd(int addr, QByteArray msg)
         ReadCanCmdBack(msg);
         break;
     case 0x07: //模块编码
-//        ui->code->setText(msg.toHex());
+        ui->code->setText(msg.toHex());
         ReadCanCmdBack(msg);
         break;
     case 0x08: //软件版本
-//        ui->version->setText(msg.toHex());
+        ui->version->setText(msg.toHex());
         ReadCanCmdBack(msg);
         break;
     default:
@@ -380,6 +380,33 @@ void PageInr::SendCanCmdConfig(int row)
         << quint8(volt%256) << quint8(time/256) << quint8(time%256) << quint8(0x00) << quint8(1);
     out << quint16(0x23) << quint8(0x07) << quint8(0x05) << quint8(0x01)
         << quint8(0/256) << quint8(0%256) << quint8(0x00) << quint8(0x03) << quint8(0x0A); // 上限
+    emit CanMsg(msg);
+}
+
+void PageInr::SendCanCmdDebug()
+{
+    QByteArray msg;
+    QDataStream out(&msg,  QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out << quint16(0x23) << quint8(0x02) << quint8(0x06) << quint8(0xEE);
+    emit CanMsg(msg);
+}
+
+void PageInr::SendCanCmdCode()
+{
+    QByteArray msg;
+    QDataStream out(&msg,  QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out << quint16(0x23) << quint8(0x02) << quint8(0x07) << quint8(0x00);
+    emit CanMsg(msg);
+}
+
+void PageInr::SendCanCmdVersion()
+{
+    QByteArray msg;
+    QDataStream out(&msg,  QIODevice::ReadWrite);
+    out.setVersion(QDataStream::Qt_4_8);
+    out << quint16(0x23) << quint8(0x01) << quint8(0x08);
     emit CanMsg(msg);
 }
 
@@ -531,6 +558,8 @@ void PageInr::ReadVariant(QVariantHash s)
     }
     if (s.value("TxCommand") == "CheckStatus") {
         TestStatus = "init";
+        SendCanCmdCode();
+        SendCanCmdVersion();
         SendCanCmdStatus();
         if (!WaitTimeOut(30))
             SendWarnning("超时");

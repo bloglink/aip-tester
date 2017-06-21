@@ -361,4 +361,39 @@ public:
         editor->setGeometry(option.rect);
     }
 };
+//利用QSpinBox委托进行输入限制，只能输入0－99之间的数字
+class VoltDelegate : public QItemDelegate
+{
+    Q_OBJECT
+public:
+    VoltDelegate(QObject *parent = 0): QItemDelegate(parent) { }
+    QWidget *createEditor(QWidget *parent, const QStyleOptionViewItem &,
+                          const QModelIndex &) const
+    {
+        QSpinBox *editor = new QSpinBox(parent);
+        editor->setButtonSymbols(QAbstractSpinBox::NoButtons);
+        editor->setMinimum(0);
+        editor->setMaximum(3000);
+        return editor;
+    }
+    void setEditorData(QWidget *editor, const QModelIndex &index) const
+    {
+        int value = index.model()->data(index, Qt::EditRole).toInt();
+        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
+        spinBox->setValue(value);
+    }
+    void setModelData(QWidget *editor, QAbstractItemModel *model,
+                      const QModelIndex &index) const
+    {
+        QSpinBox *spinBox = static_cast<QSpinBox*>(editor);
+        spinBox->interpretText();
+        int value = spinBox->value();
+        model->setData(index, value, Qt::EditRole);
+    }
+    void updateEditorGeometry(QWidget *editor,
+                              const QStyleOptionViewItem &option, const QModelIndex &) const
+    {
+        editor->setGeometry(option.rect);
+    }
+};
 #endif // DELEGATE_H
