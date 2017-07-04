@@ -105,9 +105,7 @@ void PageLvs::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
             SendTestItemsAllError();
             break;
         } else {
-            CalculateResult();
-            SendTestItem();
-            ClearResults();
+
         }
         SendTestJudge();
         Mode = LVS_FREE;
@@ -257,6 +255,7 @@ void PageLvs::ReadCanCmdStatus(QByteArray msg)
     }
 
     if (Mode == LVS_TEST) {
+        CalculateResult();
         SendTestItem();
         ClearResults();
         Mode = LVS_FREE;
@@ -272,13 +271,13 @@ void PageLvs::ReadCanCmdResult(QByteArray msg)
     Curr.append(c);
     Power.append(p);
     SendItemTemp();
-    CalculateResult();
-    if (Judge == "NG") {
-        SendCanCmdStop();
-        SendTestItem();
-        ClearResults();
+//    CalculateResult();
+//    if (Judge == "NG") {
+//        SendCanCmdStop();
+//        SendTestItem();
+//        ClearResults();
 //        Mode = LVS_FREE;
-    }
+//    }
 }
 
 void PageLvs::CalculateResult()
