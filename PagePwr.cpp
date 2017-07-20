@@ -591,29 +591,34 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
     if (Mode == PWR_TEST) {
         CalculateResult();
         SendTestItem();
+
+        if (IsPGTest()) {
+            emit SendCommand(ADDR, CMD_WAVE_ITEM, PGWaveItem.at(TestRow).toUtf8());
+            if (PGUppers.last() < 100) {
+                wave0.clear();
+                for(int i=0; i < 400; i++)
+                    wave0.append(0x50);
+            }
+            emit SendCommand(ADDR, CMD_WAVE_BYTE, wave0);
+            switch (TestRow) {
+            case 0:
+                wave1 = wave0;
+                break;
+            case 1:
+                wave2 = wave0;
+                break;
+            case 2:
+                wave3 = wave0;
+                break;
+            default:
+                break;
+            }
+        }
         ClearResults();
     }
+    wave.clear();
+    wave0.clear();
     Mode = PWR_FREE;
-    if (wave.isEmpty())
-        return;
-    if (IsPGTest()) {
-        emit SendCommand(ADDR, CMD_WAVE_ITEM, PGWaveItem.at(TestRow).toUtf8());
-        emit SendCommand(ADDR, CMD_WAVE_BYTE, wave0);
-        switch (TestRow) {
-        case 0:
-            wave1 = wave0;
-            break;
-        case 1:
-            wave2 = wave0;
-            break;
-        case 2:
-            wave3 = wave0;
-            break;
-        default:
-            break;
-        }
-        wave.clear();
-    }
 }
 
 void PagePwr::ReadCanCmdResult(QByteArray msg)
