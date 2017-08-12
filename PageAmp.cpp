@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170419
+ * author:      zhaonanlin
+ * brief:       功放模块
+*******************************************************************************/
 #include "PageAmp.h"
 
 PageAmp::PageAmp(QObject *parent) : QObject(parent)

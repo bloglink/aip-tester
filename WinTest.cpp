@@ -287,7 +287,6 @@ void WinTest::ClickWave(QModelIndex)
 {
     qDebug() << "wave";
     ui->stackedWidget->setCurrentIndex(1);
-
 }
 
 void WinTest::ClickWave(int x)
@@ -295,7 +294,6 @@ void WinTest::ClickWave(int x)
     if (x < 0)
         return;
     ui->stackedWidget->setCurrentIndex(0);
-
 }
 
 void WinTest::ClickWave0(int x)
@@ -306,8 +304,6 @@ void WinTest::ClickWave0(int x)
     ui->LabelWave->WaveByteShow(wave.at(0)->WaveByte);
     ui->LabelWave->WaveTestShow(wave.at(0)->WaveTest);
     ui->LabelWave->WaveItemShow(wave.at(0)->WaveItem);
-
-
 }
 
 void WinTest::ClickWave1(int x)

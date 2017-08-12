@@ -19,7 +19,6 @@
 #include <QShowEvent>
 #include <QListView>
 #include <QSettings>
-#include <QProcess>
 #include <QButtonGroup>
 #include <QTextStream>
 #include <QHostAddress>

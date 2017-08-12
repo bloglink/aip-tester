@@ -105,7 +105,6 @@ void PageLvs::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
             SendTestItemsAllError();
             break;
         } else {
-
         }
         SendTestJudge();
         Mode = LVS_FREE;

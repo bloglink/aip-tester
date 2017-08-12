@@ -503,7 +503,6 @@ void PagePwr::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
                     SendTestItemsAllError();
                     break;
                 } else {
-
                 }
                 Delay(5);
                 if (isStop) {
@@ -596,7 +595,7 @@ void PagePwr::ReadCanCmdStatus(QByteArray msg)
             emit SendCommand(ADDR, CMD_WAVE_ITEM, PGWaveItem.at(TestRow).toUtf8());
             if (PGUppers.last() < 100) {
                 wave0.clear();
-                for(int i=0; i < 400; i++)
+                for (int i=0; i < 400; i++)
                     wave0.append(0x50);
             }
             emit SendCommand(ADDR, CMD_WAVE_BYTE, wave0);

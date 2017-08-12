@@ -232,10 +232,10 @@ void PageLck::SendItemJudge()
     double vv = Volt.at(num)/10;
     double rr = Curr.at(num)/1000;
     double pp = Power.at(num)/10;
-    if (abs(Power.at(qMax(num,1)-1)/10-ui->BoxPower->value()) < (abs(pp-ui->BoxPower->value()))) {
-        pp = Power.at(qMax(num,1)-1)/10;
-        rr = Curr.at(qMax(num,1)-1)/1000;
-        vv = Volt.at(qMax(num,1)-1)/10;
+    if (abs(Power.at(qMax(num, 1)-1)/10-ui->BoxPower->value()) < (abs(pp-ui->BoxPower->value()))) {
+        pp = Power.at(qMax(num, 1)-1)/10;
+        rr = Curr.at(qMax(num, 1)-1)/1000;
+        vv = Volt.at(qMax(num, 1)-1)/10;
     }
 
     QString t = QString("%1V, %2A, %3W").arg(vv).arg(rr).arg(pp);

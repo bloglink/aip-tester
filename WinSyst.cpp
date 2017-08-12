@@ -240,7 +240,7 @@ void WinSyst::ReadHardWareSpace()
     QStringList s = QString(cmd->readAll()).split("\n");
     for (int i=0; i < s.size(); i++) {
         if (s.at(i).contains("/mnt/nandflash")) {
-            QStringList t = s.at(i).split(" ",QString::SkipEmptyParts);
+            QStringList t = s.at(i).split(" ", QString::SkipEmptyParts);
             QString a = t.at(qMin(4, t.size()));
             ui->TextSpace->setText(a);
             int b = a.remove(a.size()-1, 1).toInt();

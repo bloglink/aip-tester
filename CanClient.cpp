@@ -18,10 +18,7 @@ CanClient::CanClient(QObject *parent) : QObject(parent)
 void CanClient::DeviceOpen()
 {
 #ifdef __arm__
-    char str[256];
-
     struct can_filter rfilter[14];      //  rfilter 记录总数
-    //#define CAN_SFF_MASK 0x000007FFU
     rfilter[0].can_id = 0x41;           // 电阻板ID
     rfilter[0].can_mask = CAN_SFF_MASK;
     rfilter[1].can_id = 0x441;          // 反嵌板波形ID
