@@ -10,13 +10,13 @@
 #include "ui_WinHome.h"
 
 WinHome::WinHome(QWidget *parent) :
-    QWidget(parent, Qt::FramelessWindowHint),
+    QWidget(parent),
     ui(new Ui::WinHome)
 {
     ui->setupUi(this);
     InitWindows();
     InitButtons();
-    InitVersion("V-2.1.0.170704");
+    InitVersion("V-2.1.1.0");
     HomeMode = HOME_FREE;
     InitThreadAll();
     isPause = false;
@@ -24,8 +24,6 @@ WinHome::WinHome(QWidget *parent) :
 
 WinHome::~WinHome()
 {
-    thread_can->quit();
-    thread_can->wait();
     thread_sql->quit();
     thread_sql->wait();
     thread_tcp->quit();
@@ -40,7 +38,6 @@ WinHome::~WinHome()
 void WinHome::InitThreadAll()
 {
     QTimer *timer = new QTimer(this);
-    InitCan();
     InitSql();
     InitTcp();
     InitUdp();
@@ -121,16 +118,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize PageDcr OK\n");
 
-    PageMag *pageMag = new PageMag(this);
-    ui->desktop->addWidget(pageMag);
-    pageMag->setObjectName("PageMag");
-    connect(pageMag, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageMag, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageMag,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageMag OK\n");
-
     PageInr *pageInr = new PageInr(this);
     ui->desktop->addWidget(pageInr);
     pageInr->setObjectName("PageInr");
@@ -151,16 +138,6 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize PageAcw OK\n");
 
-    PageImp *pageImp = new PageImp(this);
-    ui->desktop->addWidget(pageImp);
-    pageImp->setObjectName("PageImp");
-    connect(pageImp, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageImp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageImp,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageImp OK\n");
-
     PageInd *pageInd = new PageInd(this);
     ui->desktop->addWidget(pageInd);
     pageInd->setObjectName("PageInd");
@@ -170,55 +147,6 @@ void WinHome::InitWindowsAll()
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageInd,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize PageInd OK\n");
-
-    PagePwr *pagePwr = new PagePwr(this);
-    ui->desktop->addWidget(pagePwr);
-    pagePwr->setObjectName("PagePwr");
-    connect(pagePwr, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pagePwr, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pagePwr,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PagePwr OK\n");
-
-    PageLvs *pageLvs = new PageLvs(this);
-    ui->desktop->addWidget(pageLvs);
-    pageLvs->setObjectName("PageLvs");
-    connect(pageLvs, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageLvs, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageLvs,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageLvs OK\n");
-
-    PageLck *pageLck = new PageLck(this);
-    ui->desktop->addWidget(pageLck);
-    pageLck->setObjectName("PageLck");
-    connect(pageLck, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageLck, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageLck,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageLck OK\n");
-
-    PageOut *pageOut = new PageOut(this);
-    ui->desktop->addWidget(pageOut);
-    pageOut->setObjectName("PageOut");
-    connect(pageOut, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageOut, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageOut,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageOut OK\n");
-
-    PageAmp *pageAmp = new PageAmp(this);
-    pageOut->setObjectName("pageAmp");
-    connect(pageAmp, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
-    connect(pageAmp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), pageAmp,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    ShowLogMessage("Initialize PageAmp OK\n");
 
     ReadStatusAll();
 }
@@ -285,17 +213,6 @@ void WinHome::InitVersion(QString v)
     ui->titleVn->setText(v);
 }
 
-void WinHome::InitCan()
-{
-    thread_can = new QThread(this);
-    can.moveToThread(thread_can);
-    connect(thread_can, SIGNAL(started()), &can, SLOT(DeviceOpen()));
-    connect(thread_can, SIGNAL(finished()), &can, SLOT(DeviceQuit()));
-    connect(this, SIGNAL(PutCanData(QByteArray)), &can, SLOT(WriteAll(QByteArray)));
-    connect(&can, SIGNAL(GetCanData(QByteArray)), this, SLOT(ReadCanCmd(QByteArray)));
-    thread_can->start();
-}
-
 void WinHome::InitSql()
 {
     thread_sql = new QThread(this);
@@ -341,31 +258,6 @@ void WinHome::InitSerial()
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), &serial,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     thread_all->start();
-}
-
-void WinHome::ReadCanCmd(QByteArray msg)
-{
-    if (!msg.isEmpty()) {
-        quint16 id;
-        quint8 dlc;
-        quint8 dat;
-        QByteArray cmd;
-        QDataStream in(&msg,  QIODevice::ReadWrite);
-        in.setVersion(QDataStream::Qt_4_8);
-
-        while (!in.atEnd()) {
-            in >> id >> dlc;
-            cmd.clear();
-            for (int i=0; i < dlc; i++) {
-                in >> dat;
-                cmd.append(dat);
-            }
-            if (id == CAN_ID_DCR && quint8(cmd.at(0)) == 0x09)
-                ReadButtonBox(cmd);
-            else
-                emit SendCommand(id, CMD_CAN, cmd);
-        }
-    }
 }
 
 void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
@@ -481,18 +373,7 @@ void WinHome::ReadStatusAll()
 {
     if (HomeMode != HOME_FREE)
         return;
-    HomeMode = HOME_TEST;
 
-    emit SendCommand(WIN_ID_AMP, CMD_CHECK, NULL);
-
-    QStringList t = EnableItems();
-    for (int i=0; i < t.size(); i++) {
-        emit SendCommand(t.at(i).toInt(), CMD_CHECK, NULL);
-    }
-    QStringList s = EnableOutput();
-    for (int i=0; i < s.size(); i++) {
-        emit SendCommand(WIN_ID_OUT13, CMD_CHECK, s.at(i).toUtf8());
-    }
     qDebug() << QTime::currentTime().toString() << "WinHome read OK";
 
     ui->Text->hide();
@@ -689,13 +570,6 @@ QStringList WinHome::EnableItems()
 {
     QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
     QString n = ini->value("/GLOBAL/ItemEnable", INI_DEFAULT).toString();
-    return n.split(" ");
-}
-
-QStringList WinHome::EnableOutput()
-{
-    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
-    QString n = ini->value("/GLOBAL/OutEnable", INI_DEFAULT).toString();
     return n.split(" ");
 }
 

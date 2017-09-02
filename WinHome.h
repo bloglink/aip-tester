@@ -29,19 +29,11 @@
 #include "WinTest.h"
 
 #include "PageDcr.h"
-#include "PageMag.h"
 #include "PageInr.h"
 #include "PageAcw.h"
-#include "PageImp.h"
 #include "PageInd.h"
-#include "PagePwr.h"
-#include "PageLvs.h"
-#include "PageLck.h"
-#include "PageOut.h"
-#include "PageAmp.h"
 
 #include "SqlClient.h"
-#include "CanClient.h"
 #include "TcpClient.h"
 #include "UdpClient.h"
 #include "SerialPort.h"
@@ -81,12 +73,10 @@ private slots:
     void InitButtons(void);
     void ReadButtons(int id);
     void InitVersion(QString v);
-    void InitCan(void);
     void InitSql(void);
     void InitTcp(void);
     void InitUdp(void);
     void InitSerial(void);
-    void ReadCanCmd(QByteArray msg);
 
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void InitTestItems(void);
@@ -103,7 +93,6 @@ private slots:
     QString CurrentSettings(void);
     QStringList CurrentItems(void);
     QStringList EnableItems(void);
-    QStringList EnableOutput(void);
     int CurrentStartMode(void);
     int CurrentPauseMode(void);
     int CurrentAlarmTime(QString msg);
@@ -120,12 +109,10 @@ private:
     QString ItemJudge;
     QStringList Items;
 
-    QThread *thread_can;
     QThread *thread_sql;
     QThread *thread_tcp;
     QThread *thread_udp;
     QThread *thread_all;
-    CanClient can;
     SqlClient sql;
     TcpClient tcp;
     UdpClient udp;

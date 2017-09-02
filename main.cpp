@@ -26,7 +26,7 @@ int main(int argc, char *argv[]) {
 #endif
 
     WinHome w;
-    w.showFullScreen();
+    w.showMaximized();
 
     return a.exec();
 }
