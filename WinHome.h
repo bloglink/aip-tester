@@ -78,7 +78,6 @@ private slots:
     void readButtons(int id);
     void initUdp(QJsonObject obj);
     void regularTasks();
-    void initExchange(void);
     void InitWindowsAll(void);
     void JumpToWindow(QByteArray win);
     void InitSql(void);

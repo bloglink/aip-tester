@@ -103,7 +103,9 @@ void WinHome::initUdp(QJsonObject obj)
 
     emit transmitJson(obj);
 
-    initExchange();
+    initCom();
+    InitSql();
+    InitTcp();
 }
 
 void WinHome::initCom()
@@ -112,6 +114,27 @@ void WinHome::initCom()
     com.moveToThread(thread_com);
     connect(thread_com, SIGNAL(started()), &com, SLOT(initCom()));
     thread_com->start();
+}
+
+void WinHome::InitSql()
+{
+    thread_sql = new QThread(this);
+    sql.moveToThread(thread_sql);
+    connect(thread_sql, SIGNAL(started()), &sql, SLOT(DeviceOpen()));
+    connect(thread_sql, SIGNAL(finished()), &sql, SLOT(DeviceQuit()));
+    connect(this, SIGNAL(WriteSql(QByteArray)), &sql, SLOT(Write(QByteArray)));
+    thread_sql->start();
+}
+
+void WinHome::InitTcp()
+{
+    thread_tcp = new QThread(this);
+    tcp.moveToThread(thread_tcp);
+    connect(thread_tcp, SIGNAL(started()), &tcp, SLOT(TcpInit()));
+    connect(thread_tcp, SIGNAL(finished()), &tcp, SLOT(TcpQuit()));
+    connect(&tcp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
+            SLOT(ReadMessage(quint16, quint16, QByteArray)));
+    thread_tcp->start();
 }
 
 void WinHome::regularTasks()
@@ -124,6 +147,7 @@ void WinHome::regularTasks()
         switch (cmd) {
         case 6001:  // 自检信息
             emit sendNetMsg("6001");
+            QTimer::singleShot(100, this, SLOT(InitWindowsAll()));
             break;
         default:
             qDebug() << cmd << dat;
@@ -132,14 +156,7 @@ void WinHome::regularTasks()
     }
 }
 
-void WinHome::initExchange()
-{
-    QTimer *timer = new QTimer(this);
-    InitSql();
-    InitTcp();
-    initCom();
-    timer->singleShot(50, this, SLOT(InitWindowsAll()));
-}
+
 
 
 
@@ -256,26 +273,7 @@ void WinHome::JumpToWindow(QByteArray win)
     }
 }
 
-void WinHome::InitSql()
-{
-    thread_sql = new QThread(this);
-    sql.moveToThread(thread_sql);
-    connect(thread_sql, SIGNAL(started()), &sql, SLOT(DeviceOpen()));
-    connect(thread_sql, SIGNAL(finished()), &sql, SLOT(DeviceQuit()));
-    connect(this, SIGNAL(WriteSql(QByteArray)), &sql, SLOT(Write(QByteArray)));
-    thread_sql->start();
-}
 
-void WinHome::InitTcp()
-{
-    thread_tcp = new QThread(this);
-    tcp.moveToThread(thread_tcp);
-    connect(thread_tcp, SIGNAL(started()), &tcp, SLOT(TcpInit()));
-    connect(thread_tcp, SIGNAL(finished()), &tcp, SLOT(TcpQuit()));
-    connect(&tcp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    thread_tcp->start();
-}
 
 
 
