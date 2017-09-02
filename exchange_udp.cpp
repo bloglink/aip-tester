@@ -32,4 +32,10 @@ void ExchangeUdp::recvAppJson(QJsonObject obj)
     this->writeDatagram(msg, txHost, txPort);
     qDebug() << "send" << msg;
 }
+
+void ExchangeUdp::recvAppMsg(QByteArray msg)
+{
+    this->writeDatagram(msg, txHost, txPort);
+    qDebug() << "send" << msg;
+}
 /*********************************END OF FILE**********************************/

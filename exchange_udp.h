@@ -32,6 +32,7 @@ public:
 private slots:
     void readSocket(void);
     void recvAppJson(QJsonObject obj);
+    void recvAppMsg(QByteArray msg);
 private:
     quint16 txPort;
     QHostAddress txHost;

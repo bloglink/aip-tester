@@ -4,10 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui sql network serialport
+QT       += core gui sql network serialport xml
 CONFIG   += serialport
 
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets printsupport
 
 
 TARGET = aip-tester
@@ -49,7 +49,8 @@ SOURCES += main.cpp\
     PageAmp.cpp \
     login.cpp \
     exchange_udp.cpp \
-    exchange_com.cpp
+    exchange_com.cpp \
+    qcustomplot.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -81,7 +82,9 @@ HEADERS  += \
     PageAmp.h \
     login.h \
     exchange_udp.h \
-    exchange_com.h
+    exchange_com.h \
+    qcustomplot.h \
+    conf_delegation.h
 
 FORMS    += \
     PageKey.ui \

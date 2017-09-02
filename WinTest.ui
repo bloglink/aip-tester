@@ -41,7 +41,7 @@
        </property>
        <item>
         <widget class="QWidget" name="widgetTest" native="true">
-         <layout class="QVBoxLayout" name="verticalLayout">
+         <layout class="QVBoxLayout" name="verticalLayout" stretch="7,3,0,0">
           <property name="spacing">
            <number>0</number>
           </property>
@@ -58,7 +58,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QTableWidget" name="TabTest">
+           <widget class="QTableView" name="view">
             <property name="focusPolicy">
              <enum>Qt::NoFocus</enum>
             </property>
@@ -77,87 +77,10 @@
             <property name="selectionBehavior">
              <enum>QAbstractItemView::SelectRows</enum>
             </property>
-            <property name="rowCount">
-             <number>0</number>
-            </property>
-            <property name="columnCount">
-             <number>4</number>
-            </property>
-            <attribute name="horizontalHeaderDefaultSectionSize">
-             <number>80</number>
-            </attribute>
-            <attribute name="horizontalHeaderHighlightSections">
-             <bool>false</bool>
-            </attribute>
-            <column>
-             <property name="text">
-              <string>测试项目</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>测试参数</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>测试结果</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>测试判定</string>
-             </property>
-            </column>
            </widget>
           </item>
           <item>
-           <widget class="QTableWidget" name="TabWave">
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>135</height>
-             </size>
-            </property>
-            <property name="focusPolicy">
-             <enum>Qt::NoFocus</enum>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="editTriggers">
-             <set>QAbstractItemView::NoEditTriggers</set>
-            </property>
-            <property name="selectionMode">
-             <enum>QAbstractItemView::NoSelection</enum>
-            </property>
-            <attribute name="verticalHeaderVisible">
-             <bool>false</bool>
-            </attribute>
-            <row>
-             <property name="text">
-              <string>1</string>
-             </property>
-            </row>
-            <column>
-             <property name="text">
-              <string>1</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>2</string>
-             </property>
-            </column>
-            <column>
-             <property name="text">
-              <string>3</string>
-             </property>
-            </column>
-           </widget>
+           <widget class="QCustomPlot" name="wave" native="true"/>
           </item>
           <item>
            <widget class="QWidget" name="WidgetTestOther" native="true">
@@ -724,6 +647,12 @@ color: rgb(0, 0, 0);</string>
    <class>Waveform</class>
    <extends>QLabel</extends>
    <header>Waveform.h</header>
+  </customwidget>
+  <customwidget>
+   <class>QCustomPlot</class>
+   <extends>QWidget</extends>
+   <header>qcustomplot.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources>

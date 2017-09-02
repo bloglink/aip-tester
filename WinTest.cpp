@@ -14,7 +14,7 @@ WinTest::WinTest(QWidget *parent) :
     ui(new Ui::WinTest)
 {
     ui->setupUi(this);
-    InitWindows();
+    initUI();
     InitButtons();
 
     QTimer *timer = new QTimer(this);
@@ -29,32 +29,121 @@ WinTest::~WinTest()
     delete ui;
 }
 
-void WinTest::InitWindows()
+void WinTest::initItems(quint16 station)
 {
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
-    ui->TabTest->setColumnWidth(1, 150);
-    ui->TabTest->horizontalHeader()->setResizeMode(2, QHeaderView::Stretch);
-    ui->TabWave->horizontalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->TabWave->verticalHeader()->setResizeMode(QHeaderView::Stretch);
-    ui->BtnCmdStart->hide();
-#else
-    ui->WidgetItem->hide();
-    ui->TabTest->setColumnWidth(1, 180);
-    ui->TabTest->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
-    ui->TabWave->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->TabWave->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-#endif
-    for (int i=0; i < 3; i++) {
-        wave.append(new Waveform(this));
-        ui->TabWave->setCellWidget(0, i, wave.at(i));
+    for (int i=0; i < mView->rowCount(); i++) {
+        mView->item(i, 2)->setText("");
+        mView->item(i, 3)->setText("");
     }
+    qDebug() << station;
+}
+
+void WinTest::updateItems(QString dat)
+{
+    QDomDocument docs;
+    docs.setContent(dat);
+    if (!docs.elementsByTagName("Test_Data_Param").isEmpty()) {
+        mView->setRowCount(0);
+        QDomNodeList list = docs.elementsByTagName("Test_Data_Param").at(0).childNodes();
+        for (int i=0; i < list.size(); i++) {
+            QDomElement dom = list.at(i).toElement();
+            QStringList temp = dom.text().split(",");
+            if (dom.nodeName() == "Test_1") {
+                for (int i=0; i < temp.size(); i++) {
+                    mView->appendRow(new QStandardItem(temp.at(i)));
+                    mView->setItem(i, 1, new QStandardItem);
+                    mView->setItem(i, 2, new QStandardItem);
+                    mView->setItem(i, 3, new QStandardItem);
+                }
+            }
+            if (dom.nodeName() == "Test_2") {
+                for (int i=0; i < qMin(temp.size(), mView->rowCount()); i++)
+                    mView->setItem(i, 1, new QStandardItem(temp.at(i)));
+            }
+        }
+    }
+    if (!docs.elementsByTagName("Test_Data_Result").isEmpty()) {
+        QDomNodeList list = docs.elementsByTagName("Test_Data_Result").at(0).childNodes();
+        for (int i=0; i < list.size(); i++) {
+            QDomElement dom = list.at(i).toElement();
+            QString temp = dom.text();
+            if (dom.nodeName() == "Test_3") {
+                for (int i=0; i < mView->rowCount(); i++) {
+                    if (mView->item(i, 3)->text().isEmpty()) {
+                        mView->item(i, 2)->setText(temp);
+                        break;
+                    }
+                }
+            }
+        }
+    }
+    if (!docs.elementsByTagName("Test_Data_Judge").isEmpty()) {
+        QDomNodeList list = docs.elementsByTagName("Test_Data_Judge").at(0).childNodes();
+        for (int i=0; i < list.size(); i++) {
+            QDomElement dom = list.at(i).toElement();
+            QString temp = dom.text();
+            if (dom.nodeName() == "Test_3") {
+                for (int i=0; i < mView->rowCount(); i++) {
+                    if (mView->item(i, 3)->text().isEmpty()) {
+                        mView->item(i, 3)->setText(temp);
+                        if (temp == "OK")
+                            mView->item(i, 3)->setForeground(QBrush(QColor(Qt::green)));
+                        else
+                            mView->item(i, 3)->setForeground(QBrush(QColor(Qt::red)));
+                        break;
+                    }
+                }
+            }
+        }
+    }
+}
+
+bool WinTest::updateResult()
+{
+//    for (int i=0; i < mView->rowCount(); i++) {
+//        if (mView->item(i, 3)->text() != "OK") {
+//            judge->setStyleSheet("font:55pt;color:red");
+//            judge->setText("NG");
+//            qDebug() << i;
+//            return false;
+//        }
+//    }
+//    judge->setStyleSheet("font:55pt;color:green");
+//    judge->setText("OK");
+    return true;
+}
+
+void WinTest::initUI()
+{
+    QStringList headers;
+    headers << tr("测试项目") << tr("测试参数") << tr("测试结果") << tr("测试判定");
+    mView = new StandardItem(0, headers.size());
+    mView->setHorizontalHeaderLabels(headers);
+
+    ui->view->setModel(mView);
+    ui->view->horizontalHeader()->setSectionResizeMode(2, QHeaderView::Stretch);
+    ui->view->setColumnWidth(0, 150);
+    ui->view->setColumnWidth(1, 250);
+    ui->view->setColumnWidth(3, 450);
+
+    ui->wave->setBackground(QBrush(QColor(19, 19, 19))); //设置背景色
+    ui->wave->xAxis->grid()->setPen(QPen(Qt::darkGreen, 1, Qt::DotLine));
+    ui->wave->yAxis->grid()->setPen(QPen(Qt::darkGreen, 1, Qt::DotLine));
+    ui->wave->xAxis->setTicks(false);
+    ui->wave->yAxis->setTicks(false);
+    ui->wave->xAxis->setTickLabels(false);
+    ui->wave->yAxis->setTickLabels(false);
+    ui->wave->axisRect()->setMinimumMargins(QMargins(0, 0, 0, 0));
+    ui->wave->axisRect()->setupFullAxesBox();
+    ui->wave->rescaleAxes();
+    ui->wave->addGraph();
+    ui->wave->xAxis->setRange(0, 400);
+    ui->wave->yAxis->setRange(0, 250);
+    ui->wave->graph(0)->setPen(QPen(Qt::green));
+//    DrawWave();
+
     ui->LabelState->setStyleSheet("color:green;font:Bold 42pt Ubuntu;");
     ui->TextPos->setStyleSheet("color:white;font:Bold 42pt Ubuntu;");
-    connect(ui->TabTest, SIGNAL(cellClicked(int, int)), this, SLOT(ClickItem(int, int)));
-    connect(wave.at(0), SIGNAL(BlockClick(int)), this, SLOT(ClickWave0(int)));
-    connect(wave.at(1), SIGNAL(BlockClick(int)), this, SLOT(ClickWave1(int)));
-    connect(wave.at(2), SIGNAL(BlockClick(int)), this, SLOT(ClickWave2(int)));
-    connect(ui->LabelWave, SIGNAL(BlockClick(int)), this, SLOT(ClickWave(int)));
 }
 
 void WinTest::InitButtons()
@@ -97,8 +186,8 @@ void WinTest::InitSettings()
     g_settings->setIniCodec("GB18030");
     g_settings->beginGroup("GLOBAL");
 
-    int width = g_settings->value("Width", "200").toInt();
-    ui->TabTest->setColumnWidth(1, width);
+//    int width = g_settings->value("Width", "200").toInt();
+//    ui->TabTest->setColumnWidth(1, width);
 
     int user = g_settings->value("User", "0").toInt();
     if (user == 0)
@@ -131,51 +220,51 @@ void WinTest::InitSettings()
 
 void WinTest::SaveSettings()
 {
-    QSettings *settings_g = new QSettings(INI_PATH, QSettings::IniFormat);
-    settings_g->setIniCodec("GB18030");
-    settings_g->beginGroup("GLOBAL");
-    int width = ui->TabTest->columnWidth(1);
-    settings_g->setValue("Width", width);
-    qDebug() << QTime::currentTime().toString() << "WinTest save OK";
+//    QSettings *settings_g = new QSettings(INI_PATH, QSettings::IniFormat);
+//    settings_g->setIniCodec("GB18030");
+//    settings_g->beginGroup("GLOBAL");
+//    int width = ui->TabTest->columnWidth(1);
+//    settings_g->setValue("Width", width);
+//    qDebug() << QTime::currentTime().toString() << "WinTest save OK";
 }
 
 void WinTest::ShowItem(QString item)
 {
-    ui->TabTest->clearFocus();
-    QStringList s = item.split("@");
-    for (int i=0; i < ui->TabTest->rowCount(); i++) {
-        QString n = ui->TabTest->item(i, 0)->text();
-        QString t = ui->TabTest->item(i, 3)->text();
-        if (t != " ")
-            continue;
-        if (s.at(0) == n) {
-            int v = qMax(ui->TabTest->verticalScrollBar()->value(), i-10);
-            ui->TabTest->verticalScrollBar()->setValue(v);
-            ui->TabTest->item(i, 2)->setText(s.at(2));
-            ui->TabTest->item(i, 3)->setText(s.at(3));
-            if (s.at(3) == "NG")
-                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
-            else
-                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::green));
-            break;
-        }
-    }
+//    ui->TabTest->clearFocus();
+//    QStringList s = item.split("@");
+//    for (int i=0; i < ui->TabTest->rowCount(); i++) {
+//        QString n = ui->TabTest->item(i, 0)->text();
+//        QString t = ui->TabTest->item(i, 3)->text();
+//        if (t != " ")
+//            continue;
+//        if (s.at(0) == n) {
+//            int v = qMax(ui->TabTest->verticalScrollBar()->value(), i-10);
+//            ui->TabTest->verticalScrollBar()->setValue(v);
+//            ui->TabTest->item(i, 2)->setText(s.at(2));
+//            ui->TabTest->item(i, 3)->setText(s.at(3));
+//            if (s.at(3) == "NG")
+//                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::red));
+//            else
+//                ui->TabTest->item(i, 3)->setTextColor(QColor(Qt::green));
+//            break;
+//        }
+//    }
 }
 
 void WinTest::ReplaceItem(QString item)
 {
-    QStringList t = item.split("\n");
-    for (int i=0; i < t.size(); i++) {
-        QStringList s = t.at(i).split("@");
-        for (int i=0; i < ui->TabTest->rowCount(); i++) {
-            QString n = ui->TabTest->item(i, 0)->text();
-            if (s.at(0) == n) {
-                ui->TabTest->item(i, 2)->setText(" ");
-                ui->TabTest->item(i, 3)->setText(" ");
-                break;
-            }
-        }
-    }
+//    QStringList t = item.split("\n");
+//    for (int i=0; i < t.size(); i++) {
+//        QStringList s = t.at(i).split("@");
+//        for (int i=0; i < ui->TabTest->rowCount(); i++) {
+//            QString n = ui->TabTest->item(i, 0)->text();
+//            if (s.at(0) == n) {
+//                ui->TabTest->item(i, 2)->setText(" ");
+//                ui->TabTest->item(i, 3)->setText(" ");
+//                break;
+//            }
+//        }
+//    }
 }
 
 void WinTest::ShowJudge(QString judge)
@@ -201,35 +290,35 @@ void WinTest::ShowJudge(QString judge)
 
 void WinTest::ShowWaveItem(QByteArray msg)
 {
-    if (!wave.last()->WaveItem.isEmpty()) {
-        ClearWave();
-    }
-    for (int i=0; i < wave.size(); i++) {
-        if (wave.at(i)->WaveItem.isEmpty()) {
-            wave.at(i)->WaveItemShow(msg);
-            break;
-        }
-    }
+//    if (!ui->wave.last()->WaveItem.isEmpty()) {
+//        ClearWave();
+//    }
+//    for (int i=0; i < ui->wave.size(); i++) {
+//        if (ui->wave.at(i)->WaveItem.isEmpty()) {
+//            ui->wave.at(i)->WaveItemShow(msg);
+//            break;
+//        }
+//    }
 }
 
 void WinTest::ShowWaveByte(QByteArray msg)
 {
-    for (int i=0; i < wave.size(); i++) {
-        if (wave.at(i)->WaveByte.isEmpty()) {
-            wave.at(i)->WaveByteShow(msg);
-            break;
-        }
-    }
+//    for (int i=0; i < ui->wave.size(); i++) {
+//        if (ui->wave.at(i)->WaveByte.isEmpty()) {
+//            ui->wave.at(i)->WaveByteShow(msg);
+//            break;
+//        }
+//    }
 }
 
 void WinTest::ShowWaveTest(QByteArray msg)
 {
-    for (int i=0; i < wave.size(); i++) {
-        if (wave.at(i)->WaveTest.isEmpty()) {
-            wave.at(i)->WaveTestShow(msg);
-            break;
-        }
-    }
+//    for (int i=0; i < ui->wave.size(); i++) {
+//        if (ui->wave.at(i)->WaveTest.isEmpty()) {
+//            ui->wave.at(i)->WaveTestShow(msg);
+//            break;
+//        }
+//    }
 }
 
 void WinTest::ShowTemperature(QByteArray msg)
@@ -265,22 +354,22 @@ void WinTest::ShowCode()
 
 void WinTest::ClearWave()
 {
-    for (int i=0; i < wave.size(); i++) {
-        wave.at(i)->WaveByteShow(NULL);
-        wave.at(i)->WaveTestShow(NULL);
-        wave.at(i)->WaveItemShow(NULL);
-        QString t = QString::number(i+1);
-        ui->TabWave->horizontalHeaderItem(i)->setText(t);
-    }
+//    for (int i=0; i < wave.size(); i++) {
+//        wave.at(i)->WaveByteShow(NULL);
+//        wave.at(i)->WaveTestShow(NULL);
+//        wave.at(i)->WaveItemShow(NULL);
+//        QString t = QString::number(i+1);
+//        ui->TabWave->horizontalHeaderItem(i)->setText(t);
+//    }
 }
 
 void WinTest::ClickItem(int r,  int )
 {
-    QString t = ui->TabTest->item(r, 0)->text();
-    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")) || t.contains(tr("PG"))) {
-        ClearWave();
-        emit SendCommand(ADDR, CMD_WAVE, t.toUtf8());
-    }
+//    QString t = ui->TabTest->item(r, 0)->text();
+//    if (t.contains(tr("反嵌")) || t.contains(tr("匝间")) || t.contains(tr("PG"))) {
+//        ClearWave();
+//        emit SendCommand(ADDR, CMD_WAVE, t.toUtf8());
+//    }
 }
 
 void WinTest::ClickWave(QModelIndex)
@@ -298,32 +387,32 @@ void WinTest::ClickWave(int x)
 
 void WinTest::ClickWave0(int x)
 {
-    if (x < 0)
-        return;
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->LabelWave->WaveByteShow(wave.at(0)->WaveByte);
-    ui->LabelWave->WaveTestShow(wave.at(0)->WaveTest);
-    ui->LabelWave->WaveItemShow(wave.at(0)->WaveItem);
+//    if (x < 0)
+//        return;
+//    ui->stackedWidget->setCurrentIndex(1);
+//    ui->LabelWave->WaveByteShow(ui->wave.at(0)->WaveByte);
+//    ui->LabelWave->WaveTestShow(ui->wave.at(0)->WaveTest);
+//    ui->LabelWave->WaveItemShow(ui->wave.at(0)->WaveItem);
 }
 
 void WinTest::ClickWave1(int x)
 {
-    if (x < 0)
-        return;
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->LabelWave->WaveByteShow(wave.at(1)->WaveByte);
-    ui->LabelWave->WaveTestShow(wave.at(1)->WaveTest);
-    ui->LabelWave->WaveItemShow(wave.at(1)->WaveItem);
+//    if (x < 0)
+//        return;
+//    ui->stackedWidget->setCurrentIndex(1);
+//    ui->LabelWave->WaveByteShow(ui->wave.at(1)->WaveByte);
+//    ui->LabelWave->WaveTestShow(ui->wave.at(1)->WaveTest);
+//    ui->LabelWave->WaveItemShow(ui->wave.at(1)->WaveItem);
 }
 
 void WinTest::ClickWave2(int x)
 {
-    if (x < 0)
-        return;
-    ui->stackedWidget->setCurrentIndex(1);
-    ui->LabelWave->WaveByteShow(wave.at(2)->WaveByte);
-    ui->LabelWave->WaveTestShow(wave.at(2)->WaveTest);
-    ui->LabelWave->WaveItemShow(wave.at(2)->WaveItem);
+//    if (x < 0)
+//        return;
+//    ui->stackedWidget->setCurrentIndex(1);
+//    ui->LabelWave->WaveByteShow(ui->wave.at(2)->WaveByte);
+//    ui->LabelWave->WaveTestShow(ui->wave.at(2)->WaveTest);
+//    ui->LabelWave->WaveItemShow(ui->wave.at(2)->WaveItem);
 }
 
 QString WinTest::BarCode1()
@@ -382,37 +471,37 @@ void WinTest::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 
 void WinTest::InitItem(QByteArray msg)
 {
-    ui->TabTest->verticalScrollBar()->setValue(0);
-    ui->LabelState->setStyleSheet("color:rgb(0, 255, 0);font:Bold 42pt Ubuntu;border:none;");
-    ui->LabelState->setText("--");
-    if (msg.isEmpty()) {
-        ui->TabTest->setRowCount(0);
-        return;
-    }
-    QStringList item = QString(msg).split("\n");
-    ui->TabTest->setRowCount(item.size());
-    for (int i=0; i < item.size(); i++) {
-        QStringList s = QString(item.at(i)).split("@");
-        ui->TabTest->setItem(i, 0, new QTableWidgetItem);
-        ui->TabTest->item(i, 0)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 0)->setText(s.at(0));
+//    ui->TabTest->verticalScrollBar()->setValue(0);
+//    ui->LabelState->setStyleSheet("color:rgb(0, 255, 0);font:Bold 42pt Ubuntu;border:none;");
+//    ui->LabelState->setText("--");
+//    if (msg.isEmpty()) {
+//        ui->TabTest->setRowCount(0);
+//        return;
+//    }
+//    QStringList item = QString(msg).split("\n");
+//    ui->TabTest->setRowCount(item.size());
+//    for (int i=0; i < item.size(); i++) {
+//        QStringList s = QString(item.at(i)).split("@");
+//        ui->TabTest->setItem(i, 0, new QTableWidgetItem);
+//        ui->TabTest->item(i, 0)->setTextAlignment(Qt::AlignCenter);
+//        ui->TabTest->item(i, 0)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+//        ui->TabTest->item(i, 0)->setText(s.at(0));
 
-        ui->TabTest->setItem(i, 1, new QTableWidgetItem);
-        ui->TabTest->item(i, 1)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 1)->setText(s.at(1));
+//        ui->TabTest->setItem(i, 1, new QTableWidgetItem);
+//        ui->TabTest->item(i, 1)->setTextAlignment(Qt::AlignCenter);
+//        ui->TabTest->item(i, 1)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+//        ui->TabTest->item(i, 1)->setText(s.at(1));
 
-        ui->TabTest->setItem(i, 2, new QTableWidgetItem);
-        ui->TabTest->item(i, 2)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 2)->setText(s.at(2));
+//        ui->TabTest->setItem(i, 2, new QTableWidgetItem);
+//        ui->TabTest->item(i, 2)->setTextAlignment(Qt::AlignCenter);
+//        ui->TabTest->item(i, 2)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+//        ui->TabTest->item(i, 2)->setText(s.at(2));
 
-        ui->TabTest->setItem(i, 3, new QTableWidgetItem);
-        ui->TabTest->item(i, 3)->setTextAlignment(Qt::AlignCenter);
-        ui->TabTest->item(i, 3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
-        ui->TabTest->item(i, 3)->setText(s.at(3));
-    }
+//        ui->TabTest->setItem(i, 3, new QTableWidgetItem);
+//        ui->TabTest->item(i, 3)->setTextAlignment(Qt::AlignCenter);
+//        ui->TabTest->item(i, 3)->setFlags(Qt::ItemIsSelectable|Qt::ItemIsEnabled);
+//        ui->TabTest->item(i, 3)->setText(s.at(3));
+//    }
 }
 
 void WinTest::showEvent(QShowEvent *e)
@@ -436,5 +525,11 @@ void WinTest::keyReleaseEvent(QKeyEvent *e)
     codeTimer->start(10);
     e->accept();
 }
-
+void WinTest::recvAppShow(QString win)
+{
+    if (win != this->objectName())
+        return;
+    emit sendNetMsg("6008");
+    emit sendNetMsg("6004 Sys");
+}
 /*********************************END OF FILE**********************************/

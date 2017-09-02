@@ -17,6 +17,7 @@ WinHome::WinHome(QWidget *parent) :
     initUI("V-2.1.1.0");
     HomeMode = HOME_FREE;
     isPause = false;
+    station = 0x13;
 }
 
 WinHome::~WinHome()
@@ -92,7 +93,6 @@ void WinHome::initUdp(QJsonObject obj)
     quint16 port = obj.value("host_port").toString().toInt();
     udp.initSocket(host, port);
     connect(this, SIGNAL(transmitJson(QJsonObject)), &udp, SLOT(recvAppJson(QJsonObject)));
-    connect(&udp, SIGNAL(sendNetMsg(QString)), this, SLOT(recvNetMsg(QString)));
     thread_udp = new QThread(this);
     udp.moveToThread(thread_udp);
     thread_udp->start();
@@ -106,6 +106,8 @@ void WinHome::initUdp(QJsonObject obj)
     initCom();
     InitSql();
     InitTcp();
+
+    QTimer::singleShot(1000, this, SLOT(InitWindowsAll()));
 }
 
 void WinHome::initCom()
@@ -114,6 +116,405 @@ void WinHome::initCom()
     com.moveToThread(thread_com);
     connect(thread_com, SIGNAL(started()), &com, SLOT(initCom()));
     thread_com->start();
+}
+
+void WinHome::testThread()
+{
+
+}
+
+void WinHome::wait(int ms)
+{
+    QElapsedTimer t;
+    t.start();
+    while (t.elapsed() < ms)
+        QCoreApplication::processEvents();
+}
+
+void WinHome::testInit()
+{
+    winTest->initItems(station);
+    QJsonObject obj;
+    obj.insert("TxMessage",QString("6020 %1").arg(station));
+    emit transmitJson(obj);
+
+    //    com.send_IO(station, Y10);
+    //    readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+
+    QStringList testItems = CurrentItems();
+    for (int i=0; i < testItems.size(); i++) {
+        int cmd = testItems.at(i).toInt();
+        status = cmd;
+        switch (cmd) {
+        case STATUS_DCR:
+            testDCR();
+            break;
+        case STATUS_INR:
+            testINR();
+            break;
+        case STATUS_ACW:
+            testACW();
+            break;
+        case STATUS_IND:
+            testIND();
+            break;
+        case STATUS_HAL:
+            testHAL();
+            break;
+        case STATUS_NLD:
+            testNLD();
+            break;
+        case STATUS_LOD:
+            testLOD();
+            break;
+        default:
+            break;
+        }
+        if (status == STATUS_OVER) {
+            QMessageBox::warning(this, "警告", "测试停止", QMessageBox::Ok);
+            break;
+        }
+    }
+    if (winTest->updateResult()) {
+        com.send_IO(station, Y11 | Y08);  // 绿灯加蜂鸣器
+        wait(500);
+        com.send_IO(station, Y11);  // 绿灯
+    } else {
+        com.send_IO(station, Y09 | Y08);  // 红灯加蜂鸣器
+        wait(1500);
+        com.send_IO(station, Y09);  // 红灯
+    }
+    status = STATUS_FREE;
+}
+
+void WinHome::testDCR()
+{
+//    com.send_IO(station, Y10);
+//    readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 DCR");
+    emit transmitJson(obj);
+    waitTimeOut(STATUS_DCR);
+
+//    com.send_IO(station, Y10);
+//    readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+}
+
+void WinHome::testINR()
+{
+    //    bool cylinder = false;
+    //    com.send_IO(station, Y10);
+    //    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    //    if (!cylinder) {
+    //        status = STATUS_OVER;
+    //        return;
+    //    }
+    //    wait(100);
+    //    com.send_IO(station, Y03 | Y10);
+    //    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_TARGET);
+    //    wait(100);
+
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 IR");
+    emit transmitJson(obj);
+    waitTimeOut(STATUS_INR);
+
+    //    com.send_IO(station, Y10);
+    //    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    //    if (!cylinder) {
+    //        status = STATUS_OVER;
+    //        return;
+    //    }
+    //    wait(500);
+}
+
+void WinHome::testACW()
+{
+//    bool cylinder = false;
+//    com.send_IO(station, Y10);  // 气缸全部归位
+//    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+//    if (!cylinder) {
+//        status = STATUS_OVER;
+//        return;
+//    }
+//    wait(100);
+//    com.send_IO(station, Y03 | Y10);  // 气缸4动作
+//    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_TARGET);
+//    if (!cylinder) {
+//        status = STATUS_OVER;
+//        return;
+//    }
+//    wait(100);
+
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 ACW");
+    emit transmitJson(obj);
+    waitTimeOut(STATUS_ACW);
+
+//    com.send_IO(station, Y10);  // 气缸全部归位
+//    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+//    if (!cylinder) {
+//        status = STATUS_OVER;
+//        return;
+//    }
+//    wait(500);
+}
+
+void WinHome::testIND()
+{
+    bool cylinder = false;
+    com.send_IO(station, Y10);  // 气缸全部归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 IND");
+    emit transmitJson(obj);
+    waitTimeOut(STATUS_INR);
+
+    com.send_IO(station, Y10);  // 气缸全部归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(500);
+}
+
+void WinHome::testHAL()
+{
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 HALL");
+    emit transmitJson(obj);
+    waitTimeOut(STATUS_HAL);
+}
+
+void WinHome::testNLD()
+{
+    //    bool cylinder = false;
+    //    com.send_IO(station, Y10);  // 气缸全部归位
+    //    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    //    if (!cylinder) {
+    //        status = STATUS_OVER;
+    //        return;
+    //    }
+    //    wait(100);
+
+    //    com.send_IO(station, Y02 | Y10);  // 气缸3压紧
+    //    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_TARGET | X04_ORIGIN);
+    //    if (!cylinder) {
+    //        status = STATUS_OVER;
+    //        return;
+    //    }
+    //    wait(100);
+
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 NOLAOD");
+    emit transmitJson(obj);
+    waitTimeOut(STATUS_NLD);
+
+    //    com.send_IO(station, Y10);  // 气缸全部归位
+    //    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    //    if (!cylinder) {
+    //        status = STATUS_OVER;
+    //        return;
+    //    }
+    //    wait(100);
+}
+
+void WinHome::testLOD()
+{
+    bool cylinder = false;
+
+    com.send_IO(station, Y10);  // 气缸全部归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y00 | Y10);  // 气缸1上升
+    cylinder = readCylinderL(X01_TARGET | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y00 | Y01 | Y10);  // 气缸2夹紧
+    cylinder = readCylinderL(X01_TARGET | X02_TARGET | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y00 | Y01 | Y02 | Y10);  // 气缸3压紧
+    cylinder = readCylinderL(X01_TARGET | X02_TARGET | X03_TARGET | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    QJsonObject obj;
+    obj.insert("TxMessage","6006 LOAD");
+    emit transmitJson(obj);
+    wait(1500);
+
+    com.pre_speed();
+    int load = 1*2446;
+
+    for (int i=0; i < 11; i++) {
+        com.add_speed(load/10*i);
+        wait(100);
+    }
+    com.readPlc();
+    quint16 speed = com.speed;
+    quint16 torque = com.torque;
+    QString s = QString("转速:%1,转矩:%2\n").arg(speed).arg(torque);
+    QMessageBox::warning(this, "伺服", s, QMessageBox::Ok);
+    wait(1500);
+    for (int i=0; i < 11; i++) {
+        com.add_speed(load/10*(10-i));
+        wait(100);
+    }
+
+    wait(1500);
+    com.end_speed();
+    wait(100);
+
+    com.send_IO(station, Y00 | Y02 | Y10);  // 气缸2松开
+    cylinder = readCylinderL(X01_TARGET | X02_ORIGIN | X03_TARGET | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y02 | Y10);  // 气缸1归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_TARGET | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y10);  // 气缸全部归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+}
+
+void WinHome::testStop()
+{
+    QJsonObject obj;
+    obj.insert("TxMessage",QString("6022 %1").arg(station));
+    emit transmitJson(obj);
+    status = STATUS_OVER;
+}
+
+void WinHome::testStopAction()
+{
+    bool cylinder = false;
+    com.send_IO(station, Y00 | Y02 | Y10);  // 气缸2松开
+    cylinder = readCylinderL(X01_TARGET | X02_ORIGIN | X03_TARGET | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y02 | Y10);  // 气缸1归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_TARGET | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+
+    com.send_IO(station, Y10);  // 气缸全部归位
+    cylinder = readCylinderL(X01_ORIGIN | X02_ORIGIN | X03_ORIGIN | X04_ORIGIN);
+    if (!cylinder) {
+        status = STATUS_OVER;
+        return;
+    }
+    wait(100);
+}
+
+void WinHome::testTimeOut()
+{
+    QJsonObject obj;
+    obj.insert("TxMessage",QString("6026"));
+    emit transmitJson(obj);
+    status = STATUS_OVER;
+}
+
+void WinHome::recvIOMsg(QString msg)
+{
+    if (msg == "StartL") {
+        if (status != STATUS_FREE)
+            return;
+        status = STATUS_PREP;
+        station = 0x13;
+        QTimer::singleShot(10, this, SLOT(testThread()));
+    }
+    if (msg == "StartR") {
+        if (status != STATUS_FREE)
+            return;
+        status = STATUS_PREP;
+        station = 0x14;
+        QTimer::singleShot(10, this, SLOT(testThread()));
+    }
+    if (msg == "StopL" || msg == "StopR") {
+        testStop();
+        testTimeOut();
+    }
+}
+
+bool WinHome::readCylinderL(quint16 s)
+{
+    quint16 timeOut = 0x0000;
+    while (1) {
+        if ((station == 0x13) && (com.hexL & 0xFF00) == s)
+            return true;
+        if ((station == 0x14) && (com.hexR & 0xFF00) == s)
+            return true;
+        wait(10);
+        timeOut++;
+        if (timeOut > 500) {
+            QString temp = QString("气缸到位超时:%1!=%2").
+                    arg(s, 4, 16, QChar('0')).arg(com.hexL, 4, 16, QChar('0'));
+            QMessageBox::warning(this, "气缸", temp, QMessageBox::Ok);
+            return false;
+        }
+    }
+}
+
+bool WinHome::waitTimeOut(quint16 s)
+{
+    status = s;
+    timeOut = 0;
+    while (1) {
+        wait(10);
+        timeOut++;
+        if (timeOut > 2000) {
+            QMessageBox::warning(this, "超时", QString("测试超时:%1").arg(s), QMessageBox::Ok);
+            testTimeOut();
+            return false;
+        }
+        if (status != s)
+            return true;
+    }
 }
 
 void WinHome::InitSql()
@@ -147,8 +548,12 @@ void WinHome::regularTasks()
         switch (cmd) {
         case 6001:  // 自检信息
             emit sendNetMsg("6001");
-            QTimer::singleShot(100, this, SLOT(InitWindowsAll()));
             break;
+        case 6005:
+            winTest->updateItems(dat);
+            break;
+        case 6007:  // 单项测试完成
+            status = STATUS_FREE;
         default:
             qDebug() << cmd << dat;
             break;
@@ -198,10 +603,11 @@ void WinHome::InitWindowsAll()
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     ShowLogMessage("Initialize WinData OK\n");
 
-    WinTest *winTest = new WinTest(this);
+    winTest = new WinTest(this);
     ui->desktop->addWidget(winTest);
     winTest->setObjectName("WinTest");
-    connect(winTest, SIGNAL(SendVariant(QVariant)), this, SLOT(ReadVariant(QVariant)));
+    connect(winTest, SIGNAL(sendNetMsg(QByteArray)), &udp, SLOT(recvAppMsg(QByteArray)));
+    connect(this, SIGNAL(transmitShow(QString)), winTest, SLOT(recvAppShow(QString)));
     connect(winTest, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), winTest,
@@ -257,12 +663,14 @@ void WinHome::JumpToWindow(QByteArray win)
         return;
     int WinCurrent = ui->desktop->currentIndex();
     if (win.isNull()) { //空代表返回
+        emit transmitShow(ui->desktop->widget(previous_window.last())->objectName());
         ui->desktop->setCurrentIndex(previous_window.last());
         previous_window.removeLast();
         return;
     }
     for (int i=0; i < ui->desktop->count(); i++) {
         if (ui->desktop->widget(i)->objectName() == win) {
+            emit transmitShow(win);
             ui->desktop->setCurrentIndex(i);
             break;
         }
@@ -405,62 +813,63 @@ void WinHome::ReadStatusAll()
 
 void WinHome::StartTest(QByteArray station)
 {
-    stat = station;
-    if (CurrentReStartMode() == 1)
-        stat = QString("%1").arg(0x13).toUtf8();
-    if (CurrentReStartMode() == 2)
-        stat = QString("%1").arg(0x14).toUtf8();
-    if (HomeMode == HOME_TEST)
-        return;
-    if (ui->desktop->currentWidget()->objectName() != "WinTest")
-        return;
-    HomeMode = HOME_TEST;
-    ItemJudge = "OK";
+    testInit();
+    //    stat = station;
+    //    if (CurrentReStartMode() == 1)
+    //        stat = QString("%1").arg(0x13).toUtf8();
+    //    if (CurrentReStartMode() == 2)
+    //        stat = QString("%1").arg(0x14).toUtf8();
+    //    if (HomeMode == HOME_TEST)
+    //        return;
+    //    if (ui->desktop->currentWidget()->objectName() != "WinTest")
+    //        return;
+    //    HomeMode = HOME_TEST;
+    //    ItemJudge = "OK";
 
-    InitTestItems();
-    emit SendCommand(ADDR, CMD_STATUS, "buzy");
-    emit SendCommand(WIN_ID_TEST, CMD_START, station);
-    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
+    //    InitTestItems();
+    //    emit SendCommand(ADDR, CMD_STATUS, "buzy");
+    //    emit SendCommand(WIN_ID_TEST, CMD_START, station);
+    //    emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x02 | 0x00));
 
-    QStringList n = CurrentItems();
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
-        n.insert(0, QString::number(WIN_ID_DCR));
-    }
-    for (int i=0; i < n.size(); i++) {
-        Current_Test_Item = n.at(i).toInt();
-        emit SendCommand(n.at(i).toInt(), CMD_START, station);
-        if (HomeMode == HOME_STOP) {
-            //            QVariantHash hash;
-            //            hash.insert("TxMessage", tr("测试中断"));
-            //            Warnning(hash);
-            break;
-        }
-        Delay(10);
-    }
-    SaveTestJudge();
-    if (ItemJudge == "NG") {
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x08 | 0x01));
-        Delay(CurrentAlarmTime("NG"));
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x08 | 0x00));
-    } else {
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x04 | 0x01));
-        Delay(CurrentAlarmTime("OK"));
-        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x04 | 0x00));
-    }
-    emit SendCommand(WIN_ID_TEST, CMD_JUDGE, ItemJudge.toUtf8());
+    //    QStringList n = CurrentItems();
+    //    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_PWR))) {
+    //        n.insert(0, QString::number(WIN_ID_DCR));
+    //    }
+    //    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LVS))) {
+    //        n.insert(0, QString::number(WIN_ID_DCR));
+    //    }
+    //    if (!n.contains(QString::number(WIN_ID_DCR)) && n.contains(QString::number(WIN_ID_LCK))) {
+    //        n.insert(0, QString::number(WIN_ID_DCR));
+    //    }
+    //    for (int i=0; i < n.size(); i++) {
+    //        Current_Test_Item = n.at(i).toInt();
+    //        emit SendCommand(n.at(i).toInt(), CMD_START, station);
+    //        if (HomeMode == HOME_STOP) {
+    //            //            QVariantHash hash;
+    //            //            hash.insert("TxMessage", tr("测试中断"));
+    //            //            Warnning(hash);
+    //            break;
+    //        }
+    //        Delay(10);
+    //    }
+    //    SaveTestJudge();
+    //    if (ItemJudge == "NG") {
+    //        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x08 | 0x01));
+    //        Delay(CurrentAlarmTime("NG"));
+    //        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x08 | 0x00));
+    //    } else {
+    //        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x04 | 0x01));
+    //        Delay(CurrentAlarmTime("OK"));
+    //        emit SendCommand(ADDR, CMD_ALARM, QByteArray(1, 0x04 | 0x00));
+    //    }
+    //    emit SendCommand(WIN_ID_TEST, CMD_JUDGE, ItemJudge.toUtf8());
 
-    emit SendCommand(ADDR, CMD_STATUS, "ready");
-    if (CurrentReStartMode() != 0 && HomeMode != HOME_STOP) {
-        QTimer *timer = new QTimer(this);
-        timer->singleShot(CurrentDelay(),  this,  SLOT(ReStartTest()));
-    }
-    HomeMode = HOME_FREE;
+    //    emit SendCommand(ADDR, CMD_STATUS, "ready");
+    //    if (CurrentReStartMode() != 0 && HomeMode != HOME_STOP) {
+    //        QTimer *timer = new QTimer(this);
+    //        timer->singleShot(CurrentDelay(),  this,  SLOT(ReStartTest()));
+    //    }
+    //    HomeMode = HOME_FREE;
 }
 
 void WinHome::ReStartTest()

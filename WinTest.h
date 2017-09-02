@@ -20,9 +20,11 @@
 #include <QDataStream>
 #include <QElapsedTimer>
 #include <QScrollBar>
+#include <QtXml/QDomDocument>
 
 #include "define.h"
 #include "Waveform.h"
+#include "conf_delegation.h"
 
 namespace Ui {
 class WinTest;
@@ -40,10 +42,15 @@ private:
     Ui::WinTest *ui;
 
 signals:
+    void sendNetMsg(QByteArray msg);
     void SendVariant(QVariant s);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+public slots:
+    void initItems(quint16 station);
+    void updateItems(QString items);
+    bool updateResult();
 private slots:
-    void InitWindows(void);
+    void initUI(void);
     void InitButtons(void);
     void ReadButtons(int win);
     void InitSettings(void);
@@ -72,13 +79,14 @@ private slots:
     void showEvent(QShowEvent *);
     void keyPressEvent(QKeyEvent *e);
     void keyReleaseEvent(QKeyEvent *e);
+    void recvAppShow(QString win);
 private:
     QTimer *timer;
-    QList<Waveform *>wave;
     QString motor_type;
     QStringList Items;
     QString code;
     QTimer *codeTimer;
+    StandardItem *mView;
 };
 
 #endif // WINTEST_H

@@ -48,6 +48,25 @@
 #define HOME_TEST 0x01
 #define HOME_STOP 0x02
 
+#define STATUS_DCR 0x01
+#define STATUS_MAG 0x02
+#define STATUS_INR 0x03
+#define STATUS_ACW 0x04
+#define STATUS_DCW 0x05
+#define STATUS_IMP 0x06
+#define STATUS_PWR 0x07
+#define STATUS_IND 0x08
+#define STATUS_LCK 0x09
+#define STATUS_LVS 0x0A
+#define STATUS_HAL 0x0B
+#define STATUS_LOD 0x0C
+#define STATUS_NLD 0x0D
+#define STATUS_BMF 0x0E
+
+#define STATUS_FREE 0x00
+#define STATUS_OVER 0xFF
+#define STATUS_PREP 0xFE
+
 namespace Ui {
 class WinHome;
 }
@@ -70,6 +89,7 @@ signals:
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
     void transmitJson(QJsonObject obj);
+    void transmitShow(QString win);
     void sendNetMsg(QString msg);
 public:
     bool login();
@@ -83,6 +103,23 @@ private slots:
     void InitSql(void);
     void InitTcp(void);
     void initCom(void);
+
+    void testThread();
+    void wait(int ms);
+    void testInit();
+    void testDCR();
+    void testINR();
+    void testACW();
+    void testIND();
+    void testHAL();
+    void testNLD();
+    void testLOD();
+    void testStop();
+    void testStopAction();
+    void testTimeOut();
+    void recvIOMsg(QString msg);
+    bool readCylinderL(quint16 s);
+    bool waitTimeOut(quint16 s);
 
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void InitTestItems(void);
@@ -134,6 +171,12 @@ private:
     quint16 Current_Test_Item;
     QStringList TempItems;
     bool isPause;
+
+    WinTest *winTest;
+
+    int status;
+    int station;
+    int timeOut;
 };
 
 #endif // WINHOME_H
