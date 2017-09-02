@@ -14,9 +14,7 @@ WinHome::WinHome(QWidget *parent) :
     ui(new Ui::WinHome)
 {
     ui->setupUi(this);
-    InitWindows();
-    InitButtons();
-    InitVersion("V-2.1.1.0");
+    initUI("V-2.1.1.0");
     HomeMode = HOME_FREE;
     InitThreadAll();
     isPause = false;
@@ -41,6 +39,52 @@ bool WinHome::login()
     connect(&login, SIGNAL(sendJson(QJsonObject)), this, SLOT(initUdp(QJsonObject)));
     connect(this, SIGNAL(sendNetMsg(QString)), &login, SLOT(recvNetMsg(QString)));
     return login.exec();
+}
+
+void WinHome::initUI(QString v)
+{
+    ui->keybord->setCurrentIndex(0);
+    //设置界面风格
+    QFile file;
+    QString qss;
+    file.setFileName(":/source/SoftRainBlue.css");
+    file.open(QFile::ReadOnly);
+    qss = QLatin1String(file.readAll());
+    qApp->setStyleSheet(qss);
+
+    QButtonGroup *btnGroup = new QButtonGroup;
+    btnGroup->addButton(ui->btnSyst, Qt::Key_1);
+    btnGroup->addButton(ui->btnType, Qt::Key_2);
+    btnGroup->addButton(ui->btnData, Qt::Key_3);
+    btnGroup->addButton(ui->btnTest, Qt::Key_4);
+    btnGroup->addButton(ui->btnQuit, Qt::Key_5);
+    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(readButtons(int)));
+
+    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
+    ini->setValue("/GLOBAL/Version", v);
+    this->setWindowTitle(QString("电机综合测试仪%1").arg(v));
+    ui->titleVn->setText(v);
+}
+
+void WinHome::readButtons(int id)
+{
+    switch (id) {
+    case Qt::Key_1:
+        JumpToWindow("WinSyst");
+        break;
+    case Qt::Key_2:
+        JumpToWindow("WinType");
+        break;
+    case Qt::Key_3:
+        JumpToWindow("WinData");
+        break;
+    case Qt::Key_4:
+        JumpToWindow("WinTest");
+        break;
+    case Qt::Key_5:
+        QApplication::closeAllWindows();
+        break;
+    }
 }
 
 void WinHome::initUdp(QJsonObject obj)
@@ -88,20 +132,7 @@ void WinHome::InitThreadAll()
     timer->singleShot(50, this, SLOT(InitWindowsAll()));
 }
 
-void WinHome::InitWindows()
-{
-#ifdef __arm__
-    ui->btnQuit->hide();
-#endif
-    ui->keybord->setCurrentIndex(0);
-    //设置界面风格
-    QFile file;
-    QString qss;
-    file.setFileName(":/source/SoftRainBlue.css");
-    file.open(QFile::ReadOnly);
-    qss = QLatin1String(file.readAll());
-    qApp->setStyleSheet(qss);
-}
+
 
 void WinHome::InitWindowsAll()
 {
@@ -214,46 +245,6 @@ void WinHome::JumpToWindow(QByteArray win)
     if (previous_window.size() > 10) { // 最大嵌套10层
         previous_window.removeFirst();
     }
-}
-
-void WinHome::InitButtons()
-{
-    QButtonGroup *btnGroup = new QButtonGroup;
-    btnGroup->addButton(ui->btnSyst, Qt::Key_1);
-    btnGroup->addButton(ui->btnType, Qt::Key_2);
-    btnGroup->addButton(ui->btnData, Qt::Key_3);
-    btnGroup->addButton(ui->btnTest, Qt::Key_4);
-    btnGroup->addButton(ui->btnQuit, Qt::Key_5);
-    connect(btnGroup, SIGNAL(buttonClicked(int)), this, SLOT(ReadButtons(int)));
-}
-
-void WinHome::ReadButtons(int id)
-{
-    switch (id) {
-    case Qt::Key_1:
-        JumpToWindow("WinSyst");
-        break;
-    case Qt::Key_2:
-        JumpToWindow("WinType");
-        break;
-    case Qt::Key_3:
-        JumpToWindow("WinData");
-        break;
-    case Qt::Key_4:
-        JumpToWindow("WinTest");
-        break;
-    case Qt::Key_5:
-        QApplication::closeAllWindows();
-        break;
-    }
-}
-
-void WinHome::InitVersion(QString v)
-{
-    QSettings *ini = new QSettings(INI_PATH, QSettings::IniFormat);
-    ini->setValue("/GLOBAL/Version", v);
-    this->setWindowTitle(QString("电机综合测试仪%1").arg(v));
-    ui->titleVn->setText(v);
 }
 
 void WinHome::InitSql()

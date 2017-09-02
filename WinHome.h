@@ -73,15 +73,13 @@ signals:
 public:
     bool login();
 private slots:
+    void initUI(QString v);
+    void readButtons(int id);
     void initUdp(QJsonObject obj);
     void regularTasks();
     void InitThreadAll(void);
-    void InitWindows(void);
     void InitWindowsAll(void);
     void JumpToWindow(QByteArray win);
-    void InitButtons(void);
-    void ReadButtons(int id);
-    void InitVersion(QString v);
     void InitSql(void);
     void InitTcp(void);
     void InitSerial(void);
