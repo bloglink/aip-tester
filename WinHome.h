@@ -41,6 +41,7 @@
 
 #include "login.h"
 #include "exchange_udp.h"
+#include "exchange_com.h"
 
 #define HOME_UNKOWN 0xff
 #define HOME_FREE 0x00
@@ -77,12 +78,12 @@ private slots:
     void readButtons(int id);
     void initUdp(QJsonObject obj);
     void regularTasks();
-    void InitThreadAll(void);
+    void initExchange(void);
     void InitWindowsAll(void);
     void JumpToWindow(QByteArray win);
     void InitSql(void);
     void InitTcp(void);
-    void InitSerial(void);
+    void initCom(void);
 
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void InitTestItems(void);
@@ -116,15 +117,18 @@ private:
     QStringList Items;
 
     ExchangeUdp udp;
+    ExchangeCom com;
+
+    QThread *thread_udp;
+    QThread *thread_com;
 
     QThread *thread_sql;
     QThread *thread_tcp;
-    QThread *thread_udp;
-    QThread *thread_all;
+
     SqlClient sql;
     TcpClient tcp;
 
-    SerialPort serial;
+
     quint8 HomeMode;
     QByteArray stat;
     PopupBox *msgBox;

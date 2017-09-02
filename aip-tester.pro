@@ -48,7 +48,8 @@ SOURCES += main.cpp\
     MessageBox.cpp \
     PageAmp.cpp \
     login.cpp \
-    exchange_udp.cpp
+    exchange_udp.cpp \
+    exchange_com.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -79,7 +80,8 @@ HEADERS  += \
     MessageBox.h \
     PageAmp.h \
     login.h \
-    exchange_udp.h
+    exchange_udp.h \
+    exchange_com.h
 
 FORMS    += \
     PageKey.ui \

@@ -16,7 +16,6 @@ WinHome::WinHome(QWidget *parent) :
     ui->setupUi(this);
     initUI("V-2.1.1.0");
     HomeMode = HOME_FREE;
-    InitThreadAll();
     isPause = false;
 }
 
@@ -28,8 +27,8 @@ WinHome::~WinHome()
     thread_tcp->wait();
     thread_udp->quit();
     thread_udp->wait();
-    thread_all->quit();
-    thread_all->wait();
+    thread_com->quit();
+    thread_com->wait();
     delete ui;
 }
 
@@ -103,6 +102,16 @@ void WinHome::initUdp(QJsonObject obj)
     timer->start(5);
 
     emit transmitJson(obj);
+
+    initExchange();
+}
+
+void WinHome::initCom()
+{
+    thread_com = new QThread(this);
+    com.moveToThread(thread_com);
+    connect(thread_com, SIGNAL(started()), &com, SLOT(initCom()));
+    thread_com->start();
 }
 
 void WinHome::regularTasks()
@@ -123,12 +132,12 @@ void WinHome::regularTasks()
     }
 }
 
-void WinHome::InitThreadAll()
+void WinHome::initExchange()
 {
     QTimer *timer = new QTimer(this);
     InitSql();
     InitTcp();
-    InitSerial();
+    initCom();
     timer->singleShot(50, this, SLOT(InitWindowsAll()));
 }
 
@@ -268,18 +277,7 @@ void WinHome::InitTcp()
     thread_tcp->start();
 }
 
-void WinHome::InitSerial()
-{
-    thread_all = new QThread(this);
-    serial.moveToThread(thread_all);
-    connect(thread_all, SIGNAL(started()), &serial, SLOT(OpenSerial()));
-    connect(thread_all, SIGNAL(finished()), &serial, SLOT(CloseSerial()));
-    connect(&serial, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), &serial,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    thread_all->start();
-}
+
 
 void WinHome::ReadMessage(quint16 addr,  quint16 cmd,  QByteArray msg)
 {
@@ -440,9 +438,9 @@ void WinHome::StartTest(QByteArray station)
         Current_Test_Item = n.at(i).toInt();
         emit SendCommand(n.at(i).toInt(), CMD_START, station);
         if (HomeMode == HOME_STOP) {
-//            QVariantHash hash;
-//            hash.insert("TxMessage", tr("测试中断"));
-//            Warnning(hash);
+            //            QVariantHash hash;
+            //            hash.insert("TxMessage", tr("测试中断"));
+            //            Warnning(hash);
             break;
         }
         Delay(10);
