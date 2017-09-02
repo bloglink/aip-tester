@@ -35,6 +35,14 @@ WinHome::~WinHome()
     delete ui;
 }
 
+bool WinHome::login()
+{
+    Login login;
+    connect(&login, SIGNAL(sendJson(QJsonObject)), this, SLOT(initUdp(QJsonObject)));
+    connect(this, SIGNAL(sendNetMsg(QString)), &login, SLOT(recvNetMsg(QString)));
+    return login.exec();
+}
+
 void WinHome::InitThreadAll()
 {
     QTimer *timer = new QTimer(this);

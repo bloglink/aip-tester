@@ -46,7 +46,8 @@ SOURCES += main.cpp\
     CanClient.cpp \
     SerialPort.cpp \
     MessageBox.cpp \
-    PageAmp.cpp
+    PageAmp.cpp \
+    login.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -75,7 +76,8 @@ HEADERS  += \
     CanClient.h \
     SerialPort.h \
     MessageBox.h \
-    PageAmp.h
+    PageAmp.h \
+    login.h
 
 FORMS    += \
     PageKey.ui \

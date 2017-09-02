@@ -6,27 +6,20 @@
  * author:      zhaonanlin
  * brief:       电机综合测试仪
 *******************************************************************************/
-#include "PageKey.h"
 #include "WinHome.h"
 #include <QApplication>
-#include <QTextCodec>
 
 int main(int argc, char *argv[]) {
-#if (QT_VERSION <= QT_VERSION_CHECK(5, 0, 0))
-    QTextCodec *codec = QTextCodec::codecForName("UTF-8");
-    QTextCodec::setCodecForLocale(codec);
-    QTextCodec::setCodecForCStrings(codec);
-    QTextCodec::setCodecForTr(codec);
-#endif
-
     QApplication a(argc, argv);
 
-#ifdef __arm__
-    PageKey::Instance()->hide();
-#endif
-
     WinHome w;
-    w.showMaximized();
+    int ret = w.login();
+    if (ret == QDialog::Rejected) {
+        return 0;
+    }
+    if (ret == QDialog::Accepted) {
+        w.showMaximized();
+    }
 
     return a.exec();
 }

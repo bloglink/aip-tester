@@ -39,6 +39,8 @@
 #include "SerialPort.h"
 #include "MessageBox.h"
 
+#include "login.h"
+
 #define HOME_UNKOWN 0xff
 #define HOME_FREE 0x00
 #define HOME_TEST 0x01
@@ -65,6 +67,8 @@ signals:
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+public:
+    bool login();
 private slots:
     void InitThreadAll(void);
     void InitWindows(void);
