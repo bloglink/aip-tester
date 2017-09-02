@@ -43,12 +43,47 @@ bool WinHome::login()
     return login.exec();
 }
 
+void WinHome::initUdp(QJsonObject obj)
+{
+    QString host = obj.value("host_addr").toString();
+    quint16 port = obj.value("host_port").toString().toInt();
+    udp.initSocket(host, port);
+    connect(this, SIGNAL(transmitJson(QJsonObject)), &udp, SLOT(recvAppJson(QJsonObject)));
+    connect(&udp, SIGNAL(sendNetMsg(QString)), this, SLOT(recvNetMsg(QString)));
+    thread_udp = new QThread(this);
+    udp.moveToThread(thread_udp);
+    thread_udp->start();
+
+    QTimer *timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(regularTasks()));
+    timer->start(5);
+
+    emit transmitJson(obj);
+}
+
+void WinHome::regularTasks()
+{
+    while (!udp.recv_queue.isEmpty()) {
+        QString msg = udp.recv_queue.dequeue();
+        int a = msg.indexOf(" ");
+        int cmd = msg.mid(0, a).toInt();
+        QString dat = msg.mid(a+1, msg.size());
+        switch (cmd) {
+        case 6001:  // 自检信息
+            emit sendNetMsg("6001");
+            break;
+        default:
+            qDebug() << cmd << dat;
+            break;
+        }
+    }
+}
+
 void WinHome::InitThreadAll()
 {
     QTimer *timer = new QTimer(this);
     InitSql();
     InitTcp();
-    InitUdp();
     InitSerial();
     timer->singleShot(50, this, SLOT(InitWindowsAll()));
 }
@@ -240,19 +275,6 @@ void WinHome::InitTcp()
     connect(&tcp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
             SLOT(ReadMessage(quint16, quint16, QByteArray)));
     thread_tcp->start();
-}
-
-void WinHome::InitUdp()
-{
-    thread_udp = new QThread(this);
-    udp.moveToThread(thread_udp);
-    connect(thread_udp, SIGNAL(started()), &udp, SLOT(Init()));
-    connect(thread_udp, SIGNAL(finished()), &udp, SLOT(Quit()));
-    connect(&udp, SIGNAL(SendCommand(quint16, quint16, QByteArray)), this,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    connect(this, SIGNAL(SendCommand(quint16, quint16, QByteArray)), &udp,
-            SLOT(ReadMessage(quint16, quint16, QByteArray)));
-    thread_udp->start();
 }
 
 void WinHome::InitSerial()

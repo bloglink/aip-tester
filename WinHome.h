@@ -40,6 +40,7 @@
 #include "MessageBox.h"
 
 #include "login.h"
+#include "exchange_udp.h"
 
 #define HOME_UNKOWN 0xff
 #define HOME_FREE 0x00
@@ -67,9 +68,13 @@ signals:
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
+    void transmitJson(QJsonObject obj);
+    void sendNetMsg(QString msg);
 public:
     bool login();
 private slots:
+    void initUdp(QJsonObject obj);
+    void regularTasks();
     void InitThreadAll(void);
     void InitWindows(void);
     void InitWindowsAll(void);
@@ -79,7 +84,6 @@ private slots:
     void InitVersion(QString v);
     void InitSql(void);
     void InitTcp(void);
-    void InitUdp(void);
     void InitSerial(void);
 
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
@@ -113,13 +117,15 @@ private:
     QString ItemJudge;
     QStringList Items;
 
+    ExchangeUdp udp;
+
     QThread *thread_sql;
     QThread *thread_tcp;
     QThread *thread_udp;
     QThread *thread_all;
     SqlClient sql;
     TcpClient tcp;
-    UdpClient udp;
+
     SerialPort serial;
     quint8 HomeMode;
     QByteArray stat;

@@ -47,7 +47,8 @@ SOURCES += main.cpp\
     SerialPort.cpp \
     MessageBox.cpp \
     PageAmp.cpp \
-    login.cpp
+    login.cpp \
+    exchange_udp.cpp
 
 HEADERS  += \
     Histogram.h \
@@ -77,7 +78,8 @@ HEADERS  += \
     SerialPort.h \
     MessageBox.h \
     PageAmp.h \
-    login.h
+    login.h \
+    exchange_udp.h
 
 FORMS    += \
     PageKey.ui \
