@@ -19,34 +19,23 @@
 #include <QSqlError>
 #include <QSqlDatabase>
 #include <QStringList>
-#include <QProcess>
 
-typedef struct {
-    QString m_item;
-    QString m_para;
-    QString m_result;
-    QString m_judge;
-    QString m_b1;
-}ResData;
+#include "define.h"
 
 class SqlClient : public QObject
 {
     Q_OBJECT
 public:
     explicit SqlClient(QObject *parent = 0);
-public slots:
-    void DeviceOpen();
+
 private slots:
+    void DeviceOpen(void);
     void DeviceQuit(void);
     void Write(QByteArray msg);
 private:
     QSqlDatabase db;
     int count;
     QString code;
-    QList<ResData> dateList;
-    QString filePath();
-    void typeSql(QString qs);
-    void viewSql(QStringList qs);
 };
 
 #endif // SQLCLIENT_H

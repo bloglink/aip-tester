@@ -301,6 +301,38 @@ void WinBack::ClickOutput(int r,  int c)
         ui->TabOutput->item(r, c)->setText("N");
 }
 
+void WinBack::ExcuteCanCmd(int addr,  QByteArray msg)
+{
+    return;
+    if (!Testing)
+        return;
+    switch (addr) {
+    case CAN_ID_DCR:
+        ReadCanCmdDcr(msg);
+        break;
+    case CAN_ID_INR:
+        ReadCanCmdInr(msg);
+        break;
+    case CAN_ID_IMP:
+        ReadCanCmdImp(msg);
+        break;
+    case CAN_ID_IND:
+        ReadCanCmdInd(msg);
+        break;
+    case CAN_ID_PWR:
+        ReadCanCmdPwr(msg);
+        break;
+    case CAN_ID_13OUT:
+        ReadCanCmdOut13(msg);
+        break;
+    case CAN_ID_14OUT:
+        ReadCanCmdOut14(msg);
+        break;
+    default:
+        break;
+    }
+}
+
 void WinBack::SendCanCmdVersion(quint16 id)
 {
     QByteArray msg;
@@ -375,23 +407,31 @@ void WinBack::SendCanCmdStartDcr(quint8 gear)
 
 void WinBack::ReadCanCmdDcr(QByteArray msg)
 {
-    QString v;
-    quint8 cmd = (quint8)msg.at(0);
-    quint8 row = (quint8)msg.at(1);
-    quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
-    switch (cmd) {
-    case 0x06:
-        if (row > 0x00 && row <= 0x08)
-            BoxDcr.at(row-1)->setValue(k);
-        break;
-    case 0x07:
-        break;
-    case 0x08:
+    if (msg.size() == 8 && quint8(msg.at(0)) == 0x08) {
+        QString v;
         for (int i=1; i < msg.size(); i++)
             v.append(QString::number(quint8(msg.at(i))));
         ui->TabItems->item(0, 2)->setText(v);
         ui->TabItems->item(1, 2)->setText(v);
-        break;
+    }
+    if (msg.size() == 4 && quint8(msg.at(0)) == 0x06) {
+        int c = quint8(msg.at(1));
+        quint16 k = quint16(msg.at(2))*256+quint8(msg.at(3));
+        if (c > 0x00 && c <= 0x08)
+            BoxDcr.at(c-1)->setValue(k);
+    }
+    if (msg.size() == 7 && (quint8)msg.at(0) == 0x01) {
+        quint8 grade = quint8(msg.at(2));
+        double temp = (quint16)(msg.at(3)*256)+(quint8)msg.at(4);
+        qDebug() << temp;
+        switch (grade) {
+        case 1:
+            break;
+        case 2:
+            break;
+        default:
+            break;
+        }
     }
 }
 
@@ -507,33 +547,41 @@ void WinBack::ReadVariant(QVariantHash s)
 {
     if (s.value("TxAddress") != "WinBack" && s.value("TxAddress") != "WinHome")
         return;
-    if (s.value("TxCommand") == "DcrMsg") {
-        ReadCanCmdDcr(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PageDcrVersion") {
+        ui->TabItems->item(0, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(1, 2)->setText(s.value("TxMessage").toString());
         return;
     }
-    if (s.value("TxCommand") == "InrMsg") {
-        ReadCanCmdInr(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PageInrVersion") {
+        ui->TabItems->item(2, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(3, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(4, 2)->setText(s.value("TxMessage").toString());
         return;
     }
-    if (s.value("TxCommand") == "ImpMsg") {
-        ReadCanCmdImp(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PageImpVersion") {
+        ui->TabItems->item(5, 2)->setText(s.value("TxMessage").toString());
         return;
     }
-    if (s.value("TxCommand") == "IndMsg") {
-        ReadCanCmdInd(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PageIndVersion") {
+        ui->TabItems->item(6, 2)->setText(s.value("TxMessage").toString());
         return;
     }
-    if (s.value("TxCommand") == "PwrMsg") {
-        ReadCanCmdPwr(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PagePwrVersion") {
+        ui->TabItems->item(7, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(8, 2)->setText(s.value("TxMessage").toString());
+        ui->TabItems->item(9, 2)->setText(s.value("TxMessage").toString());
         return;
     }
-    if (s.value("TxCommand") == "AmpMsg") {
-        //        ReadCanCmdAmp(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PageAmpVersion") {
+        ui->TabItems->item(10, 2)->setText(s.value("TxMessage").toString());
         return;
     }
-    if (s.value("TxCommand") == "OutMsg") {
-        ReadCanCmdOut13(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
-        ReadCanCmdOut14(QByteArray::fromBase64(s.value("TxMessage").toByteArray()));
+    if (s.value("TxCommand") == "PageOut13Version") {
+        ui->TabOutput->item(0, 2)->setText(s.value("TxMessage").toString());
+        return;
+    }
+    if (s.value("TxCommand") == "PageOut14Version") {
+        ui->TabOutput->item(1, 2)->setText(s.value("TxMessage").toString());
         return;
     }
 }

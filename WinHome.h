@@ -1,5 +1,13 @@
-#ifndef DESKTOP_H
-#define DESKTOP_H
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170422
+ * author:      zhaonanlin
+ * brief:       开机主页
+*******************************************************************************/
+#ifndef WINHOME_H
+#define WINHOME_H
 
 #include <QTime>
 #include <QFile>
@@ -8,6 +16,7 @@
 #include <QWidget>
 #include <QThread>
 #include <QSettings>
+#include <QMessageBox>
 #include <QButtonGroup>
 #include <QElapsedTimer>
 
@@ -29,65 +38,64 @@
 #include "PageLvs.h"
 #include "PageLck.h"
 #include "PageOut.h"
-#include "PageAmp.h"
 
 #include "SqlClient.h"
+#include "CanClient.h"
 #include "TcpClient.h"
 #include "UdpClient.h"
 #include "SerialPort.h"
-#include "sockeckcan.h"
-#include "warnning.h"
+#include "MessageBox.h"
+
+#define HOME_UNKOWN 0xff
+#define HOME_FREE 0x00
+#define HOME_TEST 0x01
+#define HOME_STOP 0x02
 
 namespace Ui {
-class Desktop;
+class WinHome;
 }
 
-class Desktop : public QWidget
+class WinHome : public QWidget
 {
     Q_OBJECT
+
+public:
+    explicit WinHome(QWidget *parent = 0);
+    ~WinHome();
+
+private:
+    Ui::WinHome *ui;
+
 signals:
     void SendVariant(QVariantHash s);
-    void SendCanCmdDcr(int addr, QByteArray msg);
-    void SendCanCmdMag(int addr, QByteArray msg);
-    void SendCanCmdInr(int addr, QByteArray msg);
-    void SendCanCmdAcw(int addr, QByteArray msg);
-    void SendCanCmdImp(int addr, QByteArray msg);
-    void SendCanCmdInd(int addr, QByteArray msg);
-    void SendCanCmdPwr(int addr, QByteArray msg);
-    void SendCanCmdLvs(int addr, QByteArray msg);
-    void SendCanCmdLck(int addr, QByteArray msg);
-    void SendCanCmdOut(int addr, QByteArray msg);
-    void SendCanCmdAmp(int addr, QByteArray msg);
     void CanMsg(int addr, QByteArray msg);
     void message(QByteArray msg);
     void PutCanData(QByteArray msg);
     void WriteSql(QByteArray msg);
     void SendCommand(quint16 addr, quint16 cmd, QByteArray data);
-public:
-    explicit Desktop(QWidget *parent = 0);
-    ~Desktop();
-private slots:
-    void InitWin(void);
-    void InitCan(void);
-    void ReadCan(void);
-    void Warnnings(QVariantHash s);
-    void Delay(int ms);
 
+private slots:
+    void InitThreadAll(void);
+    void InitWindows(void);
     void InitWindowsAll(void);
     void JumpToWindow(QByteArray win);
+    void InitButtons(void);
     void ReadButtons(int id);
+    void InitVersion(QString v);
+    void InitCan(void);
     void InitSql(void);
     void InitTcp(void);
     void InitUdp(void);
-    void InitBtn(void);
+    void InitSerial(void);
     void ReadCanCmd(QByteArray msg);
 
     void ReadMessage(quint16 addr, quint16 cmd, QByteArray data);
     void ReadStatusAll(void);
     void SendTestRestart(void);
     void SendTestPause(void);
+    void Delay(int ms);
 
-    QString GetWinName(int n);
+    QString WinName(int n);
     QString CurrentSettings(void);
     QStringList CurrentItems(void);
     QStringList EnableItems(void);
@@ -100,6 +108,9 @@ private slots:
     QString CurrentUser(void);
 
     void ReadVariant(QVariantHash s);
+    void Warnning(QVariantHash hash);
+    void ReadButtonBox(QByteArray msg);
+    void SendButtonBox(QString button);
     void SendTestStatus(QString msg);
     void SendTestSave(void);
     void ReadTestSave(QVariantHash s);
@@ -112,28 +123,26 @@ private slots:
     void ExcuteCanCmd(QByteArray msg);
     void TestThread(QVariantHash hash);
 private:
-    Ui::Desktop *ui;
-    QString TestStatus;
-    SockeckCan can;
-    QTimer *timer;
-
     QList<int> previous_window;
     QString Judge;
 
+    QThread *thread_can;
     QThread *thread_sql;
     QThread *thread_tcp;
     QThread *thread_udp;
-    QThread *thread_btn;
+    QThread *thread_all;
+    CanClient can;
     SqlClient sql;
     TcpClient tcp;
     UdpClient udp;
     SerialPort btn;
     QByteArray stat;
-    Warnning *msgBox;
+    PopupBox *msgBox;
     quint16 Current_Test_Item;
     QStringList TempItems;
     bool isPause;
+    QString TestStatus;
     QVariantHash TestHash;
 };
 
-#endif // DESKTOP_H
+#endif // WINHOME_H

@@ -46,6 +46,7 @@ private slots:
     void SaveSettings(void);
     void ClickItem(int r, int c);
     void ClickOutput(int r, int c);
+    void ExcuteCanCmd(int addr, QByteArray msg);
     void SendCanCmdVersion(quint16 id);
     void SendCanCmdParam(quint16 id);
     void SendCanCmdParamDcr(void);

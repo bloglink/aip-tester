@@ -1,8 +1,24 @@
-#include "warnning.h"
+/*******************************************************************************
+ * Copyright [2016]   <  青岛艾普智能仪器有限公司>
+ * All rights reserved.
+ *
+ * version:     2.1.0.170427
+ * author:      zhaonanlin
+ * brief:       暂停询问模块
+*******************************************************************************/
+#include <QLabel>
+#include <QPushButton>
+#include <QMessageBox>
+#include <QCheckBox>
+#include <QHBoxLayout>
+#include <QEvent>
+#include <QApplication>
+#include <QDebug>
+#include "MessageBox.h"
 
-Warnning::Warnning(QWidget  *parent, const QString &title, const QString &text,
-                   QMessageBox::StandardButtons buttons,
-                   QMessageBox::StandardButton defaultButton)
+PopupBox::PopupBox(QWidget  *parent, const QString &title, const QString &text,
+                               QMessageBox::StandardButtons buttons,
+                               QMessageBox::StandardButton defaultButton)
     : QDialog(parent, Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint)
 {
     setWindowFlags(Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
@@ -45,7 +61,12 @@ Warnning::Warnning(QWidget  *parent, const QString &title, const QString &text,
     connect(ButtonBox, SIGNAL(clicked(QAbstractButton*)), this,
             SLOT(onButtonClicked(QAbstractButton*)));
 }
-void Warnning::changeEvent(QEvent *event)
+
+PopupBox::~PopupBox()
+{
+}
+
+void PopupBox::changeEvent(QEvent *event)
 {
     switch (event->type()) {
     case QEvent::LanguageChange:
@@ -57,7 +78,7 @@ void Warnning::changeEvent(QEvent *event)
     }
 }
 
-void Warnning::TranslateButtonText()
+void PopupBox::TranslateButtonText()
 {
     QPushButton *RetryButton = ButtonBox->button(QDialogButtonBox::Retry);
     if (RetryButton != NULL)
@@ -71,11 +92,11 @@ void Warnning::TranslateButtonText()
         OkButton->setText(tr("继续"));
 }
 
-void Warnning::ReadVariant(QVariantHash s)
+void PopupBox::ReadVariant(QVariantHash s)
 {
     if (s.value("TxAddress") != "WinHome")
         return;
-    if (s.value("TxCommand") != "ButtonBox")
+    if (s.value("TxCommand") != "BoxButton")
         return;
     if (s.value("TxMessage") == "Retry")
         onButtonClicked(ButtonBox->button(QDialogButtonBox::Retry));
@@ -83,10 +104,9 @@ void Warnning::ReadVariant(QVariantHash s)
         onButtonClicked(ButtonBox->button(QDialogButtonBox::Ok));
 }
 
-void Warnning::onButtonClicked(QAbstractButton *button)
+void PopupBox::onButtonClicked(QAbstractButton *button)
 {
     if (!ButtonBox->buttons().contains(button))
         return;
     done(ButtonBox->standardButton(button));
 }
-

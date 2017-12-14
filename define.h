@@ -79,7 +79,6 @@
 #define WIN_ID_OUT15 0x15 // 输出板
 #define WIN_ID_OUT16 0x16 // 输出板
 #define WIN_ID_OUT17 0x17 // 输出板
-#define WIN_ID_AMP 0x18
 
 #define CAN_ID_DCR 0x41 // 电阻板
 #define CAN_ID_DCR_WAVE 0x441 // 电阻板反嵌波形
@@ -94,6 +93,5 @@
 #define CAN_ID_15OUT 0x2A1 // 输出板15
 #define CAN_ID_16OUT 0x2C1 // 输出板16
 #define CAN_ID_17OUT 0x2E1 // 输出板17
-#define CAN_ID_AMP 0x141
 
 #endif // DEFINE_H

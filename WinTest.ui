@@ -635,7 +635,11 @@ color: rgb(0, 0, 0);</string>
      <widget class="QWidget" name="page_2">
       <layout class="QVBoxLayout" name="verticalLayout_4">
        <item>
-        <widget class="QCustomPlot" name="customPlot" native="true"/>
+        <widget class="WaveBox" name="WaveView">
+         <property name="text">
+          <string/>
+         </property>
+        </widget>
        </item>
       </layout>
      </widget>
@@ -645,10 +649,9 @@ color: rgb(0, 0, 0);</string>
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QCustomPlot</class>
-   <extends>QWidget</extends>
-   <header>qcustomplot.h</header>
-   <container>1</container>
+   <class>WaveBox</class>
+   <extends>QLabel</extends>
+   <header>WaveBox.h</header>
   </customwidget>
  </customwidgets>
  <resources>

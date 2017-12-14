@@ -23,15 +23,11 @@
 #include <QElapsedTimer>
 #include <QDoubleSpinBox>
 #include <QTableWidgetItem>
-
+#include "define.h"
 #include "qmath.h"
-
-#include "delegate.h"
 
 #define PWR_ROW 6
 #define PG_ROW 3
-
-#define PWR_MAX 6
 
 #define PWR_FREE        0
 #define PWR_INIT        4
@@ -51,15 +47,18 @@ public:
 
 private:
     Ui::PagePwr *ui;
-    StandardItemModel *m;
 
 signals:
     void SendVariant(QVariantHash s);
     void CanMsg(QByteArray msg);
 private slots:
-    void InitWin(void);
-    void InitSet(void);
-    void SaveSet(void);
+    void InitWindows(void);
+    void InitButtons(void);
+    void ReadButtons(int id);
+    void InitSettings(void);
+    void SaveSettings(void);
+    void ItemClick(int r, int c);
+    void ItemClickPG(int r, int c);
     void ExcuteCanCmd(int addr,  QByteArray msg);
     void SendCanCmdStatus(void);
     void SendCanCmdStart(quint8 s);
@@ -69,10 +68,15 @@ private slots:
     void ReadCanCmdResult(QByteArray msg);
     void ReadCanCmdDir(QByteArray msg);
     void ReadCanCmdVolt(QByteArray msg);
+    void ReadCanCmdPGCurrs(QByteArray msg);
+    void ReadCanCmdPGFreqs(QByteArray msg);
+    void ReadCanCmdPGDutys(QByteArray msg);
+    void ReadCanCmdPGWaveStop(void);
     void CalculateResult(void);
     void ClearResults(void);
     bool WaitTimeOut(quint16 t);
     void Delay(int ms);
+    QString CurrentSettings(void);
     QString CurrentPorwer(void);
     bool IsPGEnable(void);
     virtual void showEvent(QShowEvent *);
@@ -90,8 +94,6 @@ private slots:
     void TestThread(QVariantHash hash);
     void SafeThread(QVariantHash hash);
     int CurrentPowerDir();
-    void on_btn1_clicked();
-
 private:
     QSettings *set;
     quint16 TimeOut;
@@ -104,11 +106,41 @@ private:
     QList<double> CVolt;
     QStringList Dir;
 
+
+
+    QList<QTableWidgetItem*> Enable;
+    QList<QDoubleSpinBox*> CurrMax;
+    QList<QDoubleSpinBox*> CurrMin;
+    QList<QDoubleSpinBox*> PowerMax;
+    QList<QDoubleSpinBox*> PowerMin;
+    QList<QDoubleSpinBox*> CapMax;
+    QList<QDoubleSpinBox*> CapMin;
+    QList<QComboBox*> TestDir;
+    QList<QDoubleSpinBox*> TestTime;
+    QList<QTableWidgetItem*> Grade;
     quint8 TestRow;
     quint8 Mode;
     QString dir;
     quint8 isTestDir;
 
+    QList<QTableWidgetItem*> PGEnable;
+    QList<QDoubleSpinBox*> PGUpperMin;
+    QList<QDoubleSpinBox*> PGUpperMax;
+    QList<QDoubleSpinBox*> PGLowerMin;
+    QList<QDoubleSpinBox*> PGLowerMax;
+    QList<QDoubleSpinBox*> PGDutyMin;
+    QList<QDoubleSpinBox*> PGDutyMax;
+    QList<QDoubleSpinBox*> PGFreqMin;
+    QList<QDoubleSpinBox*> PGFreqMax;
+    QList<QDoubleSpinBox*> PGCurrMin;
+    QList<QDoubleSpinBox*> PGCurrMax;
+    QList<QTableWidgetItem*> PGGrade;
+    QList<double> PGCurrs;
+    QList<double> PGUppers;
+    QList<double> PGLowers;
+    QList<double> PGFreqAvr;
+    QList<double> PGDutyAvr;
+    QByteArray wave;
     quint8 stat;
     QList<QVariantHash> PwrView;
     QList<QVariantHash> DirView;

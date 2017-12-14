@@ -34,21 +34,188 @@
      <widget class="QWidget" name="WidgetImp">
       <layout class="QVBoxLayout" name="verticalLayout_2" stretch="1,0">
        <item>
-        <widget class="QTableView" name="parameters"/>
+        <widget class="QTableWidget" name="TabParams">
+         <property name="horizontalScrollBarPolicy">
+          <enum>Qt::ScrollBarAlwaysOff</enum>
+         </property>
+         <property name="editTriggers">
+          <set>QAbstractItemView::AllEditTriggers</set>
+         </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::SingleSelection</enum>
+         </property>
+         <attribute name="horizontalHeaderDefaultSectionSize">
+          <number>50</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>选中</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>端一</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>端二</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>电压</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>次数</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>电晕</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>相位</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>面积</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>差积</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>波形</string>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>11</pointsize>
+           </font>
+          </property>
+         </column>
+        </widget>
        </item>
        <item>
-        <layout class="QGridLayout" name="LayoutCtrl" columnstretch="1,0,0,0,0,0,0,0,0,0">
-         <item row="0" column="0">
-          <widget class="QCheckBox" name="BoxOffset">
-           <property name="enabled">
-            <bool>true</bool>
+        <layout class="QGridLayout" name="LayoutCtrl" columnstretch="1,0,0,0,0,0,0">
+         <item row="0" column="1">
+          <spacer name="SpacerCtrl">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item row="0" column="6">
+          <widget class="QPushButton" name="BtnExitImp">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
            </property>
            <property name="text">
-            <string>取消电压反馈</string>
+            <string>保存退出</string>
            </property>
           </widget>
          </item>
-         <item row="0" column="6">
+         <item row="0" column="4">
+          <widget class="QPushButton" name="BtnAvarage">
+           <property name="sizePolicy">
+            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+             <horstretch>0</horstretch>
+             <verstretch>0</verstretch>
+            </sizepolicy>
+           </property>
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>添加样品</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="5">
+          <widget class="QPushButton" name="BtnExit">
+           <property name="minimumSize">
+            <size>
+             <width>97</width>
+             <height>44</height>
+            </size>
+           </property>
+           <property name="text">
+            <string>退出</string>
+           </property>
+          </widget>
+         </item>
+         <item row="0" column="2">
           <widget class="QComboBox" name="BoxStation">
            <property name="minimumSize">
             <size>
@@ -68,8 +235,8 @@
            </item>
           </widget>
          </item>
-         <item row="0" column="7">
-          <widget class="QPushButton" name="btn1">
+         <item row="0" column="3">
+          <widget class="QPushButton" name="BtnSampleImp">
            <property name="sizePolicy">
             <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
              <horstretch>0</horstretch>
@@ -87,82 +254,13 @@
            </property>
           </widget>
          </item>
-         <item row="0" column="3">
-          <widget class="QLabel" name="label">
-           <property name="text">
-            <string>软件版本</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="5">
-          <spacer name="SpacerCtrl">
-           <property name="orientation">
-            <enum>Qt::Horizontal</enum>
-           </property>
-           <property name="sizeHint" stdset="0">
-            <size>
-             <width>40</width>
-             <height>20</height>
-            </size>
-           </property>
-          </spacer>
-         </item>
-         <item row="0" column="9">
-          <widget class="QPushButton" name="btn3">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>97</width>
-             <height>44</height>
-            </size>
+         <item row="0" column="0">
+          <widget class="QCheckBox" name="BoxOffset">
+           <property name="enabled">
+            <bool>true</bool>
            </property>
            <property name="text">
-            <string>保存退出</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="2">
-          <widget class="QLabel" name="code">
-           <property name="text">
-            <string>---</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="1">
-          <widget class="QLabel" name="label_3">
-           <property name="text">
-            <string>硬件编码</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="8">
-          <widget class="QPushButton" name="btn2">
-           <property name="sizePolicy">
-            <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-             <horstretch>0</horstretch>
-             <verstretch>0</verstretch>
-            </sizepolicy>
-           </property>
-           <property name="minimumSize">
-            <size>
-             <width>97</width>
-             <height>44</height>
-            </size>
-           </property>
-           <property name="text">
-            <string>添加样品</string>
-           </property>
-          </widget>
-         </item>
-         <item row="0" column="4">
-          <widget class="QLabel" name="version">
-           <property name="text">
-            <string>---</string>
+            <string>取消电压反馈</string>
            </property>
           </widget>
          </item>
@@ -191,7 +289,7 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QLabel" name="WaveView">
+           <widget class="WaveBox" name="WaveView">
             <property name="text">
              <string/>
             </property>
@@ -317,6 +415,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>WaveBox</class>
+   <extends>QLabel</extends>
+   <header>WaveBox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

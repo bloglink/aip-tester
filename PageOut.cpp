@@ -25,6 +25,8 @@ PageOut::~PageOut()
 
 void PageOut::ExcuteCanCmd(int addr, QByteArray msg)
 {
+    if (addr != CAN_ID_13OUT && addr != CAN_ID_14OUT)
+        return;
     if (quint8(msg.at(0)) == 0x00)
         ReadCanCmdStatus(addr, msg);
     if (quint8(msg.at(0)) == 0x01 && quint8(msg.at(1) == 0x01))
